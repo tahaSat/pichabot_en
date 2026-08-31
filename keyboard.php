@@ -997,7 +997,7 @@ if ($setting['statussupportpv'] == "onpvsupport") {
         'inline_keyboard' => [
             [
                 ['text' => $datatextbot['text_fq'], 'callback_data' => "fqQuestions"],
-                ['text' => "🎟 ارسال پیام به پشتیبانی", 'url' => "https://t.me/{$setting['id_support']}"],
+                ['text' => "🎟 Message support", 'url' => "https://t.me/{$setting['id_support']}"],
             ],
             [
                 ['text' => "🔙 Back to main menu", 'callback_data' => "backuser"]
@@ -1010,7 +1010,7 @@ if ($setting['statussupportpv'] == "onpvsupport") {
         'inline_keyboard' => [
             [
                 ['text' => $datatextbot['text_fq'], 'callback_data' => "fqQuestions"],
-                ['text' => "🎟 ارسال پیام به پشتیبانی", 'callback_data' => "support"],
+                ['text' => "🎟 Message support", 'callback_data' => "support"],
             ],
             [
                 ['text' => "🔙 Back to main menu", 'callback_data' => "backuser"]

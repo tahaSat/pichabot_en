@@ -231,7 +231,7 @@ switch ($action) {
             flash('error', 'متن پیام خالی است.');
             break;
         }
-        $prefix = "👤 یک پیام از طرف ادمین ارسال شده است\n\nمتن پیام:\n\n";
+        $prefix = "👤 A message from the admin was sent to you\n\nMessage:\n\n";
         panel_notify_user($id, $prefix . htmlspecialchars($text, ENT_QUOTES, 'UTF-8'));
         flash('success', 'پیام برای کاربر ارسال شد.');
         break;

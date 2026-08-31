@@ -118,11 +118,11 @@ function panel_support_send_reply(array $ticket, string $reply, ?array $upload =
     $tracking = (string) ($ticket['Tracking'] ?? '');
     $keyboard = json_encode([
         'inline_keyboard' => [[
-            ['text' => '✉️ پاسخ به پیام', 'callback_data' => 'Responsesusera_' . $tracking],
+            ['text' => '✉️ Reply to message', 'callback_data' => 'Responsesusera_' . $tracking],
         ]],
     ], JSON_UNESCAPED_UNICODE);
     $safeReply = htmlspecialchars($reply, ENT_QUOTES, 'UTF-8');
-    $message = "📩 یک پیام از سمت مدیریت برای شما ارسال گردید.\n\nمتن پیام:\n" . $safeReply;
+    $message = "📩 A message from the admin was sent to you.\n\nMessage:\n" . $safeReply;
     $media = null;
 
     if ($upload) {
@@ -133,7 +133,7 @@ function panel_support_send_reply(array $ticket, string $reply, ?array $upload =
             'document' => ['sendDocument', 'document'],
         ];
         [$method, $field] = $methodMap[$upload['type']];
-        $caption = $reply !== '' ? $message : '📎 یک فایل از سمت مدیریت برای شما ارسال گردید.';
+        $caption = $reply !== '' ? $message : '📎 A file from the admin was sent to you.';
         $response = telegram($method, [
             'chat_id' => $ticket['iduser'],
             $field => new CURLFile($upload['path'], $upload['mime'], $upload['name']),

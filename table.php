@@ -1486,7 +1486,9 @@ try {
             name_departman VARCHAR(600) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci");
         $stmt->execute();
-        $connect->query("INSERT INTO departman (idsupport,name_departman) VALUES ('$adminnumber','☎️ بخش عمومی')");
+        $connect->query("INSERT INTO departman (idsupport,name_departman) VALUES ('$adminnumber','☎️ General')");
+    } else {
+        $connect->query("UPDATE departman SET name_departman = '☎️ General' WHERE name_departman = '☎️ بخش عمومی'");
     }
 } catch (PDOException $e) {
     file_put_contents('error_log departman', $e->getMessage());
