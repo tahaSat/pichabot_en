@@ -363,7 +363,7 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
     $userbalance['Balance'] = $Balance_add_user;
     file_put_contents("data/{$user['Processing_value']}/{$user['Processing_value']}.json", json_encode($userbalance));
     $heibalanceuser = number_format($text, 0);
-    $textadd = "💎 $heibalanceuser Toman was added to your wallet.";
+    $textadd = "💎 $heibalanceuser USD was added to your wallet.";
     sendmessage($user['Processing_value'], $textadd, null, 'HTML');
     step('home', $from_id);
 } elseif (preg_match('/lowbalanceuser_(\w+)/', $datain, $dataget)) {
@@ -394,7 +394,7 @@ if ($text == "📞 تنظیم نام کاربری پشتیبانی") {
     $userbalance['Balance'] = $Balance_add_user;
     file_put_contents("data/{$user['Processing_value']}/{$user['Processing_value']}.json", json_encode($userbalance));
     $lowbalanceuser = number_format($text, 0);
-    $textkam = "❌ $lowbalanceuser Toman was deducted from your wallet.";
+    $textkam = "❌ $lowbalanceuser USD was deducted from your wallet.";
     sendmessage($user['Processing_value'], $textkam, null, 'HTML');
     step('home', $from_id);
     $statistics = select("user", "*", "bottype", $ApiToken, "count");

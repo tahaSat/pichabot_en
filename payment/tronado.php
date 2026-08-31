@@ -67,7 +67,7 @@ if ($Payment_report['payment_Status'] != "paid") {
             $Balance_confrim = intval($Balance_id['Balance']) + $result;
             update("user", "Balance", $Balance_confrim, "id", $Balance_id['id']);
             $pricecashback = number_format($pricecashback);
-            $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
+            $text_report = "🎁 $result USD was added to your account as a deposit bonus.";
             sendmessage($Balance_id['id'], $text_report, null, 'HTML');
         }
         $paymentreports = select("topicid", "idreport", "report", "paymentreport", "select")['idreport'];

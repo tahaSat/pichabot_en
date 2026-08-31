@@ -56,7 +56,7 @@ while ($row = mysqli_fetch_assoc($list_service)) {
     $textexpire = "❌ This transaction expired because it was not paid. Please do not send funds for it.
 
 🛒 Order ID: {$Payment_report['id_order']}
-💰 Amount:  {$Payment_report['price']} Toman";
+💰 Amount:  {$Payment_report['price']} USD";
     sendmessage($Payment_report['id_user'], $textexpire, null, 'html');
     update("Payment_report","payment_Status","expire","id_order",$Payment_report['id_order']);
 }
@@ -69,7 +69,7 @@ while ($row = mysqli_fetch_assoc($list_service)) {
         $Balance_confrim = intval($Balance_id['Balance']) +$result;
         update("user","Balance",$Balance_confrim, "id",$Balance_id['id']); 
         $pricecashback =  number_format($pricecashback);
-        $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
+        $text_report = "🎁 $result USD was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
     $text_reportpayment = "💵 پرداخت جدید

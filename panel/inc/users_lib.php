@@ -580,7 +580,7 @@ function panel_invoice_apply_refund(PDO $pdo, string $idInvoice, bool $disablePr
                     'INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method, id_invoice) VALUES (?,?,?,?,?,?,?)',
                     [$userId, $orderId, $dateacc, $price, 'paid', 'refund to wallet', $idInvoice]
                 );
-                panel_notify_user($userId, '💎 ' . number_format($price) . ' Toman was refunded to your wallet for the returned service.');
+                panel_notify_user($userId, '💎 ' . number_format($price) . ' USD was refunded to your wallet for the returned service.');
                 $notes[] = 'مبلغ ' . number_format($price) . ' تومان به کیف پول کاربر بازگردانده شد.';
             }
         }
@@ -778,7 +778,7 @@ function panel_extend_user_service(PDO $pdo, $userId, string $idInvoice, string 
     $priceFmt = number_format((int) ($infoProduct['price_product'] ?? 0));
     panel_notify_user(
         $userId,
-        "✅ Your service was renewed by an admin.\n\n▫️Service : {$username}\n▫️Product : {$infoProduct['name_product']}\n▫️Renewal amount {$priceFmt} Toman"
+        "✅ Your service was renewed by an admin.\n\n▫️Service : {$username}\n▫️Product : {$infoProduct['name_product']}\n▫️Renewal amount {$priceFmt} USD"
     );
 
     return ['ok' => true, 'msg' => 'سرویس «' . $username . '» با موفقیت تمدید شد.'];
@@ -813,7 +813,7 @@ function panel_remove_user_service(PDO $pdo, string $idInvoice, $userId, bool $r
         $price = (int) ($invoice['price_product'] ?? 0);
         if ($price > 0) {
             db_query($pdo, 'UPDATE user SET Balance = Balance + ? WHERE id = ?', [$price, $userId]);
-            panel_notify_user($userId, '💎 ' . number_format($price) . ' Toman was added to your wallet.');
+            panel_notify_user($userId, '💎 ' . number_format($price) . ' USD was added to your wallet.');
         }
     }
 

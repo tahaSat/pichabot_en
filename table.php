@@ -772,7 +772,7 @@ After joining, tap Check membership";
 👤 Username:  {username}
 🔐 Service: {name_product}
 📆 Duration: {Service_time} days
-💶 Price:  {price} Toman
+💶 Price:  {price} USD
 👥 Data: {Volume} GB
 🗒 Note: {note}
 💵 Wallet balance: {userBalance}
@@ -833,7 +833,7 @@ Connection link:
 Your test service with username {username} has ended
 We hope you enjoyed the speed and quality. If you liked the test, you can buy your own plan and stay connected with a high-quality connection 😉🔥
 🛍 Use the button below to buy a service";
-    $textcart = "To top up your wallet, transfer <code>{price}</code> Toman to the account below 👇🏻
+    $textcart = "To top up your wallet, transfer <code>{price}</code> USD to the account below 👇🏻
         
         ==================== 
         <code>{card_number}</code>
@@ -869,7 +869,7 @@ We hope you enjoyed the speed and quality. If you liked the test, you can buy yo
         ['text_dec_fq', $text_dec_fq],
         ['text_sell', '🔐 Buy subscription'],
         ['text_Add_Balance', '💰 Top up wallet'],
-        ['text_wallet_withdraw', "💸 Enter the amount you want to withdraw from your wallet in Toman."],
+        ['text_wallet_withdraw', "💸 Enter the amount you want to withdraw from your wallet in USD."],
         ['text_wallet_withdraw_success', "✅ Your payout request was submitted and will be paid after review."],
         ['text_channel', $text_channel],
         ['text_Discount', '🎁 Gift code'],
@@ -911,7 +911,7 @@ We hope you enjoyed the speed and quality. If you liked the test, you can buy yo
         ['text_service_select', '🛍️ Please select the service you want to buy!'],
         ['text_service_select_first', '🛍️ Please select the service you want to buy!'],
         ['text_month_select', '📌 Select the service duration'],
-        ['text_custom_volume_ask', "📌 Send the data amount you want.\n🔔 Price per GB is {price} Toman.\n🔔 Minimum {min} GB and maximum {max} GB."],
+        ['text_custom_volume_ask', "📌 Send the data amount you want.\n🔔 Price per GB is {price} USD.\n🔔 Minimum {min} GB and maximum {max} GB."],
         ['text_custom_month_ask', "⌛️ Select the service duration\n📌 Each month equals 30 days\n⚠️ Only the options below can be selected"],
         ['text_custom_volume_invalid', "❌ Invalid data amount.\n🔔 Minimum {min} GB and maximum {max} GB"],
         ['text_sell_notestep', "📌 Write a note for your config.\n⚠️ This name is used to find the service faster later\n🪪 (example: Ali, office, travel, ...)"],

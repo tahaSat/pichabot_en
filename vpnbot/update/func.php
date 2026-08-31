@@ -63,13 +63,13 @@ function DirectPaymentbot($order_id, $image = 'images.jpg')
         }
 
         if (!$get_invoice) {
-            sendmessage($uid, "💎 {$format_price_cart} Toman was added to your wallet, but the service invoice was not found. Please contact support.\n🛒 Tracking code: {$Payment_report['id_order']}", $keyboard, 'HTML');
+            sendmessage($uid, "💎 {$format_price_cart} USD was added to your wallet, but the service invoice was not found. Please contact support.\n🛒 Tracking code: {$Payment_report['id_order']}", $keyboard, 'HTML');
             if ($Payment_report['Payment_Method'] == "cart to cart" || $Payment_report['Payment_Method'] == "arze digital offline") {
                 $textconfrom = "✅ پرداخت تایید شد (افزایش Balance — فاکتور یافت نشد)
 👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
 🛒 Tracking code پرداخت: {$Payment_report['id_order']}
 ⚜️ Username: @{$Balance_id['username']}
-💸 Amount paid: $format_price_cart Toman";
+💸 Amount paid: $format_price_cart USD";
                 if (!empty($from_id) && !empty($message_id)) {
                     Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
                 }
@@ -120,7 +120,7 @@ function DirectPaymentbot($order_id, $image = 'images.jpg')
         if (($dataoutput['username'] ?? null) == null) {
             $dataoutput['msg'] = json_encode($dataoutput['msg'] ?? '');
             sendmessage($uid, $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
-            sendmessage($uid, "💎 {$format_price_cart} Toman was added to your wallet (service creation failed).", $keyboard, 'HTML');
+            sendmessage($uid, "💎 {$format_price_cart} USD was added to your wallet (service creation failed).", $keyboard, 'HTML');
             if (strlen($settingmain['Channel_Report'] ?? '') > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $settingmain['Channel_Report'],
@@ -252,7 +252,7 @@ Connection link:
 👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
 🛒 Tracking code پرداخت: {$Payment_report['id_order']}
 ⚜️ Username: @{$Balance_id['username']}
-💸 Amount paid: $format_price_cart Toman";
+💸 Amount paid: $format_price_cart USD";
             if (!empty($from_id) && !empty($message_id)) {
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
             }
@@ -274,7 +274,7 @@ Connection link:
             Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
         }
     }
-    sendmessage($Payment_report['id_user'], "💎 {$Payment_report_price_fmt} Toman was added to your wallet. Thank you for your payment.
+    sendmessage($Payment_report['id_user'], "💎 {$Payment_report_price_fmt} USD was added to your wallet. Thank you for your payment.
 
 🛒 Your tracking code: {$Payment_report['id_order']}", null, 'HTML');
 }

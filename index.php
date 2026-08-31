@@ -1550,7 +1550,7 @@ $textconnect
     savedata("clear", "id_invoice", $nameloc['id_invoice']);
     if ($product == 0) {
         $textcustom = "📌 Send the data amount you want.
-🔔 Price per GB is $custompricevalue Toman.
+🔔 Price per GB is $custompricevalue USD.
 🔔 Minimum $mainvolume GB and maximum $maxvolume GB.";
         sendmessage($from_id, $textcustom, $backuser, 'html');
         deletemessage($from_id, $message_id);
@@ -1559,7 +1559,7 @@ $textconnect
     }
     if ($nameloc['name_product'] == "🛍 Custom data" || $nameloc['name_product'] == "⚙️ Custom service") {
         $textcustom = "📌 Send the data amount you want.
-🔔 Price per GB is $custompricevalue Toman.
+🔔 Price per GB is $custompricevalue USD.
 🔔 Minimum $mainvolume GB and maximum $maxvolume GB.";
         sendmessage($from_id, $textcustom, $backuser, 'html');
         deletemessage($from_id, $message_id);
@@ -1826,7 +1826,7 @@ $textconnect
     $textextend = "📜 Your renewal invoice for username {$nameloc['username']} created.
         
 🛍 Product :{$product['name_product']}
-💸 Renewal price : $pricelastextend Toman
+💸 Renewal price : $pricelastextend USD
 ⏱ Renewal duration :{$product['Service_time']} days
 🔋 Renewal data :{$product['Volume_constraint']} GB
 ✍️ Notes : {$product['note']}
@@ -2114,7 +2114,7 @@ $textconnect
         $result = ($prodcut['price_product'] * $valurcashbackextend) / 100;
         $pricelastextend = $pricelastextend - $result;
         sendmessage($from_id, "Congratulations 🎉
-📌 $result Toman was added to your account as a renewal bonus", null, 'HTML');
+📌 $result USD was added to your account as a renewal bonus", null, 'HTML');
     }
     $Balance_Low_user = $user['Balance'] - $pricelastextend;
     update("user", "Balance", $Balance_Low_user, "id", $from_id);
@@ -2157,7 +2157,7 @@ $textconnect
  
 ▫️Service : {$nameloc['username']}
 ▫️Product : {$prodcut['name_product']}
-▫️Renewal price $priceproductformat Toman
+▫️Renewal price $priceproductformat USD
 ";
     sendmessage($from_id, $textextend, $keyboardextendfnished, 'HTML');
     $timejalali = jdate('Y/m/d H:i:s');
@@ -2277,7 +2277,7 @@ $textconnect
     update("user", "Processing_value", $nameloc['id_invoice'], "id", $from_id);
     $textextra = " ⭕️ Send the data amount you want to buy.
 ❌ Send the number in English.
-        ⚠️ Each extra GB costs $extrapricevalue Toman.";
+        ⚠️ Each extra GB costs $extrapricevalue USD.";
     $bakinfos = json_encode([
         'inline_keyboard' => [
             [
@@ -2312,9 +2312,9 @@ $textconnect
     $extrapricevalues = number_format($extrapricevalue, 0);
     $textextra = "📜 Extra data invoice was created for you.
         
-📌 Price per GB Extra data : $extrapricevalues Toman
+📌 Price per GB Extra data : $extrapricevalues USD
 🔋 Extra data requested : $text GB
-💰 Your invoice amount : $priceextra Toman
+💰 Your invoice amount : $priceextra USD
         
 ✅ Tap below to pay and add the data";
     sendmessage($from_id, $textextra, $keyboardsetting, 'HTML');
@@ -2447,14 +2447,14 @@ $textconnect
 ▫️Service: {$nameloc['username']}
 ▫️Extra data : $volumes GB
 
-▫️مبلغ افزایش حجم : $volumesformat Toman";
+▫️مبلغ افزایش حجم : $volumesformat USD";
     sendmessage($from_id, $textvolume, $keyboardextrafnished, 'HTML');
     $text_report = "⭕️ A user bought extra data
         
 User details : 
 🪪 User ID : $from_id
 🛍 Data purchased: $volumes GB
-💰 Amount paid : $volumesformat Toman
+💰 Amount paid : $volumesformat USD
 👤 Config username : {$nameloc['username']}
 Balance before purchase : {$user['Balance']}
 ";
@@ -2495,7 +2495,7 @@ Balance before purchase : {$user['Balance']}
         $userlimitlastfree = 0;
     $Pricechange = select("marzban_panel", "*", "code_panel", $dataget[1], "select")['priceChangeloc'];
     $textchange = "📍 Confirming will remove the service from this location and move it to the new one.
-💰 Transfer fee $Pricechange Toman 
+💰 Transfer fee $Pricechange USD 
 📌 Remaining limit : $userlimitlast  (Free transfers remaining :‌$userlimitlastfree )
 
 ✅ Tap below to confirm the transfer";
@@ -2714,7 +2714,7 @@ Balance before purchase : {$user['Balance']}
 🔻Name پنل جدید : {$marzban_list_get_new['name_panel']}
 🔻 Username مشتری در پنل:{$nameloc['username']}
 🔻حجم نهایی سرویس : $format_byte
-🔻Balance کاربر : $balanceformatsell Toman";
+🔻Balance کاربر : $balanceformatsell USD";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
             'chat_id' => $setting['Channel_Report'],
@@ -2923,9 +2923,9 @@ User subscription link :
     $extrapricevalues = number_format($extrapricevalue, 0);
     $textextra = "📜 Extra time invoice was created for you.
         
-📌 Price per days Extra time : $extratimepricevalue Toman
+📌 Price per days Extra time : $extratimepricevalue USD
 📆 Extra days requested : $text days
-💰 Your invoice amount : $priceextratime Toman
+💰 Your invoice amount : $priceextratime USD
         
 ✅ Tap below to pay and add the time";
     sendmessage($from_id, $textextra, $keyboardsetting, 'HTML');
@@ -3049,7 +3049,7 @@ User subscription link :
 ▫️Service : {$nameloc['username']}
 ▫️Extra time : $extratimeday days
 
-▫️مبلغ افزایش زمان : $volumesformat Toman";
+▫️مبلغ افزایش زمان : $volumesformat USD";
     sendmessage($from_id, $textextratime, $keyboardextrafnished, 'HTML');
     $volumes = $tmieextra / $extratimepricevalue;
     $text_report = "⭕️ A user bought extra time
@@ -3057,7 +3057,7 @@ User subscription link :
 User details : 
 🪪 User ID : $from_id
 🛍 Time purchased: $volumes days
-💰 Amount paid : $volumesformat Toman
+💰 Amount paid : $volumesformat USD
 👤 Config username : {$nameloc['username']}";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
@@ -3923,7 +3923,7 @@ https://t.me/$usernamebot?start={$user['codeInvitation']}";
 👨‍👩‍👦 Your referral code : <code>{$user['codeInvitation']}</code>
 📱 Phone :$numberphone
 ⌚️Joined : $userjoin
-💰 Balance: $Balanceuser Toman
+💰 Balance: $Balanceuser USD
 🛒 Purchased services : $countorder 
 📑 Paid invoices :: $countpayment 
 🤝 Your referrals : {$user['affiliatescount']} 
@@ -4061,7 +4061,7 @@ $textinvite
         } else {
             $amount = withdraw_parse_int($text);
             if ($amount === null) {
-                sendmessage($from_id, "❌ Invalid amount. Enter a number in Toman.", $wdAmountKb, 'HTML');
+                sendmessage($from_id, "❌ Invalid amount. Enter a number in USD.", $wdAmountKb, 'HTML');
                 return;
             }
         }
@@ -5021,7 +5021,7 @@ $textinvite
                 $dateacc = date('Y/m/d H:i:s');
                 $textadd = "🎁 Referral commission
 
-        $result Toman was added to your wallet from your referral";
+        $result USD was added to your wallet from your referral";
                 $textreportport = "
 مبلغ $result به کاربر {$user['affiliates']} برای پورسانت از کاربر $from_id واریز گردید 
 تایم : $dateacc";
@@ -5050,7 +5050,7 @@ $textinvite
             $dateacc = date('Y/m/d H:i:s');
             $textadd = "🎁 Referral commission
 
-        $result Toman was added to your wallet from your referral";
+        $result USD was added to your wallet from your referral";
             $textreportport = "
 مبلغ $result به کاربر {$user['affiliates']} برای پورسانت از کاربر $from_id واریز گردید 
 تایم : $dateacc";
@@ -5219,8 +5219,8 @@ $textonebuy
 👤 Username: <code>{$user['Processing_value_tow']}</code>
 🔐 Service: {$info_product['name_product']}
 📆 Duration: {$info_product['Service_time']} days
-💶 Original price : <del>$info_productmain Toman</del>
-💶 Discounted price: {$info_product['price_product']}  Toman
+💶 Original price : <del>$info_productmain USD</del>
+💶 Discounted price: {$info_product['price_product']}  USD
 👥 Account data: {$info_product['Volume_constraint']} GB
 💵 Wallet balance : {$user['Balance']}
                   
@@ -5240,7 +5240,7 @@ $textonebuy
     }
     $PaySetting = select("PaySetting", "*", "NamePay", "minbalancebuybulk", "select")['ValuePay'];
     if ($user['Balance'] < $PaySetting) {
-        sendmessage($from_id, "❌ Bulk buy requires at least $PaySetting Toman in your wallet.", null, 'HTML');
+        sendmessage($from_id, "❌ Bulk buy requires at least $PaySetting USD in your wallet.", null, 'HTML');
         return;
     }
     $locationproduct = mysqli_query($connect, "SELECT * FROM marzban_panel");
@@ -5363,8 +5363,8 @@ $textonebuy
 🔐 Service: {$info_product['name_product']}
 ⏱ Duration: {$info_product['Service_time']} days
 🔋 Service data : {$info_product['Volume_constraint']} GB
-💸 Amount due : $price_product_format Toman
-💰 Wallet balance : $userbalancepish Toman
+💸 Amount due : $price_product_format USD
+💰 Wallet balance : $userbalancepish USD
     
 ✅ Tap the button below to confirm and pay";
     sendmessage($from_id, $textin, $payment, 'HTML');
@@ -5437,7 +5437,7 @@ $textonebuy
 👤 Username: <code>$username_ac</code>
 🔐 Service: {$info_product['name_product']}
 📆 Duration: {$info_product['Service_time']} days
-💶 Price: $price_product_format  Toman
+💶 Price: $price_product_format  USD
 👥 Account data: {$info_product['Volume_constraint']} GB
 💵 Wallet balance : $userbalancepish
 ⭕️Number of configs : {$user['Processing_value_four']}
@@ -5735,8 +5735,8 @@ Name پنل : {$marzban_list_get['name_panel']}";
             ]
         ]
     ]);
-    $sent = reply_or_edit($from_id, $message_id, "💸 Enter the amount in Toman:
-✅ Minimum $minbalance, maximum $maxbalance Toman", $bakinfos, 'HTML');
+    $sent = reply_or_edit($from_id, $message_id, "💸 Enter the amount in USD:
+✅ Minimum $minbalance, maximum $maxbalance USD", $bakinfos, 'HTML');
     step('getprice', $from_id);
     $prompt_message_id = $sent['result']['message_id'] ?? $message_id;
     update("user", 'Processing_value', $prompt_message_id, "id", $from_id);
@@ -5751,13 +5751,13 @@ Name پنل : {$marzban_list_get['name_panel']}";
         $minbalance = number_format($minbalance);
         $maxbalance = number_format($maxbalance);
         sendmessage($from_id, "❌ Error
-💬 Amount must be at least $minbalance Toman and at most $maxbalance Toman", null, 'HTML');
+💬 Amount must be at least $minbalance USD and at most $maxbalance USD", null, 'HTML');
         return;
     }
     if ($user['Balance'] < 0 and intval($setting['Debtsettlement']) == 1) {
         $balancruser = abs($user['Balance']);
         if ($text < $balancruser) {
-            sendmessage($from_id, "❌ You have a debt. Please pay at least $balancruser Toman.
+            sendmessage($from_id, "❌ You have a debt. Please pay at least $balancruser USD.
          Send the amount again", null, 'HTML');
             return;
         }
@@ -5793,7 +5793,7 @@ Name پنل : {$marzban_list_get['name_panel']}";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance = number_format($mainbalance);
             $maxbalance = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance USD", null, 'HTML');
             return;
         }
         $cardQuery = mysqli_query($connect, "SELECT * FROM card_number  ORDER BY RAND() LIMIT 1");
@@ -5888,7 +5888,7 @@ Name پنل : {$marzban_list_get['name_panel']}";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance = number_format($mainbalance);
             $maxbalance = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -5930,7 +5930,7 @@ Name پنل : {$marzban_list_get['name_panel']}";
         ]);
         $price_format = number_format($user['Processing_value'], 0);
         $textnowpayments = "✅ Payment invoice created.\n\n🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format Toman
+💰 Invoice amount : $price_format USD
 
 ❌ This transaction is valid for one hour After that it cannot be paid.        
 
@@ -5960,7 +5960,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance = number_format($mainbalance);
             $maxbalance = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6005,7 +6005,7 @@ Use the button below to pay👇🏻";
 ✅ Payment invoice created.
             
 🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format Toman
+💰 Invoice amount : $price_format USD
 
 ❌ This transaction is valid for one day After that it cannot be paid.        
 
@@ -6033,7 +6033,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance_fmt = number_format($mainbalance);
             $maxbalance_fmt = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance_fmt and maximum is $maxbalance_fmt Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalance_fmt and maximum is $maxbalance_fmt USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6079,7 +6079,7 @@ Use the button below to pay👇🏻";
 ✅ Payment invoice created.
             
 🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format Toman
+💰 Invoice amount : $price_format USD
 
 ❌ This transaction is valid for one day After that it cannot be paid.        
 
@@ -6108,7 +6108,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6167,8 +6167,8 @@ Username کاربر : @$username";
 🔹 cafearz.com
 🔸 pay98.app
 🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format Toman
-📊 USD price: $USD Toman right now
+💰 Invoice amount : $price_format USD
+📊 Current USD rate: $USD
 
 Use the button below to pay👇🏻";
         $gethelp = select("PaySetting", "ValuePay", "NamePay", "helpplisio", "select")['ValuePay'];
@@ -6200,7 +6200,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6259,8 +6259,8 @@ Username کاربر : @$username";
 🔹 cafearz.com
 🔸 pay98.app
 🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format Toman
-📊 USD price: $USD Toman right now
+💰 Invoice amount : $price_format USD
+📊 Current USD rate: $USD
 
 
 <blockquote>⚠️ After a correct payment, your balance will be credited automatically within 15 minutes.</blockquote>
@@ -6296,7 +6296,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6343,7 +6343,7 @@ Use the button below to pay👇🏻";
         $textnowpayments = "✅ Your transaction was created
         
 🛒 Tracking code:  <code>$randomString</code> 
-💲 Amount in Toman: <code>$pricetoman</code>
+💲 Amount: <code>$pricetoman</code> USD
 
 
 💢 Please read these notes before paying 👇
@@ -6381,7 +6381,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6427,7 +6427,7 @@ Use the button below to pay👇🏻";
         $textnowpayments = "✅ Your transaction was created
         
 🛒 Tracking code:  <code>$randomString</code> 
-💲 Amount in Toman: <code>$pricetoman</code>
+💲 Amount: <code>$pricetoman</code> USD
 
 💢 Please read these notes before paying 👇
         
@@ -6475,7 +6475,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6522,7 +6522,7 @@ Use the button below to pay👇🏻";
         $textnowpayments = "✅ Your transaction was created
         
 🛒 Tracking code:  <code>$randomString</code> 
-💲 Amount in Toman: <code>$pricetoman</code> Toman
+💲 Amount: <code>$pricetoman</code> USD
 
 
 💢 Please read these notes before paying 👇
@@ -6564,7 +6564,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalancedigitaltron || $user['Processing_value'] > $maxbalancedigitaltron) {
             $mainbalanceplisio = number_format($mainbalancedigitaltron);
             $maxbalanceplisio = number_format($maxbalancedigitaltron);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6593,7 +6593,7 @@ Use the button below to pay👇🏻";
 💳 Wallet address: <code>$affilnecurrency</code>
 💲 Transaction amount: $trxprice TRX
 
-📌 Send $formatprice Toman, then tap the button below and send the receipt
+📌 Send $formatprice USD, then tap the button below and send the receipt
 
 💢 Please read these notes before paying 👇
 
@@ -6633,7 +6633,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance = number_format($mainbalance);
             $maxbalance = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance Toman", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance USD", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6691,9 +6691,9 @@ Use the button below to pay👇🏻";
         $textstar = "✅ Your transaction was created
 
 🛒 Tracking code: <code>$randomString</code>
-💲 Transaction amount: $starAmount ⭐ (equal to $formatprice Toman)
+💲 Transaction amount: $starAmount ⭐ (equal to $formatprice USD)
 
-📌 Please send $formatprice Toman as Telegram Stars.
+📌 Please send $formatprice USD as Telegram Stars.
 
 💢 Important notes before paying: 👇
 🔹 Each transaction is valid for 1 day; do not pay after it expires.
@@ -8315,7 +8315,7 @@ if (isset($update['message']['successful_payment'])) {
  
 ▫️Service : $usernamePanelExtends
 ▫️Product : {$prodcut['name_product']}
-▫️Renewal price {$prodcut['price_product']} Toman
+▫️Renewal price {$prodcut['price_product']} USD
 ";
     sendmessage($from_id, $textextend, $keyboard, 'HTML');
     $timejalali = jdate('Y/m/d H:i:s');

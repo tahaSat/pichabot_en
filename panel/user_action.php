@@ -81,7 +81,7 @@ switch ($action) {
         }
         db_query($pdo, "UPDATE user SET Balance = Balance + ? WHERE id = ?", [$amount, $id]);
         panel_record_admin_balance_change($pdo, $id, $amount, 'add balance by admin');
-        panel_notify_user($id, '💎 ' . number_format($amount) . ' Toman was added to your wallet.');
+        panel_notify_user($id, '💎 ' . number_format($amount) . ' USD was added to your wallet.');
         flash('success', number_format($amount) . ' تومان به موجودی افزوده شد.');
         break;
 
@@ -93,7 +93,7 @@ switch ($action) {
         }
         db_query($pdo, "UPDATE user SET Balance = GREATEST(0, Balance - ?) WHERE id = ?", [$amount, $id]);
         panel_record_admin_balance_change($pdo, $id, $amount, 'low balance by admin');
-        panel_notify_user($id, '❌ ' . number_format($amount) . ' Toman was deducted from your wallet.');
+        panel_notify_user($id, '❌ ' . number_format($amount) . ' USD was deducted from your wallet.');
         flash('success', number_format($amount) . ' تومان از موجودی کسر شد.');
         break;
 

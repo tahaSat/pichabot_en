@@ -5,13 +5,13 @@
 #
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MIRZA_BOT_DIR="${MIRZA_BOT_DIR:-/var/www/mirza_bot}"
-MIRZA_LEGACY_DIR="/var/www/html/mirzabotconfig"
-MIRZA_APACHE_SITE="${MIRZA_APACHE_SITE:-mirza_bot}"
-MIRZA_CONF_DIR="/root/confmirza"
-SUPERVISOR_PROG="mirza-polling"
-DEFAULT_DB_NAME="mirza_pr"
-MIRZA_GIT_REPO="${MIRZA_GIT_REPO:-https://github.com/tahaSat/mirza_bot.git}"
+MIRZA_BOT_DIR="${MIRZA_BOT_DIR:-/var/www/pichabot_en}"
+MIRZA_LEGACY_DIR="/var/www/html/pichabot_en_config"
+MIRZA_APACHE_SITE="${MIRZA_APACHE_SITE:-pichabot_en}"
+MIRZA_CONF_DIR="/root/confpichabot_en_config"
+SUPERVISOR_PROG="pichabot_en-polling"
+DEFAULT_DB_NAME="pichabot_en_db"
+MIRZA_GIT_REPO="${MIRZA_GIT_REPO:-https://github.com/tahaSat/pichabot_en.git}"
 MIRZA_GIT_BRANCH="${MIRZA_GIT_BRANCH:-main}"
 
 if [[ $EUID -ne 0 ]]; then

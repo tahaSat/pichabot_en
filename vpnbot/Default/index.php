@@ -174,7 +174,7 @@ Choose a section to continue:";
 👤 Name: <code>$first_name</code>
 ⌚️ Joined: $userjoin
 💡 User ID: <code>$from_id</code>
-💰 Balance: $Balanceuser Toman
+💰 Balance: $Balanceuser USD
 💵 Paid invoices: $countpayment
 
 📆 $dateacc → ⏰ $timeacc";
@@ -671,7 +671,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
             $maxvolume = json_decode($marzban_list_get['maxvolume'], true);
             $maxvolume = $maxvolume[$userbot['agent']];
             $textcustom = "📌 Send the data amount you want.
-        🔔 Price per GB: $eextraprice Toman.
+        🔔 Price per GB: $eextraprice USD.
         🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
             sendmessage($from_id, $textcustom, $backuser, 'html');
             step('gettimecustomvol', $from_id);
@@ -697,7 +697,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     $mainvolume = panel_agent_field($marzban_list_get, 'mainvolume', $userbot['agent'], '1');
     $maxvolume = panel_agent_field($marzban_list_get, 'maxvolume', $userbot['agent'], '1000');
     $textcustom = "📌 Send the data amount you want.
-🔔 Price per GB: $eextraprice Toman.
+🔔 Price per GB: $eextraprice USD.
 🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
     sendmessage($from_id, $textcustom, $backuser, 'html');
     step('gettimecustomvol', $from_id);
@@ -751,7 +751,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         $maxvolume = json_decode($marzban_list_get['maxvolume'], true);
         $maxvolume = $maxvolume[$userbot['agent']];
         $textcustom = "📌 Send the data amount you want.
-    🔔 Price per GB: $eextraprice Toman.
+    🔔 Price per GB: $eextraprice USD.
     🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
         sendmessage($from_id, $textcustom, $backuser, 'html');
         step('gettimecustomvol', $from_id);
@@ -868,8 +868,8 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
 🔐 Service name: {$datapish['name_product']}
 ⏱ Duration: {$datapish['Service_time']} days
 🔋 Service data : {$datapish['Volume_constraint']} GB
-💸 Amount due : $pricefmt Toman
-💰 Wallet balance : $bal Toman
+💸 Amount due : $pricefmt USD
+💰 Wallet balance : $bal USD
 
 ✅ Tap the button below to confirm and pay";
     sendmessage($from_id, $textin, $payment, 'HTML');
@@ -971,7 +971,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     $textpishfactor = "📇 Your invoice:
 👤 Username:  {username}
 📆 Duration: {Service_time} days
-💶 Price: {price} Toman
+💶 Price: {price} USD
 👥 Data: {Volume} GB
 💵 Your wallet balance: {userBalance}
           
@@ -1713,7 +1713,7 @@ Connection link :
         $maxvolume = json_decode($marzban_list_get['maxvolume'], true);
         $maxvolume = $maxvolume[$userbot['agent']];
         $textcustom = "📌 Send the data amount you want.
-🔔 Price per GB: $custompricevalue Toman.
+🔔 Price per GB: $custompricevalue USD.
 🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
         sendmessage($from_id, $textcustom, $backuser, 'html');
         step('gettimecustomvolextend', $from_id);
@@ -1727,7 +1727,7 @@ Connection link :
     $maxvolume = json_decode($marzban_list_get['maxvolume'], true);
     $maxvolume = $maxvolume[$userbot['agent']];
     $textcustom = "📌 Send the data amount you want.
-🔔 Price per GB: $custompricevalue Toman.
+🔔 Price per GB: $custompricevalue USD.
 🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
     sendmessage($from_id, $textcustom, $backuser, 'html');
     step('gettimecustomvolextend', $from_id);
@@ -2053,7 +2053,7 @@ Connection link :
  
 ▫️نام سرویس : {$nameloc['username']}
 ▫️Product : {$datafactor['name_product']}
-▫️Renewal price $priceproductformat Toman
+▫️Renewal price $priceproductformat USD
 ";
     sendmessage($from_id, $textextend, $keyboardextendfnished, 'HTML');
     $timejalali = jdate('Y/m/d H:i:s');

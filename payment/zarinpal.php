@@ -113,7 +113,7 @@ $response = json_decode($response,true);
         $Balance_confrim = intval($Balance_id['Balance']) +$result;
         update("user","Balance",$Balance_confrim, "id",$Balance_id['id']); 
         $pricecashback =  number_format($pricecashback);
-        $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
+        $text_report = "🎁 $result USD was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
     update("Payment_report","payment_Status","paid","id_order",$Payment_report['id_order']);
@@ -193,7 +193,7 @@ $text_report = "💵 پرداخت جدید
     <div class="confirmation-box">
         <h1><?php echo $payment_status ?></h1>
         <p>Transaction ID: <span><?php echo $invoice_id ?></span></p>
-        <p>Amount paid:  <span><?php echo  $price ?></span> Toman</p>
+        <p>Amount paid:  <span><?php echo  $price ?></span> USD</p>
         <p>Date: <span>  <?php echo date('Y-m-d')  ?>  </span></p>
         <p><?php echo $dec_payment_status ?></p>
     </div>

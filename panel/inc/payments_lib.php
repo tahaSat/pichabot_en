@@ -409,7 +409,7 @@ function panel_payment_confirm(PDO $pdo, string $orderId): array
                     if ($bonus > 0) {
                         db_query($pdo, "UPDATE user SET Balance = Balance + ? WHERE id = ?", [$bonus, $user['id']]);
                         if (function_exists('sendmessage')) {
-                            @sendmessage($payment['id_user'], "🎁 {$bonus} Toman was added to your account as a deposit bonus.", null, 'HTML');
+                            @sendmessage($payment['id_user'], "🎁 {$bonus} USD was added to your account as a deposit bonus.", null, 'HTML');
                         }
                     }
                 }
@@ -1022,7 +1022,7 @@ function panel_payment_add_manual(PDO $pdo, array $input): array
         require_once __DIR__ . '/users_lib.php';
         panel_notify_user(
             $realUser['id'],
-            '💎 ' . number_format($amount) . ' Toman was added to your wallet.'
+            '💎 ' . number_format($amount) . ' USD was added to your wallet.'
         );
     }
 

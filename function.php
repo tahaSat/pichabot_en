@@ -1111,10 +1111,10 @@ function bot_format_first_purchase_block(array $fp, int $ordersCount, float $ord
     $rlm = "\u{200F}";
     if ($html) {
         return "{$rlm}🆕 <b>خرید اول:</b> <code>$count</code> عدد — <code>$pct</code>٪ از فروش\n"
-            . "{$rlm}💰 <b>مبلغ خرید اول:</b> <code>$sum</code> Toman — <code>$pctMoney</code>٪ از مبلغ فروش";
+            . "{$rlm}💰 <b>مبلغ خرید اول:</b> <code>$sum</code> USD — <code>$pctMoney</code>٪ از مبلغ فروش";
     }
     return "{$rlm}🆕 خرید اول : $count عدد — $pct٪ از سفارشات\n"
-        . "{$rlm}💰 مبلغ خرید اول : $sum Toman — $pctMoney٪ از مبلغ سفارشات";
+        . "{$rlm}💰 مبلغ خرید اول : $sum USD — $pctMoney٪ از مبلغ سفارشات";
 }
 
 /**
@@ -1253,29 +1253,29 @@ function bot_format_period_stats(array $s, string $title, ?string $rangeLabel = 
 🕐 <b>$title</b>
 $rangeLine
 🛍 تعداد سفارشات : {$s['orders']} عدد
-💸 جمع مبلغ سفارشات  : $sumOrder Toman
+💸 جمع مبلغ سفارشات  : $sumOrder USD
 $firstPurchaseBlock
 
 🧲 تعداد تمدید  : {$s['extends']} عدد
-💰 جمع Renewal price: $sumExtend Toman
+💰 جمع Renewal price: $sumExtend USD
 
 📦 حجم‌های اضافه  :{$s['extra_volume']} عدد
-💰 مبلغ حجم‌های اضافه : $sumExtraVolume Toman
+💰 مبلغ حجم‌های اضافه : $sumExtraVolume USD
 
 ⏱️ زمان‌های اضافه  : {$s['extra_time']} عدد
-💰 مبلغ زمان‌های اضافه  : $sumExtraTime Toman
+💰 مبلغ زمان‌های اضافه  : $sumExtraTime USD
 
 📍 تغییر لوکیشن  : {$s['change_location']} عدد
-💰 مبلغ تغییر لوکیشن : $sumChange Toman
+💰 مبلغ تغییر لوکیشن : $sumChange USD
 
 💳 شارژ کیف پول : $walletCount عدد
-💰 مبلغ شارژ کیف پول : $sumWallet Toman
+💰 مبلغ شارژ کیف پول : $sumWallet USD
 
 💸 تعداد برداشت از کیف پول : $withdrawCount عدد
-💰 مبلغ برداشت از کیف پول : $sumWithdraw Toman
+💰 مبلغ برداشت از کیف پول : $sumWithdraw USD
 
 📊 تعداد کل : {$s['total_count']} عدد
-💵 جمع مبلغ کل : $sumTotal Toman
+💵 جمع مبلغ کل : $sumTotal USD
 
 $soldVolumeBlock
 
@@ -3175,7 +3175,7 @@ function admin_provision_user_service($userId, array $opts): array
 
     if (function_exists('sendMessageService')) {
         $Shoppinginfo = json_encode([
-            'inline_keyboard' => [[['text' => $textbotlang['users']['help']['btninlinebuy'] ?? 'راهنما', 'callback_data' => 'helpbtn']]],
+            'inline_keyboard' => [[['text' => $textbotlang['users']['help']['btninlinebuy'] ?? 'Guide', 'callback_data' => 'helpbtn']]],
         ]);
         sendMessageService(
             $panel,
@@ -3306,7 +3306,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
             $balance = $Balance_id['Balance'] + $Payment_report['price'];
             update("user", "Balance", $balance, "id", $Balance_id['id']);
             sendmessage($Balance_id['id'], $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
-            sendmessage($Balance_id['id'], "💎 The service could not be created, so $balance Toman was added back to your wallet.", $keyboard, 'HTML');
+            sendmessage($Balance_id['id'], "💎 The service could not be created, so $balance USD was added back to your wallet.", $keyboard, 'HTML');
             $texterros = "
 ⭕️ خطا در ساخت کانفیگ
 ✍️ دلیل خطا : 
@@ -3400,7 +3400,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
                     $result = number_format($result);
                     $textadd = "🎁 Referral commission
 
-        $result Toman was added to your wallet from your referral";
+        $result USD was added to your wallet from your referral";
                     $textreportport = "
 مبلغ $result به کاربر {$Balance_id['affiliates']} برای پورسانت از کاربر {$Balance_id['id']} واریز گردید 
 تایم : $dateacc";
@@ -3429,7 +3429,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
                 $result = number_format($result);
                 $textadd = "🎁 Referral commission
 
-        $result Toman was added to your wallet from your referral";
+        $result USD was added to your wallet from your referral";
                 $textreportport = "
 مبلغ $result به کاربر {$Balance_id['affiliates']} برای پورسانت از کاربر {$Balance_id['id']} واریز گردید 
 تایم : $dateacc";
@@ -3514,7 +3514,7 @@ $textonebuy
 🛒 Tracking code پرداخت: {$Payment_report['id_order']}
 ⚜️ Username: @{$Balance_id['username']}
 💎 Balance قبل خرید  : {$Balance_id['Balance']}
-💸 Amount paid: $format_price_cart Toman
+💸 Amount paid: $format_price_cart USD
 ✍️ توضیحات : {$Payment_report['dec_not_confirmed']}
 
 ";
@@ -3566,7 +3566,7 @@ $textonebuy
             $balance = $Balance_id['Balance'] + $Payment_report['price'];
             update("user", "Balance", $balance, "id", $Balance_id['id']);
             sendmessage($Balance_id['id'], $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
-            sendmessage($Balance_id['id'], "💎 The service could not be renewed, so $balance Toman was added back to your wallet.", $keyboard, 'HTML');
+            sendmessage($Balance_id['id'], "💎 The service could not be renewed, so $balance USD was added back to your wallet.", $keyboard, 'HTML');
             $extend['msg'] = json_encode($extend['msg']);
             $textreports = "
         خطای تمدید سرویس
@@ -3631,14 +3631,14 @@ $textonebuy
             $pricelastextend = $result;
             update("user", "Balance", $pricelastextend, "id", $Balance_id['id']);
             sendmessage($Balance_id['id'], "Congratulations 🎉
-📌 $result Toman was added to your account as a renewal bonus", null, 'HTML');
+📌 $result USD was added to your account as a renewal bonus", null, 'HTML');
         }
         $priceproductformat = number_format($prodcut['price_product']);
         $textextend = "✅ Your service was renewed
  
 ▫️نام سرویس : $usernamepanel
 ▫️Product : {$prodcut['name_product']}
-▫️Renewal price $priceproductformat Toman
+▫️Renewal price $priceproductformat USD
 ";
         sendmessage($Balance_id['id'], $textextend, $keyboardextendfnished, 'HTML');
         if (intval($setting['scorestatus']) == 1 and !in_array($Balance_id['id'], $admin_ids)) {
@@ -3679,7 +3679,7 @@ $textonebuy
 🛒 Tracking code پرداخت: {$Payment_report['id_order']}
 ⚜️ Username: @{$Balance_id['username']}
 💎 Balance قبل تمدید  : {$Balance_id['Balance']}
-💸 Amount paid: $format_price_cart Toman
+💸 Amount paid: $format_price_cart USD
 ✍️ توضیحات : {$Payment_report['dec_not_confirmed']}
 
 ";
@@ -3751,7 +3751,7 @@ $textonebuy
 ▫️نام سرویس  : {$steppay[0]}
 ▫️Extra data : $volume GB
 
-▫️مبلغ افزایش حجم : $volumesformat Toman";
+▫️مبلغ افزایش حجم : $volumesformat USD";
         sendmessage($Balance_id['id'], $textvolume, $keyboardextrafnished, 'HTML');
         $volumes = $volume;
         if ($Payment_report['Payment_Method'] == "cart to cart") {
@@ -3763,7 +3763,7 @@ $textonebuy
 🛒 Tracking code پرداخت: {$Payment_report['id_order']}
 ⚜️ Username: @{$Balance_id['username']}
 💎 Balance قبل ازافزایش Balance : {$Balance_id['Balance']}
-💸 Amount paid: $format_price_cart Toman
+💸 Amount paid: $format_price_cart USD
 ";
             if (!empty($from_id) && !empty($message_id)) {
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
@@ -3775,7 +3775,7 @@ $textonebuy
 اطلاعات کاربر : 
 🪪 آیدی عددی : {$Balance_id['id']}
 🛍 حجم خریداری شده  : $volumes GB
-💰 مبلغ پرداختی : {$Payment_report['price']} Toman
+💰 مبلغ پرداختی : {$Payment_report['price']} USD
 👤 Config username {$steppay[0]}
 Balance کاربر قبل خرید : {$Balance_id['Balance']}
 ";
@@ -3853,7 +3853,7 @@ Balance کاربر قبل خرید : {$Balance_id['Balance']}
 ▫️نام سرویس : {$steppay[0]}
 ▫️Extra time : $tmieextra days
 
-▫️مبلغ افزایش زمان : $volumesformat Toman";
+▫️مبلغ افزایش زمان : $volumesformat USD";
         sendmessage($Balance_id['id'], $textextratime, $keyboardextrafnished, 'HTML');
         if ($Payment_report['Payment_Method'] == "cart to cart") {
             $volumes = $tmieextra;
@@ -3865,7 +3865,7 @@ Balance کاربر قبل خرید : {$Balance_id['Balance']}
 🛒 Tracking code پرداخت: {$Payment_report['id_order']}
 ⚜️ Username: @{$Balance_id['username']}
 💎 Balance قبل ازافزایش Balance : {$Balance_id['Balance']}
-💸 Amount paid: $format_price_cart Toman
+💸 Amount paid: $format_price_cart USD
 ";
             if (!empty($from_id) && !empty($message_id)) {
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
@@ -3877,7 +3877,7 @@ Balance کاربر قبل خرید : {$Balance_id['Balance']}
 اطلاعات کاربر : 
 🪪 آیدی عددی : {$Balance_id['id']}
 🛍 زمان خریداری شده  : $volumes days
-💰 مبلغ پرداختی : {$Payment_report['price']} Toman
+💰 مبلغ پرداختی : {$Payment_report['price']} USD
 👤 Config username {$steppay[0]}";
         if (strlen($setting['Channel_Report']) > 0) {
             telegram('sendmessage', [
@@ -3905,7 +3905,7 @@ Balance کاربر قبل خرید : {$Balance_id['Balance']}
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
             }
         }
-        sendmessage($Payment_report['id_user'], "💎 {$Payment_report['price']} Toman was added to your wallet. Thank you for your payment.
+        sendmessage($Payment_report['id_user'], "💎 {$Payment_report['price']} USD was added to your wallet. Thank you for your payment.
                 
 🛒 Tracking code: {$Payment_report['id_order']}", null, 'HTML');
     }
@@ -4914,7 +4914,7 @@ function invoice_auto_renew_wallet_prewarn(array $invoice, array $user, array $u
         $textbotlang = languagechange(__DIR__ . '/text.json');
     }
     $template = $textbotlang['users']['extend']['autorenew_prewarn']
-        ?? 'سرویس %s دارای تمدید خودکار می باشد اما اعتبار کیف پول شما کافی نیست. برای تمدید موفق، لطفا کیف پول خود را به مقدار حداقل %s شارژ نمایید.';
+        ?? 'Service %s has auto-renew enabled, but your wallet balance is too low. Please add at least %s USD to your wallet for a successful renewal.';
     $message = sprintf($template, $invoice['username'] ?? '', number_format($price));
     $botToken = (!empty($invoice['bottype']) && $invoice['bottype'] !== '0') ? $invoice['bottype'] : null;
     sendmessage($invoice['id_user'], $message, null, 'HTML', $botToken);
@@ -5141,7 +5141,7 @@ Service username : {$invoice['username']}
     update('invoice', 'Status', 'active', 'id_invoice', $invoice['id_invoice']);
     $priceFormat = number_format($price);
     $success = sprintf(
-        $textbotlang['users']['extend']['autorenew_success'] ?? "✅ سرویس %s به‌صورت خودکار تمدید شد.\n\n🛍 بسته: %s\n💸 مبلغ کسر شده: %s Toman",
+        $textbotlang['users']['extend']['autorenew_success'] ?? "✅ Service %s was renewed automatically.\n\n🛍 Plan: %s\n💸 Amount deducted: %s USD",
         $invoice['username'],
         $product['name_product'],
         $priceFormat
@@ -5159,9 +5159,9 @@ Service username : {$invoice['username']}
 ▫️Product : {$product['name_product']}
 ▫️حجم محصول : {$product['Volume_constraint']}
 ▫️زمان محصول : {$product['Service_time']}
-▫️Renewal price : {$priceFormat} Toman
-▫️Balance قبل : {$balanceBefore} Toman
-▫️Balance بعد : {$balanceAfter} Toman
+▫️Renewal price : {$priceFormat} USD
+▫️Balance قبل : {$balanceBefore} USD
+▫️Balance بعد : {$balanceAfter} USD
 ▫️زمان : {$timeText}";
     $otherserviceRow = select('topicid', 'idreport', 'report', 'otherservice', 'select');
     $otherservice = is_array($otherserviceRow) ? ($otherserviceRow['idreport'] ?? null) : null;
@@ -6914,7 +6914,7 @@ function textbot_custom_volume_ask($price, $min, $max): string
 {
     $tpl = textbot_get(
         'text_custom_volume_ask',
-        "📌 حجم درخواستی خود را ارسال کنید.\n🔔قیمت هر GB حجم {price} Toman می باشد.\n🔔 Minimum data {min} GB و حداکثر {max} GB می باشد."
+        "📌 Send the data amount you want.\n🔔 Price per GB is {price} USD.\n🔔 Minimum {min} GB, maximum {max} GB."
     );
     return strtr($tpl, [
         '{price}' => (string) $price,
@@ -6927,7 +6927,7 @@ function textbot_custom_volume_invalid($min, $max): string
 {
     $tpl = textbot_get(
         'text_custom_volume_invalid',
-        "❌ حجم نامعتبر است.\n🔔 Minimum data {min} GB و حداکثر {max} GB می باشد"
+        "❌ Invalid data amount.\n🔔 Minimum {min} GB, maximum {max} GB"
     );
     return strtr($tpl, [
         '{min}' => (string) $min,
@@ -7547,10 +7547,10 @@ function affiliates_main_view($from_id, array $user): array
 
     $text_start = '';
     if (($affiliatescommission['Discount'] ?? '') === 'onDiscountaffiliates') {
-        $text_start = "<b>🎁 هدیه عضویت:</b>
-• 🎉 مجموع هدیه: {$affiliatescommission['price_Discount']} Toman  
-• 🔻 ۵۰٪ برای شما (معرف)  
-• 🔻 ۵۰٪ برای referral (کاربر جدید)
+        $text_start = "<b>🎁 Signup bonus:</b>
+• 🎉 Total bonus: {$affiliatescommission['price_Discount']} USD  
+• 🔻 50% for you (referrer)  
+• 🔻 50% for the new user
 ";
     }
     $text_porsant = affiliates_porsant_text($affiliatescommission, $setting['affiliatespercentage'] ?? 0);
@@ -7558,19 +7558,19 @@ function affiliates_main_view($from_id, array $user): array
     $orders = (int) ($inforefral['orders'] ?? 0);
     $affiliatescount = $user['affiliatescount'] ?? 0;
 
-    $text = "<b>💼 Referrals و هدیه خوش‌آمد</b>
+    $text = "<b>💼 Referrals and welcome bonus</b>
 
-با دعوت دوستان از طریق <b>لینک اختصاصی</b>، بدون پرداخت حتی ۱ Rial کیف پولت شارژ میشه و از خدمات ربات استفاده می‌کنی!
+Invite friends with your <b>personal link</b> and credit your wallet without paying anything. Then use the bot as usual.
 
 $text_start
 $text_porsant
 
-<b>📊 آمار شما:</b>
-• 👥 referral‌ها: {$affiliatescount} نفر
-• 🛒 خریدها: {$orders} عدد
-• 💵 مجموع خرید: $sum_order Toman
+<b>📊 Your stats:</b>
+• 👥 Referrals: {$affiliatescount}
+• 🛒 Purchases: {$orders}
+• 💵 Purchase total: $sum_order USD
 
-<b>📢 دعوت کن، هدیه بگیر، رشد کن!</b>
+<b>📢 Invite, earn, and grow!</b>
 ";
 
     return [
@@ -7640,16 +7640,16 @@ function affiliates_list_view($referrerId, int $page): array
             ['text' => '🔙 Back', 'callback_data' => 'affiliatesbtn'],
         ];
         return [
-            'text' => 'هنوز referral‌ای ندارید.',
+            'text' => 'You do not have any referrals yet.',
             'keyboard' => json_encode($keyboard, JSON_UNESCAPED_UNICODE),
         ];
     }
 
     $keyboard['inline_keyboard'][] = [
-        ['text' => 'یوزرنیم', 'callback_data' => 'aff_noop'],
-        ['text' => 'آیدی', 'callback_data' => 'aff_noop'],
-        ['text' => 'تعداد', 'callback_data' => 'aff_noop'],
-        ['text' => 'مشاهده', 'callback_data' => 'aff_noop'],
+        ['text' => 'Username', 'callback_data' => 'aff_noop'],
+        ['text' => 'ID', 'callback_data' => 'aff_noop'],
+        ['text' => 'Count', 'callback_data' => 'aff_noop'],
+        ['text' => 'View', 'callback_data' => 'aff_noop'],
     ];
 
     foreach ($rows as $row) {
@@ -7686,7 +7686,7 @@ function affiliates_list_view($referrerId, int $page): array
     ];
 
     return [
-        'text' => "👥 لیست referral‌های شما\nصفحه {$page} از {$pages} · {$total} نفر\nروی هر ردیف بزنید تا سرویس‌های همان کاربر را ببینید.",
+        'text' => "👥 Your referrals\nPage {$page} of {$pages} · {$total} people\nTap a row to see that user's services.",
         'keyboard' => json_encode($keyboard, JSON_UNESCAPED_UNICODE),
     ];
 }
@@ -7767,7 +7767,7 @@ function affiliates_services_view($referrerId, $childId, int $page): array
 
     if (!affiliates_user_is_invitee($childId, $referrerId)) {
         return [
-            'text' => '❌ این کاربر referral شما نیست.',
+            'text' => '❌ This user is not your referral.',
             'keyboard' => json_encode([
                 'inline_keyboard' => [
                     [['text' => '🔙 Back', 'callback_data' => 'aff_list_1']],
@@ -7805,10 +7805,10 @@ function affiliates_services_view($referrerId, $childId, int $page): array
     $keyboard = ['inline_keyboard' => []];
     if ($total === 0) {
         $keyboard['inline_keyboard'][] = [
-            ['text' => '🔙 بازگشت به لیست', 'callback_data' => 'aff_list_1'],
+            ['text' => '🔙 Back to list', 'callback_data' => 'aff_list_1'],
         ];
         return [
-            'text' => "کاربر {$childLabel} هنوز سرویسی نخریده است.",
+            'text' => "User {$childLabel} has not bought a service yet.",
             'keyboard' => json_encode($keyboard, JSON_UNESCAPED_UNICODE),
         ];
     }
@@ -7833,8 +7833,8 @@ function affiliates_services_view($referrerId, $childId, int $page): array
         $svcUser = htmlspecialchars((string) ($invoice['username'] ?? ''), ENT_QUOTES, 'UTF-8');
         $product = htmlspecialchars((string) ($invoice['name_product'] ?? ''), ENT_QUOTES, 'UTF-8');
         $lines[] = "🔹 <code>{$svcUser}</code> — {$product}";
-        $lines[] = "📦 حجم: {$volumeLine}";
-        $lines[] = "⏱ زمان: {$timeLine}";
+        $lines[] = "📦 Data: {$volumeLine}";
+        $lines[] = "⏱ Time: {$timeLine}";
         $lines[] = '';
     }
 
@@ -7851,7 +7851,7 @@ function affiliates_services_view($referrerId, $childId, int $page): array
         $keyboard['inline_keyboard'][] = $nav;
     }
     $keyboard['inline_keyboard'][] = [
-        ['text' => '🔙 بازگشت به لیست', 'callback_data' => 'aff_list_1'],
+        ['text' => '🔙 Back to list', 'callback_data' => 'aff_list_1'],
     ];
 
     return [
@@ -9642,7 +9642,7 @@ function agent_check_volume_quota($agentUserId, $volumeGb): array
     if ($cost > $balance) {
         return [
             'ok' => false,
-            'msg' => '❌ Agency balance is not enough for this data amount. Cost: ' . number_format($cost) . ' Toman',
+            'msg' => '❌ Agency balance is not enough for this data amount. Cost: ' . number_format($cost) . ' USD',
             'cost' => $cost,
             'user' => $user,
             'skipped' => false,
@@ -9956,7 +9956,7 @@ function botsaz_normalize_setting($setting): array
         $setting['card_holder'] = '';
     }
     if (!isset($setting['cart_info']) || $setting['cart_info'] === '') {
-        $setting['cart_info'] = 'پس از واریز، تصویر رسید را در همین چت ارسال کنید.';
+        $setting['cart_info'] = 'After you pay, send the receipt photo in this chat.';
     }
     return $setting;
 }
@@ -9970,7 +9970,7 @@ function botsaz_cart_payment_text(array $setting, $amount = null, $orderId = nul
     $cardNumber = trim((string) ($setting['card_number'] ?? ''));
     $cardHolder = trim((string) ($setting['card_holder'] ?? ''));
     $help = trim((string) ($setting['cart_info'] ?? ''));
-    $title = htmlspecialchars(trim((string) ($opts['title'] ?? '💳 پرداخت کارت به کارت')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $title = htmlspecialchars(trim((string) ($opts['title'] ?? '💳 Card-to-card payment')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $productName = htmlspecialchars(trim((string) ($opts['product'] ?? '')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $safeCardNumber = htmlspecialchars($cardNumber, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $safeCardHolder = htmlspecialchars($cardHolder, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -9978,18 +9978,18 @@ function botsaz_cart_payment_text(array $setting, $amount = null, $orderId = nul
 
     $lines = [$title . "\n"];
     if ($productName !== '') {
-        $lines[] = "🛍 محصول: <b>{$productName}</b>";
+        $lines[] = "🛍 Product: <b>{$productName}</b>";
     }
     if ($cardNumber !== '') {
-        $lines[] = "💳 شماره کارت:\n<code>{$safeCardNumber}</code>";
+        $lines[] = "💳 Card number:\n<code>{$safeCardNumber}</code>";
     } else {
-        $lines[] = "⚠️ شماره کارت هنوز توسط نماینده تنظیم نشده است.";
+        $lines[] = "⚠️ The reseller has not set a card number yet.";
     }
     if ($cardHolder !== '') {
-        $lines[] = "👤 به نام: <b>{$safeCardHolder}</b>";
+        $lines[] = "👤 Account holder: <b>{$safeCardHolder}</b>";
     }
     if ($amount !== null && $amount !== '') {
-        $lines[] = "💰 مبلغ: <b>" . number_format((int) $amount) . "</b> Toman";
+        $lines[] = "💰 Amount: <b>" . number_format((int) $amount) . "</b> USD";
     }
     if ($orderId !== null && $orderId !== '') {
         $lines[] = "🛒 Tracking code: <code>{$orderId}</code>";
@@ -9997,7 +9997,7 @@ function botsaz_cart_payment_text(array $setting, $amount = null, $orderId = nul
     if ($help !== '') {
         $lines[] = "\n📌 " . $safeHelp;
     }
-    $lines[] = "\nلطفاً پس از واریز، تصویر یا متن رسید را ارسال کنید.";
+    $lines[] = "\nAfter you pay, send a photo or text receipt.";
     return implode("\n", $lines);
 }
 

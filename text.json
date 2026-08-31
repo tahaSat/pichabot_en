@@ -729,7 +729,7 @@
                 "changedpriceDiscount": "✅ Referral bonus amount was saved",
                 "offaffiliates": "❌ The referral program is currently disabled",
                 "affiliateedago": "❌ You have already been referred by another user and cannot join again",
-                "affiliateinfo": "🤔 How does the referral program work?\n\n👨🏻‍💻 You can grow your wallet balance and use the bot without paying us anything.\n\n👥 Invite friends with your personal link and earn commission on their purchases.\n\n👤 Use the banner above to collect referrals.\n\n💵 Bonus per signup: %s Toman\n💴 Commission on referral purchases: %s%%\n\n📊 Your stats\n• Users who joined with your link: %s\n• Number of purchases: %s\n • Purchase amount: %s Toman"
+                "affiliateinfo": "🤔 How does the referral program work?\n\n👨🏻‍💻 You can grow your wallet balance and use the bot without paying us anything.\n\n👥 Invite friends with your personal link and earn commission on their purchases.\n\n👤 Use the banner above to collect referrals.\n\n💵 Bonus per signup: %s USD\n💴 Commission on referral purchases: %s%%\n\n📊 Your stats\n• Users who joined with your link: %s\n• Number of purchases: %s\n • Purchase amount: %s USD"
             },
             "number": {
                 "false": "❌ Invalid phone number. Please send it using the button below.",
@@ -815,8 +815,8 @@
                 "autorenew_enabled": "✅ Auto-renew was enabled for this service.\n\n📌 When remaining data reaches the cron warning threshold, the service is renewed with the same plan and the amount is deducted from your wallet.",
                 "autorenew_disabled": "❌ Auto-renew was disabled for this service.",
                 "autorenew_insufficient": "Your wallet balance is not enough for auto-renew",
-                "autorenew_prewarn": "Service %s has auto-renew enabled, but your wallet balance is too low. Please add at least %s to your wallet for a successful renewal.",
-                "autorenew_success": "✅ Service %s was renewed automatically.\n\n🛍 Plan: %s\n💸 Amount deducted: %s Toman",
+                "autorenew_prewarn": "Service %s has auto-renew enabled, but your wallet balance is too low. Please add at least %s USD to your wallet for a successful renewal.",
+                "autorenew_success": "✅ Service %s was renewed automatically.\n\n🛍 Plan: %s\n💸 Amount deducted: %s USD",
                 "autorenew_noproduct": "❌ No matching plan was found for auto-renew.",
                 "autorenew_cron_off": "💡 Enable auto-renew and keep your wallet funded to stay connected",
                 "autorenew_cron_on": "✅ Auto-renew is enabled for this service.",
@@ -830,8 +830,8 @@
                 "extracheck": "Confirm and add extra data",
                 "invalidprice": "🚫 Minimum extra data is 1 GB",
                 "setpricerxtratime": "Send the price you want for each extra day",
-                "extravolumeinvoice": "📇 Extra data invoice created.\n\n💰 Price per extra GB: %s Toman\n📝 Invoice total: %s Toman\n📥 Requested extra data: %s GB\n\n✅ Tap the button below to pay and add the data.",
-                "enterextravolume": "🔋 Enter the extra data you want (in GB):\n\n📌 Price per GB: %s Toman"
+                "extravolumeinvoice": "📇 Extra data invoice created.\n\n💰 Price per extra GB: %s USD\n📝 Invoice total: %s USD\n📥 Requested extra data: %s GB\n\n✅ Tap the button below to pay and add the data.",
+                "enterextravolume": "🔋 Enter the extra data you want (in GB):\n\n📌 Price per GB: %s USD"
             },
             "Extra_time": {
                 "title": "⏳ Buy extra time",
@@ -859,7 +859,7 @@
                 "errorprice": "❌ Error\n💬 Please enter numbers only",
                 "selectPatment": "💵 Choose your payment method",
                 "nowpayments": "❌ Error\n    The minimum amount for this gateway is 1 USD.",
-                "zarinpal": "❌ Error\n    The minimum amount for this gateway is 5000 Toman.",
+                "zarinpal": "❌ Error\n    The minimum amount for this gateway is 5000 USD.",
                 "linkpayments": "Creating payment link...",
                 "payments": "Pay",
                 "changeto": "❌ Error\n    The minimum amount for this gateway is 2 TRX.",
@@ -880,7 +880,7 @@
                 "Send-receipt": "🚀 Your payment receipt was sent. After admin approval, the amount will be added to your wallet.",
                 "Send-receiptadnsendconfig": "🚀 Your receipt was sent. After review, the service details will be sent to you.",
                 "maxpurchasereached": "❌ You have reached your purchase limit. Top up your wallet first, then buy or renew a service.",
-                "insufficientbalance": "❌ Your balance is not enough to buy this service.\n💸 Enter an amount in Toman to top up:\n✅ Minimum %s Toman, maximum %s Toman",
+                "insufficientbalance": "❌ Your balance is not enough to buy this service.\n💸 Enter an amount in USD to top up:\n✅ Minimum %s USD, maximum %s USD",
                 "receiptimage": "🖼 Receipt image"
             },
             "Discount": {
@@ -890,10 +890,10 @@
                 "erorrlimit": "❌ This discount code has reached its usage limit",
                 "erorrlimitdiscount": "❌ This gift code has reached its usage limit",
                 "firstdiscount": "❌ This discount code is for first-time purchases only.",
-                "gift-deposit": "🎁 %s Toman was added to your account as a deposit bonus.",
+                "gift-deposit": "🎁 %s USD was added to your account as a deposit bonus.",
                 "discountapplied": "Congratulations 🎉\n📌 Your purchase received a %s percent discount",
                 "giftcodeused": "⭕️ User @%s (ID %s) used gift code %s.",
-                "giftcodesuccess": "Gift code applied. %s Toman was added to your balance. 🥳",
+                "giftcodesuccess": "Gift code applied. %s USD was added to your balance. 🥳",
                 "giftcodeonce": "📌 This code can only be used once."
             },
             "changelink": {
@@ -938,7 +938,7 @@
                 "acceptrequest": "✅ Approve request",
                 "rejectrequest": "❌ Reject request",
                 "agent-request": "📣 A user requested agency. Please review and decide.\n\nUser ID: <code>%s</code>\nUsername: @%s\nAccount name: %s\nNotes: %s",
-                "insufficientbalanceagent": "❌ Your balance is not enough to request agency. Top up first, then send the request.\n\n💸 Agency fee: %s Toman",
+                "insufficientbalanceagent": "❌ Your balance is not enough to request agency. Top up first, then send the request.\n\n💸 Agency fee: %s USD",
                 "customnameusername": "👤 Choose a custom name"
             },
             "note": {
@@ -951,13 +951,13 @@
                 "appempty": "❌ There are no apps to download."
             },
             "pricearze": {
-                "tether-price": "Current USDT price: %s Toman",
-                "tron-price": "Current TRX price: %s Toman"
+                "tether-price": "Current USDT price: %s USD",
+                "tron-price": "Current TRX price: %s USD"
             },
             "wheel_luck": {
                 "notWinner": "🥲 You did not win this time. Try again tomorrow.",
                 "wheel-winner": "⭕️ User @%s (ID %s) won the lucky wheel",
-                "winner-congratulations": "🤩 Congratulations, you won! %s Toman was added to your account.",
+                "winner-congratulations": "🤩 Congratulations, you won! %s USD was added to your account.",
                 "already-participated": "❌ You already played today. Try again tomorrow.",
                 "feature-disabled": "❌ This feature is currently disabled"
             }

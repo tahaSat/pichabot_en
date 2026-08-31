@@ -69,7 +69,7 @@ if (intval($setting['scorestatus']) == 1) {
             $balanceFormatted = number_format($prizeAmount);
             $rank = $count + 1;
 
-            $textlottery = "🎁 Lottery result \n\n😎 Congratulations! You placed #$rank and won $balanceFormatted Toman. Your account was credited.";
+            $textlottery = "🎁 Lottery result \n\n😎 Congratulations! You placed #$rank and won $balanceFormatted USD. Your account was credited.";
             sendmessage($result['id'], $textlottery, null, 'html');
 
             $textlotterygroup .= "\nنام کاربری : @{$result['username']}\nآیدی عددی : {$result['id']}\nمبلغ : $balanceFormatted\nنفر : $rank\n--------------";

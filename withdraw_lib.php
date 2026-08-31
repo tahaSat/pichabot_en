@@ -11,7 +11,7 @@ const WITHDRAW_TEXT_SUCCESS = 'text_wallet_withdraw_success';
 
 function withdraw_prompt_default(): string
 {
-    return "💸 Enter the amount you want to withdraw from your wallet in Toman.";
+    return "💸 Enter the amount you want to withdraw from your wallet in USD.";
 }
 
 function withdraw_success_default(): string
@@ -266,7 +266,7 @@ function withdraw_normalize_card(string $text): ?string
 function withdraw_validate_amount(int $amount, int $balance, ?PDO $pdo = null): array
 {
     if ($amount < 1) {
-        return ['ok' => false, 'error' => '❌ Invalid amount. Enter a number in Toman.'];
+        return ['ok' => false, 'error' => '❌ Invalid amount. Enter a number in USD.'];
     }
     $min = withdraw_min_amount($pdo);
     if ($amount < $min) {

@@ -4039,7 +4039,7 @@ $caption";
         $Balance_confrim = intval($Balance_id['Balance']) + $result;
         update("user", "Balance", $Balance_confrim, "id", $Balance_id['id']);
         $pricecashback = number_format($pricecashback);
-        $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
+        $text_report = "🎁 $result USD was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
     $Payment_report['price'] = number_format($Payment_report['price']);
@@ -4768,7 +4768,7 @@ $caption";
     record_admin_balance_payment($pdo, $user['Processing_value'], (int) $text, 'low balance by admin');
     $balances1 = number_format($text, 0);
     $Balance_user_afters = number_format(select("user", "*", "id", $user['Processing_value'], "select")['Balance']);
-    $textkam = "❌ $balances1 Toman was deducted from your wallet.";
+    $textkam = "❌ $balances1 USD was deducted from your wallet.";
     sendmessage($user['Processing_value'], $textkam, null, 'HTML');
     step('home', $from_id);
     if (strlen($setting['Channel_Report']) > 0) {
@@ -6258,7 +6258,7 @@ $text_agent_volume$text_expie_agent
     $Balance_add_user = $Balance_user['Balance'] + $text;
     update("user", "Balance", $Balance_add_user, "id", $user['Processing_value']);
     $heibalanceuser = number_format($text, 0);
-    $textadd = "💎 $heibalanceuser Toman was added to your wallet.";
+    $textadd = "💎 $heibalanceuser USD was added to your wallet.";
     sendmessage($user['Processing_value'], $textadd, null, 'HTML');
     step('home', $from_id);
     $Balance_user_after = number_format(select("user", "*", "id", $user['Processing_value'], "select")['Balance']);
@@ -6306,7 +6306,7 @@ $text_agent_volume$text_expie_agent
     $Balance_add_user = $Balance_user['Balance'] - $text;
     update("user", "Balance", $Balance_add_user, "id", $user['Processing_value']);
     $lowbalanceuser = number_format($text, 0);
-    $textkam = "❌ $lowbalanceuser Toman was deducted from your wallet.";
+    $textkam = "❌ $lowbalanceuser USD was deducted from your wallet.";
     sendmessage($user['Processing_value'], $textkam, null, 'HTML');
     step('home', $from_id);
     $Balance_user_afters = number_format(select("user", "*", "id", $user['Processing_value'], "select")['Balance']);
@@ -6508,7 +6508,7 @@ $iduser  در ربات  رفع مسدود گردید
     $Balance_user = select("user", "*", "id", $info_product['id_user'], "select");
     $Balance_add_user = $Balance_user['Balance'] + $info_product['price_product'];
     update("user", "Balance", $Balance_add_user, "id", $info_product['id_user']);
-    $textadd = "💎 {$info_product['price_product']} Toman was added to your wallet.";
+    $textadd = "💎 {$info_product['price_product']} USD was added to your wallet.";
     sendmessage($info_product['id_user'], $textadd, null, 'HTML');
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['RemovedService'], $keyboardadmin, 'HTML');
     Editmessagetext($from_id, $message_id, $text_inline, json_encode(['inline_keyboard' => []]));
@@ -6769,7 +6769,7 @@ $iduser  در ربات  رفع مسدود گردید
     if (in_array($payPrefix, ['getconfigafterpay', 'getextenduser', 'getextravolumeuser', 'getextratimeuser'], true)) {
         update("Payment_report", "id_invoice", '', "id_order", $Payment_report['id_order']);
     }
-    $textadd = "💎 $balanceusers Toman was added to your wallet.";
+    $textadd = "💎 $balanceusers USD was added to your wallet.";
     sendmessage($Payment_report['id_user'], $textadd, null, 'HTML');
     $text_report = "تایید رسید کارت به کارت و افزایش دستی موجودی توسط ادمین
         
@@ -7685,7 +7685,7 @@ n2", $backadmin, 'HTML');
         $Balance_id_cancel = select("user", "*", "id", $nameloc['id_user'], "select");
         $Balance_id_cancel_fee = intval($Balance_id_cancel['Balance']) + intval($pricelast);
         update("user", "Balance", $Balance_id_cancel_fee, "id", $nameloc['id_user']);
-        sendmessage($nameloc['id_user'], "💰 $pricelast Toman was added to your wallet.", null, 'HTML');
+        sendmessage($nameloc['id_user'], "💰 $pricelast USD was added to your wallet.", null, 'HTML');
     }
     $ManagePanel->RemoveUser($nameloc['Service_location'], $requestcheck['username']);
     update("cancel_service", "status", "accept", "username", $requestcheck['username']);
@@ -7738,7 +7738,7 @@ n2", $backadmin, 'HTML');
     $Balance_id_cancel = select("user", "*", "id", $invoice['id_user'], "select");
     $Balance_id_cancel_fee = intval($Balance_id_cancel['Balance']) + intval($text);
     update("user", "Balance", $Balance_id_cancel_fee, "id", $invoice['id_user']);
-    sendmessage($invoice['id_user'], "💰 $text Toman was added to your wallet.", null, 'HTML');
+    sendmessage($invoice['id_user'], "💰 $text USD was added to your wallet.", null, 'HTML');
     sendmessage($from_id, "✅ مبلغ با موفقیت به حساب کاربر اضافه گردید.", $keyboardadmin, 'HTML');
     $text_report = "⭕️ یک ادمین سرویس کاربر که درخواست حذف داشت را تایید کرد
         

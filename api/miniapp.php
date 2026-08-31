@@ -949,7 +949,7 @@ switch ($data['actions']) {
                     $dateacc = date('Y/m/d H:i:s');
                     $textadd = "🎁 Referral commission
             
-            $result Toman was added to your wallet from your referral";
+            $result USD was added to your wallet from your referral";
                     $textreportport = "
     مبلغ $result به کاربر {$user_info['affiliates']} برای پورسانت از کاربر {$user_info['id']} واریز گردید 
     تایم : $dateacc";
@@ -977,7 +977,7 @@ switch ($data['actions']) {
                     $dateacc = date('Y/m/d H:i:s');
                     $textadd = "🎁 Referral commission
         
-        $result Toman was added to your wallet from your referral";
+        $result USD was added to your wallet from your referral";
                     $textreportport = "
 مبلغ $result به کاربر {$user_info['affiliates']} برای پورسانت از کاربر {$user_info['id']} واریز گردید 
 تایم : $dateacc";

@@ -234,7 +234,7 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
             $resultper = ($result['price_product'] * $pricediscount) / 100;
             $result['price_product'] = $result['price_product'] - $resultper;
         }
-        $namekeyboard = $result['name_product'] . " - " . number_format($result['price_product']) . " Toman";
+        $namekeyboard = $result['name_product'] . " - " . number_format($result['price_product']) . " USD";
         if ($statusshowprice == "onshowprice")$result['name_product'] = $namekeyboard;
         $product['inline_keyboard'][] = [
             telegram_button_with_icon(
