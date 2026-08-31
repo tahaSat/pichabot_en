@@ -219,7 +219,7 @@ timeauto_not_verify,status_keyboard_config,cron_status
 'offverify','offpvsupport','offnamecustom','offcategorys',
 '0','5','onbulk','4','offverify',
 '0','$DATAAWARD','0','0','2',
-'0','0','0','0','1',
+'0','0','1','0','1',
 '1','0','0','$limitlist',
 '1','0','$keyboardmain','1','0',
 '4','1','$status_cron'
@@ -242,7 +242,8 @@ timeauto_not_verify,status_keyboard_config,cron_status
         addFieldToTable("setting", "Lotteryagent", "1", "varchar(45)");
         addFieldToTable("setting", "wheelagent", "1", "varchar(45)");
         addFieldToTable("setting", "languageru", "0", "varchar(45)");
-        addFieldToTable("setting", "languageen", "0", "varchar(45)");
+        addFieldToTable("setting", "languageen", "1", "varchar(45)");
+        $connect->query("UPDATE setting SET languageen = '1'");
         addFieldToTable("setting", "linkappstatus", "0", "varchar(45)");
         addFieldToTable("setting", "categoryhelp", "0", "varchar(45)");
         addFieldToTable("setting", "daywarn", "2", "varchar(45)");
@@ -717,205 +718,210 @@ try {
     $result = $connect->query("SHOW TABLES LIKE 'textbot'");
     $table_exists = ($result->num_rows > 0);
     $text_roll = "
-♨️ قوانین استفاده از خدمات ما
+♨️ Terms of use
 
-1- به اطلاعیه هایی که داخل کانال گذاشته می شود حتما توجه کنید.
-2- در صورتی که اطلاعیه ای در مورد قطعی در کانال گذاشته نشده به اکانت پشتیبانی پیام دهید
-3- سرویس ها را از طریق پیامک ارسال نکنید برای ارسال پیامک می توانید از طریق ایمیل ارسال کنید.
+1- Please follow the announcements posted in our channel.
+2- If there is no outage announcement in the channel, message the support account.
+3- Do not send service details by SMS. You can send them by email instead.
     ";
     $text_dec_fq = " 
- 💡 سوالات متداول ⁉️
+ 💡 Frequently asked questions ⁉️
 
-1️⃣ فیلترشکن شما آیپی ثابته؟ میتونم برای صرافی های ارز دیجیتال استفاده کنم؟
+1️⃣ Do you provide a static IP? Can I use it for crypto exchanges?
 
-✅ به دلیل وضعیت نت و محدودیت های کشور سرویس ما مناسب ترید نیست و فقط لوکیشن‌ ثابته.
+✅ Because of network conditions and local restrictions, this service is not suitable for trading. Only the location is static.
 
-2️⃣ اگه قبل از منقضی شدن اکانت، تمدیدش کنم روزهای باقی مانده می سوزد؟
+2️⃣ If I renew before expiry, do the remaining days get lost?
 
-✅ خیر، روزهای باقیمونده اکانت موقع تمدید حساب میشن و اگه مثلا 5 روز قبل از منقضی شدن اکانت 1 ماهه خودتون اون رو تمدید کنید 5 روز باقیمونده + 30 روز تمدید میشه.
+✅ No. Remaining days are added on renewal. For example, if you renew a 1-month plan 5 days before expiry, you get 5 remaining days + 30 days.
 
-3️⃣ اگه به یک اکانت بیشتر از حد مجاز متصل شیم چه اتفاقی میافته؟
+3️⃣ What happens if more devices than allowed connect to one account?
 
-✅ در این صورت حجم سرویس شما زود تمام خواهد شد.
+✅ Your data will be used up faster.
 
-4️⃣ فیلترشکن شما از چه نوعیه؟
+4️⃣ What type of VPN is this?
 
-✅ فیلترشکن های ما v2ray است و پروتکل‌های مختلفی رو ساپورت میکنیم تا حتی تو دورانی که اینترنت اختلال داره بدون مشکل و افت سرعت بتونید از سرویستون استفاده کنید.
+✅ We use V2Ray and support several protocols so you can stay connected even when the network is unstable.
 
-5️⃣ فیلترشکن از کدوم کشور است؟
+5️⃣ Which country are the servers in?
 
-✅ سرور فیلترشکن ما از کشور  آلمان است
+✅ Our servers are in Germany.
 
-6️⃣ چطور باید از این فیلترشکن استفاده کنم؟
+6️⃣ How do I use this VPN?
 
-✅ برای آموزش استفاده از برنامه، روی دکمه «📚 آموزش» بزنید.
+✅ Tap the Guide button for setup instructions.
 
-7️⃣ فیلترشکن وصل نمیشه، چیکار کنم؟
+7️⃣ The VPN will not connect. What should I do?
 
-✅ به همراه یک عکس از پیغام خطایی که میگیرید به پشتیبانی مراجعه کنید.
+✅ Contact support and include a screenshot of the error.
 
-8️⃣ فیلترشکن شما تضمینی هست که همیشه مواقع متصل بشه؟
+8️⃣ Do you guarantee that it will always connect?
 
-✅ به دلیل قابل پیش‌بینی نبودن وضعیت نت کشور، امکان دادن تضمین نیست فقط می‌تونیم تضمین کنیم که تمام تلاشمون رو برای ارائه سرویس هر چه بهتر انجام بدیم.
+✅ Network conditions are unpredictable, so we cannot guarantee 100% uptime. We do guarantee that we will do our best to keep the service working well.
 
-9️⃣ امکان بازگشت وجه دارید؟
+9️⃣ Can I get a refund?
 
-✅ امکان بازگشت وجه در صورت حل نشدن مشکل از سمت ما وجود دارد.
+✅ Refunds are available if the issue is on our side and cannot be fixed.
 
-💡 در صورتی که جواب سوالتون رو نگرفتید میتونید به «پشتیبانی» مراجعه کنید.";
+💡 If you still have questions, tap Support.";
     $text_channel = "   
-        ⚠️ کاربر گرامی؛ شما عضو چنل ما نیستید
-از طریق دکمه زیر وارد کانال شده و عضو شوید
-پس از عضویت دکمه بررسی عضویت را کلیک کنید";
-    $text_invoice = "📇 پیش فاکتور شما:
-👤 نام کاربری:  {username}
-🔐 نام سرویس: {name_product}
-📆 مدت اعتبار: {Service_time} روز
-💶 قیمت:  {price} تومان
-👥 حجم اکانت: {Volume} گیگ
-🗒 یادداشت محصول : {note}
-💵 موجودی کیف پول شما : {userBalance}
+        ⚠️ You are not a member of our channel
+Join the channel using the button below
+After joining, tap Check membership";
+    $text_invoice = "📇 Your invoice:
+👤 Username:  {username}
+🔐 Service: {name_product}
+📆 Duration: {Service_time} days
+💶 Price:  {price} Toman
+👥 Data: {Volume} GB
+🗒 Note: {note}
+💵 Wallet balance: {userBalance}
           
-💰 سفارش شما آماده پرداخت است";
-    $textafterpay = "✅ سرویس با موفقیت ایجاد شد
+💰 Your order is ready to pay";
+    $textafterpay = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
-⏳ مدت زمان: {day}  روز
-🗜 حجم سرویس:  {volume} گیگابایت
+👤 Username: {username}
+🌿 Service:  {name_service}
+‏🇺🇳 Location: {location}
+⏳ Duration: {day}  days
+🗜 Data:  {volume} GB
 
-لینک اتصال:
+Connection link:
 {config}
 {links}
-🧑‍🦯 شما میتوانید شیوه اتصال را  با فشردن دکمه زیر و انتخاب سیستم عامل خود را دریافت کنید";
-    $text_wgdashboard = "✅ سرویس با موفقیت ایجاد شد
+🧍‍ You can get setup instructions by tapping the button below and choosing your OS";
+    $text_wgdashboard = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
-⏳ مدت زمان: {day}  روز
-🗜 حجم سرویس:  {volume} گیگابایت
+👤 Username: {username}
+🌿 Service:  {name_service}
+‏🇺🇳 Location: {location}
+⏳ Duration: {day}  days
+🗜 Data:  {volume} GB
 
-🧑‍🦯 شما میتوانید شیوه اتصال را  با فشردن دکمه زیر و انتخاب سیستم عامل خود را دریافت کنید";
-    $textafterpayibsng = "✅ سرویس با موفقیت ایجاد شد
+🧍‍ You can get setup instructions by tapping the button below and choosing your OS";
+    $textafterpayibsng = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🔑 رمز عبور سرویس :  <code>{password}</code>
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
-⏳ مدت زمان: {day}  روز
-🗜 حجم سرویس:  {volume} گیگابایت
+👤 Username: {username}
+🔑 Password:  <code>{password}</code>
+🌿 Service:  {name_service}
+‏🇺🇳 Location: {location}
+⏳ Duration: {day}  days
+🗜 Data:  {volume} GB
 
-🧑‍🦯 شما میتوانید شیوه اتصال را  با فشردن دکمه زیر و انتخاب سیستم عامل خود را دریافت کنید";
-    $textmanual = "✅ سرویس با موفقیت ایجاد شد
+🧍‍ You can get setup instructions by tapping the button below and choosing your OS";
+    $textmanual = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
+👤 Username: {username}
+🌿 Service:  {name_service}
+‏🇺🇳 Location: {location}
 
- اطلاعات سرویس :
+Service details:
 {config}
-🧑‍🦯 شما میتوانید شیوه اتصال را  با فشردن دکمه زیر و انتخاب سیستم عامل خود را دریافت کنید";
-    $textaftertext = "✅ سرویس با موفقیت ایجاد شد
+🧍‍ You can get setup instructions by tapping the button below and choosing your OS";
+    $textaftertext = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
-⏳ مدت زمان: {day}  ساعت
-🗜 حجم سرویس:  {volume} مگابایت
+👤 Username: {username}
+🌿 Service:  {name_service}
+‏🇺🇳 Location: {location}
+⏳ Duration: {day}  hours
+🗜 Data:  {volume} MB
 
-لینک اتصال:
+Connection link:
 {config}
-🧑‍🦯 شما میتوانید شیوه اتصال را  با فشردن دکمه زیر و انتخاب سیستم عامل خود را دریافت کنید";
-    $textconfigtest = "با سلام خدمت شما کاربر گرامی 
-سرویس تست شما با نام کاربری {username} به پایان رسیده است
-امیدواریم تجربه‌ی خوبی از آسودگی و سرعت سرویستون داشته باشین. در صورتی که از سرویس‌ تست خودتون راضی بودین، میتونید سرویس اختصاصی خودتون رو تهیه کنید و از داشتن اینترنت آزاد با نهایت کیفیت لذت ببرید😉🔥
-🛍 برای تهیه سرویس با کیفیت می توانید از دکمه زیر استفاده نمایید";
-    $textcart = "برای افزایش موجودی، مبلغ <code>{price}</code>  تومان  را به شماره‌ی حساب زیر واریز کنید 👇🏻
+🧍‍ You can get setup instructions by tapping the button below and choosing your OS";
+    $textconfigtest = "Hello
+Your test service with username {username} has ended
+We hope you enjoyed the speed and quality. If you liked the test, you can buy your own plan and stay connected with a high-quality connection 😉🔥
+🛍 Use the button below to buy a service";
+    $textcart = "To top up your wallet, transfer <code>{price}</code> Toman to the account below 👇🏻
         
         ==================== 
         <code>{card_number}</code>
         {name_card}
         ====================
 
-❌ این تراکنش به مدت یک ساعت اعتبار دارد پس از آن امکان پرداخت این تراکنش امکان ندارد.        
-‼مبلغ باید همان مبلغی که در بالا ذکر شده واریز نمایید.
-‼️امکان برداشت وجه از کیف پول نیست.
-‼️مسئولیت واریز اشتباهی با شماست.
-🔝بعد از پرداخت  دکمه پرداخت کردم را زده سپس تصویر رسید را ارسال نمایید
-💵بعد از تایید پرداختتون توسط ادمین کیف پول شما شارژ خواهد شد و در صورتی که سفارشی داشته باشین انجام خواهد شد";
-    $textcartauto = "برای تایید فوری لطفا دقیقاً مبلغ زیر واریز شود. در غیر این صورت تایید پرداخت شما ممکن است با تاخیر مواجه شود.⚠️
-            برای افزایش موجودی، مبلغ <code>{price}</code>  ریال  را به شماره‌ی حساب زیر واریز کنید 👇🏻
+❌ This payment is valid for one hour. After that it cannot be paid.
+‼ Please transfer the exact amount shown above.
+‼️ Wallet withdrawals are not available.
+‼️ You are responsible for incorrect transfers.
+🔝 After paying, tap I have paid, then send a photo of the receipt
+💵 After admin approval, your wallet will be credited and any pending order will be processed";
+    $textcartauto = "For instant confirmation, please transfer the exact amount below. Otherwise confirmation may be delayed.⚠️
+            To top up your wallet, transfer <code>{price}</code> Rial to the account below 👇🏻
 
         ==================== 
         <code>{card_number}</code>
         {name_card}
         ====================
         
-💰دقیقا مبلغی را که در بالا ذکر شده واریز نمایید تا بصورت آنی تایید شود.
-‼️امکان برداشت وجه از کیف پول نیست.
-🔝لزومی به ارسال رسید نیست، اما در صورتی که بعد از گذشت مدتی واریز شما تایید نشد، عکس رسید خود را ارسال کنید.";
+💰 Transfer the exact amount shown above for instant confirmation.
+‼️ Wallet withdrawals are not available.
+🔝 You do not need to send a receipt, but if the payment is not confirmed after a while, send a photo of your receipt.";
     $insertQueries = [
-        ['text_start', 'سلام خوش آمدید'],
-        ['text_usertest', '🔑 اکانت تست'],
-        ['text_Purchased_services', '🛍 سرویس های من'],
-        ['text_support', '☎️ پشتیبانی'],
-        ['text_help', '📚 آموزش'],
-        ['text_bot_off', '❌ ربات خاموش است، لطفا دقایقی دیگر مراجعه کنید'],
+        ['text_start', 'Hello, welcome'],
+        ['text_usertest', '🔑 Test account'],
+        ['text_Purchased_services', '🛍 My services'],
+        ['text_support', '☎️ Support'],
+        ['text_help', '📚 Guide'],
+        ['text_bot_off', '❌ The bot is offline. Please try again in a few minutes'],
         ['text_roll', $text_roll],
-        ['text_fq', '❓ سوالات متداول'],
+        ['text_fq', '❓ FAQ'],
         ['text_dec_fq', $text_dec_fq],
-        ['text_sell', '🔐 خرید اشتراک'],
-        ['text_Add_Balance', '💰 افزایش موجودی'],
-        ['text_wallet_withdraw', "💸 لطفاً مبلغ برداشت از کیف پول را به تومان وارد کنید."],
-        ['text_wallet_withdraw_success', "✅ درخواست تسویه حساب شما ثبت شد و پس از بررسی واریز خواهد شد."],
+        ['text_sell', '🔐 Buy subscription'],
+        ['text_Add_Balance', '💰 Top up wallet'],
+        ['text_wallet_withdraw', "💸 Enter the amount you want to withdraw from your wallet in Toman."],
+        ['text_wallet_withdraw_success', "✅ Your payout request was submitted and will be paid after review."],
         ['text_channel', $text_channel],
-        ['text_Discount', '🎁 کد هدیه'],
-        ['text_Tariff_list', '💵 تعرفه اشتراک ها'],
-        ['text_dec_Tariff_list', 'تنظیم نشده است'],
-        ['text_Account_op', '🎛 حساب کاربری'],
-        ['text_affiliates', '👥 زیر مجموعه گیری'],
-        ['text_referral', '🎁 دعوت دوستان'],
+        ['text_Discount', '🎁 Gift code'],
+        ['text_Tariff_list', '💵 Pricing'],
+        ['text_dec_Tariff_list', 'Not set'],
+        ['text_Account_op', '🎛 Account'],
+        ['text_affiliates', '👥 Referrals'],
+        ['text_referral', '🎁 Invite friends'],
         ['text_pishinvoice', $text_invoice],
-        ['accountwallet', '🏦 کیف پول + شارژ'],
-        ['carttocart', '💳 کارت به کارت'],
-        ['textnowpayment', '💵 پرداخت ارزی 1'],
-        ['textnowpaymenttron', '💵 واریز رمزارز ترون'],
-        ['textsnowpayment', '💸 پرداخت با ارز دیجیتال'],
-        ['iranpay1', '💸 درگاه  پرداخت ریالی'],
-        ['iranpay2', '💸 درگاه  پرداخت ریالی دوم'],
-        ['iranpay3', '💸 درگاه  پرداخت ریالی سوم'],
-        ['aqayepardakht', '🔵 درگاه آقای پرداخت'],
-        ['mowpayment', '💸 پرداخت با ارز دیجیتال'],
-        ['zarinpal', '🟡 زرین پال'],
-        ['tetraminator', '💸 پرداخت تترامینیتور'],
+        ['accountwallet', '🏦 Wallet + top up'],
+        ['carttocart', '💳 Card transfer'],
+        ['textnowpayment', '💵 Crypto payment 1'],
+        ['textnowpaymenttron', '💵 TRON deposit'],
+        ['textsnowpayment', '💸 Pay with crypto'],
+        ['iranpay1', '💸 Rial payment gateway'],
+        ['iranpay2', '💸 Rial payment gateway 2'],
+        ['iranpay3', '💸 Rial payment gateway 3'],
+        ['aqayepardakht', '🔵 Aghaye Pardakht'],
+        ['mowpayment', '💸 Pay with crypto'],
+        ['zarinpal', '🟡 ZarinPal'],
+        ['tetraminator', '💸 Tetraminator'],
         ['textafterpay', $textafterpay],
         ['textafterpayibsng', $textafterpayibsng],
         ['textaftertext', $textaftertext],
         ['textmanual', $textmanual],
-        ['textselectlocation', '📌 موقعیت سرویس را انتخاب نمایید.'],
+        ['textselectlocation', '📌 Select the service location.'],
         ['crontest', $textconfigtest],
-        ['textpaymentnotverify', 'درگاه ریالی'],
-        ['textrequestagent', '👨‍💻 درخواست نمایندگی'],
-        ['textpanelagent', '👨‍💻 پنل نمایندگی'],
-        ['text_wheel_luck', '🎲 گردونه شانس'],
+        ['textpaymentnotverify', 'Rial gateway'],
+        ['textrequestagent', '👨‍💻 Request agency'],
+        ['textpanelagent', '👨‍💻 Agency panel'],
+        ['text_wheel_luck', '🎲 Lucky wheel'],
         ['text_cart', $textcart],
         ['text_cart_auto', $textcartauto],
         ['text_star_telegram', "💫 Star Telegram"],
-        ['text_request_agent_dec', '📌 توضیحات خود را برای ثبت درخواست نمایندگی ارسال نمایید.'],
-        ['text_extend', '♻️ تمدید سرویس'],
+        ['text_request_agent_dec', '📌 Send a short description for your agency request.'],
+        ['text_extend', '♻️ Renew service'],
         ['text_wgdashboard', $text_wgdashboard],
-        ['text_category_select', '📌 دسته بندی خود را انتخاب نمایید!'],
-        ['text_service_select', '🛍️ لطفاً سرویسی که می‌خواهید خریداری کنید را انتخاب کنید!'],
-        ['text_service_select_first', '🛍️ لطفاً سرویسی که می‌خواهید خریداری کنید را انتخاب کنید!'],
-        ['text_month_select', '📌 مدت زمان سرویس را انتخاب نمایید'],
-        ['text_custom_volume_ask', "📌 حجم درخواستی خود را ارسال کنید.\n🔔قیمت هر گیگ حجم {price} تومان می باشد.\n🔔 حداقل حجم {min} گیگابایت و حداکثر {max} گیگابایت می باشد."],
-        ['text_custom_month_ask', "⌛️ مدت زمان سرویس را انتخاب کنید\n📌 هر ماه معادل ۳۰ روز است\n⚠️ فقط گزینه‌های زیر قابل انتخاب هستند"],
-        ['text_custom_volume_invalid', "❌ حجم نامعتبر است.\n🔔 حداقل حجم {min} گیگابایت و حداکثر {max} گیگابایت می باشد"],
-        ['text_sell_notestep', "📌 یک یادداشت برای کانفیگ خود بنویسید.\n⚠️ این نام برای جستجو سریع تر در مدیریت سرویس ها می باشد\n🪪(مثال: علی ، احمد ، عمو ، مشتری شهرستان و...)"],
-        ['text_select_username', "يک نام کاربري دلخواه ارسال کنيد\n⚠️ نام کاربری باید بدون کاراکترهای اضافه مانند @ ، فاصله ، خط تیره باشد. \n⚠️ نام کاربری باید انگلیسی باشد.\n✅ نام کاربری های صحیح  : ali12  | mahdi  | ws1_ksdf\n❌ نام کاربری های نادرست :   ali_ |  tele@  |  _mahdi | محسن"],
+        ['text_category_select', '📌 Select a category!'],
+        ['text_service_select', '🛍️ Please select the service you want to buy!'],
+        ['text_service_select_first', '🛍️ Please select the service you want to buy!'],
+        ['text_month_select', '📌 Select the service duration'],
+        ['text_custom_volume_ask', "📌 Send the data amount you want.\n🔔 Price per GB is {price} Toman.\n🔔 Minimum {min} GB and maximum {max} GB."],
+        ['text_custom_month_ask', "⌛️ Select the service duration\n📌 Each month equals 30 days\n⚠️ Only the options below can be selected"],
+        ['text_custom_volume_invalid', "❌ Invalid data amount.\n🔔 Minimum {min} GB and maximum {max} GB"],
+        ['text_sell_notestep', "📌 Write a note for your config.\n⚠️ This name is used to find the service faster later\n🪪 (example: Ali, office, travel, ...)"],
+        ['text_select_username', "Send a custom username\n⚠️ The username must not include extra characters such as @, spaces, or hyphens.\n⚠️ The username must be in English.\n✅ Valid usernames: ali12  | mahdi  | ws1_ksdf\n❌ Invalid usernames: ali_ |  tele@  |  _mahdi | mohsen"],
     ];
+    $upsertTextbot = function ($query) use ($connect) {
+        $id = $connect->real_escape_string($query[0]);
+        $val = $connect->real_escape_string($query[1]);
+        $connect->query("INSERT INTO textbot (id_text, text) VALUES ('$id', '$val') ON DUPLICATE KEY UPDATE text = '$val'");
+    };
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE textbot (
         id_text varchar(600) PRIMARY KEY NOT NULL,
@@ -926,13 +932,14 @@ try {
         }
 
         foreach ($insertQueries as $query) {
-            $connect->query("INSERT INTO textbot (id_text, text) VALUES ('$query[0]', '$query[1]')");
+            $upsertTextbot($query);
         }
     } else {
         foreach ($insertQueries as $query) {
-            $connect->query("INSERT IGNORE INTO textbot (id_text, text) VALUES ('$query[0]', '$query[1]')");
+            $upsertTextbot($query);
         }
     }
+
 } catch (Exception $e) {
     file_put_contents('error_log', $e->getMessage());
 }

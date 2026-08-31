@@ -37,8 +37,8 @@ if($data['action'] == "reached_usage_percent"){
         }
     }
     $notice = invoice_volume_cron_auto_renew_notice($invoice);
-    $text = "با سلام خدمت شما کاربر گرامی 👋
-🚨 از حجم سرویس $line تنها $RemainingVolume باقی مانده است. لطفاً در صورت تمایل برای تمدید سرویستون از طریق بخش «{$textservice}» اقدام بفرمایین" . $notice['text'];
+    $text = "Hello 👋
+🚨 Only $RemainingVolume remains on service $line. If you want extra data or a renewal, open «{$textservice}»." . $notice['text'];
     $Response = invoice_volume_cron_keyboard($invoice);
 if(is_array($user) && intval($user['status_cron'] ?? 1) != 0){
     sendmessage($invoice['id_user'], $text, $Response, 'HTML');
@@ -74,9 +74,9 @@ elseif ($data['action'] == "reached_days_left"){
     $timeservice = $data['expire'] - time();
     $day = intval($timeservice / 86400);
     if($day <=0){
-        $day = intval($timeservice / 3600) . "ساعت";
+        $day = intval($timeservice / 3600) . " hours";
     }else{
-        $day = $day. "روز";
+        $day = $day. " days";
     }
     $panelUser = $data;
     if (is_array($user) && invoice_auto_renew_should_run($invoice, $panelUser, $setting)) {
@@ -87,8 +87,8 @@ elseif ($data['action'] == "reached_days_left"){
         }
     }
     $notice = invoice_volume_cron_auto_renew_notice($invoice);
-    $text = "با سلام خدمت شما کاربر گرامی 👋
-📌 از مهلت زمانی استفاده از سرویس {$invoice['username']} فقط $day باقی مانده است. لطفاً در صورت تمایل برای تمدید این سرویس، از طریق بخش «{$textservice}» اقدام بفرمایین. با تشکر از همراهی شما" . $notice['text'];
+    $text = "Hello 👋
+📌 Only $day remain on service {$invoice['username']}. If you want to renew, open «{$textservice}». Thank you" . $notice['text'];
     $Response = invoice_volume_cron_keyboard($invoice);
 if(is_array($user) && intval($user['status_cron'] ?? 1) != 0){
     sendmessage($invoice['id_user'], $text, $Response, 'HTML');

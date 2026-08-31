@@ -67,7 +67,7 @@ switch ($action) {
             flash('warning', 'کاربر در وضعیت فعال است.');
         } else {
             db_query($pdo, "UPDATE user SET User_Status = 'active', description_blocking = ' ' WHERE id = ?", [$id]);
-            panel_notify_user($id, "✳️ حساب کاربری شما از مسدودی خارج شد ✳️\nاکنون می‌توانید از ربات استفاده کنید ✔️");
+            panel_notify_user($id, "✳️ Your account has been unblocked ✳️\nYou can use the bot again ✔️");
             flash('success', "مسدودیت کاربر $id برداشته شد.");
             error_log("Admin {$_SESSION['admin_user']} unblocked user $id");
         }
@@ -81,7 +81,7 @@ switch ($action) {
         }
         db_query($pdo, "UPDATE user SET Balance = Balance + ? WHERE id = ?", [$amount, $id]);
         panel_record_admin_balance_change($pdo, $id, $amount, 'add balance by admin');
-        panel_notify_user($id, '💎 کاربر عزیز مبلغ ' . number_format($amount) . ' تومان به موجودی کیف پول تان اضافه گردید.');
+        panel_notify_user($id, '💎 ' . number_format($amount) . ' Toman was added to your wallet.');
         flash('success', number_format($amount) . ' تومان به موجودی افزوده شد.');
         break;
 
@@ -93,7 +93,7 @@ switch ($action) {
         }
         db_query($pdo, "UPDATE user SET Balance = GREATEST(0, Balance - ?) WHERE id = ?", [$amount, $id]);
         panel_record_admin_balance_change($pdo, $id, $amount, 'low balance by admin');
-        panel_notify_user($id, '❌ کاربر عزیز مبلغ ' . number_format($amount) . ' تومان از موجودی کیف پول تان کسر گردید.');
+        panel_notify_user($id, '❌ ' . number_format($amount) . ' Toman was deducted from your wallet.');
         flash('success', number_format($amount) . ' تومان از موجودی کسر شد.');
         break;
 
@@ -145,7 +145,7 @@ switch ($action) {
 
     case 'verify':
         db_query($pdo, "UPDATE user SET verify = '1' WHERE id = ?", [$id]);
-        panel_notify_user($id, '💎 کاربر گرامی حساب کاربری شما توسط ادمین با موفقیت احراز هویت گردید.');
+        panel_notify_user($id, '💎 Your account was verified by an admin.');
         flash('success', 'کاربر احراز هویت شد.');
         break;
 
@@ -156,7 +156,7 @@ switch ($action) {
 
     case 'show_card':
         db_query($pdo, "UPDATE user SET cardpayment = '1' WHERE id = ?", [$id]);
-        panel_notify_user($id, '💳 کاربر عزیز شماره کارت برای شما فعال شد هم‌اکنون می‌توانید خرید خود را انجام دهید.');
+        panel_notify_user($id, '💳 Card-to-card payment is now enabled. You can complete your purchase.');
         flash('success', 'نمایش شماره کارت برای کاربر فعال شد.');
         break;
 

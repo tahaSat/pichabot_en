@@ -20,7 +20,7 @@ $ManagePanel = new ManagePanel();
 
 $order_id = isset($_GET['order_id']) ? htmlspecialchars($_GET['order_id'], ENT_QUOTES, 'UTF-8') : '';
 $setting = select("setting", "*");
-$payment_status = "ناموفق";
+$payment_status = "Failed";
 $dec_payment_status = "";
 $price = "";
 $invoice_id = $order_id;
@@ -48,30 +48,30 @@ foreach ($datatxtbot as $item) {
 }
 
 if ($order_id === '') {
-    $payment_status = "ناموفق";
-    $dec_payment_status = "شناسه سفارش یافت نشد";
+    $payment_status = "Failed";
+    $dec_payment_status = "Order ID not found";
 } else {
     $Payment_reports = select("Payment_report", "*", "id_order", $order_id, "select");
     if ($Payment_reports == false) {
-        $payment_status = "ناموفق";
-        $dec_payment_status = "سفارش یافت نشد";
+        $payment_status = "Failed";
+        $dec_payment_status = "Order not found";
     } else {
         $price = $Payment_reports['price'];
         $invoice_id = $Payment_reports['id_order'];
         $pay_id = $Payment_reports['dec_not_confirmed'];
         if ($Payment_reports['payment_Status'] == "paid") {
-            $payment_status = "پرداخت موفق";
-            $dec_payment_status = "این تراکنش قبلاً تایید شده است";
+            $payment_status = "Payment successful";
+            $dec_payment_status = "This transaction was already confirmed";
         } elseif (empty($pay_id)) {
-            $payment_status = "ناموفق";
-            $dec_payment_status = "شناسه پرداخت یافت نشد";
+            $payment_status = "Failed";
+            $dec_payment_status = "Payment ID not found";
         } else {
             $inquiry = inquireTetraminatorPayment($pay_id);
             $inquiry_paid = !empty($inquiry['status']) && isset($inquiry['payment_status']) && $inquiry['payment_status'] === 'paid';
             $amount_ok = !isset($inquiry['amount']) || intval($inquiry['amount']) === intval($Payment_reports['price']);
             if ($inquiry_paid && $amount_ok) {
-                $payment_status = "پرداخت موفق";
-                $dec_payment_status = "از انجام تراکنش متشکریم!";
+                $payment_status = "Payment successful";
+                $dec_payment_status = "Thank you for your payment!";
                 $Payment_report = select("Payment_report", "*", "id_order", $invoice_id, "select");
                 if ($Payment_report['payment_Status'] != "paid") {
                     $textbotlang = languagechange('../text.json');
@@ -82,7 +82,7 @@ if ($order_id === '') {
                         $result = ($Payment_report['price'] * $pricecashback) / 100;
                         $Balance_confrim = intval($Balance_id['Balance']) + $result;
                         update("user", "Balance", $Balance_confrim, "id", $Balance_id['id']);
-                        $text_report = "🎁 کاربر عزیز مبلغ $result تومان به عنوان هدیه واریز به حساب شما واریز گردید.";
+                        $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
                         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
                     }
                     update("Payment_report", "payment_Status", "paid", "id_order", $Payment_report['id_order']);
@@ -104,8 +104,8 @@ if ($order_id === '') {
                     }
                 }
             } else {
-                $payment_status = "ناموفق";
-                $dec_payment_status = "پرداخت تایید نشد";
+                $payment_status = "Failed";
+                $dec_payment_status = "Payment was not confirmed";
             }
         }
     }
@@ -114,7 +114,7 @@ if ($order_id === '') {
 <html>
 
 <head>
-    <title>فاکتور پرداخت</title>
+    <title>Payment invoice</title>
     <style>
         @font-face {
             font-family: 'vazir';
@@ -157,9 +157,9 @@ if ($order_id === '') {
 <body>
     <div class="confirmation-box">
         <h1><?php echo $payment_status ?></h1>
-        <p>شماره تراکنش:<span><?php echo $invoice_id ?></span></p>
-        <p>مبلغ پرداختی: <span><?php echo $price ?></span>تومان</p>
-        <p>تاریخ: <span> <?php echo jdate('Y/m/d') ?> </span></p>
+        <p>Transaction ID: <span><?php echo $invoice_id ?></span></p>
+        <p>Amount paid: <span><?php echo $price ?></span> Toman</p>
+        <p>Date: <span> <?php echo date('Y-m-d') ?> </span></p>
         <p><?php echo $dec_payment_status ?></p>
     </div>
 </body>

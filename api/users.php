@@ -335,8 +335,8 @@ switch ($data['actions'] ?? '') {
         } else {
             $text_report = "کاربر با آیدی عددی {$data['chat_id']} در ربات از مسدودیت خارج گردید 
 ادمین انجام دهنده : api site";
-            sendmessage($data['chat_id'], "✳️ حساب کاربری شما از مسدودی خارج شد ✳️
-اکنون میتوانید از ربات استفاده کنید ✔️", null, 'HTML');
+            sendmessage($data['chat_id'], "✳️ Your account was unblocked ✳️
+You can use the bot now ✔️", null, 'HTML');
             $typeblock = "Active";
         }
         update("user", "description_blocking", $data['description'], "id", $data['chat_id']);
@@ -355,7 +355,7 @@ switch ($data['actions'] ?? '') {
             $type_verify = "0";
         } else {
             $type_verify = "1";
-            sendmessage($data['chat_id'], "💎 کاربر گرامی حساب کاربری شما با موفقیت احراز هویت گردید و هم اکنون می توانیدخرید خود را انجام دهید", null, 'HTML');
+            sendmessage($data['chat_id'], "💎 Your account was verified. You can now make a purchase.", null, 'HTML');
         }
         update("user", "verify", $type_verify, "id", $data['chat_id']);
         sendJsonResponse(true, "Successful");
@@ -393,7 +393,7 @@ switch ($data['actions'] ?? '') {
         $stmt->bindValue(':amount', intval($data['amount']), PDO::PARAM_INT);
         $stmt->execute();
         record_admin_balance_payment($pdo, $data['chat_id'], (int) $data['amount'], 'add balance by admin');
-        $text_balance = "💎 کاربر عزیز مبلغ {$data['amount']} تومان به موجودی کیف پول تان اضافه گردید.";
+        $text_balance = "💎 {$data['amount']} Toman was added to your wallet.";
         sendmessage($data['chat_id'], $text_balance, null, 'html');
         sendJsonResponse(true, "Successful");
         break;
@@ -412,7 +412,7 @@ switch ($data['actions'] ?? '') {
         $stmt->bindValue(':amount', intval($data['amount']), PDO::PARAM_INT);
         $stmt->execute();
         record_admin_balance_payment($pdo, $data['chat_id'], (int) $data['amount'], 'low balance by admin');
-        $text_balance = "❌ کاربر عزیز مبلغ {$data['amount']} تومان از  موجودی کیف پول تان کسر گردید.";
+        $text_balance = "❌ {$data['amount']} Toman was deducted from your wallet.";
         sendmessage($data['chat_id'], $text_balance, null, 'html');
         sendJsonResponse(true, "Successful");
         break;

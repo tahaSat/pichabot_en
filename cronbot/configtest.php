@@ -44,7 +44,7 @@ cronCleanupUsertestAccounts();
          $Response = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => "🛍 خرید سرویس", 'callback_data' => 'buy'],
+                ['text' => "🛍 Buy service", 'callback_data' => 'buy'],
             ],
         ]
     ]);

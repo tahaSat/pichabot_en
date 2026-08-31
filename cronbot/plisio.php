@@ -53,10 +53,10 @@ while ($row = mysqli_fetch_assoc($list_service)) {
     if($Payment_report['dec_not_confirmed'] == null)continue;
     $StatusPayment = statusplisio($Payment_report['id_order']);
     if($StatusPayment['data']['operations'][0]['status'] == null || $StatusPayment['data']['operations'][0]['status'] == "cancelled"){
-    $textexpire = "❌ تراکنش زیر بدلیل عدم پرداخت منقضی شد، لطفا وجهی بابت این تراکنش پرداخت نکنید
+    $textexpire = "❌ This transaction expired because it was not paid. Please do not send funds for it.
 
-🛒 کد سفارش: {$Payment_report['id_order']}
-💰 مبلغ:  {$Payment_report['price']} تومان";
+🛒 Order ID: {$Payment_report['id_order']}
+💰 Amount:  {$Payment_report['price']} Toman";
     sendmessage($Payment_report['id_user'], $textexpire, null, 'html');
     update("Payment_report","payment_Status","expire","id_order",$Payment_report['id_order']);
 }
@@ -69,7 +69,7 @@ while ($row = mysqli_fetch_assoc($list_service)) {
         $Balance_confrim = intval($Balance_id['Balance']) +$result;
         update("user","Balance",$Balance_confrim, "id",$Balance_id['id']); 
         $pricecashback =  number_format($pricecashback);
-        $text_report = "🎁 کاربر عزیز مبلغ $result تومان به عنوان هدیه واریز به حساب شما واریز گردید.";
+        $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
     $text_reportpayment = "💵 پرداخت جدید

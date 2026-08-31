@@ -4039,7 +4039,7 @@ $caption";
         $Balance_confrim = intval($Balance_id['Balance']) + $result;
         update("user", "Balance", $Balance_confrim, "id", $Balance_id['id']);
         $pricecashback = number_format($pricecashback);
-        $text_report = "🎁 کاربر عزیز مبلغ $result تومان به عنوان هدیه واریز به حساب شما واریز گردید.";
+        $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
     $Payment_report['price'] = number_format($Payment_report['price']);
@@ -4768,7 +4768,7 @@ $caption";
     record_admin_balance_payment($pdo, $user['Processing_value'], (int) $text, 'low balance by admin');
     $balances1 = number_format($text, 0);
     $Balance_user_afters = number_format(select("user", "*", "id", $user['Processing_value'], "select")['Balance']);
-    $textkam = "❌ کاربر عزیز مبلغ $balances1 تومان از  موجودی کیف پول تان کسر گردید.";
+    $textkam = "❌ $balances1 Toman was deducted from your wallet.";
     sendmessage($user['Processing_value'], $textkam, null, 'HTML');
     step('home', $from_id);
     if (strlen($setting['Channel_Report']) > 0) {
@@ -6258,7 +6258,7 @@ $text_agent_volume$text_expie_agent
     $Balance_add_user = $Balance_user['Balance'] + $text;
     update("user", "Balance", $Balance_add_user, "id", $user['Processing_value']);
     $heibalanceuser = number_format($text, 0);
-    $textadd = "💎 کاربر عزیز مبلغ $heibalanceuser تومان به موجودی کیف پول تان اضافه گردید.";
+    $textadd = "💎 $heibalanceuser Toman was added to your wallet.";
     sendmessage($user['Processing_value'], $textadd, null, 'HTML');
     step('home', $from_id);
     $Balance_user_after = number_format(select("user", "*", "id", $user['Processing_value'], "select")['Balance']);
@@ -6306,7 +6306,7 @@ $text_agent_volume$text_expie_agent
     $Balance_add_user = $Balance_user['Balance'] - $text;
     update("user", "Balance", $Balance_add_user, "id", $user['Processing_value']);
     $lowbalanceuser = number_format($text, 0);
-    $textkam = "❌ کاربر عزیز مبلغ $lowbalanceuser تومان از  موجودی کیف پول تان کسر گردید.";
+    $textkam = "❌ $lowbalanceuser Toman was deducted from your wallet.";
     sendmessage($user['Processing_value'], $textkam, null, 'HTML');
     step('home', $from_id);
     $Balance_user_afters = number_format(select("user", "*", "id", $user['Processing_value'], "select")['Balance']);
@@ -6508,7 +6508,7 @@ $iduser  در ربات  رفع مسدود گردید
     $Balance_user = select("user", "*", "id", $info_product['id_user'], "select");
     $Balance_add_user = $Balance_user['Balance'] + $info_product['price_product'];
     update("user", "Balance", $Balance_add_user, "id", $info_product['id_user']);
-    $textadd = "💎 کاربر عزیز مبلغ {$info_product['price_product']} تومان به موجودی کیف پول تان اضافه گردید.";
+    $textadd = "💎 {$info_product['price_product']} Toman was added to your wallet.";
     sendmessage($info_product['id_user'], $textadd, null, 'HTML');
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['RemovedService'], $keyboardadmin, 'HTML');
     Editmessagetext($from_id, $message_id, $text_inline, json_encode(['inline_keyboard' => []]));
@@ -6769,7 +6769,7 @@ $iduser  در ربات  رفع مسدود گردید
     if (in_array($payPrefix, ['getconfigafterpay', 'getextenduser', 'getextravolumeuser', 'getextratimeuser'], true)) {
         update("Payment_report", "id_invoice", '', "id_order", $Payment_report['id_order']);
     }
-    $textadd = "💎 کاربر عزیز مبلغ $balanceusers تومان به موجودی کیف پول تان اضافه گردید.";
+    $textadd = "💎 $balanceusers Toman was added to your wallet.";
     sendmessage($Payment_report['id_user'], $textadd, null, 'HTML');
     $text_report = "تایید رسید کارت به کارت و افزایش دستی موجودی توسط ادمین
         
@@ -7614,9 +7614,9 @@ n2", $backadmin, 'HTML');
     update("cancel_service", "status", "reject", "username", $user['Processing_value']);
     update("cancel_service", "description", $text, "username", $user['Processing_value']);
     step("home", $from_id);
-    sendmessage($nameloc['id_user'], "❌ کاربری گرامی درخواست حذف شما با نام کاربری  {$user['Processing_value']} موافقت نگردید.
-        
-        دلیل عدم تایید : $text", null, 'HTML');
+    sendmessage($nameloc['id_user'], "❌ Your deletion request for username {$user['Processing_value']} was not approved.
+
+        Reason: $text", null, 'HTML');
 } elseif (preg_match('/remoceserviceadmin-(\w+)/', $datain, $dataget)) {
     $id_invoice = $dataget[1];
     $invoice = select("invoice", "*", "id_invoice", $id_invoice, "select");
@@ -7685,13 +7685,13 @@ n2", $backadmin, 'HTML');
         $Balance_id_cancel = select("user", "*", "id", $nameloc['id_user'], "select");
         $Balance_id_cancel_fee = intval($Balance_id_cancel['Balance']) + intval($pricelast);
         update("user", "Balance", $Balance_id_cancel_fee, "id", $nameloc['id_user']);
-        sendmessage($nameloc['id_user'], "💰کاربر گرامی مبلغ $pricelast تومان به موجودی شما اضافه گردید.", null, 'HTML');
+        sendmessage($nameloc['id_user'], "💰 $pricelast Toman was added to your wallet.", null, 'HTML');
     }
     $ManagePanel->RemoveUser($nameloc['Service_location'], $requestcheck['username']);
     update("cancel_service", "status", "accept", "username", $requestcheck['username']);
     update("invoice", "status", "removedbyadmin", "username", $requestcheck['username']);
     sendmessage($from_id, "❌ مبلغ $pricelast تومان به موجودی کاربر اضافه گردید.", null, 'HTML');
-    sendmessage($nameloc['id_user'], "✅ کاربری گرامی درخواست حذف شما با نام کاربری  {$nameloc['username']} موافقت گردید.", null, 'HTML');
+    sendmessage($nameloc['id_user'], "✅ Your deletion request for username {$nameloc['username']} was approved.", null, 'HTML');
     $text_report = "⭕️ یک ادمین سرویس کاربر که درخواست حذف داشت را تایید کرد
         
 اطلاعات کاربر تایید کننده  : 
@@ -7726,7 +7726,7 @@ n2", $backadmin, 'HTML');
     $ManagePanel->RemoveUser($invoice['Service_location'], $requestcheck['username']);
     update("cancel_service", "status", "accept", "username", $requestcheck['username']);
     update("invoice", "status", "removedbyadmin", "username", $requestcheck['username']);
-    sendmessage($invoice['id_user'], "✅ کاربری گرامی درخواست حذف شما با نام کاربری  {$invoice['username']} موافقت گردید.", null, 'HTML');
+    sendmessage($invoice['id_user'], "✅ Your deletion request for username {$invoice['username']} was approved.", null, 'HTML');
     sendmessage($from_id, "📌 مبلغ  برای بازگشت وجه را ارسال نمایید", $backadmin, 'HTML');
     step("getpricebackremove", $from_id);
 } elseif ($user['step'] == "getpricebackremove") {
@@ -7738,7 +7738,7 @@ n2", $backadmin, 'HTML');
     $Balance_id_cancel = select("user", "*", "id", $invoice['id_user'], "select");
     $Balance_id_cancel_fee = intval($Balance_id_cancel['Balance']) + intval($text);
     update("user", "Balance", $Balance_id_cancel_fee, "id", $invoice['id_user']);
-    sendmessage($invoice['id_user'], "💰کاربر گرامی مبلغ $text تومان به موجودی شما اضافه گردید.", null, 'HTML');
+    sendmessage($invoice['id_user'], "💰 $text Toman was added to your wallet.", null, 'HTML');
     sendmessage($from_id, "✅ مبلغ با موفقیت به حساب کاربر اضافه گردید.", $keyboardadmin, 'HTML');
     $text_report = "⭕️ یک ادمین سرویس کاربر که درخواست حذف داشت را تایید کرد
         
@@ -8060,7 +8060,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     step('home', $from_id);
 } elseif (preg_match('/showcarduser-(.*)/', $datain, $dataget)) {
     $id_user = $dataget[1];
-    sendmessage($id_user, "💳 کاربر عزیز شماره کارت برای شما فعال شد هم اکنون می توانید خرید خود را انجام دهید.", null, 'HTML');
+    sendmessage($id_user, "💳 Card-to-card payment is now enabled. You can complete your purchase.", null, 'HTML');
     sendmessage($from_id, "✅  شماره کارت فعال گردید", null, 'HTML');
     update("user", "cardpayment", "1", "id", $id_user);
 } elseif (preg_match('/carduserhide-(.*)/', $datain, $dataget)) {
@@ -8098,7 +8098,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         ]
     ]);
     sendmessage($from_id, "✅ درخواست با موفقیت رد گردید.", null, 'HTML');
-    sendmessage($id_user, "❌ کاربر گرامی درخواست نمایندگی شما رد گردید.", null, 'HTML');
+    sendmessage($id_user, "❌ Your reseller request was declined.", null, 'HTML');
     $textrequestagent = "📣 یک کاربر درخواست نمایندگی ثبت کرده لطفا اطلاعات را بررسی و وضعیت را مشخص کنید.
 
 آیدی عددی : $id_user
@@ -8135,7 +8135,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     update("Requestagent", "type", $defaultAgentType, "id", $id_user);
     update("user", "agent", $defaultAgentType, "id", $id_user);
     update("user", "expire", null, "id", $id_user);
-    sendmessage($id_user, "✅ کاربر گرامی با درخواست نمایندگی شما موافقت و شما نماینده شدید.", null, 'HTML');
+    sendmessage($id_user, "✅ Your reseller request was approved. You are now a reseller.", null, 'HTML');
     sendmessage($from_id, $textbotlang['Admin']['agent']['useragented'], $keyboardadmin, 'HTML');
     $agentTypeButtons = [];
     foreach ($agentTypeLabels as $typeCode => $label) {

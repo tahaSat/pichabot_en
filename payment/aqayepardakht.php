@@ -65,9 +65,9 @@ $result = curl_exec($ch);
 curl_close($ch);
 $result = json_decode($result);
 if ($result->code == "1") {
-    $payment_status = "پرداخت موفق";
+    $payment_status = "Payment successful";
     $price = $Payment_report;
-    $dec_payment_status = "از انجام تراکنش متشکریم!";
+    $dec_payment_status = "Thank you for your payment!";
     $Payment_report = select("Payment_report", "*", "id_order", $invoice_id,"select");
     if($Payment_report['payment_Status'] != "paid"){
     $textbotlang = languagechange('../text.json');
@@ -79,7 +79,7 @@ if ($result->code == "1") {
         $Balance_confrim = intval($Balance_id['Balance']) +$result;
         update("user","Balance",$Balance_confrim, "id",$Balance_id['id']); 
         $pricecashback =  number_format($pricecashback);
-        $text_report = "🎁 کاربر عزیز مبلغ $result تومان به عنوان هدیه واریز به حساب شما واریز گردید.";
+        $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
     update("Payment_report","payment_Status","paid","id_order",$Payment_report['id_order']);
@@ -102,8 +102,8 @@ $text_report = "💵 پرداخت جدید
 }
 }else {
         $payment_status = [
-        '0' => "پرداخت انجام نشد",
-        '2' => "تراکنش قبلا وریفای و پرداخت شده است",
+        '0' => "Payment was not completed",
+        '2' => "This transaction was already verified",
 
     ][$result->code];
      $dec_payment_status = "";
@@ -111,7 +111,7 @@ $text_report = "💵 پرداخت جدید
 ?>
 <html>
 <head>
-    <title>فاکتور پرداخت</title>
+    <title>Payment invoice</title>
     <style>
     @font-face {
     font-family: 'vazir';
@@ -153,9 +153,9 @@ $text_report = "💵 پرداخت جدید
 <body>
     <div class="confirmation-box">
         <h1><?php echo $payment_status ?></h1>
-        <p>شماره تراکنش:<span><?php echo $invoice_id ?></span></p>
-        <p>مبلغ پرداختی:  <span><?php echo  $price; ?></span>تومان</p>
-        <p>تاریخ: <span>  <?php echo jdate('Y/m/d')  ?>  </span></p>
+        <p>Transaction ID: <span><?php echo $invoice_id ?></span></p>
+        <p>Amount paid:  <span><?php echo  $price; ?></span> Toman</p>
+        <p>Date: <span>  <?php echo date('Y-m-d')  ?>  </span></p>
         <p><?php echo $dec_payment_status ?></p>
     </div>
 </body>

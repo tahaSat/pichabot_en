@@ -44,20 +44,20 @@ if (!empty($setting['channel'])) {
         $keyboardchannel = [
             'inline_keyboard' => [
                 [
-                    ['text' => "عضویت در کانال", 'url' => "https://t.me/" . $setting['channel']]
+                    ['text' => "Join the channel", 'url' => "https://t.me/" . $setting['channel']]
                 ],
                 [
-                    ['text' => "✅ عضو شدم", 'callback_data' => "confirmchannel"]
+                    ['text' => "✅ I joined", 'callback_data' => "confirmchannel"]
                 ],
             ]
         ];
         $keyboardchannel = json_encode($keyboardchannel);
-        sendmessage($from_id, "📌 جهت استفاده از تمامی قابلیت های ربات در کنال زیر عضو شده و سپس روی دکمه عضو شدم کلیک کنید", $keyboardchannel, "html");
+        sendmessage($from_id, "📌 Join the channel below, then tap I joined to use all bot features", $keyboardchannel, "html");
         return;
     }
     if ($datain == "confirmchannel") {
         deletemessage($from_id, $message_id);
-        sendmessage($from_id, "✅  عضویت شما با موفقیت تایید شد", $keyboard, 'HTML');
+        sendmessage($from_id, "✅ Your membership was confirmed", $keyboard, 'HTML');
     }
 }
 
@@ -125,15 +125,15 @@ if ($user['username'] != $username) {
     update("user", "username", $username, "id", $from_id);
 }
 if ($text == "/start") {
-    $textstart = "✋سلام $first_name عزیز به ربات ما خوش اومدی.
+    $textstart = "✋ Hi $first_name, welcome to our bot.
 
-برای ادامه  یک بخش را انتخاب کنید:";
+Choose a section to continue:";
     if (!in_array($from_id, $admin_ids)) {
         if ($setting['minpricetime'] > $setting['pricetime'] or $setting['minpricevolume'] > $setting['pricevolume']) {
             foreach ($admin_ids as $admin) {
                 sendmessage($admin, "❌ ادمین عزیز قیمت حجم یا زمان بروزرسانی شده است جهت فعالسازی ربات به پنل ادمین مراجعه و قیمت های جدید را اعمال کنید.", null, 'HTML');
             }
-            sendmessage($from_id, "❌ درحال حاضر ربات در حال بروزرسانی است ساعتی دیگر مراجعه نمایید.", null, 'HTML');
+            sendmessage($from_id, "❌ The bot is being updated. Please try again in a few hours.", null, 'HTML');
             return;
         }
     }
@@ -144,10 +144,10 @@ if ($text == "/start") {
     update("user", "Processing_value_four", "0", "id", $from_id);
     step('home', $from_id);
     return;
-} elseif ($text == "🏠 بازگشت به منوی اصلی" || $datain == "backuser") {
+} elseif ($text == "🏠 Back to main menu" || $datain == "backuser") {
     if ($datain == "backuser")
         deletemessage($from_id, $message_id);
-    sendmessage($from_id, "▶️ به منوی اصلی بازگشتید!", $keyboard, 'html');
+    sendmessage($from_id, "▶️ Back to the main menu", $keyboard, 'html');
     step('home', $from_id);
     update("user", "Processing_value", "0", "id", $from_id);
     update("user", "Processing_value_one", "0", "id", $from_id);
@@ -168,14 +168,14 @@ if ($text == "/start") {
     $countpayment = $stmt->rowCount();
     $userjoin = jdate('Y/m/d H:i:s', $user['register']);
     $text_account = "
-🗂 اطلاعات حساب کاربری شما :
+🗂 Your account details:
 
 
-👤 نام: <code>$first_name</code>
-⌚️زمان ثبت نام : $userjoin
-💡 شناسه کاربری: <code>$from_id</code>
-💰 موجودی: $Balanceuser تومان
-💵 تعداد فاکتور های پرداخت شده : $countpayment عدد
+👤 Name: <code>$first_name</code>
+⌚️ Joined: $userjoin
+💡 User ID: <code>$from_id</code>
+💰 Balance: $Balanceuser Toman
+💵 Paid invoices: $countpayment
 
 📆 $dateacc → ⏰ $timeacc";
     if ($datain == "account") {
@@ -192,7 +192,7 @@ if ($text == "/start") {
     $stmt->execute();
     $invoices = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($stmt->rowCount() == 0) {
-        sendmessage($from_id, "⛔️ شما هیچ سرویسی فعالی ندارید", null, 'html');
+        sendmessage($from_id, "⛔️ You have no active services", null, 'html');
         return;
     }
     $pages = 1;
@@ -218,13 +218,13 @@ if ($text == "/start") {
     }
     $pagination_buttons = [
         [
-            'text' => "بعدی",
+            'text' => "Next",
             'callback_data' => 'next_page'
         ]
     ];
     $backuser = [
         [
-            'text' => "🔙 بازگشت به منوی اصلی",
+            'text' => "🔙 Back to main menu",
             'callback_data' => 'backuser'
         ]
     ];
@@ -232,9 +232,9 @@ if ($text == "/start") {
     $keyboardlists['inline_keyboard'][] = $backuser;
     $keyboard_json = json_encode($keyboardlists);
     if ($datain == "backorder") {
-        Editmessagetext($from_id, $message_id, "🛍 برای مشاهده اطلاعات سرویس خود از لیست زیر سرویس خود را انتخاب نمایید", $keyboard_json);
+        Editmessagetext($from_id, $message_id, "🛍 Select a service from the list to view its details", $keyboard_json);
     } else {
-        sendmessage($from_id, "🛍 برای مشاهده اطلاعات سرویس خود از لیست زیر سرویس خود را انتخاب نمایید", $keyboard_json, 'html');
+        sendmessage($from_id, "🛍 Select a service from the list to view its details", $keyboard_json, 'html');
     }
 } elseif ($datain == 'next_page') {
     $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND bottype = :apibot");
@@ -266,17 +266,17 @@ if ($text == "/start") {
     }
     $pagination_buttons = [
         [
-            'text' => "بعدی",
+            'text' => "Next",
             'callback_data' => 'next_page'
         ],
         [
-            'text' => "قبلی",
+            'text' => "Back",
             'callback_data' => 'previous_page'
         ]
     ];
     $backuser = [
         [
-            'text' => "🔙 بازگشت به منوی اصلی",
+            'text' => "🔙 Back to main menu",
             'callback_data' => 'backuser'
         ]
     ];
@@ -284,7 +284,7 @@ if ($text == "/start") {
     $keyboardlists['inline_keyboard'][] = $backuser;
     $keyboard_json = json_encode($keyboardlists);
     update("user", "pagenumber", $next_page, "id", $from_id);
-    Editmessagetext($from_id, $message_id, "🛍 برای مشاهده اطلاعات سرویس خود از لیست زیر سرویس خود را انتخاب نمایید", $keyboard_json);
+    Editmessagetext($from_id, $message_id, "🛍 Select a service from the list to view its details", $keyboard_json);
 } elseif ($datain == 'previous_page') {
     $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold') AND bottype = :apibot");
     $stmt->bindParam(':id_user', $from_id);
@@ -315,17 +315,17 @@ if ($text == "/start") {
     }
     $pagination_buttons = [
         [
-            'text' => "بعدی",
+            'text' => "Next",
             'callback_data' => 'next_page'
         ],
         [
-            'text' => "قبلی",
+            'text' => "Back",
             'callback_data' => 'previous_page'
         ]
     ];
     $backuser = [
         [
-            'text' => "🔙 بازگشت به منوی اصلی",
+            'text' => "🔙 Back to main menu",
             'callback_data' => 'backuser'
         ]
     ];
@@ -333,13 +333,13 @@ if ($text == "/start") {
     $keyboardlists['inline_keyboard'][] = $backuser;
     $keyboard_json = json_encode($keyboardlists);
     update("user", "pagenumber", $previous_page, "id", $from_id);
-    Editmessagetext($from_id, $message_id, "🛍 برای مشاهده اطلاعات سرویس خود از لیست زیر سرویس خود را انتخاب نمایید", $keyboard_json);
+    Editmessagetext($from_id, $message_id, "🛍 Select a service from the list to view its details", $keyboard_json);
 } elseif ($text == $text_bot_var['btn_keyboard']['support']) {
-    $textsupport = "📞 برای ارتباط با ما  روی دکمه زیر کلیک کنید";
+    $textsupport = "📞 Tap the button below to contact us";
     $Keyboardsupport = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => "📞 ارتباط با پشتیبانی", 'url' => 'https://t.me/' . $setting['support_username']],
+                ['text' => "📞 Contact support", 'url' => 'https://t.me/' . $setting['support_username']],
             ],
         ]
     ]);
@@ -347,21 +347,21 @@ if ($text == "/start") {
 } elseif ($text == $text_bot_var['btn_keyboard']['test']) {
     $locationproduct = select("marzban_panel", "*", "TestAccount", "ONTestAccount", "count");
     if ($locationproduct == 0) {
-        sendmessage($from_id, "❌ سرویس تست درحال حاضر غیرفعال می باشد.", null, 'HTML');
+        sendmessage($from_id, "❌ Test service is currently disabled.", null, 'HTML');
         return;
     }
     if ($locationproduct != 1) {
         if ($user['limit_usertest'] <= 0) {
-            sendmessage($from_id, "⚠️ محدودیت دریافت اکانت تست شما به پایان رسیده است .", $keyboard, 'html');
+            sendmessage($from_id, "⚠️ You have reached the test-account limit.", $keyboard, 'html');
             return;
         }
-        sendmessage($from_id, "📌 موقعیت سرویس خود را انتخاب کنید.", $list_marzban_usertest, 'html');
+        sendmessage($from_id, "📌 Select a service location.", $list_marzban_usertest, 'html');
     }
 }
 if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $datain, $dataget) || ($text == $text_bot_var['btn_keyboard']['test'])) {
     $userlimit = select("user", "*", "id", $from_id, "select");
     if ($userlimit['limit_usertest'] <= 0) {
-        sendmessage($from_id, "⚠️ محدودیت دریافت اکانت تست شما به پایان رسیده است .", $keyboard, 'html');
+        sendmessage($from_id, "⚠️ You have reached the test-account limit.", $keyboard, 'html');
         return;
     }
     $locationproduct = select("marzban_panel", "*", "TestAccount", "ONTestAccount", "count");
@@ -370,7 +370,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         if ($panel['hide_user'] != null) {
             $list_user = json_decode($panel['hide_user'], true);
             if (in_array($from_id, $list_user)) {
-                sendmessage($from_id, "❌ سرویس تست درحال حاضر غیرفعال می باشد.", null, 'HTML');
+                sendmessage($from_id, "❌ Test service is currently disabled.", null, 'HTML');
                 return;
             }
         }
@@ -414,7 +414,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         $stmt->execute();
         $configexits = $stmt->rowCount();
         if (intval($configexits) == 0) {
-            sendmessage($from_id, "❌ موجودی این سرویس به پایان رسیده.", null, 'HTML');
+            sendmessage($from_id, "❌ This service has no remaining data.", null, 'HTML');
             return;
         }
     }
@@ -484,32 +484,32 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
             $config .= "\n" . $configs;
         }
     }
-    $datatextbot['textaftertext'] = "✅ سرویس با موفقیت ایجاد شد
+    $datatextbot['textaftertext'] = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
-⏳ مدت زمان: {day}  ساعت
-🗜 حجم سرویس:  {volume} مگابایت
+👤 Service username : {username}
+🌿 Service name: {name_service}
+🇺🇳 Location: {location}
+⏳ Duration: {day}  hours
+🗜 Service data:  {volume} MB
 
-لینک اتصال:
+Connection link:
 {config}";
     if ($marzban_list_get['type'] == "WGDashboard") {
-        $datatextbot['textaftertext'] = "✅ سرویس با موفقیت ایجاد شد
+        $datatextbot['textaftertext'] = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
-⏳ مدت زمان: {day}  ساعت
-🗜 حجم سرویس:  {volume} مگابایت
+👤 Service username : {username}
+🌿 Service name: {name_service}
+🇺🇳 Location: {location}
+⏳ Duration: {day}  hours
+🗜 Service data:  {volume} MB
 
-🧑‍🦯 شما میتوانید شیوه اتصال را  با فشردن دکمه زیر و انتخاب سیستم عامل خود را دریافت کنید";
+🧑‍🦯 Tap the button below and choose your OS to see how to connect";
     }
     if ($marzban_list_get['type'] == "ibsng") {
         $datatextbot['textafterpay'] = $datatextbot['textafterpayibsng'];
     }
     $textcreatuser = str_replace('{username}', $dataoutput['username'], $datatextbot['textaftertext']);
-    $textcreatuser = str_replace('{name_service}', "تست", $textcreatuser);
+    $textcreatuser = str_replace('{name_service}', "Test", $textcreatuser);
     $textcreatuser = str_replace('{location}', $marzban_list_get['name_panel'], $textcreatuser);
     $textcreatuser = str_replace('{day}', $marzban_list_get['time_usertest'], $textcreatuser);
     $textcreatuser = str_replace('{volume}', $marzban_list_get['val_usertest'], $textcreatuser);
@@ -650,7 +650,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
                     $keyboarddata = "selectproductbuy_";
                 }
                 $prodcut = KeyboardProduct($marzban_list_get['name_panel'], $query, 0, $keyboarddata, $statuscustom, "backuser", null, $customvolume = "customvolumebuy");
-                sendmessage($from_id, "🛍️ لطفاً سرویسی که می‌خواهید خریداری کنید را انتخاب کنید!", $prodcut, 'HTML');
+                sendmessage($from_id, "🛍️ Select the service you want to buy!", $prodcut, 'HTML');
                 return;
             } else {
                 $nullproduct = (agent_uses_category_whitelist($userbot['agent'] ?? 'f') ? count(agent_n2_list_products($dataBase['id_user'])) : select("product", "*", "agent", $userbot['agent'], "count"));
@@ -660,7 +660,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
                 }
                 sendmessage($from_id, (!empty($marzban_list_get['description']) && is_string($marzban_list_get['description']))
                     ? htmlspecialchars(trim($marzban_list_get['description']), ENT_QUOTES, 'UTF-8')
-                    : "📌 دسته بندی خود را انتخاب نمایید!", KeyboardCategory($marzban_list_get['name_panel'], $userbot['agent'], "backuser", $dataBase['id_user']), 'HTML');
+                    : "📌 Select a category!", KeyboardCategory($marzban_list_get['name_panel'], $userbot['agent'], "backuser", $dataBase['id_user']), 'HTML');
                 return;
             }
         } else {
@@ -670,9 +670,9 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
             $mainvolume = $mainvolume[$userbot['agent']];
             $maxvolume = json_decode($marzban_list_get['maxvolume'], true);
             $maxvolume = $maxvolume[$userbot['agent']];
-            $textcustom = "📌 حجم درخواستی خود را ارسال کنید.
-        🔔قیمت هر گیگ حجم $eextraprice تومان می باشد.
-        🔔 حداقل حجم $mainvolume گیگابایت و حداکثر $maxvolume گیگابایت می باشد.";
+            $textcustom = "📌 Send the data amount you want.
+        🔔 Price per GB: $eextraprice Toman.
+        🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
             sendmessage($from_id, $textcustom, $backuser, 'html');
             step('gettimecustomvol', $from_id);
             return;
@@ -682,12 +682,12 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         savedata('clear', "note", $text);
         step("home", $from_id);
     }
-    sendmessage($from_id, "📌 موقعیت سرویس خود را انتخاب کنید", $list_marzban_panel_user, 'HTML');
+    sendmessage($from_id, "📌 Select a service location", $list_marzban_panel_user, 'HTML');
 } elseif ($datain == "customvolumebuy") {
     $userdate = json_decode($user['Processing_value'], true);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
     if (!$marzban_list_get || !panel_custom_enabled($marzban_list_get, (string) $userbot['agent'])) {
-        sendmessage($from_id, "❌ سرویس دلخواه برای این پنل فعال نیست.", $backuser, 'HTML');
+        sendmessage($from_id, "❌ Custom service is not enabled for this panel.", $backuser, 'HTML');
         return;
     }
     $eextraprice = panel_agent_field($marzban_list_get, 'pricecustomvolume', $userbot['agent'], '4000');
@@ -696,9 +696,9 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     }
     $mainvolume = panel_agent_field($marzban_list_get, 'mainvolume', $userbot['agent'], '1');
     $maxvolume = panel_agent_field($marzban_list_get, 'maxvolume', $userbot['agent'], '1000');
-    $textcustom = "📌 حجم درخواستی خود را ارسال کنید.
-🔔قیمت هر گیگ حجم $eextraprice تومان می باشد.
-🔔 حداقل حجم $mainvolume گیگابایت و حداکثر $maxvolume گیگابایت می باشد.";
+    $textcustom = "📌 Send the data amount you want.
+🔔 Price per GB: $eextraprice Toman.
+🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
     sendmessage($from_id, $textcustom, $backuser, 'html');
     step('gettimecustomvol', $from_id);
 } elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
@@ -731,7 +731,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
                 $keyboarddata = "selectproductbuy_";
             }
             $prodcut = KeyboardProduct($locationproduct['name_panel'], $query, 0, $keyboarddata, $statuscustom, "backuser", null, $customvolume = "customvolumebuy");
-            Editmessagetext($from_id, $message_id, "🛍️ لطفاً سرویسی که می‌خواهید خریداری کنید را انتخاب کنید!", $prodcut, 'HTML');
+            Editmessagetext($from_id, $message_id, "🛍️ Select the service you want to buy!", $prodcut, 'HTML');
         } else {
             $nullproduct = (agent_uses_category_whitelist($userbot['agent'] ?? 'f') ? count(agent_n2_list_products($dataBase['id_user'])) : select("product", "*", "agent", $userbot['agent'], "count"));
             if ($nullproduct == 0) {
@@ -740,7 +740,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
             }
             Editmessagetext($from_id, $message_id, (!empty($locationproduct['description']) && is_string($locationproduct['description']))
                 ? htmlspecialchars(trim($locationproduct['description']), ENT_QUOTES, 'UTF-8')
-                : "📌 دسته بندی خود را انتخاب نمایید!", KeyboardCategory($locationproduct['name_panel'], $userbot['agent'], "backuser", $dataBase['id_user']));
+                : "📌 Select a category!", KeyboardCategory($locationproduct['name_panel'], $userbot['agent'], "backuser", $dataBase['id_user']));
         }
     } else {
         deletemessage($from_id, $message_id);
@@ -750,9 +750,9 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         $mainvolume = $mainvolume[$userbot['agent']];
         $maxvolume = json_decode($marzban_list_get['maxvolume'], true);
         $maxvolume = $maxvolume[$userbot['agent']];
-        $textcustom = "📌 حجم درخواستی خود را ارسال کنید.
-    🔔قیمت هر گیگ حجم $eextraprice تومان می باشد.
-    🔔 حداقل حجم $mainvolume گیگابایت و حداکثر $maxvolume گیگابایت می باشد.";
+        $textcustom = "📌 Send the data amount you want.
+    🔔 Price per GB: $eextraprice Toman.
+    🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
         sendmessage($from_id, $textcustom, $backuser, 'html');
         step('gettimecustomvol', $from_id);
         return;
@@ -766,18 +766,18 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     savedata("save", "category_id", $category['id']);
     $categoryMessage = (!empty($category['description']) && is_string($category['description']))
         ? htmlspecialchars(trim($category['description']), ENT_QUOTES, 'UTF-8')
-        : "🛍️ لطفاً سرویسی که می‌خواهید خریداری کنید را انتخاب کنید!";
+        : "🛍️ Select the service you want to buy!";
     $userFresh = select("user", "*", "id", $from_id, "select");
     $userdate = json_decode(is_array($userFresh) ? ($userFresh['Processing_value'] ?? '{}') : '{}', true);
     if (!is_array($userdate) || empty($userdate['name_panel'])) {
-        sendmessage($from_id, "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید", $keyboard, 'HTML');
+        sendmessage($from_id, "❌ An error occurred. Please start the purchase again.", $keyboard, 'HTML');
         step("home", $from_id);
         return;
     }
     $panelName = $userdate['name_panel'];
     $locationproduct = select("marzban_panel", "*", "name_panel", $panelName, "select");
     if (!$locationproduct || !is_array($locationproduct)) {
-        sendmessage($from_id, "❌ پنل یافت نشد. مراحل خرید را از اول انجام دهید", $keyboard, 'HTML');
+        sendmessage($from_id, "❌ Panel not found. Please start the purchase again.", $keyboard, 'HTML');
         step("home", $from_id);
         return;
     }
@@ -796,13 +796,13 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     $userdate = json_decode($user['Processing_value'], true);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
     if (!$marzban_list_get) {
-        sendmessage($from_id, "❌ پنل یافت نشد.", $backuser, 'HTML');
+        sendmessage($from_id, "❌ Panel not found.", $backuser, 'HTML');
         return;
     }
     $mainvolume = panel_agent_field($marzban_list_get, 'mainvolume', $userbot['agent'], '1');
     $maxvolume = panel_agent_field($marzban_list_get, 'maxvolume', $userbot['agent'], '1000');
     if ($text > intval($maxvolume) || $text < intval($mainvolume)) {
-        $texttime = "❌ حجم نامعتبر است.\n🔔 حداقل حجم $mainvolume گیگابایت و حداکثر $maxvolume گیگابایت می باشد";
+        $texttime = "❌ Invalid data amount.\n🔔 Minimum $mainvolume GB and maximum $maxvolume GB";
         sendmessage($from_id, $texttime, $backuser, 'HTML');
         return;
     }
@@ -811,9 +811,9 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         return;
     }
     savedata("save", "volume", $text);
-    $textcustom = "⌛️ مدت زمان سرویس را انتخاب کنید
-📌 هر ماه معادل ۳۰ روز است
-⚠️ فقط گزینه‌های زیر قابل انتخاب هستند";
+    $textcustom = "⌛️ Choose the service duration
+📌 Each month equals 30 days
+⚠️ Only the options below can be selected";
     sendmessage($from_id, $textcustom, KeyboardCustomMonths($marzban_list_get, 'custommonth_', 'backuser', (int) $text, $userbot), 'html');
     step('selectcustommonth', $from_id);
 } elseif (preg_match('/^custommonth_(\d+)$/', $datain, $dataget) && ($user['step'] == "selectcustommonth" || $user['step'] == "getvolumecustomuser" || $user['step'] == "getvolumecustomusername")) {
@@ -821,7 +821,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     $userdate = json_decode($user['Processing_value'], true);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
     if (!$marzban_list_get || !panel_custom_month_option($marzban_list_get, $months)) {
-        sendmessage($from_id, "❌ مدت انتخاب‌شده نامعتبر است.", $backuser, 'HTML');
+        sendmessage($from_id, "❌ The selected duration is invalid.", $backuser, 'HTML');
         return;
     }
     $days = panel_custom_months_to_days($months);
@@ -845,7 +845,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         "price_product" => panel_custom_service_price_for_user($marzban_list_get, $userbot, (int) $userdate['volume'], $days)
     );
     if ($datapish['price_product'] === null) {
-        sendmessage($from_id, "❌ مدت انتخاب‌شده نامعتبر است.", $keyboard, 'html');
+        sendmessage($from_id, "❌ The selected duration is invalid.", $keyboard, 'html');
         return;
     }
     $randomString = bin2hex(random_bytes(2));
@@ -863,22 +863,22 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         $datapish['Service_time'] = $textbotlang['users']['stateus']['Unlimited'];
     $pricefmt = number_format($datapish['price_product']);
     $bal = number_format($userbot['Balance'] ?? $user['Balance'] ?? 0);
-    $textin = "📇 پیش فاکتور شما:
-👤 نام کاربری: <code>$username_ac</code>
-🔐 نام سرویس: {$datapish['name_product']}
-⏱ مدت زمان: {$datapish['Service_time']} روز
-🔋 حجم سرویس : {$datapish['Volume_constraint']} گیگ
-💸 مبلغ قابل پرداخت : $pricefmt تومان
-💰 موجودی کیف پول : $bal تومان
+    $textin = "📇 Your invoice:
+👤 Username: <code>$username_ac</code>
+🔐 Service name: {$datapish['name_product']}
+⏱ Duration: {$datapish['Service_time']} days
+🔋 Service data : {$datapish['Volume_constraint']} GB
+💸 Amount due : $pricefmt Toman
+💰 Wallet balance : $bal Toman
 
-✅ برای تایید و پرداخت روی دکمه زیر کلیک کنید";
+✅ Tap the button below to confirm and pay";
     sendmessage($from_id, $textin, $payment, 'HTML');
     step('payment', $from_id);
 } elseif ($user['step'] == "getvolumecustomusername" || preg_match('/selectproductbuyy_(.*)/', $datain, $dataget)) {
     $userdate = json_decode($user['Processing_value'], true);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
     if ($user['step'] == "getvolumecustomusername") {
-        sendmessage($from_id, "⌛️ مدت زمان سرویس را از دکمه‌ها انتخاب کنید", KeyboardCustomMonths($marzban_list_get, 'custommonth_', 'backuser', (int) ($userdate['volume'] ?? 0), $userbot), 'html');
+        sendmessage($from_id, "⌛️ Choose the service duration from the buttons", KeyboardCustomMonths($marzban_list_get, 'custommonth_', 'backuser', (int) ($userdate['volume'] ?? 0), $userbot), 'html');
         step('selectcustommonth', $from_id);
         return;
     } else {
@@ -891,13 +891,13 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     $userdate = json_decode($user['Processing_value'], true);
     if ($user['step'] == "getvolumecustomuser") {
         $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
-        sendmessage($from_id, "⌛️ مدت زمان سرویس را از دکمه‌ها انتخاب کنید", KeyboardCustomMonths($marzban_list_get, 'custommonth_', 'backuser', (int) ($userdate['volume'] ?? 0), $userbot), 'html');
+        sendmessage($from_id, "⌛️ Choose the service duration from the buttons", KeyboardCustomMonths($marzban_list_get, 'custommonth_', 'backuser', (int) ($userdate['volume'] ?? 0), $userbot), 'html');
         step('selectcustommonth', $from_id);
         return;
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
     if ($marzban_list_get['status'] == "disable") {
-        sendmessage($from_id, "❌ این پنل در دسترس نیست لطفا از پنل دیگری خرید را انجام دهید.", $backuser, 'html');
+        sendmessage($from_id, "❌ This panel is unavailable. Please buy from another panel.", $backuser, 'html');
         step("home", $from_id);
         return;
     }
@@ -915,7 +915,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     if (!in_array($user['step'], ["endstepuserscustom", "getvolumecustomuser"])) {
         $product = select("product", "*", "code_product", $code_product);
         if ($product == false) {
-            sendmessage($from_id, "❌ خطایی در هنگام خرید رخ داده لطفا مراحل را از اول طی کنید", $keyboard, 'html');
+            sendmessage($from_id, "❌ A purchase error occurred. Please start over", $keyboard, 'html');
             step("home", $from_id);
             return;
         }
@@ -942,7 +942,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
             "price_product" => panel_custom_service_price_for_user($marzban_list_get, $userbot, (int) $userdate['volume'], (int) $userdate['time'])
         );
         if ($datapish['price_product'] === null) {
-            sendmessage($from_id, "❌ مدت سرویس نامعتبر است.", $keyboard, 'html');
+            sendmessage($from_id, "❌ Invalid service duration.", $keyboard, 'html');
             return;
         }
     }
@@ -968,17 +968,17 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         '{Volume}' => $datapish['Volume_constraint'],
         '{userBalance}' => $userBalance
     ];
-    $textpishfactor = "📇 پیش فاکتور شما:
-👤 نام کاربری:  {username}
-📆 مدت اعتبار: {Service_time} روز
-💶 قیمت:  {price} تومان
-👥 حجم اکانت: {Volume} گیگ
-💵 موجودی کیف پول شما : {userBalance}
+    $textpishfactor = "📇 Your invoice:
+👤 Username:  {username}
+📆 Duration: {Service_time} days
+💶 Price: {price} Toman
+👥 Data: {Volume} GB
+💵 Your wallet balance: {userBalance}
           
-💰 سفارش شما آماده پرداخت است";
+💰 Your order is ready to pay";
     $textin = strtr($textpishfactor, $replacements);
     if (intval($datapish['Volume_constraint']) == 0) {
-        $textin = str_replace('گیگ', "", $textin);
+        $textin = str_replace('GB', "", $textin);
     }
     if ($user['step'] != "getvolumecustomuser" && !in_array($marzban_list_get['MethodUsername'], [$textbotlang['users']['customusername'], "نام کاربری دلخواه + عدد رندوم"])) {
         Editmessagetext($from_id, $message_id, $textin, $payment);
@@ -990,18 +990,18 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     $userdate = json_decode($user['Processing_value'], true);
     Editmessagetext($from_id, $message_id, $text_inline, json_encode(['inline_keyboard' => []]));
     if (!isset($userdate['name_panel'])) {
-        sendmessage($from_id, "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید", $keyboard, 'html');
+        sendmessage($from_id, "❌ An error occurred. Please start the purchase again.", $keyboard, 'html');
         step("home", $from_id);
         return;
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
     if ($marzban_list_get == false) {
-        sendmessage($from_id, "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید", $keyboard, 'html');
+        sendmessage($from_id, "❌ An error occurred. Please start the purchase again.", $keyboard, 'html');
         step("home", $from_id);
         return;
     }
     if ($marzban_list_get['status'] == "disable") {
-        sendmessage($from_id, "❌ این پنل در دسترس نیست لطفا از پنل دیگری خرید را انجام دهید.", $backuser, 'html');
+        sendmessage($from_id, "❌ This panel is unavailable. Please buy from another panel.", $backuser, 'html');
         step("home", $from_id);
         return;
     }
@@ -1009,7 +1009,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         $product = $userdate['code_product'];
         $product = select("product", "*", "code_product", $product);
         if ($product == false) {
-            sendmessage($from_id, "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید", $keyboard, 'html');
+            sendmessage($from_id, "❌ An error occurred. Please start the purchase again.", $keyboard, 'html');
             step("home", $from_id);
             return;
         }
@@ -1037,7 +1037,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         $months = (int) round($days / 30);
         $opt = panel_custom_month_option($marzban_list_get, $months);
         if ($opt === null || panel_custom_months_to_days($months) !== $days) {
-            sendmessage($from_id, "❌ مدت سرویس نامعتبر است.", $keyboard, 'html');
+            sendmessage($from_id, "❌ Invalid service duration.", $keyboard, 'html');
             return;
         }
         $mag = (float) $opt['magnifier'];
@@ -1058,7 +1058,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         );
     }
     if (!ctype_digit($datafactor['Volume_constraint']) || !ctype_digit($datafactor['Service_time'])) {
-        sendmessage($from_id, "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید", $keyboard, 'html');
+        sendmessage($from_id, "❌ An error occurred. Please start the purchase again.", $keyboard, 'html');
         step("home", $from_id);
         return;
     }
@@ -1073,14 +1073,14 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
             $n2CatRemark = (string) $datafactor['category'];
         }
         if (!agent_category_purchase_allowed($botbalance['id_user'], $n2Code, $n2CatRemark)) {
-            sendmessage($from_id, "❌ این محصول / دسته‌بندی برای نمایندگی فعال نیست.", $keyboard, 'HTML');
+            sendmessage($from_id, "❌ This product/category is not available for this reseller.", $keyboard, 'HTML');
             step("home", $from_id);
             return;
         }
     }
     $agentQuotaCheck = agent_check_volume_quota($botbalance['id_user'], $agentVolumeGb);
     if (!$agentQuotaCheck['ok']) {
-        sendmessage($from_id, "❌ خطایی در خرید رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشید", $keyboard, 'HTML');
+        sendmessage($from_id, "❌ A purchase error occurred. Please contact support", $keyboard, 'HTML');
         step("home", $from_id);
         foreach ($admin_ids as $admin) {
             sendmessage($admin, $agentQuotaCheck['msg'], null, 'HTML');
@@ -1107,7 +1107,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         $stmt->execute();
         $configexits = $stmt->rowCount();
         if (intval($configexits) == 0) {
-            sendmessage($from_id, "❌ موجودی این سرویس به پایان رسیده لطفا سرویسی دیگر را خریداری کنید.", null, 'HTML');
+            sendmessage($from_id, "❌ This service has no remaining data. Please buy another service.", null, 'HTML');
             return;
         }
     }
@@ -1129,21 +1129,21 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
             $setting,
             "getconfigafterpay|" . $username_ac,
             [
-                'title' => '💳 پرداخت کارت به کارت خرید سرویس',
+                'title' => '💳 Card-to-card payment for service purchase',
                 'product' => (string) ($datafactor['name_product'] ?? ''),
             ]
         );
         if (!($pay['ok'] ?? false)) {
             if (($pay['error'] ?? '') === 'card_not_configured') {
-                sendmessage($from_id, "❌ شماره کارت نماینده هنوز تنظیم نشده است. لطفاً با پشتیبانی در ارتباط باشید.", $keyboard, 'HTML');
+                sendmessage($from_id, "❌ The reseller card number is not set yet. Please contact support.", $keyboard, 'HTML');
             } else {
-                sendmessage($from_id, "❌ ثبت پرداخت با خطا مواجه شد. لطفاً دوباره تلاش کنید یا با پشتیبانی در ارتباط باشید.", $keyboard, 'HTML');
+                sendmessage($from_id, "❌ Payment could not be registered. Please try again or contact support.", $keyboard, 'HTML');
             }
             step('home', $from_id);
             return;
         }
         if (!$pay['card_ok']) {
-            sendmessage($from_id, "❌ شماره کارت نماینده هنوز تنظیم نشده است. لطفاً با پشتیبانی در ارتباط باشید.", $keyboard, 'HTML');
+            sendmessage($from_id, "❌ The reseller card number is not set yet. Please contact support.", $keyboard, 'HTML');
             step('home', $from_id);
             return;
         }
@@ -1156,7 +1156,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         savedata('clear', 'id_order', $pay['id_order']);
         return;
     }
-    Editmessagetext($from_id, $message_id, "♻️ در حال ساختن سرویس شما...", null);
+    Editmessagetext($from_id, $message_id, "♻️ Creating your service...", null);
     $datetimestep = strtotime("+" . $datafactor['Service_time'] . "days");
     if ($datafactor['Service_time'] == 0) {
         $datetimestep = 0;
@@ -1210,25 +1210,25 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
             $configqr .= "";
         }
     }
-    $textafterpay = "✅ سرویس با موفقیت ایجاد شد
+    $textafterpay = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
-⏳ مدت زمان: {day}  روز
-🗜 حجم سرویس:  {volume} گیگابایت
+👤 Service username : {username}
+🌿 Service name: {name_service}
+🇺🇳 Location: {location}
+⏳ Duration: {day}  days
+🗜 Service data:  {volume} GB
 
-لینک اتصال:
+Connection link:
 {config}
 {links}
 ";
-    $textmanual = "✅ سرویس با موفقیت ایجاد شد
+    $textmanual = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-🇺🇳 لوکیشن: {location}
+👤 Service username : {username}
+🌿 Service name: {name_service}
+🇺🇳 Location: {location}
 
- اطلاعات سرویس :
+ Service details:
 {config}
 ";
     if ($marzban_list_get['type'] == "ibsng") {
@@ -1238,15 +1238,15 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
         $textafterpay = $textmanual;
     }
     if ($marzban_list_get['type'] == "WGDashboard") {
-        $datatextbot['textafterpay'] = "✅ سرویس با موفقیت ایجاد شد
+        $datatextbot['textafterpay'] = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
-⏳ مدت زمان: {day}  روز
-🗜 حجم سرویس:  {volume} گیگابایت
+👤 Service username : {username}
+🌿 Service name: {name_service}
+🇺🇳 Location: {location}
+⏳ Duration: {day}  days
+🗜 Service data:  {volume} GB
 
-🧑‍🦯 شما میتوانید شیوه اتصال را  با فشردن دکمه زیر و انتخاب سیستم عامل خود را دریافت کنید";
+🧑‍🦯 Tap the button below and choose your OS to see how to connect";
     }
     if (intval($datafactor['Service_time']) == 0)
         $datafactor['Service_time'] = $textbotlang['users']['stateus']['Unlimited'];
@@ -1260,7 +1260,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     $textcreatuser = str_replace('{config}', "<code>{$output_config_link}</code>", $textcreatuser);
     $textcreatuser = str_replace('{links}', "<code>{$config}</code>", $textcreatuser);
     if (intval($datafactor['Volume_constraint']) == 0) {
-        $textcreatuser = str_replace('گیگابایت', "", $textcreatuser);
+        $textcreatuser = str_replace('GB', "", $textcreatuser);
     }
     if ($marzban_list_get['type'] == "ibsng") {
         $textcreatuser = str_replace('{password}', $dataoutput['subscription_url'], $textcreatuser);
@@ -1339,7 +1339,7 @@ if ($text == $text_bot_var['btn_keyboard']['buy'] && $setting['active_step_note'
     $countinvoice = $stmt->rowCount();
     $textonebuy = "";
     if ($countinvoice == 1) {
-        $textonebuy = "📌 خرید اول کاربر";
+        $textonebuy = "📌 First purchase";
     }
     $balanceformatsellbefore = number_format($user['Balance'], 0);
     $balanceagent_before = number_format($userbotbalance['Balance'], 0);
@@ -1413,7 +1413,7 @@ $textonebuy
         ]
     ]);
     $format_price_cart = number_format($PaymentReport['price']);
-    $payTypeLabel = (strpos((string) ($PaymentReport['id_invoice'] ?? ''), 'getconfigafterpay') === 0) ? '🛍 خرید سرویس' : 'افزایش موجودی';
+    $payTypeLabel = (strpos((string) ($PaymentReport['id_invoice'] ?? ''), 'getconfigafterpay') === 0) ? '🛍 خرید سرویس' : 'افزایش Balance';
     $textsendrasid = "
 ⭕️ یک پرداخت جدید انجام شده است .
 $payTypeLabel
@@ -1437,7 +1437,7 @@ $payTypeLabel
         step('home', $id_admin);
     }
     step('home', $from_id);
-    sendmessage($from_id, "💎 رسید شما ارسال و پس از بررسی حساب کاربری شما شارژ خواهد شد.", $keyboard, 'HTML');
+    sendmessage($from_id, "💎 Your receipt was sent. Your account will be credited after review.", $keyboard, 'HTML');
 } elseif (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $sql = "SELECT * FROM invoice WHERE id_invoice = :username AND id_user = :id_user";
@@ -1448,7 +1448,7 @@ $payTypeLabel
     $nameloc = $stmt->fetch(PDO::FETCH_ASSOC);
     $username = $nameloc['id_invoice'];
     if (!in_array($nameloc['Status'], ['active', 'end_of_time', 'end_of_volume', 'sendedwarn', 'send_on_hold'])) {
-        sendmessage($from_id, "❌ امکان مشاهده اطلاعات اکانت درحال حاضر وجود ندارد", $keyboard, 'html');
+        sendmessage($from_id, "❌ Account details cannot be viewed right now", $keyboard, 'html');
         step('home', $from_id);
         return;
     }
@@ -1470,16 +1470,16 @@ $payTypeLabel
         return;
     }
     if ($DataUserOut['online_at'] == "online") {
-        $lastonline = 'آنلاین';
+        $lastonline = 'Online';
     } elseif ($DataUserOut['online_at'] == "offline") {
-        $lastonline = 'آفلاین';
+        $lastonline = 'Offline';
     } else {
         if (isset($DataUserOut['online_at']) && $DataUserOut['online_at'] !== null) {
             $dateTime = new DateTime($DataUserOut['online_at'], new DateTimeZone('UTC'));
             $dateTime->setTimezone(new DateTimeZone('Asia/Tehran'));
             $lastonline = jdate('Y/m/d H:i:s', $dateTime->getTimestamp());
         } else {
-            $lastonline = "متصل نشده";
+            $lastonline = "Not connected";
         }
     }
     #-------------status----------------#
@@ -1499,7 +1499,7 @@ $payTypeLabel
     $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
     #---------------[ RemainingVolume ]--------------#
     $output = $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
-    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : "نامحدود";
+    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : "Unlimited";
     #---------------[ used_traffic ]--------------#
     $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
     #--------------[ day ]---------------#
@@ -1529,7 +1529,7 @@ $payTypeLabel
         if ($timeminuts > 0) {
             $day .= $timeminuts . $textbotlang['users']['stateus']['min'];
         }
-        $day .= " دیگر";
+        $day .= " other";
     }
     #--------------[ subsupdate ]---------------#
     $lastupdate = '-';
@@ -1578,11 +1578,11 @@ $payTypeLabel
     $keyboardsetting['inline_keyboard'][] = [['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder']];
     if ($marzban['type'] == "Manualsale") {
         $userinfo = select("manualsell", "*", "username", $nameloc['username'], "select");
-        $textinfo = "وضعیت سرویس : <b>$status_var</b>
-    نام کاربری سرویس : {$DataUserOut['username']}
-    📎 کد پیگیری سرویس : {$nameloc['id_invoice']}
+        $textinfo = "Service status : <b>$status_var</b>
+    Service username : {$DataUserOut['username']}
+    📎 Service tracking code: {$nameloc['id_invoice']}
     
-    📌 اطلاعات سرویس : 
+    📌 Service details: 
     {$userinfo['contentrecord']}";
         Editmessagetext($from_id, $message_id, $textinfo, $keyboardsetting);
         return;
@@ -1598,21 +1598,21 @@ $payTypeLabel
     #-----------------------------#
     $keyboardsetting = json_encode($keyboardsetting);
     if (!in_array($status, ["active", "on_hold", "disabled", "Unknown"])) {
-        $textinfo = "وضعیت سرویس : <b>$status_var</b>
-نام کاربری سرویس : {$DataUserOut['username']}
-موقعیت سرویس :{$nameloc['Service_location']}
-مدت زمان سرویس :{$nameloc['Service_time']} روز
+        $textinfo = "Service status : <b>$status_var</b>
+Service username : {$DataUserOut['username']}
+Service location :{$nameloc['Service_location']}
+Service duration:{$nameloc['Service_time']} days
 
-📶 اخرین زمان اتصال شما : $lastonline
+📶 Last connection: $lastonline
 
-🔋 حجم سرویس : $LastTraffic
-📥 حجم مصرفی : $usedTrafficGb
-💢 حجم باقی مانده : $RemainingVolume ($Percent%)
+🔋 Service data : $LastTraffic
+📥 Data used : $usedTrafficGb
+💢 Data remaining : $RemainingVolume ($Percent%)
 
-📅 فعال تا تاریخ : $expirationDate ($day) 
+📅 Active until : $expirationDate ($day) 
 
 
-لینک اتصال : 
+Connection link : 
     
 <code>$config</code>
 
@@ -1620,44 +1620,44 @@ $payTypeLabel
 ";
     } else {
         if ($DataUserOut['sub_updated_at'] !== null) {
-            $textinfo = "وضعیت سرویس : $status_var
-👤 نام سرویس : {$DataUserOut['username']}
-🌍 موقعیت سرویس :{$nameloc['Service_location']}
-🖇 کد سرویس:{$nameloc['id_invoice']}
+            $textinfo = "Service status : $status_var
+👤 Service name: {$DataUserOut['username']}
+🌍 Service location :{$nameloc['Service_location']}
+🖇 Service code:{$nameloc['id_invoice']}
 
         
-🔋 حجم سرویس : $LastTraffic
-📥 حجم مصرفی : $usedTrafficGb
-💢 حجم باقی مانده : $RemainingVolume ($Percent%)
+🔋 Service data : $LastTraffic
+📥 Data used : $usedTrafficGb
+💢 Data remaining : $RemainingVolume ($Percent%)
 
-📅 فعال تا تاریخ : $expirationDate ($day)
+📅 Active until : $expirationDate ($day)
 
 
-📶 اخرین زمان اتصال  : $lastonline
-🔄 اخرین زمان آپدیت لینک اشتراک  : $lastupdate
-#️⃣ کلاینت متصل شده :<code>{$DataUserOut['sub_last_user_agent']}</code>
+📶 Last connection  : $lastonline
+🔄 Subscription last update: $lastupdate
+#️⃣ Connected client:<code>{$DataUserOut['sub_last_user_agent']}</code>
 
-لینک اتصال : 
+Connection link : 
     
 $config
 $output
 ";
         } else {
-            $textinfo = "وضعیت سرویس : $status_var
-👤 نام سرویس : {$DataUserOut['username']}
-🌍 موقعیت سرویس :{$nameloc['Service_location']}
-🖇 کد سرویس:{$nameloc['id_invoice']}
+            $textinfo = "Service status : $status_var
+👤 Service name: {$DataUserOut['username']}
+🌍 Service location :{$nameloc['Service_location']}
+🖇 Service code:{$nameloc['id_invoice']}
 
-🔋 حجم سرویس : $LastTraffic
-📥 حجم مصرفی : $usedTrafficGb
-💢 حجم باقی مانده : $RemainingVolume ($Percent%)
+🔋 Service data : $LastTraffic
+📥 Data used : $usedTrafficGb
+💢 Data remaining : $RemainingVolume ($Percent%)
 
-📅 فعال تا تاریخ : $expirationDate ($day)
+📅 Active until : $expirationDate ($day)
 
-📶 اخرین زمان اتصال شما : $lastonline
+📶 Last connection: $lastonline
         
 
-لینک اتصال : 
+Connection link : 
     
 <code>$config</code>
 
@@ -1671,7 +1671,7 @@ $output
     savedata("clear", "id_invoice", $id_invoice);
     $nameloc = select("invoice", "*", "id_invoice", $id_invoice, "select");
     if ($nameloc == false) {
-        sendmessage($from_id, "❌ تمدید با خطا مواجه گردید مراحل تمدید را مجددا انجام دهید.", null, 'HTML');
+        sendmessage($from_id, "❌ Renewal failed. Please try again.", null, 'HTML');
         return;
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
@@ -1686,7 +1686,7 @@ $output
         return;
     }
     if ($DataUserOut['status'] == "on_hold") {
-        sendmessage($from_id, "❌ هنوز به سرویس متصل نشده اید برای تمدید سرویس ابتدا به سرویس متصل شوید سپس اقدام به تمدید کنید", null, 'html');
+        sendmessage($from_id, "❌ You have not connected yet. Connect first, then renew the service.", null, 'html');
         return;
     }
     savedata("save", "name_panel", $nameloc['Service_location']);
@@ -1705,16 +1705,16 @@ $output
         }
         $query = "SELECT * FROM product WHERE (Location = '{$marzban_list_get['name_panel']}' OR Location = '/all')AND " . agent_product_access_sql($userbot['agent'], $dataBase['id_user']) . "";
         $prodcut = KeyboardProduct($marzban_list_get['name_panel'], $query, 0, "selectproductextends_", $statuscustom, "backuser", null, $customvolume = "customvolumeextend");
-        sendmessage($from_id, "🛍️ لطفاً سرویسی که می‌خواهید تمدید کنید را انتخاب کنید!", $prodcut, 'HTML');
+        sendmessage($from_id, "🛍️ Select the service you want to renew!", $prodcut, 'HTML');
     } else {
         $custompricevalue = $setting['pricevolume'];
         $mainvolume = json_decode($marzban_list_get['mainvolume'], true);
         $mainvolume = $mainvolume[$userbot['agent']];
         $maxvolume = json_decode($marzban_list_get['maxvolume'], true);
         $maxvolume = $maxvolume[$userbot['agent']];
-        $textcustom = "📌 حجم درخواستی خود را ارسال کنید.
-🔔قیمت هر گیگ حجم $custompricevalue تومان می باشد.
-🔔 حداقل حجم $mainvolume گیگابایت و حداکثر $maxvolume گیگابایت می باشد.";
+        $textcustom = "📌 Send the data amount you want.
+🔔 Price per GB: $custompricevalue Toman.
+🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
         sendmessage($from_id, $textcustom, $backuser, 'html');
         step('gettimecustomvolextend', $from_id);
     }
@@ -1726,9 +1726,9 @@ $output
     $mainvolume = $mainvolume[$userbot['agent']];
     $maxvolume = json_decode($marzban_list_get['maxvolume'], true);
     $maxvolume = $maxvolume[$userbot['agent']];
-    $textcustom = "📌 حجم درخواستی خود را ارسال کنید.
-🔔قیمت هر گیگ حجم $custompricevalue تومان می باشد.
-🔔 حداقل حجم $mainvolume گیگابایت و حداکثر $maxvolume گیگابایت می باشد.";
+    $textcustom = "📌 Send the data amount you want.
+🔔 Price per GB: $custompricevalue Toman.
+🔔 Minimum $mainvolume GB, maximum $maxvolume GB.";
     sendmessage($from_id, $textcustom, $backuser, 'html');
     step('gettimecustomvolextend', $from_id);
 } elseif ($user['step'] == "gettimecustomvolextend") {
@@ -1740,7 +1740,7 @@ $output
     $maxvolume = json_decode($marzban_list_get['maxvolume'], true);
     $maxvolume = $maxvolume[$userbot['agent']];
     if ($text > intval($maxvolume) || $text < intval($mainvolume)) {
-        $texttime = "❌ حجم نامعتبر است.\n🔔 حداقل حجم $mainvolume گیگابایت و حداکثر $maxvolume گیگابایت می باشد";
+        $texttime = "❌ Invalid data amount.\n🔔 Minimum $mainvolume GB and maximum $maxvolume GB";
         sendmessage($from_id, $texttime, $backuser, 'HTML');
         return;
     }
@@ -1749,9 +1749,9 @@ $output
         return;
     }
     savedata("save", "volume", $text);
-    $textcustom = "⌛️ مدت زمان تمدید را انتخاب کنید
-📌 هر ماه معادل ۳۰ روز است
-⚠️ فقط گزینه‌های زیر قابل انتخاب هستند";
+    $textcustom = "⌛️ Choose the renewal duration
+📌 Each month equals 30 days
+⚠️ Only the options below can be selected";
     $backCb = "product_" . $nameloc['id_invoice'];
     sendmessage($from_id, $textcustom, KeyboardCustomMonths($marzban_list_get, 'custommonthextend_', $backCb, (int) $text, $userbot), 'html');
     step('selectcustommonthextend', $from_id);
@@ -1761,7 +1761,7 @@ $output
     $nameloc = select("invoice", "*", "id_invoice", $userdate['id_invoice'], "select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     if (!$marzban_list_get || !panel_custom_month_option($marzban_list_get, $months)) {
-        sendmessage($from_id, "❌ مدت انتخاب‌شده نامعتبر است.", $backuser, 'HTML');
+        sendmessage($from_id, "❌ The selected duration is invalid.", $backuser, 'HTML');
         return;
     }
     $days = panel_custom_months_to_days($months);
@@ -1778,13 +1778,13 @@ $output
         "price_product" => (int) round(((int) $userdate['volume']) * $custompricevalue * $mag)
     );
     savedata("save", "time", $days);
-    $textextend = "📜 فاکتور تمدید شما برای نام کاربری {$nameloc['username']} ایجاد شد.
+    $textextend = "📜 Your renewal invoice for username {$nameloc['username']} was created.
         
-💸 مبلغ تمدید :{$datapish['price_product']}
-⏱ مدت زمان تمدید : {$datapish['Service_time']} روز
-🔋 حجم تمدید :{$datapish['Volume_constraint']} گیگ
-💸 موجودی کیف پول : {$user['Balance']}
-✅ برای تایید و تمدید سرویس روی دکمه زیر کلیک کنید";
+💸 Renewal price :{$datapish['price_product']}
+⏱ Renewal duration: {$datapish['Service_time']} days
+🔋 Renewal data:{$datapish['Volume_constraint']} GB
+💸 Wallet balance : {$user['Balance']}
+✅ Tap the button below to confirm and renew";
     $keyboardextend = json_encode([
         'inline_keyboard' => [
             [
@@ -1803,7 +1803,7 @@ $output
         $userdate = json_decode($user['Processing_value'], true);
         $nameloc = select("invoice", "*", "id_invoice", $userdate['id_invoice'], "select");
         $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
-        sendmessage($from_id, "⌛️ مدت زمان تمدید را از دکمه‌ها انتخاب کنید", KeyboardCustomMonths($marzban_list_get, 'custommonthextend_', "product_" . $nameloc['id_invoice'], (int) ($userdate['volume'] ?? 0), $userbot), 'html');
+        sendmessage($from_id, "⌛️ Choose the renewal duration from the buttons", KeyboardCustomMonths($marzban_list_get, 'custommonthextend_', "product_" . $nameloc['id_invoice'], (int) ($userdate['volume'] ?? 0), $userbot), 'html');
         step('selectcustommonthextend', $from_id);
         return;
     }
@@ -1831,13 +1831,13 @@ $output
         "Service_time" => $product['Service_time'],
         "price_product" => $product['price_product']
     );
-    $textextend = "📜 فاکتور تمدید شما برای نام کاربری {$nameloc['username']} ایجاد شد.
+    $textextend = "📜 Your renewal invoice for username {$nameloc['username']} was created.
         
-💸 مبلغ تمدید :{$datapish['price_product']}
-⏱ مدت زمان تمدید : {$datapish['Service_time']} روز
-🔋 حجم تمدید :{$datapish['Volume_constraint']} گیگ
-💸 موجودی کیف پول : {$user['Balance']}
-✅ برای تایید و تمدید سرویس روی دکمه زیر کلیک کنید";
+💸 Renewal price :{$datapish['price_product']}
+⏱ Renewal duration: {$datapish['Service_time']} days
+🔋 Renewal data:{$datapish['Volume_constraint']} GB
+💸 Wallet balance : {$user['Balance']}
+✅ Tap the button below to confirm and renew";
     $keyboardextend = json_encode([
         'inline_keyboard' => [
             [
@@ -1889,7 +1889,7 @@ $output
         $months = (int) round($days / 30);
         $opt = panel_custom_month_option($marzban_list_get, $months);
         if ($opt === null || panel_custom_months_to_days($months) !== $days) {
-            sendmessage($from_id, "❌ مدت سرویس نامعتبر است.", $keyboard, 'html');
+            sendmessage($from_id, "❌ Invalid service duration.", $keyboard, 'html');
             return;
         }
         $mag = (float) $opt['magnifier'];
@@ -1927,14 +1927,14 @@ $output
             $n2CatRemark = (string) $datafactor['category'];
         }
         if (!agent_category_purchase_allowed($botbalance['id_user'], $n2Code, $n2CatRemark)) {
-            sendmessage($from_id, "❌ این محصول / دسته‌بندی برای نمایندگی فعال نیست.", $keyboard, 'HTML');
+            sendmessage($from_id, "❌ This product/category is not available for this reseller.", $keyboard, 'HTML');
             step("home", $from_id);
             return;
         }
     }
     $agentQuotaCheck = agent_check_volume_quota($botbalance['id_user'], $agentVolumeGb);
     if (!$agentQuotaCheck['ok']) {
-        sendmessage($from_id, "❌ خطایی در خرید رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشید", $keyboard, 'HTML');
+        sendmessage($from_id, "❌ A purchase error occurred. Please contact support", $keyboard, 'HTML');
         step("home", $from_id);
         foreach ($admin_ids as $admin) {
             sendmessage($admin, $agentQuotaCheck['msg'], null, 'HTML');
@@ -1950,21 +1950,21 @@ $output
             $setting,
             "0 | 0",
             [
-                'title' => '💳 پرداخت کارت به کارت تمدید سرویس',
+                'title' => '💳 Card-to-card payment for service renewal',
                 'product' => (string) ($datafactor['name_product'] ?? ''),
             ]
         );
         if (!($pay['ok'] ?? false)) {
             if (($pay['error'] ?? '') === 'card_not_configured') {
-                sendmessage($from_id, "❌ شماره کارت نماینده هنوز تنظیم نشده است. لطفاً با پشتیبانی در ارتباط باشید.", $keyboard, 'HTML');
+                sendmessage($from_id, "❌ The reseller card number is not set yet. Please contact support.", $keyboard, 'HTML');
             } else {
-                sendmessage($from_id, "❌ ثبت پرداخت با خطا مواجه شد. لطفاً دوباره تلاش کنید یا با پشتیبانی در ارتباط باشید.", $keyboard, 'HTML');
+                sendmessage($from_id, "❌ Payment could not be registered. Please try again or contact support.", $keyboard, 'HTML');
             }
             step('home', $from_id);
             return;
         }
         if (!$pay['card_ok']) {
-            sendmessage($from_id, "❌ شماره کارت نماینده هنوز تنظیم نشده است. لطفاً با پشتیبانی در ارتباط باشید.", $keyboard, 'HTML');
+            sendmessage($from_id, "❌ The reseller card number is not set yet. Please contact support.", $keyboard, 'HTML');
             step('home', $from_id);
             return;
         }
@@ -1986,7 +1986,7 @@ $output
 نام پنل : {$marzban_list_get['name_panel']}
 نام کاربری سرویس : {$nameloc['username']}
 دلیل خطا : {$extend['msg']}";
-        sendmessage($from_id, "❌خطایی در تمدید سرویس در ربات رخ داده با پشتیبانی در ارتباط باشید", null, 'HTML');
+        sendmessage($from_id, "❌ A renewal error occurred. Please contact support", null, 'HTML');
         if (strlen($settingmain['Channel_Report']) > 0) {
             telegram('sendmessage', [
                 'chat_id' => $settingmain['Channel_Report'],
@@ -2049,11 +2049,11 @@ $output
     $priceproductformat = number_format($datafactor['price_product']);
     $balanceformatsell = number_format($userbalance = json_decode(file_get_contents("data/$from_id/$from_id.json"), true)['Balance']);
     $balanceformatsellbefore = number_format($user['Balance'], 0);
-    $textextend = "✅ تمدید برای سرویس شما با موفقیت صورت گرفت
+    $textextend = "✅ Your service was renewed
  
 ▫️نام سرویس : {$nameloc['username']}
-▫️نام محصول : {$datafactor['name_product']}
-▫️مبلغ تمدید $priceproductformat تومان
+▫️Product : {$datafactor['name_product']}
+▫️Renewal price $priceproductformat Toman
 ";
     sendmessage($from_id, $textextend, $keyboardextendfnished, 'HTML');
     $timejalali = jdate('Y/m/d H:i:s');
@@ -2092,7 +2092,7 @@ $output
         return;
     }
     if ($DataUserOut['status'] == "disabled" || $DataUserOut['status'] == "on_hold") {
-        sendmessage($from_id, "❌ سرویس غیرفعال است و امکان تعویض لینک برای سرویس وجود ندارد.", null, 'html');
+        sendmessage($from_id, "❌ This service is disabled, so the link cannot be changed.", null, 'html');
         return;
     }
     $keyboardextend = json_encode([
@@ -2112,7 +2112,7 @@ $output
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->Revoke_sub($nameloc['Service_location'], $nameloc['username']);
     if ($DataUserOut['status'] == "Unsuccessful") {
-        sendmessage($from_id, '❌ خطایی در تغییر لینک رخ داده است.', null, 'HTML');
+        sendmessage($from_id, '❌ An error occurred while changing the link.', null, 'HTML');
         return;
     }
     if ($marzban_list_get['sublink'] == "onsublink") {
@@ -2130,8 +2130,8 @@ $output
         }
         $output_config_link = $config;
     }
-    $textconfig = "✅ کانفیگ شما با موفقیت بروزرسانی گردید.
-اشتراک شما : 
+    $textconfig = "✅ Your config was updated.
+Your subscription: 
 <code>$output_config_link</code>";
     $bakinfos = json_encode([
         'inline_keyboard' => [

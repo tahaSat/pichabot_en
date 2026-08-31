@@ -20,7 +20,7 @@ function mirza_development_mode_support_id(): string
 
 function mirza_development_mode_message(bool $html = false): string
 {
-    $message = 'ربات در حالت توسعه و بروز رسانی میباشد. لطفا پس از مدتی مجددا تلاش نمایید.';
+    $message = 'The bot is in maintenance mode. Please try again later.';
     $id = mirza_development_mode_support_id();
     if ($id === '') {
         return $message;
@@ -36,7 +36,7 @@ function mirza_development_mode_message(bool $html = false): string
         }
     }
 
-    return $message . "\nبرای خرید محصول و پشتیبانی به اکانت " . $display . " پیام دهید";
+    return $message . "\nFor purchases and support, message " . $display;
 }
 
 function mirza_is_development_mode(): bool
@@ -175,7 +175,7 @@ function mirza_development_mode_reply_http(): void
     }
 
     header('Content-Type: text/html; charset=UTF-8');
-    echo '<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+    echo '<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
         . '<title>Maintenance</title></head><body style="font-family:Tahoma,sans-serif;text-align:center;padding:3rem;line-height:1.8;">'
         . htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
         . '</body></html>';

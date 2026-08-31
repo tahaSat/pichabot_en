@@ -63,13 +63,13 @@ function DirectPaymentbot($order_id, $image = 'images.jpg')
         }
 
         if (!$get_invoice) {
-            sendmessage($uid, "💎 مبلغ {$format_price_cart} تومان به کیف پول شما واریز شد، اما فاکتور سرویس یافت نشد. با پشتیبانی در ارتباط باشید.\n🛒 کد پیگیری: {$Payment_report['id_order']}", $keyboard, 'HTML');
+            sendmessage($uid, "💎 {$format_price_cart} Toman was added to your wallet, but the service invoice was not found. Please contact support.\n🛒 Tracking code: {$Payment_report['id_order']}", $keyboard, 'HTML');
             if ($Payment_report['Payment_Method'] == "cart to cart" || $Payment_report['Payment_Method'] == "arze digital offline") {
-                $textconfrom = "✅ پرداخت تایید شد (افزایش موجودی — فاکتور یافت نشد)
+                $textconfrom = "✅ پرداخت تایید شد (افزایش Balance — فاکتور یافت نشد)
 👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 کد پیگیری پرداخت: {$Payment_report['id_order']}
-⚜️ نام کاربری: @{$Balance_id['username']}
-💸 مبلغ پرداختی: $format_price_cart تومان";
+🛒 Tracking code پرداخت: {$Payment_report['id_order']}
+⚜️ Username: @{$Balance_id['username']}
+💸 Amount paid: $format_price_cart Toman";
                 if (!empty($from_id) && !empty($message_id)) {
                     Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
                 }
@@ -79,7 +79,7 @@ function DirectPaymentbot($order_id, $image = 'images.jpg')
 
         $marzban_list_get = select("marzban_panel", "*", "name_panel", $get_invoice['Service_location'], "select");
         $codeProduct = 'customvolume';
-        if ($get_invoice['name_product'] == "🛍 حجم دلخواه" || $get_invoice['name_product'] == "⚙️ سرویس دلخواه" || $get_invoice['name_product'] == ($textbotlang['users']['customsellvolume']['title'] ?? '')) {
+        if ($get_invoice['name_product'] == "🛍 Custom data" || $get_invoice['name_product'] == "⚙️ Custom service" || $get_invoice['name_product'] == ($textbotlang['users']['customsellvolume']['title'] ?? '')) {
             $codeProduct = 'customvolume';
         } else {
             $stmt = $pdo->prepare("SELECT * FROM product WHERE name_product = :name_product AND (Location = :Service_location OR Location = '/all') LIMIT 1");
@@ -120,7 +120,7 @@ function DirectPaymentbot($order_id, $image = 'images.jpg')
         if (($dataoutput['username'] ?? null) == null) {
             $dataoutput['msg'] = json_encode($dataoutput['msg'] ?? '');
             sendmessage($uid, $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
-            sendmessage($uid, "💎 مبلغ {$format_price_cart} تومان به کیف پول شما اضافه شد (ساخت سرویس ناموفق).", $keyboard, 'HTML');
+            sendmessage($uid, "💎 {$format_price_cart} Toman was added to your wallet (service creation failed).", $keyboard, 'HTML');
             if (strlen($settingmain['Channel_Report'] ?? '') > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $settingmain['Channel_Report'],
@@ -130,7 +130,7 @@ function DirectPaymentbot($order_id, $image = 'images.jpg')
                 ], $GLOBALS['APIKEY'] ?? null);
             }
             if (!empty($from_id) && !empty($message_id)) {
-                Editmessagetext($from_id, $message_id, "✅ پرداخت تایید شد ولی ساخت سرویس ناموفق بود. مبلغ به کیف پول کاربر واریز شد.\n👤 {$Balance_id['id']}\n💸 $format_price_cart", $Confirm_pay);
+                Editmessagetext($from_id, $message_id, "✅ پرداخت تایید شد ولی ساخت سرویس Failed بود. مبلغ به کیف پول کاربر واریز شد.\n👤 {$Balance_id['id']}\n💸 $format_price_cart", $Confirm_pay);
             }
             return;
         }
@@ -178,15 +178,15 @@ function DirectPaymentbot($order_id, $image = 'images.jpg')
                 }
             }
         }
-        $textcreatuser = "✅ سرویس با موفقیت ایجاد شد
+        $textcreatuser = "✅ Service created successfully
 
-👤 نام کاربری سرویس : {username}
-🌿 نام سرویس:  {name_service}
-‏🇺🇳 لوکیشن: {location}
-⏳ مدت زمان: {day}  روز
-🗜 حجم سرویس:  {volume} گیگابایت
+👤 Service username : {username}
+🌿 Service name: {name_service}
+🇺🇳 Location: {location}
+⏳ Duration: {day}  days
+🗜 Service data:  {volume} GB
 
-لینک اتصال:
+Connection link:
 {config}
 {links}
 ";
@@ -247,12 +247,12 @@ function DirectPaymentbot($order_id, $image = 'images.jpg')
         if ($Payment_report['Payment_Method'] == "cart to cart" || $Payment_report['Payment_Method'] == "arze digital offline") {
             $textconfrom = "✅ پرداخت تایید شد
 🛍 خرید سرویس
-▫️نام کاربری کانفیگ : {$dataoutput['username']}
+▫️Config username : {$dataoutput['username']}
 ▫️لوکیشن : {$marzban_list_get['name_panel']}
 👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 کد پیگیری پرداخت: {$Payment_report['id_order']}
-⚜️ نام کاربری: @{$Balance_id['username']}
-💸 مبلغ پرداختی: $format_price_cart تومان";
+🛒 Tracking code پرداخت: {$Payment_report['id_order']}
+⚜️ Username: @{$Balance_id['username']}
+💸 Amount paid: $format_price_cart Toman";
             if (!empty($from_id) && !empty($message_id)) {
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
             }
@@ -274,9 +274,9 @@ function DirectPaymentbot($order_id, $image = 'images.jpg')
             Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
         }
     }
-    sendmessage($Payment_report['id_user'], "💎 کاربر گرامی مبلغ {$Payment_report_price_fmt} تومان به کیف پول شما واریز گردید با تشکراز پرداخت شما.
+    sendmessage($Payment_report['id_user'], "💎 {$Payment_report_price_fmt} Toman was added to your wallet. Thank you for your payment.
 
-🛒 کد پیگیری شما: {$Payment_report['id_order']}", null, 'HTML');
+🛒 Your tracking code: {$Payment_report['id_order']}", null, 'HTML');
 }
 
 function channel_check($id_channel)

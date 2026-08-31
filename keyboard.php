@@ -114,7 +114,7 @@ $keyboardPanel = json_encode([
             ['text' => $datatextbot['text_Add_Balance'], 'callback_data' => "Add_Balance"]
         ],
         [
-            ['text' => '💸 درخواست برداشت', 'callback_data' => 'Wallet_Withdraw'],
+            ['text' => '💸 Withdraw request', 'callback_data' => 'Wallet_Withdraw'],
         ],
         [['text' => $textbotlang['users']['backbtn'], 'callback_data' => "backuser"]],
     ],
@@ -331,7 +331,7 @@ if (intval($paymentsstartelegram) == 1) {
     ];
 }
 $step_payment['inline_keyboard'][] = [
-    ['text' => "❌ بستن لیست", 'callback_data' => "colselist"]
+    ['text' => "❌ Close list", 'callback_data' => "colselist"]
 ];
 $step_payment = json_encode($step_payment);
 $keyboardhelpadmin = json_encode([
@@ -375,21 +375,21 @@ if ($setting['inlinebtnmain'] == "oninline") {
     $confrimrolls = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => "✅ قوانین را می پذیرم", 'callback_data' => "acceptrule"],
+                ['text' => "✅ I accept the rules", 'callback_data' => "acceptrule"],
             ],
         ]
     ]);
 } else {
     $confrimrolls = json_encode([
         'keyboard' => [
-            [['text' => "✅ قوانین را می پذیرم"]],
+            [['text' => "✅ I accept the rules"]],
         ],
         'resize_keyboard' => true
     ]);
 }
 $request_contact = json_encode([
     'keyboard' => [
-        [['text' => "☎️ ارسال شماره تلفن", 'request_contact' => true]],
+        [['text' => "☎️ Send phone number", 'request_contact' => true]],
         [['text' => $textbotlang['users']['backbtn']]]
     ],
     'resize_keyboard' => true
@@ -421,7 +421,7 @@ if ($setting['inlinebtnmain'] == "oninline") {
             [['text' => $textbotlang['users']['backbtn']]]
         ],
         'resize_keyboard' => true,
-        'input_field_placeholder' => "برای بازگشت روی دکمه زیر کلیک کنید"
+        'input_field_placeholder' => "Tap the button below to go back"
     ]);
 }
 $backadmin = json_encode([
@@ -429,7 +429,7 @@ $backadmin = json_encode([
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true,
-    'input_field_placeholder' => "برای بازگشت روی دکمه زیر کلیک کنید"
+    'input_field_placeholder' => "Tap the button below to go back"
 ]);
 if ($build_admin_keyboards) {
 //------------------  [ list panel ]----------------//
@@ -746,7 +746,7 @@ function purchase_inline_back_keyboard(string $callback): string
     global $textbotlang;
     return json_encode([
         'inline_keyboard' => [
-            [['text' => $textbotlang['users']['stateus']['backinfo'] ?? '🏠 بازگشت', 'callback_data' => $callback]],
+            [['text' => $textbotlang['users']['stateus']['backinfo'] ?? '🏠 Back', 'callback_data' => $callback]],
         ],
     ]);
 }
@@ -1000,7 +1000,7 @@ if ($setting['statussupportpv'] == "onpvsupport") {
                 ['text' => "🎟 ارسال پیام به پشتیبانی", 'url' => "https://t.me/{$setting['id_support']}"],
             ],
             [
-                ['text' => "🔙 بازگشت به منوی اصلی", 'callback_data' => "backuser"]
+                ['text' => "🔙 Back to main menu", 'callback_data' => "backuser"]
             ],
 
         ]
@@ -1013,7 +1013,7 @@ if ($setting['statussupportpv'] == "onpvsupport") {
                 ['text' => "🎟 ارسال پیام به پشتیبانی", 'callback_data' => "support"],
             ],
             [
-                ['text' => "🔙 بازگشت به منوی اصلی", 'callback_data' => "backuser"]
+                ['text' => "🔙 Back to main menu", 'callback_data' => "backuser"]
             ],
 
         ]
@@ -1105,7 +1105,7 @@ if ($setting['inlinebtnmain'] == "oninline") {
     $keyboardagent = [
         'inline_keyboard' => [
             [
-                ['text' => "🗂 خرید انبوه", 'callback_data' => "kharidanbuh"],
+                ['text' => "🗂 Bulk buy", 'callback_data' => "kharidanbuh"],
                 ['text' => "👤 انتخاب نام دلخواه", 'callback_data' => "selectname"]
             ],
             [
@@ -1120,7 +1120,7 @@ if ($setting['inlinebtnmain'] == "oninline") {
 } else {
     $keyboardagent = [
         'keyboard' => [
-            [['text' => "🗂 خرید انبوه"], ['text' => "👤 انتخاب نام دلخواه"]],
+            [['text' => "🗂 Bulk buy"], ['text' => "👤 انتخاب نام دلخواه"]],
             [['text' => $textbotlang['users']['backbtn']]]
         ],
         'resize_keyboard' => true
@@ -1295,7 +1295,7 @@ function keyboard_help_category()
     }
     if (($setting['linkappstatus'] ?? '') == "1") {
         $helpcwtgory['inline_keyboard'][] = [
-            ['text' => "🔗 لینک دانلود برنامه", 'callback_data' => "linkappdownlod"],
+            ['text' => "🔗 App download link", 'callback_data' => "linkappdownlod"],
         ];
     }
     $helpcwtgory['inline_keyboard'][] = [
@@ -1561,7 +1561,7 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
         $discountApplied = false;
         if ($isAgentN) {
             $result['price_product'] = agent_wholesale_cost($user, (int) ($result['Volume_constraint'] ?? 0));
-            $namekeyboard = $result['name_product'] . " - " . number_format($result['price_product']) . "تومان";
+            $namekeyboard = $result['name_product'] . " - " . number_format($result['price_product']) . " Toman";
         } else {
             $priceInfo = product_discount_payable($result['price_product'], $result['code_product'] ?? '', $pricediscount, $user);
             $result['price_product'] = $priceInfo['payable'];
@@ -1576,7 +1576,7 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
                 );
             }
             $result['name_product'] = $displayName;
-            $namekeyboard = $displayName . " - " . product_discount_format_button((int) $priceInfo['original'], (int) $priceInfo['payable'], (bool) $priceInfo['applied']) . "تومان";
+            $namekeyboard = $displayName . " - " . product_discount_format_button((int) $priceInfo['original'], (int) $priceInfo['payable'], (bool) $priceInfo['applied']) . " Toman";
         }
         if ($statusshowprice == "onshowprice") {
             $result['name_product'] = $namekeyboard;
@@ -1652,7 +1652,7 @@ function KeyboardCategory($location, $agent, $backuser = "backuser", $agentUserI
         ];
     }
     $list_category['inline_keyboard'][] = [
-        ['text' => "▶️ بازگشت به منوی قبل", "callback_data" => $backuser],
+        ['text' => "▶️ Previous menu", "callback_data" => $backuser],
     ];
     return json_encode($list_category);
 }
@@ -1849,7 +1849,7 @@ function keyboard_config($config_split, $id_invoice, $back_active = true)
 $keyboard_buy = json_encode([
     'inline_keyboard' => [
         [
-            ['text' => "🛍خرید اشتراک", 'callback_data' => 'buy'],
+            ['text' => "🛍 Buy subscription", 'callback_data' => 'buy'],
         ],
     ]
 ]);

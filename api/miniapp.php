@@ -127,9 +127,9 @@ switch ($data['actions']) {
             foreach ($invoices as $invoice) {
                 $DataUserOut = $ManagePanel->DataUser($invoice['Service_location'], $invoice['username']);
                 if ($DataUserOut['status'] == "Unsuccessful") {
-                    $expire = "نامشخص";
+                    $expire = "Unknown";
                 } else {
-                    $expire = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : 'نامحدود';
+                    $expire = $DataUserOut['expire'] ? date('Y-m-d', $DataUserOut['expire']) : 'Unlimited';
                 }
                 $datauser[] = [
                     'username' => $invoice['username'],
@@ -223,26 +223,26 @@ switch ($data['actions']) {
                 $sub_updated = $DataUserOut['sub_updated_at'];
                 $dateTime = new DateTime($sub_updated, new DateTimeZone('UTC'));
                 $dateTime->setTimezone(new DateTimeZone('Asia/Tehran'));
-                $lastupdate = jdate('Y/m/d H:i:s', $dateTime->getTimestamp());
+                $lastupdate = date('Y-m-d H:i:s', $dateTime->getTimestamp());
             } else {
                 $lastupdate = null;
             }
             if (($DataUserOut['online_at'] ?? null) == "online") {
-                $lastonline = 'آنلاین';
+                $lastonline = 'Online';
             } elseif (($DataUserOut['online_at'] ?? null) == "offline") {
-                $lastonline = 'آفلاین';
+                $lastonline = 'Offline';
             } else {
                 if (isset($DataUserOut['online_at']) && $DataUserOut['online_at'] !== null) {
                     $dateString = $DataUserOut['online_at'];
                     $date = new DateTime($dateString, new DateTimeZone('UTC'));
                     $date->setTimezone(new DateTimeZone('Asia/Tehran'));
-                    $lastonline = jdate('Y/m/d H:i:s', $date->getTimestamp());
+                    $lastonline = date('Y-m-d H:i:s', $date->getTimestamp());
                 } else {
-                    $lastonline = "متصل نشده";
+                    $lastonline = "Not connected";
                 }
             }
             $expireTimestamp = isset($DataUserOut['expire']) && is_numeric($DataUserOut['expire']) ? (int) $DataUserOut['expire'] : 0;
-            $expirationDate = $expireTimestamp ? jdate('Y/m/d', $expireTimestamp) : 'نامحدود';
+            $expirationDate = $expireTimestamp ? date('Y-m-d', $expireTimestamp) : 'Unlimited';
             $usernameOutput = $DataUserOut['username'] ?? $invoice['username'];
             echo json_encode([
                 'status' => true,
@@ -285,12 +285,12 @@ switch ($data['actions']) {
                 $user_info['codeInvitation'] = $randomString;
             }
             if ($user_info['number'] == "none") {
-                $numberphone = "🔴 ارسال نشده است 🔴";
+                $numberphone = "🔴 Not submitted 🔴";
             } else {
                 $numberphone = $user_info['number'];
             }
             if ($user_info['number'] == "confrim number by admin") {
-                $numberphone = "✅ تایید شده توسط ادمین";
+                $numberphone = "✅ Verified by admin";
             }
             $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND name_product != 'سرویس تست' AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn' OR Status = 'send_on_hold')");
             $stmt->execute([
@@ -303,11 +303,11 @@ switch ($data['actions']) {
             ]);
             $countpayment = $stmt->rowCount();
             $groupuser = [
-                'f' => "عادی",
-                'n' => "نماینده",
-                'n2' => "نمایندگی پیشرفته",
+                'f' => "Regular",
+                'n' => "Agent",
+                'n2' => "Advanced agent",
             ][$user_info['agent']];
-            $userjoin = jdate('Y/m/d', $user_info['register']);
+            $userjoin = date('Y-m-d', $user_info['register']);
             echo json_encode([
                 'status' => true,
                 'msg' => "Successful",
@@ -754,7 +754,7 @@ switch ($data['actions']) {
             http_response_code(500);
             echo json_encode(array(
                 'status' => false,
-                'msg' => "پنل انتخابی موجود نیست."
+                'msg' => "Selected panel was not found."
             ));
             return;
         }
@@ -762,7 +762,7 @@ switch ($data['actions']) {
             http_response_code(500);
             echo json_encode(array(
                 'status' => false,
-                'msg' => "پنل انتخابی درحال حاضر فعال نیست"
+                'msg' => "The selected panel is not active right now"
             ));
             return;
         }
@@ -795,7 +795,7 @@ switch ($data['actions']) {
                 http_response_code(500);
                 echo json_encode(array(
                     'status' => false,
-                    'msg' => "حجم نامعتبر است خرید را از اول انجام دهید"
+                    'msg' => "Invalid data amount. Please start the purchase again."
                 ));
                 return;
             }
@@ -803,7 +803,7 @@ switch ($data['actions']) {
                 http_response_code(500);
                 echo json_encode(array(
                     'status' => false,
-                    'msg' => "مدت ماه نامعتبر است خرید را از اول انجام دهید"
+                    'msg' => "Invalid duration. Please start the purchase again."
                 ));
                 return;
             }
@@ -812,7 +812,7 @@ switch ($data['actions']) {
             http_response_code(500);
             echo json_encode(array(
                 'status' => false,
-                'msg' => "محصول انتخابی پیدا نشد"
+                'msg' => "Selected product was not found"
             ));
             return;
         }
@@ -828,7 +828,7 @@ switch ($data['actions']) {
             http_response_code(500);
             echo json_encode(array(
                 'status' => false,
-                'msg' => "موجودی کمتر از قیمت محصول است"
+                'msg' => "Balance is less than the product price"
             ));
             return;
         }
@@ -840,7 +840,7 @@ switch ($data['actions']) {
             http_response_code(500);
             echo json_encode(array(
                 'status' => false,
-                'msg' => "نام کاربری وجود دارد مراحل را از اول طی کنید"
+                'msg' => "This username already exists. Please start over."
             ));
             return;
         }
@@ -873,7 +873,7 @@ switch ($data['actions']) {
             http_response_code(500);
             echo json_encode(array(
                 'status' => false,
-                'msg' => "خطایی در ساخت اشتراک رخ داده است با پشتیبانی در ارتباط باشید"
+                'msg' => "An error occurred while creating the subscription. Please contact support."
             ));
             $dataoutput['msg'] = json_encode($dataoutput['msg']);
 
@@ -940,16 +940,16 @@ switch ($data['actions']) {
                     $user_Balance = select("user", "*", "id", $user_info['affiliates'], "select");
                     $Balance_prim = $user_Balance['Balance'] + $result;
                     if (intval($setting['scorestatus']) == 1) {
-                        sendmessage($user_info['affiliates'], "📌شما 2 امتیاز جدید کسب کردید.", null, 'html');
+                        sendmessage($user_info['affiliates'], "📌 You earned 2 new points.", null, 'html');
                         $scorenew = $user_Balance['score'] + 2;
                         update("user", "score", $scorenew, "id", $user_info['affiliates']);
                     }
                     update("user", "Balance", $Balance_prim, "id", $user_info['affiliates']);
                     $result = number_format($result);
                     $dateacc = date('Y/m/d H:i:s');
-                    $textadd = "🎁  پرداخت پورسانت 
+                    $textadd = "🎁 Referral commission
             
-            مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
+            $result Toman was added to your wallet from your referral";
                     $textreportport = "
     مبلغ $result به کاربر {$user_info['affiliates']} برای پورسانت از کاربر {$user_info['id']} واریز گردید 
     تایم : $dateacc";
@@ -968,16 +968,16 @@ switch ($data['actions']) {
                     $user_Balance = select("user", "*", "id", $user_info['affiliates'], "select");
                     $Balance_prim = $user_Balance['Balance'] + $result;
                     if (intval($setting['scorestatus']) == 1) {
-                        sendmessage($user_info['affiliates'], "📌شما 2 امتیاز جدید کسب کردید.", null, 'html');
+                        sendmessage($user_info['affiliates'], "📌 You earned 2 new points.", null, 'html');
                         $scorenew = $user_Balance['score'] + 2;
                         update("user", "score", $scorenew, "id", $user_info['affiliates']);
                     }
                     update("user", "Balance", $Balance_prim, "id", $user_info['affiliates']);
                     $result = number_format($result);
                     $dateacc = date('Y/m/d H:i:s');
-                    $textadd = "🎁  پرداخت پورسانت 
+                    $textadd = "🎁 Referral commission
         
-        مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
+        $result Toman was added to your wallet from your referral";
                     $textreportport = "
 مبلغ $result به کاربر {$user_info['affiliates']} برای پورسانت از کاربر {$user_info['id']} واریز گردید 
 تایم : $dateacc";
@@ -994,14 +994,14 @@ switch ($data['actions']) {
             }
         }
         if (intval($setting['scorestatus']) == 1) {
-            sendmessage($user_info['id'], "📌شما 1 امتیاز جدید کسب کردید.", null, 'html');
+            sendmessage($user_info['id'], "📌 You earned 1 new point.", null, 'html');
             $scorenew = $user_info['score'] + 1;
             update("user", "score", $scorenew, "id", $user_info['id']);
         }
         $balanceformatsell = number_format(select("user", "Balance", "id", $user_info['id'], "select")['Balance'], 0);
         $textonebuy = "";
         if (bot_is_first_product_purchase($pdo, $user_info['id'], $randomString)) {
-            $textonebuy = "📌 خرید اول کاربر";
+            $textonebuy = "📌 First purchase";
         }
         $balanceformatsellbefore = number_format($user_info['Balance'], 0);
         $Response = json_encode([

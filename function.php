@@ -889,7 +889,7 @@ function bot_sql_extra_volume_gb(string $column = 'value'): string
 function bot_sold_volume_stats(PDO $pdo, ?int $startTs = null, ?int $endTs = null): array
 {
     $paidSql = invoice_paid_status_sql('Status');
-    $panelSql = "COALESCE(NULLIF(TRIM(Service_location), ''), 'نامشخص')";
+    $panelSql = "COALESCE(NULLIF(TRIM(Service_location), ''), 'Unknown')";
     $hasRange = $startTs !== null && $endTs !== null;
 
     $invoiceTime = $hasRange ? 'AND time_sell BETWEEN :start AND :end' : '';
@@ -995,13 +995,13 @@ function bot_format_sold_volume_block(array $vol, bool $html = false): string
     $invoice = $fmt($vol['invoice'] ?? 0);
     $extra = $fmt($vol['extra'] ?? 0);
     if ($html) {
-        $lines = "🔋 <b>حجم فروخته شده:</b> <code>$total</code> گیگابایت\n"
-            . "🛒 <b>از خرید سرویس:</b> <code>$invoice</code> گیگابایت\n"
-            . "📦 <b>از حجم اضافه:</b> <code>$extra</code> گیگابایت";
+        $lines = "🔋 <b>حجم فروخته شده:</b> <code>$total</code> GB\n"
+            . "🛒 <b>از خرید سرویس:</b> <code>$invoice</code> GB\n"
+            . "📦 <b>از Extra data:</b> <code>$extra</code> GB";
     } else {
-        $lines = "🔋 حجم فروخته شده : $total گیگابایت\n"
-            . "🛒 از خرید سرویس : $invoice گیگابایت\n"
-            . "📦 از حجم اضافه : $extra گیگابایت";
+        $lines = "🔋 حجم فروخته شده : $total GB\n"
+            . "🛒 از خرید سرویس : $invoice GB\n"
+            . "📦 از Extra data : $extra GB";
     }
 
     $panels = $vol['panels'] ?? [];
@@ -1012,11 +1012,11 @@ function bot_format_sold_volume_block(array $vol, bool $html = false): string
     $shown = 0;
     $totalPanels = count($panels);
     foreach ($panels as $panel) {
-        $name = htmlspecialchars((string) ($panel['name'] ?? 'نامشخص'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $name = htmlspecialchars((string) ($panel['name'] ?? 'Unknown'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $gb = $fmt($panel['total'] ?? 0);
         $line = $html
-            ? "\n• {$name}: <code>$gb</code> گیگابایت"
-            : "\n• {$name} : $gb گیگابایت";
+            ? "\n• {$name}: <code>$gb</code> GB"
+            : "\n• {$name} : $gb GB";
         if ($shown > 0 && mb_strlen($lines . $line) > 1800) {
             $remaining = $totalPanels - $shown;
             $lines .= $html
@@ -1111,10 +1111,10 @@ function bot_format_first_purchase_block(array $fp, int $ordersCount, float $ord
     $rlm = "\u{200F}";
     if ($html) {
         return "{$rlm}🆕 <b>خرید اول:</b> <code>$count</code> عدد — <code>$pct</code>٪ از فروش\n"
-            . "{$rlm}💰 <b>مبلغ خرید اول:</b> <code>$sum</code> تومان — <code>$pctMoney</code>٪ از مبلغ فروش";
+            . "{$rlm}💰 <b>مبلغ خرید اول:</b> <code>$sum</code> Toman — <code>$pctMoney</code>٪ از مبلغ فروش";
     }
     return "{$rlm}🆕 خرید اول : $count عدد — $pct٪ از سفارشات\n"
-        . "{$rlm}💰 مبلغ خرید اول : $sum تومان — $pctMoney٪ از مبلغ سفارشات";
+        . "{$rlm}💰 مبلغ خرید اول : $sum Toman — $pctMoney٪ از مبلغ سفارشات";
 }
 
 /**
@@ -1241,7 +1241,7 @@ function bot_format_period_stats(array $s, string $title, ?string $rangeLabel = 
     $soldVolumeBlock = bot_format_sold_volume_block($s['sold_volume'] ?? []);
     $forecastVolume = $s['forecast_sold_volume'] ?? null;
     if ($forecastVolume !== null) {
-        $soldVolumeBlock .= "\n📅 حجم فروخته‌شده پیش‌بینی‌شده ماهانه : " . bot_format_gb($forecastVolume) . " گیگابایت";
+        $soldVolumeBlock .= "\n📅 حجم فروخته‌شده پیش‌بینی‌شده ماهانه : " . bot_format_gb($forecastVolume) . " GB";
     }
     $firstPurchaseBlock = bot_format_first_purchase_block(
         $s['first_purchase'] ?? [],
@@ -1253,29 +1253,29 @@ function bot_format_period_stats(array $s, string $title, ?string $rangeLabel = 
 🕐 <b>$title</b>
 $rangeLine
 🛍 تعداد سفارشات : {$s['orders']} عدد
-💸 جمع مبلغ سفارشات  : $sumOrder تومان
+💸 جمع مبلغ سفارشات  : $sumOrder Toman
 $firstPurchaseBlock
 
 🧲 تعداد تمدید  : {$s['extends']} عدد
-💰 جمع مبلغ تمدید: $sumExtend تومان
+💰 جمع Renewal price: $sumExtend Toman
 
 📦 حجم‌های اضافه  :{$s['extra_volume']} عدد
-💰 مبلغ حجم‌های اضافه : $sumExtraVolume تومان
+💰 مبلغ حجم‌های اضافه : $sumExtraVolume Toman
 
 ⏱️ زمان‌های اضافه  : {$s['extra_time']} عدد
-💰 مبلغ زمان‌های اضافه  : $sumExtraTime تومان
+💰 مبلغ زمان‌های اضافه  : $sumExtraTime Toman
 
 📍 تغییر لوکیشن  : {$s['change_location']} عدد
-💰 مبلغ تغییر لوکیشن : $sumChange تومان
+💰 مبلغ تغییر لوکیشن : $sumChange Toman
 
 💳 شارژ کیف پول : $walletCount عدد
-💰 مبلغ شارژ کیف پول : $sumWallet تومان
+💰 مبلغ شارژ کیف پول : $sumWallet Toman
 
 💸 تعداد برداشت از کیف پول : $withdrawCount عدد
-💰 مبلغ برداشت از کیف پول : $sumWithdraw تومان
+💰 مبلغ برداشت از کیف پول : $sumWithdraw Toman
 
 📊 تعداد کل : {$s['total_count']} عدد
-💵 جمع مبلغ کل : $sumTotal تومان
+💵 جمع مبلغ کل : $sumTotal Toman
 
 $soldVolumeBlock
 
@@ -1292,22 +1292,22 @@ function format_duration_fa(?float $seconds): string
     }
     $seconds = (int) round($seconds);
     if ($seconds < 60) {
-        return 'کمتر از ۱ دقیقه';
+        return 'کمتر از ۱ minutes';
     }
     $days = intdiv($seconds, 86400);
     $hours = intdiv($seconds % 86400, 3600);
     $minutes = intdiv($seconds % 3600, 60);
     $parts = [];
     if ($days > 0) {
-        $parts[] = $days . ' روز';
+        $parts[] = $days . ' days';
     }
     if ($hours > 0) {
-        $parts[] = $hours . ' ساعت';
+        $parts[] = $hours . ' hours';
     }
     if ($minutes > 0 && $days === 0) {
-        $parts[] = $minutes . ' دقیقه';
+        $parts[] = $minutes . ' minutes';
     }
-    return $parts === [] ? 'کمتر از ۱ دقیقه' : implode(' و ', $parts);
+    return $parts === [] ? 'کمتر از ۱ minutes' : implode(' و ', $parts);
 }
 
 /**
@@ -2170,7 +2170,7 @@ function paymentInvoiceTtlSeconds()
 
 function paymentInvoiceExpiredMessage()
 {
-    return "❗زمان این تراکنش به پایان رسیده و امکان پرداخت این تراکنش وجود ندارد.\nلطفاً مجدداً فاکتور ایجاد نمایید.";
+    return "❗This payment has expired and can no longer be completed.\nPlease create a new invoice.";
 }
 
 /**
@@ -2518,7 +2518,7 @@ function save_forced_join_channel($link, $remark, $linkjoin): array
         if (($verify['error'] ?? '') === 'not_found') {
             return ['ok' => false, 'msg' => 'کانال یافت نشد. یوزرنیم/آیدی را بررسی کنید و مطمئن شوید ربات عضو کانال است.'];
         }
-        return ['ok' => false, 'msg' => 'ثبت کانال ناموفق بود.'];
+        return ['ok' => false, 'msg' => 'ثبت کانال Failed بود.'];
     }
 
     $insertChannel = function ($remarkValue) use ($pdo, $link, $linkjoin) {
@@ -2603,7 +2603,7 @@ function build_forced_join_keyboard(array $missing_channels, $textbotlang): stri
             continue;
         }
         if ($remark === '') {
-            $remark = $textbotlang['users']['channel']['text_join'] ?? 'عضویت در کانال';
+            $remark = $textbotlang['users']['channel']['text_join'] ?? 'Join the channel';
         }
         $keyboard['inline_keyboard'][] = [[
             'text' => $remark,
@@ -2611,7 +2611,7 @@ function build_forced_join_keyboard(array $missing_channels, $textbotlang): stri
         ]];
     }
     $keyboard['inline_keyboard'][] = [[
-        'text' => $textbotlang['users']['channel']['confirmjoin'] ?? 'بررسی عضویت',
+        'text' => $textbotlang['users']['channel']['confirmjoin'] ?? 'Check membership',
         'callback_data' => 'confirmchannel',
     ]];
     return json_encode($keyboard);
@@ -2788,7 +2788,7 @@ function formatBytes($bytes, $precision = 2): string
 {
     $base = log($bytes, 1024);
     $power = $bytes > 0 ? floor($base) : 0;
-    $suffixes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت', 'ترابایت'];
+        $suffixes = ['B', 'KB', 'MB', 'GB', 'TB'];
     return round(pow(1024, $base - $power), $precision) . ' ' . $suffixes[$power];
 }
 function panel_method_uses_namecustom($method): bool
@@ -2910,13 +2910,13 @@ function bump_username_sequence_counters($panel, $userId): void
 function allocate_service_username($panel, $user, string $customText = '', $ManagePanel = null): array
 {
     if (!is_array($panel) || !is_array($user)) {
-        return ['ok' => false, 'username' => '', 'msg' => 'پنل یا کاربر نامعتبر است.'];
+        return ['ok' => false, 'username' => '', 'msg' => 'Invalid panel or user.'];
     }
     $method = (string) ($panel['MethodUsername'] ?? '');
     $customText = trim($customText);
     if (panel_method_asks_custom_username($method)) {
         if ($customText === '' || !preg_match('/^\w{3,32}$/', strtolower($customText))) {
-            return ['ok' => false, 'username' => '', 'msg' => 'نام کاربری باید ۳ تا ۳۲ کاراکتر و فقط حروف، عدد و _ باشد.'];
+            return ['ok' => false, 'username' => '', 'msg' => 'Username must be 3 to 32 characters and only letters, numbers, and _.'];
         }
     }
 
@@ -2952,7 +2952,7 @@ function allocate_service_username($panel, $user, string $customText = '', $Mana
             return ['ok' => true, 'username' => $username, 'msg' => ''];
         }
         if (panel_method_asks_custom_username($method)) {
-            return ['ok' => false, 'username' => '', 'msg' => 'این نام کاربری از قبل ثبت شده است.'];
+            return ['ok' => false, 'username' => '', 'msg' => 'This username is already taken.'];
         }
         $username = strtolower(rand(1000000, 9999999) . '_' . $username);
         if (strlen($username) > 32) {
@@ -2964,7 +2964,7 @@ function allocate_service_username($panel, $user, string $customText = '', $Mana
         }
     }
 
-    return ['ok' => false, 'username' => '', 'msg' => 'ساخت نام کاربری طبق تنظیمات پنل ناموفق بود. دوباره تلاش کنید.'];
+    return ['ok' => false, 'username' => '', 'msg' => 'Could not create a username with the panel settings. Please try again.'];
 }
 
 function admin_custom_service_product_token(): string
@@ -2983,8 +2983,8 @@ function is_custom_service_product_choice($panel, string $productName): bool
     }
     $label = is_array($panel) ? panel_custom_button_text($panel) : '';
     return $productName === $label
-        || $productName === '⚙️ سرویس دلخواه'
-        || $productName === '🛍 حجم دلخواه';
+        || $productName === '⚙️ Custom service'
+        || $productName === '🛍 Custom data';
 }
 
 /**
@@ -3010,7 +3010,7 @@ function admin_provision_user_service($userId, array $opts): array
     }
     $panel = select("marzban_panel", "*", "name_panel", $panelName, "select");
     if (!is_array($panel)) {
-        return ['ok' => false, 'msg' => 'پنل یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Panel not found.'];
     }
 
     if (!class_exists('ManagePanel', false)) {
@@ -3035,7 +3035,7 @@ function admin_provision_user_service($userId, array $opts): array
         $minVol = (int) panel_agent_field($panel, 'mainvolume', (string) ($user['agent'] ?? 'f'), '1');
         $maxVol = (int) panel_agent_field($panel, 'maxvolume', (string) ($user['agent'] ?? 'f'), '1000');
         if ($gb < $minVol || $gb > $maxVol) {
-            return ['ok' => false, 'msg' => "حجم باید بین {$minVol} تا {$maxVol} گیگابایت باشد."];
+            return ['ok' => false, 'msg' => "حجم باید بین {$minVol} تا {$maxVol} GB باشد."];
         }
         if (!panel_custom_month_option($panel, $months)) {
             return ['ok' => false, 'msg' => 'مدت انتخاب‌شده نامعتبر است.'];
@@ -3134,7 +3134,7 @@ function admin_provision_user_service($userId, array $opts): array
         }
     }
 
-    $textTemplate = $datatextbot['textafterpay'] ?? '✅ سرویس {name_service} برای {username} ایجاد شد.';
+    $textTemplate = $datatextbot['textafterpay'] ?? '✅ Service {name_service} created for {username}.';
     if (($panel['type'] ?? '') === 'Manualsale') {
         $textTemplate = $datatextbot['textmanual'] ?? $textTemplate;
     } elseif (in_array($panel['type'] ?? '', ['ibsng', 'mikrotik'], true)) {
@@ -3144,10 +3144,10 @@ function admin_provision_user_service($userId, array $opts): array
     }
 
     $dayLabel = (int) ($info_product['Service_time'] ?? 0) === 0
-        ? ($textbotlang['users']['stateus']['Unlimited'] ?? 'نامحدود')
+        ? ($textbotlang['users']['stateus']['Unlimited'] ?? 'Unlimited')
         : $info_product['Service_time'];
     $volumeLabel = (int) ($info_product['Volume_constraint'] ?? 0) === 0
-        ? ($textbotlang['users']['stateus']['Unlimited'] ?? 'نامحدود')
+        ? ($textbotlang['users']['stateus']['Unlimited'] ?? 'Unlimited')
         : $info_product['Volume_constraint'];
 
     $createdUsername = (string) ($DataUserOut['username'] ?? $username);
@@ -3166,7 +3166,7 @@ function admin_provision_user_service($userId, array $opts): array
         $textTemplate
     );
     if ((int) ($info_product['Volume_constraint'] ?? 0) === 0) {
-        $textcreatuser = str_replace('گیگابایت', '', $textcreatuser);
+        $textcreatuser = str_replace('GB', '', $textcreatuser);
     }
     if (in_array($panel['type'] ?? '', ['Manualsale', 'ibsng', 'mikrotik'], true)) {
         $textcreatuser = str_replace('{password}', $DataUserOut['subscription_url'] ?? '', $textcreatuser);
@@ -3256,7 +3256,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
         $stmt->bindParam(':Service_location', $get_invoice['Service_location'], PDO::PARAM_STR);
         $stmt->execute();
         $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($get_invoice['name_product'] == "🛍 حجم دلخواه" || $get_invoice['name_product'] == "⚙️ سرویس دلخواه") {
+        if ($get_invoice['name_product'] == "🛍 Custom data" || $get_invoice['name_product'] == "⚙️ Custom service") {
             $info_product['data_limit_reset'] = "no_reset";
             $info_product['Volume_constraint'] = $get_invoice['Volume'];
             $info_product['name_product'] = $textbotlang['users']['customsellvolume']['title'];
@@ -3306,7 +3306,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
             $balance = $Balance_id['Balance'] + $Payment_report['price'];
             update("user", "Balance", $balance, "id", $Balance_id['id']);
             sendmessage($Balance_id['id'], $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
-            sendmessage($Balance_id['id'], "💎  کاربر عزیز بدلیل ساخته نشدن سرویس مبلغ $balance تومان به کیف پول شما اضافه گردید.", $keyboard, 'HTML');
+            sendmessage($Balance_id['id'], "💎 The service could not be created, so $balance Toman was added back to your wallet.", $keyboard, 'HTML');
             $texterros = "
 ⭕️ خطا در ساخت کانفیگ
 ✍️ دلیل خطا : 
@@ -3328,7 +3328,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
         $Shoppinginfo = json_encode([
             'inline_keyboard' => [
                 [
-                    ['text' => "📚 مشاهده آموزش استفاده ", 'callback_data' => "helpbtn"],
+                    ['text' => "📚 View usage guide ", 'callback_data' => "helpbtn"],
                 ]
             ]
         ]);
@@ -3372,7 +3372,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
                 'price_original' => null,
                 'price_final' => $get_invoice['price_product'] ?? ($Payment_report['price'] ?? null),
             ]);
-            $text_report = "⭕️ یک کاربر با نام کاربری @{$Balance_id['username']}  و آیدی عددی {$Balance_id['id']} از کد تخفیف {$partsdic[1]} استفاده کرد.";
+            $text_report = "⭕️ یک کاربر با Username @{$Balance_id['username']}  و آیدی عددی {$Balance_id['id']} از کد تخفیف {$partsdic[1]} استفاده کرد.";
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],
@@ -3390,7 +3390,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
                     $result = ($Payment_report['price'] * $setting['affiliatespercentage']) / 100;
                     $user_Balance = select("user", "*", "id", $Balance_id['affiliates'], "select");
                     if (intval($setting['scorestatus']) == 1 and !in_array($Balance_id['affiliates'], $admin_ids)) {
-                        sendmessage($Balance_id['affiliates'], "📌شما 2 امتیاز جدید کسب کردید.", null, 'html');
+                        sendmessage($Balance_id['affiliates'], "📌 You earned 2 new points.", null, 'html');
                         $scorenew = $user_Balance['score'] + 2;
                         update("user", "score", $scorenew, "id", $Balance_id['affiliates']);
                     }
@@ -3398,9 +3398,9 @@ function DirectPayment($order_id, $image = 'images.jpg')
                     $dateacc = date('Y/m/d H:i:s');
                     update("user", "Balance", $Balance_prim, "id", $Balance_id['affiliates']);
                     $result = number_format($result);
-                    $textadd = "🎁  پرداخت پورسانت 
-        
-        مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
+                    $textadd = "🎁 Referral commission
+
+        $result Toman was added to your wallet from your referral";
                     $textreportport = "
 مبلغ $result به کاربر {$Balance_id['affiliates']} برای پورسانت از کاربر {$Balance_id['id']} واریز گردید 
 تایم : $dateacc";
@@ -3419,7 +3419,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
                 $result = ($Payment_report['price'] * $setting['affiliatespercentage']) / 100;
                 $user_Balance = select("user", "*", "id", $Balance_id['affiliates'], "select");
                 if (intval($setting['scorestatus']) == 1 and !in_array($Balance_id['affiliates'], $admin_ids)) {
-                    sendmessage($Balance_id['affiliates'], "📌شما 2 امتیاز جدید کسب کردید.", null, 'html');
+                    sendmessage($Balance_id['affiliates'], "📌 You earned 2 new points.", null, 'html');
                     $scorenew = $user_Balance['score'] + 2;
                     update("user", "score", $scorenew, "id", $Balance_id['affiliates']);
                 }
@@ -3427,9 +3427,9 @@ function DirectPayment($order_id, $image = 'images.jpg')
                 $dateacc = date('Y/m/d H:i:s');
                 update("user", "Balance", $Balance_prim, "id", $Balance_id['affiliates']);
                 $result = number_format($result);
-                $textadd = "🎁  پرداخت پورسانت 
-        
-        مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
+                $textadd = "🎁 Referral commission
+
+        $result Toman was added to your wallet from your referral";
                 $textreportport = "
 مبلغ $result به کاربر {$Balance_id['affiliates']} برای پورسانت از کاربر {$Balance_id['id']} واریز گردید 
 تایم : $dateacc";
@@ -3462,7 +3462,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
         $timejalali = jdate('Y/m/d H:i:s');
         $textonebuy = "";
         if (bot_is_first_product_purchase($pdo, $Balance_id['id'], $get_invoice['id_invoice'] ?? null)) {
-            $textonebuy = "📌 خرید اول کاربر";
+            $textonebuy = "📌 First purchase";
         }
         $Response = json_encode([
             'inline_keyboard' => [
@@ -3499,7 +3499,7 @@ $textonebuy
             ]);
         }
         if (intval($setting['scorestatus']) == 1 and !in_array($Balance_id['id'], $admin_ids)) {
-            sendmessage($Balance_id['id'], "📌شما 1 امتیاز جدید کسب کردید.", null, 'html');
+            sendmessage($Balance_id['id'], "📌 You earned 1 new point.", null, 'html');
             $scorenew = $Balance_id['score'] + 1;
             update("user", "score", $scorenew, "id", $Balance_id['id']);
         }
@@ -3508,13 +3508,13 @@ $textonebuy
             update("invoice", "Status", "active", "id_invoice", $get_invoice['id_invoice']);
             $textconfrom = "✅ پرداخت تایید شده
  🛍خرید سرویس 
- ▫️نام کاربری کانفیگ :$username_ac
+ ▫️Config username :$username_ac
 ▫️لوکیشن سرویس : {$get_invoice['Service_location']}
 👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 کد پیگیری پرداخت: {$Payment_report['id_order']}
-⚜️ نام کاربری: @{$Balance_id['username']}
-💎 موجودی قبل خرید  : {$Balance_id['Balance']}
-💸 مبلغ پرداختی: $format_price_cart تومان
+🛒 Tracking code پرداخت: {$Payment_report['id_order']}
+⚜️ Username: @{$Balance_id['username']}
+💎 Balance قبل خرید  : {$Balance_id['Balance']}
+💸 Amount paid: $format_price_cart Toman
 ✍️ توضیحات : {$Payment_report['dec_not_confirmed']}
 
 ";
@@ -3535,7 +3535,7 @@ $textonebuy
         $data_order = $stmt->fetch(PDO::FETCH_ASSOC);
         $service_other = $data_order;
         if ($service_other == false) {
-            sendmessage($Balance_id['id'], '❌ خطایی در هنگام تمدید رخ داده با پشتیبانی در ارتباط باشید', $keyboard, 'HTML');
+            sendmessage($Balance_id['id'], '❌ A renewal error occurred. Please contact support.', $keyboard, 'HTML');
             return;
         }
         $service_other = json_decode($service_other['value'], true);
@@ -3566,14 +3566,14 @@ $textonebuy
             $balance = $Balance_id['Balance'] + $Payment_report['price'];
             update("user", "Balance", $balance, "id", $Balance_id['id']);
             sendmessage($Balance_id['id'], $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
-            sendmessage($Balance_id['id'], "💎  کاربر عزیز بدلیل تمدید نشدن سرویس مبلغ $balance تومان به کیف پول شما اضافه گردید.", $keyboard, 'HTML');
+            sendmessage($Balance_id['id'], "💎 The service could not be renewed, so $balance Toman was added back to your wallet.", $keyboard, 'HTML');
             $extend['msg'] = json_encode($extend['msg']);
             $textreports = "
         خطای تمدید سرویس
 نام پنل : {$marzban_list_get['name_panel']}
 نام کاربری سرویس : {$nameloc['username']}
 دلیل خطا : {$extend['msg']}";
-            sendmessage($nameloc['id_user'], "❌خطایی در تمدید سرویس رخ داده با پشتیبانی در ارتباط باشید", null, 'HTML');
+            sendmessage($nameloc['id_user'], "❌ A renewal error occurred. Please contact support.", null, 'HTML');
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],
@@ -3602,7 +3602,7 @@ $textonebuy
                 'price_original' => $prodcut['price_product'] ?? null,
                 'price_final' => $Payment_report['price'] ?? null,
             ]);
-            $text_report = "⭕️ یک کاربر با نام کاربری @{$Balance_id['username']}  و آیدی عددی {$Balance_id['id']} از کد تخفیف {$partsdic[1]} استفاده کرد.";
+            $text_report = "⭕️ یک کاربر با Username @{$Balance_id['username']}  و آیدی عددی {$Balance_id['id']} از کد تخفیف {$partsdic[1]} استفاده کرد.";
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],
@@ -3630,19 +3630,19 @@ $textonebuy
             $result = ($prodcut['price_product'] * $valurcashbackextend) / 100;
             $pricelastextend = $result;
             update("user", "Balance", $pricelastextend, "id", $Balance_id['id']);
-            sendmessage($Balance_id['id'], "تبریک 🎉
-📌 به عنوان هدیه تمدید مبلغ $result تومان حساب شما شارژ گردید", null, 'HTML');
+            sendmessage($Balance_id['id'], "Congratulations 🎉
+📌 $result Toman was added to your account as a renewal bonus", null, 'HTML');
         }
         $priceproductformat = number_format($prodcut['price_product']);
-        $textextend = "✅ تمدید برای سرویس شما با موفقیت صورت گرفت
+        $textextend = "✅ Your service was renewed
  
 ▫️نام سرویس : $usernamepanel
-▫️نام محصول : {$prodcut['name_product']}
-▫️مبلغ تمدید $priceproductformat تومان
+▫️Product : {$prodcut['name_product']}
+▫️Renewal price $priceproductformat Toman
 ";
         sendmessage($Balance_id['id'], $textextend, $keyboardextendfnished, 'HTML');
         if (intval($setting['scorestatus']) == 1 and !in_array($Balance_id['id'], $admin_ids)) {
-            sendmessage($Balance_id['id'], "📌شما 2 امتیاز جدید کسب کردید.", null, 'html');
+            sendmessage($Balance_id['id'], "📌 You earned 2 new points.", null, 'html');
             $scorenew = $Balance_id['score'] + 2;
             update("user", "score", $scorenew, "id", $Balance_id['id']);
         }
@@ -3672,14 +3672,14 @@ $textonebuy
 
             $textconfrom = "✅ پرداخت تایید شده
 🔋 تمدید سرویس
-🪪 نام کاربری کانفیگ : $usernamepanel
-🛍 نام محصول : {$prodcut['name_product']}
+🪪 Config username : $usernamepanel
+🛍 Product : {$prodcut['name_product']}
 🌏 نام لوکیشن : {$nameloc['Service_location']}
 👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 کد پیگیری پرداخت: {$Payment_report['id_order']}
-⚜️ نام کاربری: @{$Balance_id['username']}
-💎 موجودی قبل تمدید  : {$Balance_id['Balance']}
-💸 مبلغ پرداختی: $format_price_cart تومان
+🛒 Tracking code پرداخت: {$Payment_report['id_order']}
+⚜️ Username: @{$Balance_id['username']}
+💎 Balance قبل تمدید  : {$Balance_id['Balance']}
+💸 Amount paid: $format_price_cart Toman
 ✍️ توضیحات : {$Payment_report['dec_not_confirmed']}
 
 ";
@@ -3713,7 +3713,7 @@ $textonebuy
 نام پنل : {$marzban_list_get['name_panel']}
 نام کاربری سرویس : {$nameloc['username']}
 دلیل خطا : {$extra_volume['msg']}";
-            sendmessage($nameloc['id_user'], "❌خطایی در خرید حجم اضافه سرویس رخ داده با پشتیبانی در ارتباط باشید", null, 'HTML');
+            sendmessage($nameloc['id_user'], "❌ Extra-data purchase failed. Please contact support.", null, 'HTML');
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],
@@ -3742,42 +3742,42 @@ $textonebuy
         ]);
         $volumesformat = number_format($Payment_report['price'], 0);
         if (intval($setting['scorestatus']) == 1 and !in_array($Balance_id['id'], $admin_ids)) {
-            sendmessage($Balance_id['id'], "📌شما 1 امتیاز جدید کسب کردید.", null, 'html');
+            sendmessage($Balance_id['id'], "📌 You earned 1 new point.", null, 'html');
             $scorenew = $Balance_id['score'] + 1;
             update("user", "score", $scorenew, "id", $Balance_id['id']);
         }
-        $textvolume = "✅ افزایش حجم برای سرویس شما با موفقیت صورت گرفت
+        $textvolume = "✅ Extra data was added to your service
  
 ▫️نام سرویس  : {$steppay[0]}
-▫️حجم اضافه : $volume گیگ
+▫️Extra data : $volume GB
 
-▫️مبلغ افزایش حجم : $volumesformat تومان";
+▫️مبلغ افزایش حجم : $volumesformat Toman";
         sendmessage($Balance_id['id'], $textvolume, $keyboardextrafnished, 'HTML');
         $volumes = $volume;
         if ($Payment_report['Payment_Method'] == "cart to cart") {
             $textconfrom = "✅ پرداخت تایید شده
-🔋 خرید حجم اضافه
-🛍 حجم خریداری شده  : $volumes گیگ
-👤 نام کاربری کانفیگ {$steppay[0]}
+🔋 خرید Extra data
+🛍 حجم خریداری شده  : $volumes GB
+👤 Config username {$steppay[0]}
 👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 کد پیگیری پرداخت: {$Payment_report['id_order']}
-⚜️ نام کاربری: @{$Balance_id['username']}
-💎 موجودی قبل ازافزایش موجودی : {$Balance_id['Balance']}
-💸 مبلغ پرداختی: $format_price_cart تومان
+🛒 Tracking code پرداخت: {$Payment_report['id_order']}
+⚜️ Username: @{$Balance_id['username']}
+💎 Balance قبل ازافزایش Balance : {$Balance_id['Balance']}
+💸 Amount paid: $format_price_cart Toman
 ";
             if (!empty($from_id) && !empty($message_id)) {
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
             }
         }
         update("invoice", "Status", "active", "id_invoice", $nameloc['id_invoice']);
-        $text_report = "⭕️ یک کاربر حجم اضافه خریده است
+        $text_report = "⭕️ یک کاربر Extra data خریده است
         
 اطلاعات کاربر : 
 🪪 آیدی عددی : {$Balance_id['id']}
-🛍 حجم خریداری شده  : $volumes گیگ
-💰 مبلغ پرداختی : {$Payment_report['price']} تومان
-👤 نام کاربری کانفیگ {$steppay[0]}
-موجودی کاربر قبل خرید : {$Balance_id['Balance']}
+🛍 حجم خریداری شده  : $volumes GB
+💰 مبلغ پرداختی : {$Payment_report['price']} Toman
+👤 Config username {$steppay[0]}
+Balance کاربر قبل خرید : {$Balance_id['Balance']}
 ";
         if (strlen($setting['Channel_Report']) > 0) {
             telegram('sendmessage', [
@@ -3815,7 +3815,7 @@ $textonebuy
 نام پنل : {$marzban_list_get['name_panel']}
 نام کاربری سرویس : {$nameloc['username']}
 دلیل خطا : {$extra_time['msg']}";
-            sendmessage($from_id, "❌خطایی در خرید حجم اضافه سرویس رخ داده با پشتیبانی در ارتباط باشید", null, 'HTML');
+            sendmessage($from_id, "❌ Extra-data purchase failed. Please contact support.", null, 'HTML');
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],
@@ -3844,41 +3844,41 @@ $textonebuy
         ]);
         $volumesformat = number_format($Payment_report['price']);
         if (intval($setting['scorestatus']) == 1 and !in_array($Balance_id['id'], $admin_ids)) {
-            sendmessage($Balance_id['id'], "📌شما 1 امتیاز جدید کسب کردید.", null, 'html');
+            sendmessage($Balance_id['id'], "📌 You earned 1 new point.", null, 'html');
             $scorenew = $Balance_id['score'] + 1;
             update("user", "score", $scorenew, "id", $Balance_id['id']);
         }
-        $textextratime = "✅ افزایش زمان برای سرویس شما با موفقیت صورت گرفت
+        $textextratime = "✅ Extra time was added to your service
  
 ▫️نام سرویس : {$steppay[0]}
-▫️زمان اضافه : $tmieextra روز
+▫️Extra time : $tmieextra days
 
-▫️مبلغ افزایش زمان : $volumesformat تومان";
+▫️مبلغ افزایش زمان : $volumesformat Toman";
         sendmessage($Balance_id['id'], $textextratime, $keyboardextrafnished, 'HTML');
         if ($Payment_report['Payment_Method'] == "cart to cart") {
             $volumes = $tmieextra;
             $textconfrom = "✅ پرداخت تایید شده
-🔋 خرید زمان اضافه
-🛍 زمان خریداری شده  : $volumes روز
-👤 نام کاربری کانفیگ {$steppay[0]}
+🔋 خرید Extra time
+🛍 زمان خریداری شده  : $volumes days
+👤 Config username {$steppay[0]}
 👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 کد پیگیری پرداخت: {$Payment_report['id_order']}
-⚜️ نام کاربری: @{$Balance_id['username']}
-💎 موجودی قبل ازافزایش موجودی : {$Balance_id['Balance']}
-💸 مبلغ پرداختی: $format_price_cart تومان
+🛒 Tracking code پرداخت: {$Payment_report['id_order']}
+⚜️ Username: @{$Balance_id['username']}
+💎 Balance قبل ازافزایش Balance : {$Balance_id['Balance']}
+💸 Amount paid: $format_price_cart Toman
 ";
             if (!empty($from_id) && !empty($message_id)) {
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
             }
         }
         update("invoice", "Status", "active", "id_invoice", $nameloc['id_invoice']);
-        $text_report = "⭕️ یک کاربر زمان اضافه خریده است
+        $text_report = "⭕️ یک کاربر Extra time خریده است
         
 اطلاعات کاربر : 
 🪪 آیدی عددی : {$Balance_id['id']}
-🛍 زمان خریداری شده  : $volumes روز
-💰 مبلغ پرداختی : {$Payment_report['price']} تومان
-👤 نام کاربری کانفیگ {$steppay[0]}";
+🛍 زمان خریداری شده  : $volumes days
+💰 مبلغ پرداختی : {$Payment_report['price']} Toman
+👤 Config username {$steppay[0]}";
         if (strlen($setting['Channel_Report']) > 0) {
             telegram('sendmessage', [
                 'chat_id' => $setting['Channel_Report'],
@@ -3905,9 +3905,9 @@ $textonebuy
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
             }
         }
-        sendmessage($Payment_report['id_user'], "💎 کاربر گرامی مبلغ {$Payment_report['price']} تومان به کیف پول شما واریز گردید با تشکراز پرداخت شما.
+        sendmessage($Payment_report['id_user'], "💎 {$Payment_report['price']} Toman was added to your wallet. Thank you for your payment.
                 
-🛒 کد پیگیری شما: {$Payment_report['id_order']}", null, 'HTML');
+🛒 Tracking code: {$Payment_report['id_order']}", null, 'HTML');
     }
 }
 function plisio($order_id, $price)
@@ -4078,7 +4078,7 @@ function getUsertestLimitWarningMessage($user): string
     $limit = $setting['limit_usertest_all'] ?? ($user['limit_usertest'] ?? '1');
     if (countActiveUsertestAccounts($user['id']) > 0) {
         $msg = $textbotlang['users']['usertest']['limitwarningactive']
-            ?? "محدودیت اکانت تست هر {limit}‌ اکانت در ۱۰ روز است . شما یک اکانت تست فعال دارید. لطفا چند روز دیگر مجددا امتحان نمایید .";
+            ?? "محدودیت اکانت تست هر {limit}‌ اکانت در ۱۰ days است . شما یک اکانت تست فعال دارید. لطفا چند days دیگر مجددا امتحان نمایید .";
         return str_replace('{limit}', $limit, $msg);
     }
     return $textbotlang['users']['usertest']['limitwarning'];
@@ -4139,7 +4139,7 @@ function panel_custom_enabled($panel, string $agent): bool
 function panel_custom_button_text($panel): string
 {
     global $textbotlang;
-    $default = $textbotlang['users']['customsellvolume']['title'] ?? '⚙️ سرویس دلخواه';
+    $default = $textbotlang['users']['customsellvolume']['title'] ?? '⚙️ Custom service';
     if (!is_array($panel)) {
         return $default;
     }
@@ -4316,7 +4316,7 @@ function KeyboardCustomMonths($panel, string $prefix = 'custommonth_', string $b
         ];
     }
     $keyboard['inline_keyboard'][] = [
-        ['text' => $textbotlang['users']['stateus']['backinfo'] ?? '🏠 بازگشت', 'callback_data' => $backCallback],
+        ['text' => $textbotlang['users']['stateus']['backinfo'] ?? '🏠 Back', 'callback_data' => $backCallback],
     ];
     return json_encode($keyboard);
 }
@@ -4409,20 +4409,20 @@ function product_category_is_active($product): bool
 function extend_can_proceed($panel, $product = null): array
 {
     if (!panel_is_active($panel) || (($panel['status_extend'] ?? '') === 'off_extend')) {
-        return ['ok' => false, 'msg' => '❌ امکان تمدید در این پنل وجود ندارد'];
+        return ['ok' => false, 'msg' => '❌ Renewal is not available on this panel'];
     }
     if ($product === null) {
         return ['ok' => true, 'msg' => ''];
     }
     if (!is_array($product)) {
-        return ['ok' => false, 'msg' => '❌ این محصول غیرفعال است و امکان تمدید آن وجود ندارد'];
+        return ['ok' => false, 'msg' => '❌ This product is disabled and cannot be renewed'];
     }
     $code = (string) ($product['code_product'] ?? '');
     if (in_array($code, ['custom_volume', 'customvolume', 'pre'], true)) {
         return ['ok' => true, 'msg' => ''];
     }
     if (!product_category_is_active($product)) {
-        return ['ok' => false, 'msg' => '❌ این محصول غیرفعال است و امکان تمدید آن وجود ندارد'];
+        return ['ok' => false, 'msg' => '❌ This product is disabled and cannot be renewed'];
     }
     return ['ok' => true, 'msg' => ''];
 }
@@ -4461,7 +4461,7 @@ function extend_current_plan_row($invoice): ?array
     }
     $currentProd = select("product", "*", "name_product", $invoice['name_product'] ?? '', "select");
     if (!$currentProd || product_category_is_active($currentProd)) {
-        return [['text' => "♻️ تمدید پلن فعلی", 'callback_data' => "exntedagei"]];
+        return [['text' => "♻️ Renew current plan", 'callback_data' => "exntedagei"]];
     }
     return null;
 }
@@ -4478,7 +4478,7 @@ function extend_category_select_text($panel): string
 function extend_products_message($category = null): string
 {
     global $textbotlang;
-    $fallback = $textbotlang['users']['extend']['selectservice'] ?? '🛍 محصول خود را برای تمدید انتخاب نمایید';
+    $fallback = $textbotlang['users']['extend']['selectservice'] ?? '🛍 Select a product to renew';
     if (!is_array($category)) {
         return $fallback;
     }
@@ -4671,10 +4671,10 @@ function invoice_auto_renew_notify_enabled(array $invoice, $fromId, $telegramUse
 
 ▫️آیدی عددی کاربر : <code>{$fromId}</code>
 ▫️نام کاربر : {$firstName}
-▫️نام کاربری تلگرام : {$tgUser}
-▫️نام کاربری سرویس : <code>{$invoice['username']}</code>
-▫️نام محصول : {$invoice['name_product']}
-▫️موقعیت سرویس : {$invoice['Service_location']}
+▫️Username تلگرام : {$tgUser}
+▫️Service username : <code>{$invoice['username']}</code>
+▫️Product : {$invoice['name_product']}
+▫️Service location : {$invoice['Service_location']}
 ▫️زمان : {$timeText}";
     telegram('sendmessage', [
         'chat_id' => $setting['Channel_Report'],
@@ -5082,7 +5082,7 @@ function invoice_try_auto_renew(array $invoice, array $user, array $userData, $p
         $extendMsg = json_encode($extend['msg'] ?? $extend, JSON_UNESCAPED_UNICODE);
         $textreports = "خطای تمدید خودکار سرویس
 نام پنل : {$panel['name_panel']}
-نام کاربری سرویس : {$invoice['username']}
+Service username : {$invoice['username']}
 دلیل خطا : {$extendMsg}";
         $errorreportRow = select('topicid', 'idreport', 'report', 'errorreport', 'select');
         $errorreport = is_array($errorreportRow) ? ($errorreportRow['idreport'] ?? null) : null;
@@ -5141,7 +5141,7 @@ function invoice_try_auto_renew(array $invoice, array $user, array $userData, $p
     update('invoice', 'Status', 'active', 'id_invoice', $invoice['id_invoice']);
     $priceFormat = number_format($price);
     $success = sprintf(
-        $textbotlang['users']['extend']['autorenew_success'] ?? "✅ سرویس %s به‌صورت خودکار تمدید شد.\n\n🛍 بسته: %s\n💸 مبلغ کسر شده: %s تومان",
+        $textbotlang['users']['extend']['autorenew_success'] ?? "✅ سرویس %s به‌صورت خودکار تمدید شد.\n\n🛍 بسته: %s\n💸 مبلغ کسر شده: %s Toman",
         $invoice['username'],
         $product['name_product'],
         $priceFormat
@@ -5154,14 +5154,14 @@ function invoice_try_auto_renew(array $invoice, array $user, array $userData, $p
     $text_report = "📣 تمدید خودکار سرویس ثبت شد.
 
 ▫️آیدی عددی کاربر : <code>{$user['id']}</code>
-▫️نام کاربری کانفیگ : {$invoice['username']}
-▫️موقعیت سرویس : {$invoice['Service_location']}
-▫️نام محصول : {$product['name_product']}
+▫️Config username : {$invoice['username']}
+▫️Service location : {$invoice['Service_location']}
+▫️Product : {$product['name_product']}
 ▫️حجم محصول : {$product['Volume_constraint']}
 ▫️زمان محصول : {$product['Service_time']}
-▫️مبلغ تمدید : {$priceFormat} تومان
-▫️موجودی قبل : {$balanceBefore} تومان
-▫️موجودی بعد : {$balanceAfter} تومان
+▫️Renewal price : {$priceFormat} Toman
+▫️Balance قبل : {$balanceBefore} Toman
+▫️Balance بعد : {$balanceAfter} Toman
 ▫️زمان : {$timeText}";
     $otherserviceRow = select('topicid', 'idreport', 'report', 'otherservice', 'select');
     $otherservice = is_array($otherserviceRow) ? ($otherserviceRow['idreport'] ?? null) : null;
@@ -5350,7 +5350,11 @@ function checktelegramip()
         return false;
     }
 
-    global $telegram_polling_mode;
+    global $telegram_polling_mode, $telegram_allow_localhost;
+    $remoteAddr = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    if (!empty($telegram_allow_localhost) && in_array($remoteAddr, ['127.0.0.1', '::1'], true)) {
+        return true;
+    }
     if (!empty($telegram_polling_mode) && in_array($clientIp, ['127.0.0.1', '::1'], true)) {
         return true;
     }
@@ -5727,13 +5731,24 @@ function languagechange($path_dir)
     }
 
     $setting = select("setting", "*");
-    if (intval($setting['languageen'] ?? 0) === 1 && isset($decoded['en'])) {
-        return $decoded['en'];
+    $fa = $decoded['fa'] ?? [];
+    $en = $decoded['en'] ?? [];
+    $ru = $decoded['ru'] ?? [];
+    if (intval($setting['languageen'] ?? 0) === 1 && isset($en['users'])) {
+        $out = $en;
+        if (isset($fa['Admin']) && is_array($fa['Admin'])) {
+            $out['Admin'] = array_replace_recursive($fa['Admin'], is_array($en['Admin'] ?? null) ? $en['Admin'] : []);
+        }
+        return $out;
     }
-    if (intval($setting['languageru'] ?? 0) === 1 && isset($decoded['ru'])) {
-        return $decoded['ru'];
+    if (intval($setting['languageru'] ?? 0) === 1 && isset($ru['users'])) {
+        $out = $ru;
+        if (isset($fa['Admin']) && is_array($fa['Admin'])) {
+            $out['Admin'] = array_replace_recursive($fa['Admin'], is_array($ru['Admin'] ?? null) ? $ru['Admin'] : []);
+        }
+        return $out;
     }
-    return $decoded['fa'] ?? $decoded['en'] ?? [];
+    return $fa ?: $en ?: [];
 }
 function generateAuthStr($length = 10)
 {
@@ -6058,17 +6073,17 @@ function build_keyboardmain_from_active_buttons($active_buttons)
 function get_main_keyboard_button_fallback_labels()
 {
     return [
-        'text_sell' => '🔐 خرید اشتراک',
-        'text_extend' => '♻️ تمدید سرویس',
-        'text_usertest' => '🔑 اکانت تست',
-        'text_wheel_luck' => '🎲 گردونه شانس',
-        'text_Purchased_services' => '🛍 سرویس های من',
-        'accountwallet' => '🏦 کیف پول + شارژ',
-        'text_affiliates' => '👥 زیر مجموعه گیری',
-        'text_referral' => '🎁 دعوت دوستان',
-        'text_Tariff_list' => '💵 تعرفه اشتراک ها',
-        'text_support' => '☎️ پشتیبانی',
-        'text_help' => '📚 آموزش',
+        'text_sell' => '🔐 Buy subscription',
+        'text_extend' => '♻️ Renew service',
+        'text_usertest' => '🔑 Test account',
+        'text_wheel_luck' => '🎲 Lucky wheel',
+        'text_Purchased_services' => '🛍 My services',
+        'accountwallet' => '🏦 Wallet + top up',
+        'text_affiliates' => '👥 Referrals',
+        'text_referral' => '🎁 Invite friends',
+        'text_Tariff_list' => '💵 Pricing',
+        'text_support' => '☎️ Support',
+        'text_help' => '📚 Guide',
     ];
 }
 
@@ -6434,14 +6449,14 @@ function build_user_main_keyboard_markup($setting, $datatextbot, $textbotlang, $
         $extra_row[] = $extra_button;
     }
     if (($users['agent'] ?? '') !== 'f') {
-        $extra_button = ['text' => $datatextbot['textpanelagent'] ?? 'نمایندگی'];
+        $extra_button = ['text' => $datatextbot['textpanelagent'] ?? 'Agency'];
         if ($inline) {
             $extra_button['callback_data'] = 'agentpanel';
         }
         $extra_row[] = $extra_button;
     }
     if (($users['agent'] ?? '') === 'f' && ($setting['statusagentrequest'] ?? '') === 'onrequestagent') {
-        $extra_button = ['text' => $datatextbot['textrequestagent'] ?? 'درخواست نمایندگی'];
+        $extra_button = ['text' => $datatextbot['textrequestagent'] ?? 'Request agency'];
         if ($inline) {
             $extra_button['callback_data'] = 'requestagent';
         }
@@ -6579,7 +6594,7 @@ function build_main_keyboard_button_edit_text($button_id, $datatextbot, $keyboar
     $label = get_main_keyboard_button_label($button_id, $datatextbot);
     $parts = split_main_keyboard_button_label($label);
     $title = $parts['title'] !== '' ? $parts['title'] : $label;
-    $active = check_active_btn($keyboardmain_json, $button_id, $datatextbot) ? 'نمایش ✅' : 'مخفی ❌';
+    $active = check_active_btn($keyboardmain_json, $button_id, $datatextbot) ? 'Visible ✅' : 'Hidden ❌';
     $icons = get_main_keyboard_button_icons();
     $icon = $icons[$button_id] ?? '';
     if ($icon !== '') {
@@ -6899,7 +6914,7 @@ function textbot_custom_volume_ask($price, $min, $max): string
 {
     $tpl = textbot_get(
         'text_custom_volume_ask',
-        "📌 حجم درخواستی خود را ارسال کنید.\n🔔قیمت هر گیگ حجم {price} تومان می باشد.\n🔔 حداقل حجم {min} گیگابایت و حداکثر {max} گیگابایت می باشد."
+        "📌 حجم درخواستی خود را ارسال کنید.\n🔔قیمت هر GB حجم {price} Toman می باشد.\n🔔 Minimum data {min} GB و حداکثر {max} GB می باشد."
     );
     return strtr($tpl, [
         '{price}' => (string) $price,
@@ -6912,7 +6927,7 @@ function textbot_custom_volume_invalid($min, $max): string
 {
     $tpl = textbot_get(
         'text_custom_volume_invalid',
-        "❌ حجم نامعتبر است.\n🔔 حداقل حجم {min} گیگابایت و حداکثر {max} گیگابایت می باشد"
+        "❌ حجم نامعتبر است.\n🔔 Minimum data {min} GB و حداکثر {max} GB می باشد"
     );
     return strtr($tpl, [
         '{min}' => (string) $min,
@@ -7163,7 +7178,7 @@ function keyboard_panels_purchase_text_edit(string $callback_prefix): string
     if ($rows === []) {
         $rows[] = [['text' => '❌ پنلی یافت نشد', 'callback_data' => 'purchase_texts_back']];
     }
-    $rows[] = [['text' => '🔙 بازگشت', 'callback_data' => 'purchase_texts_back']];
+    $rows[] = [['text' => '🔙 Back', 'callback_data' => 'purchase_texts_back']];
     return json_encode(['inline_keyboard' => $rows], JSON_UNESCAPED_UNICODE);
 }
 
@@ -7191,7 +7206,7 @@ function keyboard_categories_purchase_text_edit(string $callback_prefix): string
     if ($rows === []) {
         $rows[] = [['text' => '❌ دسته‌بندی یافت نشد', 'callback_data' => 'purchase_texts_back']];
     }
-    $rows[] = [['text' => '🔙 بازگشت', 'callback_data' => 'purchase_texts_back']];
+    $rows[] = [['text' => '🔙 Back', 'callback_data' => 'purchase_texts_back']];
     return json_encode(['inline_keyboard' => $rows], JSON_UNESCAPED_UNICODE);
 }
 
@@ -7306,7 +7321,7 @@ function sendMessageService($panel_info, $config, $sub_link, $username_service, 
 
     if ($panel_info['config'] == "onconfig" && $setting['status_keyboard_config'] == "1") {
         if (is_array($config) && count($config) > 0) {
-            sendmessage($user_id, "📌 جهت دریافت کانفیگ روی دکمه دریافت کانفیگ کلیک کنید", keyboard_config($config, $invoice_id, false), 'HTML');
+            sendmessage($user_id, "📌 Tap Get config to receive your config", keyboard_config($config, $invoice_id, false), 'HTML');
         }
     }
     // Keep the latest delivered sub link so "subscription link" button can fallback reliably.
@@ -7318,7 +7333,7 @@ function isValidInvitationCode($setting, $fromId, $verfy_status)
 {
 
     if ($setting['verifybucodeuser'] == "onverify" && $verfy_status != 1) {
-        sendmessage($fromId, "حساب کاربری شما با موفقیت احرازهویت گردید", null, 'html');
+        sendmessage($fromId, "Your account was verified", null, 'html');
         update("user", "verify", "1", "id", $fromId);
         update("user", "cardpayment", "1", "id", $fromId);
     }
@@ -7484,11 +7499,11 @@ function affiliates_porsant_text(array $affiliatesRow, $percentage): string
     }
     $percent = $percentage;
     if (($affiliatesRow['porsant_one_buy'] ?? 'off_buy_porsant') === 'off_buy_porsant') {
-        return "<b>💸 پورسانت خرید:</b>  
-•  $percent درصد از  مبلغ هر خرید زیرمجموعه به شما تعلق می‌گیره.";
+        return "<b>💸 Purchase commission:</b>
+•  You receive $percent percent of every referral purchase.";
     }
-    return "<b>💸 پورسانت خرید:</b>  
-•  $percent درصد از مبلغ خرید زیرمجموعه به شما تعلق می‌گیره";
+    return "<b>💸 Purchase commission:</b>
+•  You receive $percent percent of the referral purchase";
 }
 
 function affiliates_main_keyboard($from_id, array $user, $usernamebot): string
@@ -7496,16 +7511,16 @@ function affiliates_main_keyboard($from_id, array $user, $usernamebot): string
     $shareUrl = "https://t.me/share/url?url=https://t.me/{$usernamebot}?start={$from_id}";
     $rows = [
         [
-            ['text' => '👥 زیر مجموعه ها', 'callback_data' => 'aff_list_1'],
-            ['text' => '🔗 اشتراک گذاری لینک', 'url' => $shareUrl],
+            ['text' => '👥 Referrals', 'callback_data' => 'aff_list_1'],
+            ['text' => '🔗 Share link', 'url' => $shareUrl],
         ],
         [
-            ['text' => '💸 درخواست برداشت', 'callback_data' => 'Wallet_Withdraw'],
+            ['text' => '💸 Withdraw request', 'callback_data' => 'Wallet_Withdraw'],
         ],
     ];
     if (affiliates_user_can_claim_start_gift($user)) {
         $rows[] = [
-            ['text' => '🎁 دریافت هدیه عضویت', 'callback_data' => 'get_gift_start'],
+            ['text' => '🎁 Claim signup bonus', 'callback_data' => 'get_gift_start'],
         ];
     }
     return json_encode(['inline_keyboard' => $rows], JSON_UNESCAPED_UNICODE);
@@ -7533,9 +7548,9 @@ function affiliates_main_view($from_id, array $user): array
     $text_start = '';
     if (($affiliatescommission['Discount'] ?? '') === 'onDiscountaffiliates') {
         $text_start = "<b>🎁 هدیه عضویت:</b>
-• 🎉 مجموع هدیه: {$affiliatescommission['price_Discount']} تومان  
+• 🎉 مجموع هدیه: {$affiliatescommission['price_Discount']} Toman  
 • 🔻 ۵۰٪ برای شما (معرف)  
-• 🔻 ۵۰٪ برای زیرمجموعه (کاربر جدید)
+• 🔻 ۵۰٪ برای referral (کاربر جدید)
 ";
     }
     $text_porsant = affiliates_porsant_text($affiliatescommission, $setting['affiliatespercentage'] ?? 0);
@@ -7543,17 +7558,17 @@ function affiliates_main_view($from_id, array $user): array
     $orders = (int) ($inforefral['orders'] ?? 0);
     $affiliatescount = $user['affiliatescount'] ?? 0;
 
-    $text = "<b>💼 زیرمجموعه‌گیری و هدیه خوش‌آمد</b>
+    $text = "<b>💼 Referrals و هدیه خوش‌آمد</b>
 
-با دعوت دوستان از طریق <b>لینک اختصاصی</b>، بدون پرداخت حتی ۱ ریال کیف پولت شارژ میشه و از خدمات ربات استفاده می‌کنی!
+با دعوت دوستان از طریق <b>لینک اختصاصی</b>، بدون پرداخت حتی ۱ Rial کیف پولت شارژ میشه و از خدمات ربات استفاده می‌کنی!
 
 $text_start
 $text_porsant
 
 <b>📊 آمار شما:</b>
-• 👥 زیرمجموعه‌ها: {$affiliatescount} نفر
+• 👥 referral‌ها: {$affiliatescount} نفر
 • 🛒 خریدها: {$orders} عدد
-• 💵 مجموع خرید: $sum_order تومان
+• 💵 مجموع خرید: $sum_order Toman
 
 <b>📢 دعوت کن، هدیه بگیر، رشد کن!</b>
 ";
@@ -7622,10 +7637,10 @@ function affiliates_list_view($referrerId, int $page): array
     $keyboard = ['inline_keyboard' => []];
     if ($total === 0) {
         $keyboard['inline_keyboard'][] = [
-            ['text' => '🔙 بازگشت', 'callback_data' => 'affiliatesbtn'],
+            ['text' => '🔙 Back', 'callback_data' => 'affiliatesbtn'],
         ];
         return [
-            'text' => 'هنوز زیرمجموعه‌ای ندارید.',
+            'text' => 'هنوز referral‌ای ندارید.',
             'keyboard' => json_encode($keyboard, JSON_UNESCAPED_UNICODE),
         ];
     }
@@ -7667,11 +7682,11 @@ function affiliates_list_view($referrerId, int $page): array
         $keyboard['inline_keyboard'][] = $nav;
     }
     $keyboard['inline_keyboard'][] = [
-        ['text' => '🔙 بازگشت', 'callback_data' => 'affiliatesbtn'],
+        ['text' => '🔙 Back', 'callback_data' => 'affiliatesbtn'],
     ];
 
     return [
-        'text' => "👥 لیست زیرمجموعه‌های شما\nصفحه {$page} از {$pages} · {$total} نفر\nروی هر ردیف بزنید تا سرویس‌های همان کاربر را ببینید.",
+        'text' => "👥 لیست referral‌های شما\nصفحه {$page} از {$pages} · {$total} نفر\nروی هر ردیف بزنید تا سرویس‌های همان کاربر را ببینید.",
         'keyboard' => json_encode($keyboard, JSON_UNESCAPED_UNICODE),
     ];
 }
@@ -7684,17 +7699,17 @@ function affiliates_format_volume_usage(?array $dataUser, array $invoice): strin
         $limit = $dataUser['data_limit'] ?? 0;
         $usedText = (is_numeric($used) && (float) $used > 0)
             ? formatBytes((float) $used)
-            : 'مصرف نشده';
+            : 'Not used';
         $limitText = (is_numeric($limit) && (float) $limit > 0)
             ? formatBytes((float) $limit)
-            : 'نامحدود';
+            : 'Unlimited';
         return $usedText . ' / ' . $limitText;
     }
     $volume = $invoice['Volume'] ?? ($invoice['Volume_constraint'] ?? '0');
     $totalText = (is_numeric($volume) && (float) $volume > 0)
-        ? ((float) $volume . ' گیگ')
-        : 'نامحدود';
-    return 'نامشخص / ' . $totalText;
+        ? ((float) $volume . ' GB')
+        : 'Unlimited';
+    return 'Unknown / ' . $totalText;
 }
 
 function affiliates_format_time_usage(?array $dataUser, array $invoice): string
@@ -7705,7 +7720,7 @@ function affiliates_format_time_usage(?array $dataUser, array $invoice): string
     $expireTs = is_numeric($expire) ? (int) $expire : 0;
 
     if ($totalDays <= 0 && $expireTs <= 0) {
-        return 'نامحدود';
+        return 'Unlimited';
     }
 
     $consumed = null;
@@ -7721,12 +7736,12 @@ function affiliates_format_time_usage(?array $dataUser, array $invoice): string
     }
 
     if ($totalDays <= 0) {
-        return $consumed === null ? 'نامحدود' : ($consumed . ' روز / نامحدود');
+        return $consumed === null ? 'Unlimited' : ($consumed . ' days / Unlimited');
     }
     if ($consumed === null) {
-        return 'نامشخص / ' . $totalDays . ' روز';
+        return 'Unknown / ' . $totalDays . ' days';
     }
-    return $consumed . ' / ' . $totalDays . ' روز';
+    return $consumed . ' / ' . $totalDays . ' days';
 }
 
 function affiliates_fetch_invoice_usage(array $invoice): ?array
@@ -7752,10 +7767,10 @@ function affiliates_services_view($referrerId, $childId, int $page): array
 
     if (!affiliates_user_is_invitee($childId, $referrerId)) {
         return [
-            'text' => '❌ این کاربر زیرمجموعه شما نیست.',
+            'text' => '❌ این کاربر referral شما نیست.',
             'keyboard' => json_encode([
                 'inline_keyboard' => [
-                    [['text' => '🔙 بازگشت', 'callback_data' => 'aff_list_1']],
+                    [['text' => '🔙 Back', 'callback_data' => 'aff_list_1']],
                 ],
             ], JSON_UNESCAPED_UNICODE),
         ];
@@ -7810,7 +7825,7 @@ function affiliates_services_view($referrerId, $childId, int $page): array
     $stmt->execute([':uid' => (string) $childId]);
     $invoices = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-    $lines = ["🛍 سرویس‌های {$childLabel}", "صفحه {$page} از {$pages} · {$total} سرویس", ''];
+    $lines = ["🛍 Services of {$childLabel}", "Page {$page} of {$pages} · {$total} service(s)", ''];
     foreach ($invoices as $invoice) {
         $usage = affiliates_fetch_invoice_usage($invoice);
         $volumeLine = affiliates_format_volume_usage($usage, $invoice);
@@ -7894,7 +7909,7 @@ function referral_ensure_schema(): void
     addFieldToTable('setting', 'referralstatus', 'offreferral', 'VARCHAR(200)');
 
     $stmt = $pdo->prepare("INSERT IGNORE INTO textbot (id_text, text) VALUES ('text_referral', ?)");
-    $stmt->execute(['🎁 دعوت دوستان']);
+    $stmt->execute(['🎁 Invite friends']);
 
     $ready = true;
 }
@@ -7965,7 +7980,7 @@ function ads_generate_code(): string
             return $code;
         }
     }
-    throw new RuntimeException('تولید کد یکتای تبلیغ ناموفق بود.');
+    throw new RuntimeException('تولید کد یکتای تبلیغ Failed بود.');
 }
 
 function ads_build_link(string $code): string
@@ -8091,7 +8106,7 @@ function handle_ad_start($code, $from_id, $was_new_user = false, $invited_userna
 
     ads_ensure_schema();
     $code = (string) $code;
-    $welcome = $datatextbot['text_start'] ?? 'خوش آمدید';
+    $welcome = $datatextbot['text_start'] ?? 'Welcome';
 
     $stmt = $pdo->prepare('SELECT * FROM ad_advertiser WHERE code = ? LIMIT 1');
     $stmt->execute([$code]);
@@ -8329,7 +8344,7 @@ function provision_free_service($user_id, $product, $panel, $note = 'referral_re
 
     sendMessageService($panel, $dataoutput['configs'] ?? [], $output_config_link, $dataoutput['username'], $Shoppinginfo, $textcreatuser, $randomString, $user_id);
 
-    if ($panel['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $panel['MethodUsername'] == "نام کاربری + عدد به ترتیب" || $panel['MethodUsername'] == "آیدی عددی+عدد ترتیبی" || $panel['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
+    if ($panel['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $panel['MethodUsername'] == "Username + عدد به ترتیب" || $panel['MethodUsername'] == "آیدی عددی+عدد ترتیبی" || $panel['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
         $value = intval($user_info['number_username']) + 1;
         update("user", "number_username", $value, "id", $user_id);
         if ($panel['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $panel['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
@@ -8377,7 +8392,7 @@ function referral_check_and_grant_reward($campaign, $referrer_id)
     $reward_text = "<b>🎉 تبریک! هدیه دعوت دریافت شد</b>\n\n";
     $reward_text .= "کمپین: <b>{$campaign['title']}</b>\n";
     $reward_text .= "سرویس: <b>{$product['name_product']}</b>\n";
-    $reward_text .= "نام کاربری: <code>{$result['username']}</code>";
+    $reward_text .= "Username: <code>{$result['username']}</code>";
     sendmessage($referrer_id, $reward_text, null, 'HTML');
 
     if (strlen($setting['Channel_Report'] ?? '') > 0) {
@@ -9329,10 +9344,10 @@ function agent_n2_log_purchase(array $data): void
 function agent_n2_assert_and_log_purchase($agentUserId, $codeProduct, array $meta = []): array
 {
     if ($codeProduct === 'customvolume') {
-        return ['ok' => false, 'msg' => '❌ نماینده پیشرفته فقط می‌تواند محصولات فعال‌شده را خریداری کند.'];
+        return ['ok' => false, 'msg' => '❌ Advanced agents can only buy enabled products.'];
     }
     if (!agent_n2_product_enabled($agentUserId, $codeProduct, $meta['category'] ?? null)) {
-        return ['ok' => false, 'msg' => '❌ این محصول / دسته‌بندی برای نمایندگی شما فعال نیست.'];
+        return ['ok' => false, 'msg' => '❌ This product/category is not enabled for your agency.'];
     }
     agent_n2_log_purchase([
         'agent_id' => $agentUserId,
@@ -9616,7 +9631,7 @@ function agent_check_volume_quota($agentUserId, $volumeGb): array
     if ($volumeGb <= 0) {
         return [
             'ok' => false,
-            'msg' => '❌ نمایندگان نمی‌توانند سرویس با حجم نامحدود (۰ گیگ) بسازند. حجم باید بیشتر از صفر باشد.',
+            'msg' => '❌ Agents cannot create unlimited (0 GB) services. Data must be greater than zero.',
             'cost' => 0,
             'user' => $user,
             'skipped' => false,
@@ -9627,7 +9642,7 @@ function agent_check_volume_quota($agentUserId, $volumeGb): array
     if ($cost > $balance) {
         return [
             'ok' => false,
-            'msg' => '❌ موجودی نمایندگی برای ساخت این حجم کافی نیست. هزینه: ' . number_format($cost) . ' تومان',
+            'msg' => '❌ Agency balance is not enough for this data amount. Cost: ' . number_format($cost) . ' Toman',
             'cost' => $cost,
             'user' => $user,
             'skipped' => false,
@@ -9811,7 +9826,7 @@ function agent_create_sell_bot($agentUserId, $token, $rootPath = null): array
     agent_telegram_api_get(
         'https://api.telegram.org/bot' . $token . '/sendMessage?' . http_build_query([
             'chat_id' => $agentUserId,
-            'text' => '✅ کاربر عزیز ربات شما با موفقیت نصب گردید.',
+            'text' => '✅ Your bot was installed successfully.',
         ]),
         8
     );
@@ -9974,10 +9989,10 @@ function botsaz_cart_payment_text(array $setting, $amount = null, $orderId = nul
         $lines[] = "👤 به نام: <b>{$safeCardHolder}</b>";
     }
     if ($amount !== null && $amount !== '') {
-        $lines[] = "💰 مبلغ: <b>" . number_format((int) $amount) . "</b> تومان";
+        $lines[] = "💰 مبلغ: <b>" . number_format((int) $amount) . "</b> Toman";
     }
     if ($orderId !== null && $orderId !== '') {
-        $lines[] = "🛒 کد پیگیری: <code>{$orderId}</code>";
+        $lines[] = "🛒 Tracking code: <code>{$orderId}</code>";
     }
     if ($help !== '') {
         $lines[] = "\n📌 " . $safeHelp;
@@ -10748,7 +10763,7 @@ function broadcast_audience_label(array $userdata)
     ][$userdata['agent'] ?? ''] ?? ($userdata['agent'] ?? '-');
     $extra = '';
     if (($userdata['typeservice'] ?? '') === 'xdaynotmessage' && !empty($userdata['daynoyuse'])) {
-        $extra = " | غیرفعال {$userdata['daynoyuse']} روز";
+        $extra = " | غیرفعال {$userdata['daynoyuse']} days";
     }
     if (!empty($userdata['selectpanel']) && $userdata['selectpanel'] !== 'all') {
         $panel = select("marzban_panel", "*", "code_panel", $userdata['selectpanel'], "select");
@@ -10809,7 +10824,7 @@ function broadcast_attachable_buttons()
         'start' => [
             'admin_label' => 'دکمه استارت',
             'text_key' => null,
-            'fallback' => 'شروع',
+            'fallback' => 'Start',
             'callback' => 'start',
             'legacy' => 'start',
             'route_text' => 'start',
@@ -10818,7 +10833,7 @@ function broadcast_attachable_buttons()
         'buy' => [
             'admin_label' => 'دکمه خرید',
             'text_key' => 'text_sell',
-            'fallback' => '🔐 خرید اشتراک',
+            'fallback' => '🔐 Buy subscription',
             'callback' => 'buy',
             'legacy' => 'buy',
             'route_text' => 'buy',
@@ -10827,7 +10842,7 @@ function broadcast_attachable_buttons()
         'usertestbtn' => [
             'admin_label' => 'دکمه اکانت تست',
             'text_key' => 'text_usertest',
-            'fallback' => '🔑 اکانت تست',
+            'fallback' => '🔑 Test account',
             'callback' => 'usertestbtn',
             'legacy' => 'usertest',
             'route_text' => 'usertest',
@@ -10836,7 +10851,7 @@ function broadcast_attachable_buttons()
         'services' => [
             'admin_label' => 'دکمه سرویس های من',
             'text_key' => 'text_Purchased_services',
-            'fallback' => '🛍 سرویس های من',
+            'fallback' => '🛍 My services',
             'callback' => 'backorder',
             'legacy' => 'services',
             'route_text' => '/services',
@@ -10845,7 +10860,7 @@ function broadcast_attachable_buttons()
         'extendbtn' => [
             'admin_label' => 'دکمه تمدید سرویس',
             'text_key' => 'text_extend',
-            'fallback' => '♻️ تمدید سرویس',
+            'fallback' => '♻️ Renew service',
             'callback' => 'extendbtn',
             'legacy' => 'extend',
             'route_text' => '',
@@ -10854,7 +10869,7 @@ function broadcast_attachable_buttons()
         'wallet' => [
             'admin_label' => 'دکمه کیف پول',
             'text_key' => 'accountwallet',
-            'fallback' => '🏦 کیف پول + شارژ',
+            'fallback' => '🏦 Wallet + top up',
             'callback' => 'account',
             'legacy' => 'wallet',
             'route_text' => '/wallet',
@@ -10863,7 +10878,7 @@ function broadcast_attachable_buttons()
         'addbalance' => [
             'admin_label' => 'شارژ حساب کاربری',
             'text_key' => 'text_Add_Balance',
-            'fallback' => '💰 شارژ حساب',
+            'fallback' => '💰 Top up',
             'callback' => 'Add_Balance',
             'legacy' => 'bal',
             'route_text' => '',
@@ -10872,7 +10887,7 @@ function broadcast_attachable_buttons()
         'tariff' => [
             'admin_label' => 'دکمه تعرفه اشتراک ها',
             'text_key' => 'text_Tariff_list',
-            'fallback' => '💵 تعرفه اشتراک ها',
+            'fallback' => '💵 Pricing',
             'callback' => 'Tariff_list',
             'legacy' => 'tariff',
             'route_text' => '',
@@ -10881,7 +10896,7 @@ function broadcast_attachable_buttons()
         'helpbtn' => [
             'admin_label' => 'دکمه آموزش',
             'text_key' => 'text_help',
-            'fallback' => '📚 آموزش',
+            'fallback' => '📚 Guide',
             'callback' => 'helpbtn',
             'legacy' => 'help',
             'route_text' => 'help',
@@ -10890,7 +10905,7 @@ function broadcast_attachable_buttons()
         'support' => [
             'admin_label' => 'دکمه پشتیبانی',
             'text_key' => 'text_support',
-            'fallback' => '☎️ پشتیبانی',
+            'fallback' => '☎️ Support',
             'callback' => 'supportbtns',
             'legacy' => 'support',
             'route_text' => '/support',
@@ -10899,7 +10914,7 @@ function broadcast_attachable_buttons()
         'affiliatesbtn' => [
             'admin_label' => 'دکمه زیرمجموعه گیری',
             'text_key' => 'text_affiliates',
-            'fallback' => '👥 زیر مجموعه گیری',
+            'fallback' => '👥 Referrals',
             'callback' => 'affiliatesbtn',
             'legacy' => 'aff',
             'route_text' => '',
@@ -10908,7 +10923,7 @@ function broadcast_attachable_buttons()
         'referral' => [
             'admin_label' => 'دکمه دعوت دوستان',
             'text_key' => 'text_referral',
-            'fallback' => '🎁 دعوت دوستان',
+            'fallback' => '🎁 Invite friends',
             'callback' => 'referralbtn',
             'legacy' => 'invite',
             'route_text' => '',
@@ -10917,7 +10932,7 @@ function broadcast_attachable_buttons()
         'wheel' => [
             'admin_label' => 'دکمه گردونه شانس',
             'text_key' => 'text_wheel_luck',
-            'fallback' => '🎲 گردونه شانس',
+            'fallback' => '🎲 Lucky wheel',
             'callback' => 'wheel_luck',
             'legacy' => 'wheel',
             'route_text' => '/gift',
@@ -11151,8 +11166,8 @@ function broadcast_continue_after_btn_title($from_id)
     }
     if (($userdata['typeservice'] ?? '') === 'xdaynotmessage') {
         step("gettextday", $from_id);
-        sendmessage($from_id, "📌 در این قابلیت پیام به کاربرانی ارسال میشود که تعیین  میکنید چند روز از ربات استفاده نکرده اند
-تعداد روز خود را ارسال نمایید.", $backadmin, 'HTML');
+        sendmessage($from_id, "📌 در این قابلیت پیام به کاربرانی ارسال میشود که تعیین  میکنید چند days از ربات استفاده نکرده اند
+تعداد days خود را ارسال نمایید.", $backadmin, 'HTML');
         return;
     }
     step("gettextSystemMessage", $from_id);
@@ -11767,7 +11782,7 @@ function handle_broadcast_resend_callback($datain, $from_id, $callback_query_id,
     $result = execute_broadcast_resend($broadcast_id, $from_id);
     EditMessageReplyMarkup($chat_id, $message_id, broadcast_report_resend_keyboard($broadcast_id));
     if (empty($result['ok'])) {
-        sendmessage($from_id, "❌ ارسال مجدد ناموفق بود:\n" . ((string) ($result['error'] ?? 'خطای نامشخص')), null, 'HTML');
+        sendmessage($from_id, "❌ ارسال مجدد Failed بود:\n" . ((string) ($result['error'] ?? 'خطای نامشخص')), null, 'HTML');
         return true;
     }
     if (($result['mode'] ?? '') === 'channel') {

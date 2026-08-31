@@ -4,19 +4,19 @@ const WITHDRAW_STATUS_PENDING = 'pending';
 const WITHDRAW_STATUS_PAID = 'paid';
 const WITHDRAW_STATUS_REJECTED = 'rejected';
 const WITHDRAW_EXPENSE_SLUG = 'wallet_withdraw';
-const WITHDRAW_EXPENSE_LABEL = 'برداشت از کیف پول';
+const WITHDRAW_EXPENSE_LABEL = 'Wallet withdrawal';
 const WITHDRAW_MIN_KEY = 'wallet_withdraw_min';
 const WITHDRAW_TEXT_PROMPT = 'text_wallet_withdraw';
 const WITHDRAW_TEXT_SUCCESS = 'text_wallet_withdraw_success';
 
 function withdraw_prompt_default(): string
 {
-    return "💸 لطفاً مبلغ برداشت از کیف پول را به تومان وارد کنید.";
+    return "💸 Enter the amount you want to withdraw from your wallet in Toman.";
 }
 
 function withdraw_success_default(): string
 {
-    return "✅ درخواست تسویه حساب شما ثبت شد و پس از بررسی واریز خواهد شد.";
+    return "✅ Your payout request was submitted and will be paid after review.";
 }
 
 function withdraw_pdo(?PDO $pdo = null): ?PDO
@@ -266,14 +266,14 @@ function withdraw_normalize_card(string $text): ?string
 function withdraw_validate_amount(int $amount, int $balance, ?PDO $pdo = null): array
 {
     if ($amount < 1) {
-        return ['ok' => false, 'error' => '❌ مبلغ نامعتبر است. مبلغ را به تومان و به‌صورت عدد وارد کنید.'];
+        return ['ok' => false, 'error' => '❌ Invalid amount. Enter a number in Toman.'];
     }
     $min = withdraw_min_amount($pdo);
     if ($amount < $min) {
-        return ['ok' => false, 'error' => 'مبلغ ورودی از حداقل برداشت کمتر است'];
+        return ['ok' => false, 'error' => 'The amount is below the minimum withdrawal'];
     }
     if ($amount > $balance) {
-        return ['ok' => false, 'error' => 'مبلغ ورودی از موجودی کیف پول شما بیشتر است'];
+        return ['ok' => false, 'error' => 'The amount is more than your wallet balance'];
     }
     return ['ok' => true, 'error' => ''];
 }
@@ -394,7 +394,7 @@ function withdraw_card_button_label(string $card, string $holder): string
 
 function withdraw_card_picker_text(): string
 {
-    return '💳 یک کارت را انتخاب کنید';
+    return '💳 Select a card';
 }
 
 function withdraw_card_picker_keyboard(string $userId, bool $canBackToReview = false): string
@@ -410,12 +410,12 @@ function withdraw_card_picker_keyboard(string $userId, bool $canBackToReview = f
             'callback_data' => 'wd_use_' . $id,
         ]];
     }
-    $rows[] = [['text' => '➕ افزودن کارت جدید', 'callback_data' => 'wd_add_card']];
+    $rows[] = [['text' => '➕ Add a new card', 'callback_data' => 'wd_add_card']];
     if ($canBackToReview) {
-        $rows[] = [['text' => '🔙 بازگشت به بررسی', 'callback_data' => 'wd_edit_back']];
+        $rows[] = [['text' => '🔙 Back to review', 'callback_data' => 'wd_edit_back']];
     } else {
         global $textbotlang;
-        $back = is_array($textbotlang) ? ($textbotlang['users']['stateus']['backinfo'] ?? '🔙 بازگشت') : '🔙 بازگشت';
+        $back = is_array($textbotlang) ? ($textbotlang['users']['stateus']['backinfo'] ?? '🔙 Back') : '🔙 Back';
         $rows[] = [['text' => $back, 'callback_data' => 'account']];
     }
     return json_encode(['inline_keyboard' => $rows], JSON_UNESCAPED_UNICODE);
@@ -435,11 +435,11 @@ function withdraw_user_confirm_keyboard(): string
     return json_encode([
         'inline_keyboard' => [
             [
-                ['text' => '✅ تأیید', 'callback_data' => 'wd_confirm_yes'],
-                ['text' => '❌ لغو', 'callback_data' => 'wd_confirm_no'],
+                ['text' => '✅ Confirm', 'callback_data' => 'wd_confirm_yes'],
+                ['text' => '❌ Cancel', 'callback_data' => 'wd_confirm_no'],
             ],
             [
-                ['text' => '✏️ ویرایش', 'callback_data' => 'wd_confirm_edit'],
+                ['text' => '✏️ Edit', 'callback_data' => 'wd_confirm_edit'],
             ],
         ],
     ], JSON_UNESCAPED_UNICODE);
@@ -449,9 +449,9 @@ function withdraw_user_edit_keyboard(): string
 {
     return json_encode([
         'inline_keyboard' => [
-            [['text' => '💰 مبلغ', 'callback_data' => 'wd_edit_amount']],
-            [['text' => '💳 کارت', 'callback_data' => 'wd_edit_card']],
-            [['text' => '🔙 بازگشت به بررسی', 'callback_data' => 'wd_edit_back']],
+            [['text' => '💰 Amount', 'callback_data' => 'wd_edit_amount']],
+            [['text' => '💳 Card', 'callback_data' => 'wd_edit_card']],
+            [['text' => '🔙 Back to review', 'callback_data' => 'wd_edit_back']],
         ],
     ], JSON_UNESCAPED_UNICODE);
 }
@@ -459,7 +459,7 @@ function withdraw_user_edit_keyboard(): string
 function withdraw_user_back_keyboard(): string
 {
     global $textbotlang;
-    $back = is_array($textbotlang) ? ($textbotlang['users']['stateus']['backinfo'] ?? '🔙 بازگشت') : '🔙 بازگشت';
+    $back = is_array($textbotlang) ? ($textbotlang['users']['stateus']['backinfo'] ?? '🔙 Back') : '🔙 Back';
     return json_encode([
         'inline_keyboard' => [
             [['text' => $back, 'callback_data' => 'account']],
@@ -470,8 +470,8 @@ function withdraw_user_back_keyboard(): string
 function withdraw_amount_keyboard(int $balance): string
 {
     global $textbotlang;
-    $back = is_array($textbotlang) ? ($textbotlang['users']['stateus']['backinfo'] ?? '🔙 بازگشت') : '🔙 بازگشت';
-    $allLabel = '💰 برداشت تمام موجودی';
+    $back = is_array($textbotlang) ? ($textbotlang['users']['stateus']['backinfo'] ?? '🔙 Back') : '🔙 Back';
+    $allLabel = '💰 Withdraw full balance';
     if ($balance > 0) {
         $allLabel .= ' (' . number_format($balance) . ' ت)';
     }
@@ -556,7 +556,7 @@ function withdraw_admin_request_keyboard(int $id): string
     return json_encode([
         'inline_keyboard' => [
             [
-                ['text' => '✅ تأیید', 'callback_data' => 'wd_ok_' . $id],
+                ['text' => '✅ Confirm', 'callback_data' => 'wd_ok_' . $id],
                 ['text' => '❌ رد', 'callback_data' => 'wd_no_' . $id],
             ],
         ],
@@ -665,7 +665,7 @@ function withdraw_create_request(string $userId, int $amount, string $card, stri
     $id = (int) $pdo->lastInsertId();
     $row = withdraw_get($id, $pdo);
     if (!$row) {
-        return ['ok' => false, 'msg' => 'ثبت درخواست ناموفق بود.'];
+        return ['ok' => false, 'msg' => 'Could not submit the request.'];
     }
     withdraw_notify_admins($row, $userRow, $fallbackName, $fallbackUsername, $pdo);
     return ['ok' => true, 'id' => $id, 'row' => $row];
@@ -844,7 +844,7 @@ function withdraw_send_paid_notice(array $row, ?string $uploadAbsPath = null, ?s
     if ($userId === '' || !function_exists('telegram')) {
         return null;
     }
-    $caption = '✅ درخواست تسویه حساب شما با موفقیت پردازش شد.';
+    $caption = '✅ Your payout request was processed.';
     $fileId = trim((string) ($row['receipt_file_id'] ?? ''));
     $payload = [
         'chat_id' => $userId,
@@ -1025,7 +1025,7 @@ function withdraw_reject(int $id, string $adminId, string $reason, ?PDO $pdo = n
     $row = withdraw_get($id, $pdo);
     withdraw_telegram_ready();
     if (is_array($row) && function_exists('sendmessage')) {
-        $text = "❌ درخواست برداشت شما رد شد.\n\n✍️ " . withdraw_esc($reason);
+        $text = "❌ Your withdrawal request was rejected.\n\n✍️ " . withdraw_esc($reason);
         sendmessage($row['id_user'], $text, null, 'HTML');
         $row['status'] = WITHDRAW_STATUS_REJECTED;
         $row['reject_reason'] = $reason;

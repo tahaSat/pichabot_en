@@ -75,33 +75,33 @@ $response = curl_exec($curl);
 curl_close($curl);
 $response = json_decode($response,true);
        $payment_status = [
-			"-9" => "خطا در ارسال داده",
-			"-10" => "ای پی یا مرچنت كد پذیرنده صحیح نیست.",
-			"-11" => "مرچنت کد فعال نیست،",
-			"-12" => "تلاش بیش از دفعات مجاز در یک بازه زمانی کوتاه",
-			"-15" => "درگاه پرداخت به حالت تعلیق در آمده است",
-			"-16" => "سطح تایید پذیرنده پایین تر از سطح نقره ای است.",
-			"-17" => "محدودیت پذیرنده در سطح آبی",
-			"-30" => "پذیرنده اجازه دسترسی به سرویس تسویه اشتراکی شناور را ندارد.",
-			"-31" => "حساب بانکی تسویه را به پنل اضافه کنید. مقادیر وارد شده برای تسهیم درست نیست. پذیرنده جهت استفاده از خدمات سرویس تسویه اشتراکی شناور، باید حساب بانکی معتبری به پنل کاربری خود اضافه نماید.",
-			"-32" => "مبلغ وارد شده از مبلغ کل تراکنش بیشتر است.",
-			"-33" => "درصدهای وارد شده صحیح یست.",
-			"-34" => "مبلغ وارد شده از مبلغ کل تراکنش بیشتر است.",
-			"-35" => "تعداد افراد دریافت کننده تسهیم بیش از حد مجاز است.",
-			"-36" => "حداقل مبلغ جهت تسهیم باید ۱۰۰۰۰ ریال باشد",
-			"-37" => "یک یا چند شماره شبای وارد شده برای تسهیم از سمت بانک غیر فعال است.",
-			"-38" => "خطا٬عدم تعریف صحیح شبا٬لطفا دقایقی دیگر تلاش کنید.",
-			"-39" => "	خطایی رخ داده است",
+			"-9" => "Error sending data",
+			"-10" => "Invalid IP or merchant code.",
+			"-11" => "Merchant code is not active.",
+			"-12" => "Too many attempts in a short time",
+			"-15" => "The payment gateway is suspended",
+			"-16" => "Merchant verification level is too low.",
+			"-17" => "Blue-level merchant restriction",
+			"-30" => "Merchant cannot use floating shared settlement.",
+			"-31" => "Add a bank account to the panel. Settlement values are incorrect.",
+			"-32" => "The amount is greater than the total transaction.",
+			"-33" => "Percentages are invalid.",
+			"-34" => "The amount is greater than the total transaction.",
+			"-35" => "Too many settlement recipients.",
+			"-36" => "Minimum settlement amount is 10000 Rial",
+			"-37" => "One or more IBAN numbers are inactive.",
+			"-38" => "Invalid IBAN. Please try again later.",
+			"-39" => "	An error occurred",
 			"-40" => "",
-			"-50" => "مبلغ پرداخت شده با مقدار مبلغ ارسالی در متد وریفای متفاوت است.",
-			"-51" => "پرداخت ناموفق",
-			"-52" => "	خطای غیر منتظره‌ای رخ داده است. ",
-			"-53" => "پرداخت متعلق به این مرچنت کد نیست.",
-			"-54" => "اتوریتی نامعتبر است.",
+			"-50" => "Paid amount does not match the verify amount.",
+			"-51" => "Payment failed",
+			"-52" => "	An unexpected error occurred. ",
+			"-53" => "This payment does not belong to this merchant.",
+			"-54" => "Invalid authority.",
     ][$response['errors']['code']];
  if($response['data']['message'] == "Verified" || $response['data']['message'] == "Paid"){
-    $payment_status = "پرداخت موفق";
-    $dec_payment_status = "از انجام تراکنش متشکریم!";
+    $payment_status = "Payment successful";
+    $dec_payment_status = "Thank you for your payment!";
     $Payment_report = select("Payment_report", "*", "id_order", $invoice_id,"select");
     if($Payment_report['payment_Status'] != "paid"){
     $textbotlang = languagechange('../text.json');
@@ -113,7 +113,7 @@ $response = json_decode($response,true);
         $Balance_confrim = intval($Balance_id['Balance']) +$result;
         update("user","Balance",$Balance_confrim, "id",$Balance_id['id']); 
         $pricecashback =  number_format($pricecashback);
-        $text_report = "🎁 کاربر عزیز مبلغ $result تومان به عنوان هدیه واریز به حساب شما واریز گردید.";
+        $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
     update("Payment_report","payment_Status","paid","id_order",$Payment_report['id_order']);
@@ -140,8 +140,8 @@ $text_report = "💵 پرداخت جدید
 }
 }else {
         $payment_status = [
-        '0' => "پرداخت انجام نشد",
-        '2' => "تراکنش قبلا وریفای و پرداخت شده است",
+        '0' => "Payment was not completed",
+        '2' => "This transaction was already verified",
 
     ][$response['errors']['code']];
      $dec_payment_status = "";
@@ -150,7 +150,7 @@ $text_report = "💵 پرداخت جدید
 ?>
 <html>
 <head>
-    <title>فاکتور پرداخت</title>
+    <title>Payment invoice</title>
     <style>
     @font-face {
     font-family: 'vazir';
@@ -192,9 +192,9 @@ $text_report = "💵 پرداخت جدید
 <body>
     <div class="confirmation-box">
         <h1><?php echo $payment_status ?></h1>
-        <p>شماره تراکنش:<span><?php echo $invoice_id ?></span></p>
-        <p>مبلغ پرداختی:  <span><?php echo  $price ?></span>تومان</p>
-        <p>تاریخ: <span>  <?php echo jdate('Y/m/d')  ?>  </span></p>
+        <p>Transaction ID: <span><?php echo $invoice_id ?></span></p>
+        <p>Amount paid:  <span><?php echo  $price ?></span> Toman</p>
+        <p>Date: <span>  <?php echo date('Y-m-d')  ?>  </span></p>
         <p><?php echo $dec_payment_status ?></p>
     </div>
 </body>

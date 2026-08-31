@@ -129,9 +129,9 @@ class ServiceMonitor
 
         if ($isVolumeWarning) {
             $formattedVolume = formatBytes($remainingVolume);
-            $message = "با سلام خدمت شما کاربر گرامی 👋\n" .
-                "🚨 از حجم سرویس {$username} تنها {$formattedVolume} باقی مانده است. " .
-                "لطفاً در صورت تمایل برای خرید حجم اضافه و یا تمدید سرویستون از طریق بخش «{$this->text_Purchased_services}» اقدام بفرمایین";
+            $message = "Hello 👋\n" .
+                "🚨 Only {$formattedVolume} remains on service {$username}. " .
+                "If you want extra data or a renewal, open «{$this->text_Purchased_services}».";
             $notice = invoice_volume_cron_auto_renew_notice($invoice, $this->textBotLang);
             $message .= $notice['text'];
             $reportMessage = "📌 اطلاعیه کرون حجم\n\n" .
@@ -166,7 +166,7 @@ class ServiceMonitor
         if ($result) {
             update("invoice", "status", "removeTime", "username", $username);
             $this->Panel->RemoveUser($invoice['Service_location'], $username);
-            $message = "📌 کاربر گرامی بدلیل عدم تمدید، سرویس {$invoice['username']} از لیست سرویس های شما حذف گردید\n\n🌟 جهت تهیه سرویس جدید از بخش خرید سرویس اقدام فرمایید";
+            $message = "📌 Because it was not renewed, service {$invoice['username']} was removed from your services\n\n🌟 You can buy a new service from the shop";
             $reportMessage = "📌 اطلاعیه کرون حذف\n\nنام کاربری سرویس :‌ <code>{$invoice['username']}</code>\nآیدی عددی کاربر :‌ <code>{$invoice['id_user']}</code>\nوضعیت سرویس : $statusText\nتعداد روز باقی مانده ‌:‌$daysRemaining\nحجم باقی مانده : $remainingVolume";
             $this->send_notifactions($invoice, $user, $message, false, $invoice['bottype']);
             $this->sendReportNotification($reportMessage);
@@ -209,9 +209,9 @@ class ServiceMonitor
         if ($result) {
             update("invoice", "status", "removevolume", "username", $username);
             $this->Panel->RemoveUser($invoice['Service_location'], $username);
-            $message = "📌 کاربر گرامی بدلیل عدم تمدید، سرویس $username از لیست سرویس های شما حذف گردید
+            $message = "📌 Because it was not renewed, service $username was removed from your services
 
-🌟 جهت تهیه سرویس جدید از بخش خرید سرویس اقدام فرمایید";
+🌟 You can buy a new service from the shop";
             $reportMessage = "📌  اطلاعیه کرون حذف حجم \nنام کاربری سرویس : $username \nآیدی عددی کاربر :‌ <code>{$invoice['id_user']}</code>\n وضعیت سرویس : $statusText \nتعداد روز باقی مانده :$daysRemaining \n حجم باقی مانده : $remainingVolume\nآخرین اتصال کاربر : {$userData['online_at']}";
             $this->send_notifactions($invoice, $user, $message, false, $invoice['bottype']);
             $this->sendReportNotification($reportMessage);
@@ -245,10 +245,10 @@ class ServiceMonitor
         $isTimeWarning = $timeRemaining <= $warningThreshold && $timeRemaining > 0;
 
         if ($isTimeWarning) {
-            $message = "با سلام خدمت شما کاربر گرامی 👋\n" .
-                "📌 از مهلت زمانی استفاده از سرویس {$username} فقط {$daysRemaining} روز باقی مانده است. " .
-                "لطفاً در صورت تمایل برای تمدید این سرویس، از طریق بخش «{$this->text_Purchased_services}» اقدام بفرمایین. " .
-                "با تشکر از همراهی شما";
+            $message = "Hello 👋\n" .
+                "📌 Only {$daysRemaining} day(s) remain on service {$username}. " .
+                "If you want to renew, open «{$this->text_Purchased_services}». " .
+                "Thank you";
             $notice = invoice_volume_cron_auto_renew_notice($invoice, $this->textBotLang);
             $message .= $notice['text'];
             $reportMessage = "📌 اطلاعیه کرون زمان\n\n" .
@@ -279,7 +279,7 @@ class ServiceMonitor
         return json_encode([
             'inline_keyboard' => [
                 [
-                    ['text' => "💊 تمدید سرویس", 'callback_data' => 'extend_' . $invoiceId],
+                    ['text' => "💊 Renew service", 'callback_data' => 'extend_' . $invoiceId],
                 ],
             ]
         ]);

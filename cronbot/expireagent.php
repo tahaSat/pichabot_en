@@ -14,7 +14,7 @@ $stmt->execute();
 while ($user = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $time_expire = $user['expire'] - time();
     if($time_expire < 0){
-    $textexpire = "📌 نماینده عزیز زمان نمایندگی شما به پایان. رسید و حساب شما از حالت نمایندگی خارج گردید. چهت فعالسازی مجدد نمایندگی می توانید با پشتیبانی در ارتباط باشید.";
+    $textexpire = "📌 Your agency period has ended and your account is no longer an agent. Contact support to activate agency again.";
     sendmessage($user['id'],$textexpire, null, 'HTML');
     update("user","agent","f","id",$user['id']);
     update("user","expire",null,"id",$user['id']);

@@ -47,7 +47,7 @@ while ($Payment_report = mysqli_fetch_assoc($list_service)) {
         $result = ($Payment_report['price'] * $pricecashback) / 100;
         $Balance_confrim = intval($Balance_id['Balance']) +$result ;
         update("user","Balance",$Balance_confrim, "id",$Balance_id['id']); 
-        $text_report = "🎁 کاربر عزیز مبلغ $result تومان به عنوان هدیه واریز به حساب شما واریز گردید.";
+        $text_report = "🎁 $result Toman was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
         $text_reportpayment = "💵 پرداخت جدید

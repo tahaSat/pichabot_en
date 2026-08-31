@@ -32,12 +32,12 @@ $stmt->execute();
         $stmt->execute();
         $service_other = $stmt->rowCount();
         if($service_other != 0)continue;
-                $text = "سلام! 🌐
+                $text = "Hello! 🌐
 
-دیدیم که شما هنوز به کانفیگ خود با نام کاربری $line متصل نشده‌اید و بیش از {$setting['on_hold_day']} روز از فعال‌سازی آن گذشته است. اگر در راه‌اندازی یا استفاده از سرویس مشکلی دارید، لطفاً با تیم پشتیبانی ما  از طریق آیدی زیر در ارتباط باشید تا به شما کمک کنیم.
-ما آماده‌ایم تا هر گونه سوال یا مشکلی را برطرف کنیم! 📞
+We noticed you have not connected to config $line and more than {$setting['on_hold_day']} day(s) have passed since it was activated. If you need help setting it up, please contact support using the ID below.
+We are ready to help with any question! 📞
 
-اکانت پشتیبانی : @{$setting['id_support']}";
+Support: @{$setting['id_support']}";
             sendmessage($resultss['id_user'], $text, null, 'HTML');
             update("invoice","Status","send_on_hold", "username",$line);
             }

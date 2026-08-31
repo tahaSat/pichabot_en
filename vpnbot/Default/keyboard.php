@@ -49,10 +49,10 @@ $keyboard  = json_encode($keyboard);
 
 $backuser = json_encode([
     'keyboard' => [
-        [['text' => "🏠 بازگشت به منوی اصلی"]]
+        [['text' => "🏠 Back to main menu"]]
     ],
     'resize_keyboard' => true,
-    'input_field_placeholder' => "برای بازگشت روی دکمه زیر کلیک کنید"
+    'input_field_placeholder' => "Tap the button below to go back"
 ]);
 
 // keyboard list panel for test 
@@ -68,7 +68,7 @@ while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
     ];
 }
 $list_marzban_panel_usertest['inline_keyboard'][] = [
-    ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
+    ['text' => "🏠 Back to main menu", 'callback_data' => "backuser"],
 ];
 $list_marzban_usertest = json_encode($list_marzban_panel_usertest);
 
@@ -98,7 +98,7 @@ $keyboardadmin = json_encode([
             ['text' => "📣 جوین اجباری"]
         ],
         [
-            ['text' => "🏠 بازگشت به منوی اصلی"]
+            ['text' => "🏠 Back to main menu"]
         ],
     ],
     'resize_keyboard' =>  true
@@ -183,20 +183,20 @@ while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
     ];
 }
 $list_marzban_panel_users['inline_keyboard'][] = [
-    ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
+    ['text' => "🏠 Back to main menu", 'callback_data' => "backuser"],
 ];
 $list_marzban_panel_user = json_encode($list_marzban_panel_users);
 
 $payment = json_encode([
     'inline_keyboard' => [
-        [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => "confirmandgetservice"]],
-        [['text' => "🏠 بازگشت به منوی اصلی",  'callback_data' => "backuser"]]
+        [['text' => "💰 Pay and receive service", 'callback_data' => "confirmandgetservice"]],
+        [['text' => "🏠 Back to main menu",  'callback_data' => "backuser"]]
     ]
 ]);
 $KeyboardBalance = json_encode([
     'inline_keyboard' => [
-        [['text' => "💸 افزایش موجودی", 'callback_data' => "AddBalance"]],
-        [['text' => "🏠 بازگشت به منوی اصلی",  'callback_data' => "backuser"]]
+        [['text' => "💸 Top up wallet", 'callback_data' => "AddBalance"]],
+        [['text' => "🏠 Back to main menu",  'callback_data' => "backuser"]]
     ]
 ]);
 
@@ -234,7 +234,7 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
             $resultper = ($result['price_product'] * $pricediscount) / 100;
             $result['price_product'] = $result['price_product'] - $resultper;
         }
-        $namekeyboard = $result['name_product'] . " - " . number_format($result['price_product']) . "تومان";
+        $namekeyboard = $result['name_product'] . " - " . number_format($result['price_product']) . " Toman";
         if ($statusshowprice == "onshowprice")$result['name_product'] = $namekeyboard;
         $product['inline_keyboard'][] = [
             telegram_button_with_icon(
@@ -302,7 +302,7 @@ function KeyboardCategory($location, $agent, $backuser = "backuser", $agentUserI
         ];
     }
     $list_category['inline_keyboard'][] = [
-        ['text' => "▶️ بازگشت به منوی قبل", "callback_data" => $backuser],
+        ['text' => "▶️ Previous menu", "callback_data" => $backuser],
     ];
     return json_encode($list_category);
 }

@@ -3,6 +3,12 @@
 # Per-server secrets. Each environment keeps its own copy; do not commit.
 /config.php
 android-sms-forwarder/
+__pycache__/
+*.pyc
+error_log
+error_log *
+**/error_log
+**/error_log *
 storage/sessions/panel/*
 !storage/sessions/panel/.htaccess
 !storage/sessions/panel/.gitkeep

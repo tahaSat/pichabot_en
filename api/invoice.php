@@ -261,7 +261,7 @@ switch ($action) {
         if ($data['code_product'] == "customvolume") {
             if (empty($data["time_service"]) || empty($data["volume_service"]))
                 sendJsonResponse(false, "invalid value service time or volume", []);
-            $product['name_product'] = "⚙️ سرویس دلخواه";
+            $product['name_product'] = "⚙️ Custom service";
             $product['code_product'] = "customvolume";
             $product['Service_time'] = $data['time_service'];
             $product['price_product'] = 1;
@@ -398,7 +398,7 @@ switch ($action) {
 نام پنل : {$panel['name_panel']}
 نام کاربری سرویس : {$invoice['username']}
 دلیل خطا : {$extend['msg']}";
-            sendmessage($invoice['id_user'], "❌خطایی در تمدید سرویس رخ داده با پشتیبانی در ارتباط باشید", null, 'HTML');
+            sendmessage($invoice['id_user'], "❌ A renewal error occurred. Please contact support.", null, 'HTML');
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],

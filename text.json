@@ -1,5 +1,5 @@
 {
-    "fa":{
+    "fa": {
         "users": {
             "Rules": "✅ قوانین تایید شد از الان می توانید از خدمات ربات استفاده نمایید.",
             "back": "به صفحه اصلی بازگشتید!",
@@ -11,17 +11,17 @@
             "selectoption": "یک گزینه را انتخاب کنید",
             "selectusername": "يک نام کاربري دلخواه ارسال کنيد\n⚠️ نام کاربری باید بدون کاراکترهای اضافه مانند @ ، فاصله ، خط تیره باشد. \n⚠️ نام کاربری باید انگلیسی باشد.\n✅ نام کاربری های صحیح  : ali12  | mahdi  | ws1_ksdf\n❌  نام کاربری های نادرست :   ali_ |  tele@  |  _mahdi | محسن",
             "invalidusername": "❌نام کاربری نامعتبر است\n🔄 مجددا نام کاربری خود  را ارسال کنید",
-            "SendMessage" : "📩 ارسال پیام به کاربر",
-            "erroroccurred" : "❌ خطایی رخ داده است مراحل را از اول انجام دهید",
-            "customusername" : "نام کاربری دلخواه",
-            "disable" : "غیرفعال",
+            "SendMessage": "📩 ارسال پیام به کاربر",
+            "erroroccurred": "❌ خطایی رخ داده است مراحل را از اول انجام دهید",
+            "customusername": "نام کاربری دلخواه",
+            "disable": "غیرفعال",
             "spam": {
                 "spamed": "ارسال پیام زیاد در ربات",
                 "spamedmessage": "📌 کاربر گرامی اکانت شما بدلیل اسپم در ربات مسدود گردید.",
-                "spamedreport" : "کاربر با ایدی عددی %s بدلیل اسپم در ربات بلاک گردید"
+                "spamedreport": "کاربر با ایدی عددی %s بدلیل اسپم در ربات بلاک گردید"
             },
-            "block" : {
-                "descriptions" : "🚫 شما از طرف مدیریت بلاک شده اید.\n\n✍️ دلیل مسدودی:  %s"
+            "block": {
+                "descriptions": "🚫 شما از طرف مدیریت بلاک شده اید.\n\n✍️ دلیل مسدودی:  %s"
             },
             "channel": {
                 "link": "تنظیم نشده",
@@ -29,11 +29,11 @@
                 "confirmjoin": "✅ بررسی عضویت",
                 "confirmed": "عضویت شما با موفقیت تایید گردید با تشکر از شما❤️",
                 "notconfirmed": "❌ هنوز عضو کانال نشده اید.️",
-                "left_channel" : "❌ شما از کانال ما خارج شدید و از اخبار , اپدیت ها با خبر نمیشوید بهتر است مجدد عضو کانال شوید"
+                "left_channel": "❌ شما از کانال ما خارج شدید و از اخبار , اپدیت ها با خبر نمیشوید بهتر است مجدد عضو کانال شوید"
             },
-            "affiliates" : {
-                "affiliatesyou" : "❌ شما زیرمجموعه کاربر %s هستید و نمی توانید زیر مجموعه کاربری دیگه ای باشید",
-                "affiliatesidyou" : "❌امکان زیرمجموعه شدن با این شناسه کاربری وجود ندارد.",
+            "affiliates": {
+                "affiliatesyou": "❌ شما زیرمجموعه کاربر %s هستید و نمی توانید زیر مجموعه کاربری دیگه ای باشید",
+                "affiliatesidyou": "❌امکان زیرمجموعه شدن با این شناسه کاربری وجود ندارد.",
                 "setpercentage": "📌 درصدی که می‌خواهید بعد خرید  به کاربر واریز شود  را ارسال کنید",
                 "changedpercentage": "✅ درصد واریز به کاربر با موفقیت تنظیم شد",
                 "banner": "⭕️ بنر زیرمجموعه گیری خود را ارسال کنید \n\n❌ بنر باید حتما همراه با عکس باشد",
@@ -43,8 +43,8 @@
                 "priceDiscount": "📌 مبلغی که می‌خواهید که کاربر با هر زیرمجموعه جدید دریافت کند را وارد کنید",
                 "changedpriceDiscount": "✅ مبلغ زیرمجموعه گیری با موفقیت ثبت شد",
                 "offaffiliates": "❌ بخش زیرمجموعه گیری خاموش می باشد",
-                "affiliateedago" : "❌ شما قبلا زیرمجموعه کاربری دیگر بوده اید و امکان زیرمجموعه شدن مجدد وجود ندارد",
-                "affiliateinfo" : "🤔 زیرمجموعه گیری به چه صورت است ؟\n\n👨🏻‍💻 ما برای شما محیطی فراهم کرده‌ایم تا بتوانید بدون پرداخت حتی 1 ریال به ما، موجودی کیف پول خودتان را در ربات افزایش دهید و از خدمات ربات استفاده نمایید.\n\n👥 شما میتوانید با دعوت دوستان و آشنایان خود به ربات ما از طریق لینک اختصاصی خود کسب درآمد کنید و حتی با هر خرید زیرمجموعه‌ها به شما پورسانت داده خواهد شد.\n\n👤 شما می‌توانید با استفاده از بنر بالا برای خود زیرمجموعه جمع کنید.\n\n💵 مبلغ هدیه به ازای هر عضویت : %s تومان\n💴 میزان پورسانت از خرید زیرمجموعه : %s%%\n\n📊 آمار دعوت شما\n• افراد وارد شده با لینک: %s\n• تعداد خرید ها: %s \n • مبلغ خرید : %s تومان"
+                "affiliateedago": "❌ شما قبلا زیرمجموعه کاربری دیگر بوده اید و امکان زیرمجموعه شدن مجدد وجود ندارد",
+                "affiliateinfo": "🤔 زیرمجموعه گیری به چه صورت است ؟\n\n👨🏻‍💻 ما برای شما محیطی فراهم کرده‌ایم تا بتوانید بدون پرداخت حتی 1 ریال به ما، موجودی کیف پول خودتان را در ربات افزایش دهید و از خدمات ربات استفاده نمایید.\n\n👥 شما میتوانید با دعوت دوستان و آشنایان خود به ربات ما از طریق لینک اختصاصی خود کسب درآمد کنید و حتی با هر خرید زیرمجموعه‌ها به شما پورسانت داده خواهد شد.\n\n👤 شما می‌توانید با استفاده از بنر بالا برای خود زیرمجموعه جمع کنید.\n\n💵 مبلغ هدیه به ازای هر عضویت : %s تومان\n💴 میزان پورسانت از خرید زیرمجموعه : %s%%\n\n📊 آمار دعوت شما\n• افراد وارد شده با لینک: %s\n• تعداد خرید ها: %s \n • مبلغ خرید : %s تومان"
             },
             "number": {
                 "false": "❌ شماره تلفن صحبح نیست شماره تلفن را از دکمه زیر  ارسال نمایید.",
@@ -63,7 +63,7 @@
                 "None-credit": "📝 موجودی حساب شما کافی نمی باشد یک روش پرداخت از لیست پایین انتخاب نمایید",
                 "ErrorConfig": "❌ خطایی در ساخت اشتراک رخ داده است برای رفع مشکل با پشتیبانی در ارتباط باشد.",
                 "selectpayment": "📌 یک روش پرداخت از لیست بالا انتخاب نمایید",
-                "notestep" : "📌 یک یادداشت برای کانفیگ خود بنویسید.\n⚠️ این نام برای جستجو سریع تر در مدیریت سرویس ها می باشد\n🪪(مثال: علی ، احمد ، عمو ، مشتری شهرستان و...)"
+                "notestep": "📌 یک یادداشت برای کانفیگ خود بنویسید.\n⚠️ این نام برای جستجو سریع تر در مدیریت سرویس ها می باشد\n🪪(مثال: علی ، احمد ، عمو ، مشتری شهرستان و...)"
             },
             "stateus": {
                 "notUsernameget": "نام کاربری وجود ندارد",
@@ -91,7 +91,7 @@
                 "error": "❌خطایی رخ داده است",
                 "panelNotConnected": "❌ سامانه استعلام  سرویس مورد نظر درحال حاضر دردسترس نیست ساعتی دیگر امتحان کنید",
                 "UserNotFound": "❌ سرویس موردنظر  در سرور پیدا نشد!",
-                "statusdisable": "❌ سرویس غیرفعال می باشد امکان مشاهده اطلاعات وجود ندارد" ,
+                "statusdisable": "❌ سرویس غیرفعال می باشد امکان مشاهده اطلاعات وجود ندارد",
                 "errorexits": "❌ درخواست ثبت شده برای این نام کاربری وجود دارد  و امکان ثبت درخواست جدید وجود ندارد",
                 "errorusertest": "❌ امکان بازگشت وجه برای اکانت تست وجود ندارد.",
                 "getlinksub": "🔗  دریافت لینک اشتراک",
@@ -113,18 +113,18 @@
             },
             "extend": {
                 "title": "💊 تمدید سرویس",
-                "titleBtn" : "♻️ تمدید سرویس",
+                "titleBtn": "♻️ تمدید سرویس",
                 "confirm": "تایید تمدید",
                 "discount": "🎁 ثبت کد تخفیف",
                 "thanks": "🙏 با تشکر از تمدید سرویس خود.\n\n✅ تمدید شما با موفقیت انجام شد.\n⬅️ برای بازگشت به لیست سرویس‌های خود یا مشاهده اطلاعات، روی دکمه‌های زیر کلیک کنید.",
                 "error": "🚫 متأسفانه یک مشکل  به وجود آمده است. لطفاً با پشتیبانی تماس بگیرید تا این مشکل رفع شود.",
                 "selectservice": " 🛍 محصول خود را برای تمدید انتخاب نمایید",
-                "selectOrderDirect" : "📌 سرویس خود را جهت تمدید انتخاب نمایید.",
-                "emptyServiceforExtend" : "❌ شما هیچ سرویسی برای تمدید ندارید.",
-                "renewalerror" : "❌ خطایی در تمدید رخ داده است لطفا مراحل تمدید خود را مجددا انجام دهید",
-                "inactivepanel" : "❌ امکان تمدید در این پنل وجود ندارد",
-                "inactiveproduct" : "❌ این محصول غیرفعال است و امکان تمدید آن وجود ندارد",
-                "renewalinvoice" : "📜 فاکتور تمدید شما برای نام کاربری %s ایجاد شد.\n\n🛍 نام محصول : %s\n💸 مبلغ تمدید : %s\n⏱ مدت زمان تمدید : %s روز\n🔋 حجم تمدید : %s گیگ\n✍️ توضیحات : %s\n💸 موجودی کیف پول : %s\n\n✅ برای تایید و تمدید سرویس روی دکمه زیر کلیک کنید",
+                "selectOrderDirect": "📌 سرویس خود را جهت تمدید انتخاب نمایید.",
+                "emptyServiceforExtend": "❌ شما هیچ سرویسی برای تمدید ندارید.",
+                "renewalerror": "❌ خطایی در تمدید رخ داده است لطفا مراحل تمدید خود را مجددا انجام دهید",
+                "inactivepanel": "❌ امکان تمدید در این پنل وجود ندارد",
+                "inactiveproduct": "❌ این محصول غیرفعال است و امکان تمدید آن وجود ندارد",
+                "renewalinvoice": "📜 فاکتور تمدید شما برای نام کاربری %s ایجاد شد.\n\n🛍 نام محصول : %s\n💸 مبلغ تمدید : %s\n⏱ مدت زمان تمدید : %s روز\n🔋 حجم تمدید : %s گیگ\n✍️ توضیحات : %s\n💸 موجودی کیف پول : %s\n\n✅ برای تایید و تمدید سرویس روی دکمه زیر کلیک کنید",
                 "autorenew_on": "✅ تمدید خودکار",
                 "autorenew_off": "❌ تمدید خودکار",
                 "autorenew_enabled": "✅ تمدید خودکار این سرویس فعال شد.\n\n📌 هر زمان حجم باقی‌مانده به حد هشدار کرون برسد، سرویس با همان بسته تمدید می‌شود و مبلغ از کیف پول شما کسر می‌گردد.",
@@ -145,8 +145,8 @@
                 "extracheck": "تایید و دریافت حجم اضافه",
                 "invalidprice": "🚫 حداقل حجم 1 گیگابایت می باشد",
                 "setpricerxtratime": "قیمتی که مخیواهید  برای هر روز زمان اضافه تعیین کنید را ارسال کنید",
-                "extravolumeinvoice" : "📇 فاکتور خرید حجم اضافه برای شما ایجاد شد.\n\n💰 قیمت هر گیگابایت حجم اضافه : %s تومان\n📝 مبلغ فاکتور شما : %s تومان\n📥 حجم اضافه درخواستی : %s گیگابایت\n\n✅ جهت پرداخت و اضافه شدن حجم، روی دکمه زیر کلیک کنید.",
-                "enterextravolume" : "🔋 مقدار حجم اضافه مورد نظر را وارد کنید (برحسب گیگابایت) :\n\n📌 تعرفه هر گیگ : %s تومان"
+                "extravolumeinvoice": "📇 فاکتور خرید حجم اضافه برای شما ایجاد شد.\n\n💰 قیمت هر گیگابایت حجم اضافه : %s تومان\n📝 مبلغ فاکتور شما : %s تومان\n📥 حجم اضافه درخواستی : %s گیگابایت\n\n✅ جهت پرداخت و اضافه شدن حجم، روی دکمه زیر کلیک کنید.",
+                "enterextravolume": "🔋 مقدار حجم اضافه مورد نظر را وارد کنید (برحسب گیگابایت) :\n\n📌 تعرفه هر گیگ : %s تومان"
             },
             "Extra_time": {
                 "title": "⏳ خرید زمان اضافه",
@@ -194,9 +194,9 @@
                 "Confirmpaying": "✅ تایید پرداخت",
                 "Send-receipt": "🚀 رسید پرداخت  شما ارسال شد پس از تایید توسط مدیریت مبلغ به کیف پول شما واریز خواهد شد",
                 "Send-receiptadnsendconfig": "🚀 رسید شما ارسال و پس از بررسی اطلاعات سرویس برای شما ارسال خواهد شد",
-                "maxpurchasereached" : "❌ شما به حداکثر سقف خرید خود رسیده اید ابتدا حساب خود را شارژ نمایید سپس سرویس جدید تهیه یا سرویس را تمدید کنید",
-                "insufficientbalance" : "❌ موجودی شما برای خرید سرویس کافی نمی باشد.\n💸 برای افزایش موجودی مبلغ را به تومان وارد کنید:\n✅ حداقل مبلغ %s تومان، حداکثر مبلغ %s تومان می باشد",
-                "receiptimage" : "🖼 تصویر رسید ارسالی"
+                "maxpurchasereached": "❌ شما به حداکثر سقف خرید خود رسیده اید ابتدا حساب خود را شارژ نمایید سپس سرویس جدید تهیه یا سرویس را تمدید کنید",
+                "insufficientbalance": "❌ موجودی شما برای خرید سرویس کافی نمی باشد.\n💸 برای افزایش موجودی مبلغ را به تومان وارد کنید:\n✅ حداقل مبلغ %s تومان، حداکثر مبلغ %s تومان می باشد",
+                "receiptimage": "🖼 تصویر رسید ارسالی"
             },
             "Discount": {
                 "getcode": "💝 برای دریافت موجودی کد هدیه خود را ارسال نمایید",
@@ -205,11 +205,11 @@
                 "erorrlimit": "❌ محدودیت استفاده از این کد تخفیف به پایان رسیده است",
                 "erorrlimitdiscount": "❌ محدودیت استفاده از این کد هدیه به پایان رسیده است",
                 "firstdiscount": "❌ این کد تخفیف مخصوص خرید اول است.",
-                "gift-deposit" : "🎁 کاربر عزیز مبلغ %s تومان به عنوان هدیه واریز به حساب شما واریز گردید.",
+                "gift-deposit": "🎁 کاربر عزیز مبلغ %s تومان به عنوان هدیه واریز به حساب شما واریز گردید.",
                 "discountapplied": "تبریک 🎉\n📌 خرید شما شامل %s درصد تخفیف شده است",
-                "giftcodeused" : "⭕️ یک کاربر با نام کاربری @%s و آیدی عددی %s از کد هدیه %s استفاده کرد.",
-                "giftcodesuccess" : "کد هدیه با موفقیت ثبت شد و به موجودی شما مبلغ %s تومان اضافه گردید. 🥳",
-                "giftcodeonce" : "📌 این کد تنها یکبار قابل استفاده است."
+                "giftcodeused": "⭕️ یک کاربر با نام کاربری @%s و آیدی عددی %s از کد هدیه %s استفاده کرد.",
+                "giftcodesuccess": "کد هدیه با موفقیت ثبت شد و به موجودی شما مبلغ %s تومان اضافه گردید. 🥳",
+                "giftcodeonce": "📌 این کد تنها یکبار قابل استفاده است."
             },
             "changelink": {
                 "btntitle": "⚙️ تغییر لینک",
@@ -222,7 +222,7 @@
             },
             "customvolume": {
                 "SetPrice": "⭕️ قیمتی که می‌خواهید برای هرگیگ حجم دلخواه تعیین کنید را ارسال کنید.",
-                "setpricetime" : "📌 گزینه‌های ماه و ضریب قیمت سرویس دلخواه را از پنل وب (تب سرویس دلخواه) تنظیم کنید.",
+                "setpricetime": "📌 گزینه‌های ماه و ضریب قیمت سرویس دلخواه را از پنل وب (تب سرویس دلخواه) تنظیم کنید.",
                 "time": "📌 گزینه‌های ماه سرویس دلخواه از پنل وب تنظیم می‌شود.\n⚠️ هر ماه معادل ۳۰ روز است",
                 "savedtime": "✅ زمان با موفقیت تنظیم شد"
             },
@@ -246,55 +246,55 @@
                 "configqrcdoeservice": "📷 کیوآرکد کانفیگ",
                 "sendqrcodeconfig": "کیوآرکد کانفیگ های شما 👇"
             },
-            "agenttext" : {
+            "agenttext": {
                 "endrequest": "✅ درخواست شما ثبت گردید. پس از بررسی نتیجه اعلام خواهد شد.",
                 "requestreport": "❌ شما یک درخواست ثبت شده دارید امکان درخواست مجدد وجود ندارد.",
                 "isagent": "❌ شما درحال حاضر نماینده هستید امکان درخواست نمایندگی وجود ندارد.",
-                "acceptrequest" : "✅ تایید درخواست",
-                "rejectrequest" : "❌ رد درخواست",
-                "agent-request" :"📣 یک کاربر درخواست نمایندگی ثبت کرده لطفا اطلاعات را بررسی و وضعیت را مشخص کنید.\n\nآیدی عددی : <code>%s</code>\nنام کاربری : @%s\nنام اکانت: %s\nتوضیحات : %s",
-                "insufficientbalanceagent" : "❌ موجودی شما برای درخواست نمایندگی کافی نمی باشد ابتدا حساب کاربری خود را شارژ سپس درخواست را ارسال نمایید\n\n💸 هزینه دریافت نمایندگی  :‌%s تومان",
-                "customnameusername" : "👤 انتخاب نام دلخواه"
+                "acceptrequest": "✅ تایید درخواست",
+                "rejectrequest": "❌ رد درخواست",
+                "agent-request": "📣 یک کاربر درخواست نمایندگی ثبت کرده لطفا اطلاعات را بررسی و وضعیت را مشخص کنید.\n\nآیدی عددی : <code>%s</code>\nنام کاربری : @%s\nنام اکانت: %s\nتوضیحات : %s",
+                "insufficientbalanceagent": "❌ موجودی شما برای درخواست نمایندگی کافی نمی باشد ابتدا حساب کاربری خود را شارژ سپس درخواست را ارسال نمایید\n\n💸 هزینه دریافت نمایندگی  :‌%s تومان",
+                "customnameusername": "👤 انتخاب نام دلخواه"
             },
             "note": {
-                "changednote" : "✅ یادداشت با موفقیت تغییر کرد.",
+                "changednote": "✅ یادداشت با موفقیت تغییر کرد.",
                 "ErrorLongNote": "❌ حداکثر محدودیت یادداشت جدید ۱۵۰ کاراکتر می باشد.",
-                "SendNote" : "📝 یادداشت جدید خود را ارسال نمایید ( حداکثر ۱۵۰ کاراکتر می توانید ارسال نمایید.)"
+                "SendNote": "📝 یادداشت جدید خود را ارسال نمایید ( حداکثر ۱۵۰ کاراکتر می توانید ارسال نمایید.)"
             },
-            "app" : {
-                "selectapp" : "📌  جهت دانلود یک گزینه را انتخاب کنید",
-                "appempty" : "❌ برنامه ای برای دانلود وجود ندارد."
+            "app": {
+                "selectapp": "📌  جهت دانلود یک گزینه را انتخاب کنید",
+                "appempty": "❌ برنامه ای برای دانلود وجود ندارد."
             },
-            "pricearze" : {
-                "tether-price" : "قیمت تتر درحال حاضر :  %s تومان",
-                "tron-price" : "قیمت ترون درحال حاضر :  %s تومان"
+            "pricearze": {
+                "tether-price": "قیمت تتر درحال حاضر :  %s تومان",
+                "tron-price": "قیمت ترون درحال حاضر :  %s تومان"
             },
-            "wheel_luck" :{
+            "wheel_luck": {
                 "notWinner": "🥲متاسفانه شما برنده نشدید روز دیگر مجددا تست کنید",
                 "wheel-winner": "⭕️ یک کاربر با نام کاربری @%s و آیدی عددی %s برنده گردونه شانس شد",
-                "winner-congratulations" : "🤩 تبریک شما برنده شدید . مبلغ %s تومان به حساب کاربری شما اضافه گردید.",
-                "already-participated" : "❌ شما امروز شرکت کردید فردا مجددا  شانس خود را امتحان کنید",
-                "feature-disabled" : "❌ این قابلیت در حال حاضر خاموش می باشد"
+                "winner-congratulations": "🤩 تبریک شما برنده شدید . مبلغ %s تومان به حساب کاربری شما اضافه گردید.",
+                "already-participated": "❌ شما امروز شرکت کردید فردا مجددا  شانس خود را امتحان کنید",
+                "feature-disabled": "❌ این قابلیت در حال حاضر خاموش می باشد"
             }
         },
         "Admin": {
-            "backadmin" : "🏠 بازگشت به منوی مدیریت",
-            "backmenu" : "▶️ بازگشت به منوی قبل",
-            "textpaneladmin" : "👨‍💼 پنل مدیریت",
-            "activebottext" : "برای استفاده از امکانات پنل ادمین:\n\nبه صفحه‌ای که پایین آن کیبورد دارد بروید.\nدر کیبورد، دکمه‌ای به نام گزارشات ربات را پیدا کنید و روی آن کلیک کنید.\nبعد از کلیک روی دکمه گزارشات ربات، صفحه‌ای باز می‌شود.\nدر این صفحه، می‌توانید گروهی که می‌خواهید را انتخاب و تنظیم کنید.\nاین کار الزامی است",
-            "TextPanelAdminLogin" : "",
-            "affiliates" : {
-                "titletopic" : "🎁 گزارش پورسانت ها"
+            "backadmin": "🏠 بازگشت به منوی مدیریت",
+            "backmenu": "▶️ بازگشت به منوی قبل",
+            "textpaneladmin": "👨‍💼 پنل مدیریت",
+            "activebottext": "برای استفاده از امکانات پنل ادمین:\n\nبه صفحه‌ای که پایین آن کیبورد دارد بروید.\nدر کیبورد، دکمه‌ای به نام گزارشات ربات را پیدا کنید و روی آن کلیک کنید.\nبعد از کلیک روی دکمه گزارشات ربات، صفحه‌ای باز می‌شود.\nدر این صفحه، می‌توانید گروهی که می‌خواهید را انتخاب و تنظیم کنید.\nاین کار الزامی است",
+            "TextPanelAdminLogin": "",
+            "affiliates": {
+                "titletopic": "🎁 گزارش پورسانت ها"
             },
             "Back-Admin": "به پنل ادمین بازگشتید!",
             "Back-menu": "به منوی قبل بازگشتید!",
             "not-user": "کاربری با این شناسه یافت نشد",
-            "perfectmoney" : {
-                "setnumberacount" :"✅ شماره اکانت با موفقیت ثبت شد"
+            "perfectmoney": {
+                "setnumberacount": "✅ شماره اکانت با موفقیت ثبت شد"
             },
             "channel": {
-                "title" : "اضافه کردن کانال",
-                "removechannelbtn" : "حذف کانال",
+                "title": "اضافه کردن کانال",
+                "removechannelbtn": "حذف کانال",
                 "changechannel": "برای تنظیم کانال عضویت اجباری لطفا یوزرنیم کانال خود با @ را یا آیدی عددی کانال که با -100 شروع میشود را وارد نمایید",
                 "setchannel": "🔰 گروه گزارش با موفقیت تنظیم گردید.",
                 "description": "📌 برای فعال کردن قابلیت جوین اجباری یک کانال اضافه کنید\nنکات این قابلیت : \n- ربات حتما باید ادمین کانال باشد\n- برای غیرفعال کردن این قابلیت باید تمام کانال ها را حذف کنید",
@@ -308,22 +308,22 @@
                 "setrule": "⭕️ سطح دسترسی ادمین را ارسال کنید\nسطح دسترسی administrator به تمامی بخش ها دسترسی دارد\nسطح دسترسی Seller فقط به بخش های تایید رسید  ، خدمات کاربر ، آمار ربات دسترسی دارید\nسطح دسترسی support به بخش های خدمات کاربر ، پاسخ پیام پشتیبانی دسترسی دارد",
                 "removedadmin": "✅ ادمین با موفقیت حذف گردید.",
                 "invalidrule": "❌ سطح دسترسی نامعتبر",
-                "adminedsenduser": "⭕️  کاربر عزیز شما ادمین ربات شدید برای دسترسی به پنل ادمین می توانید دستور <code>panel<\/code> را ارسال کنید"
+                "adminedsenduser": "⭕️  کاربر عزیز شما ادمین ربات شدید برای دسترسی به پنل ادمین می توانید دستور <code>panel</code> را ارسال کنید"
             },
             "getlimitusertest": {
-                "setlimitbtn" : "➕ محدودیت ساخت اکانت تست برای همه",
+                "setlimitbtn": "➕ محدودیت ساخت اکانت تست برای همه",
                 "getid": "تعداد ساخت اکانت تست را ارسال کنید",
                 "setlimit": "محدودیت برای کاربر تنظیم گردید.",
                 "limitall": "تعداد ساخت اکانت تست را وارد نمایید.",
                 "setlimitall": "محدودیت ساخت اکانت برای تمام کاربران تنظیم شد"
             },
-            "getstats": "در صورتی که می خواهید آمار را در بازه تاریخی دیگیری ببینید  ابتدا تاریخ شروع را ارسال کنید .\nمثال: \n<code>%s<\/code>",
+            "getstats": "در صورتی که می خواهید آمار را در بازه تاریخی دیگیری ببینید  ابتدا تاریخ شروع را ارسال کنید .\nمثال: \n<code>%s</code>",
             "managepanel": {
                 "selectpanel": "پنل خود را انتخاب کنید",
                 "saveddata": "✅ تغییرات با موفقیت ذخیره گردید.",
                 "errorstateuspanel": "امکان اتصال به پنل وجود ندارد 😔 خطا در ادامه نوشته شده است در صورتی که مشکل حل نشد با پشتیبانی در ارتباط باشید",
                 "addpanelname": "نام پنل را ارسال کنید\n       \n⚠️ توجه: نام پنل نامی است که  در هنگام انجام عملیات جستجو  نشان داده می شود.",
-                "addpanelurl": "🔗 نام پنل ذخیره شد حالا آدرس پنل خود ارسال کنید\n    ⚠️ توجه:\n    🔸 آدرس پنل باید بدون dashboard ارسال شود.\n    🔹 در صورتی که پورت پنل 443 است پورت را نباید وارد کنید.  ( گاهی حتما با پورت باید وارد کنید)\n    🔸 آخر آدرس نباید \/ داشته باشد\n    🔹 در صورت وارد کردن آیپی حتما http یا https باید داشته باشد",
+                "addpanelurl": "🔗 نام پنل ذخیره شد حالا آدرس پنل خود ارسال کنید\n    ⚠️ توجه:\n    🔸 آدرس پنل باید بدون dashboard ارسال شود.\n    🔹 در صورتی که پورت پنل 443 است پورت را نباید وارد کنید.  ( گاهی حتما با پورت باید وارد کنید)\n    🔸 آخر آدرس نباید / داشته باشد\n    🔹 در صورت وارد کردن آیپی حتما http یا https باید داشته باشد",
                 "Invalid-domain": "🔗 آدرس دامنه نامعتبر است",
                 "usernameset": "👤 آدرس پنل ذخیره شد حالا نام کاربری  را ارسال کنید",
                 "getpassword": "🔑 نام کاربری ذخیره شد. رمز عبور  خود را وارد نمایید",
@@ -360,7 +360,7 @@
                     "GetProtocol": "🔱 پروتکل خود را انتخاب کنید",
                     "invalidprotocol": "⛔️ پروتکل نامعتبر است پروتکل باید از گزینه های زیر باشد",
                     "getInbound": "🔰 نام های اینباندی که می‌خواهید برای این پروتکل تنظیم کنید را ارسال کنید.",
-                    "addInbound": "⭕️ اینباند دریافت شد در صورتی که میخواهید مجدد اینباند جدید ارسال کنید نام اینباند جدید را ارسال کنید در غیراینصورت دستور \/end را ارسال کنید",
+                    "addInbound": "⭕️ اینباند دریافت شد در صورتی که میخواهید مجدد اینباند جدید ارسال کنید نام اینباند جدید را ارسال کنید در غیراینصورت دستور /end را ارسال کنید",
                     "endInbound": "🥳 اینباندها با موفقیت ثبت شدند",
                     "remove": "⭕️ اینباندی که می‌خواهید حذف کنید را  ارسال کنید در صورتی که میخواهید تمام اینباند های این پروتکل حذف شود دستور all را ارسال کنید",
                     "removeed": "❌ اینباند با موفقیت حذف شد",
@@ -373,7 +373,7 @@
                 "SendMessageuser": "✅ پیام با موفقیت برای کاربر ارسال گردید.",
                 "GetTextResponse": "برای پاسخ به پیام متن خود را ارسال کنید.",
                 "GetText": "متن خود را ارسال کنید",
-                "textconfirm": "در صورت تایید متن زیر را ارسال نمایید\n<code>تایید<\/code>",
+                "textconfirm": "در صورت تایید متن زیر را ارسال نمایید\n<code>تایید</code>",
                 "ForwardGetext": "متن فورواردی خود را ارسال کنید",
                 "ForwardSendAllUser": "✅ پیام برای تمامی کاربران فوروارد شد.",
                 "MessageSent": "✅ پیام ارسال شد",
@@ -397,7 +397,7 @@
                 "dataorder": " تاریخ ثبت نشده است",
                 "SendOrder": "لیست سفارشات کاربر ارسال شد",
                 "mangebtnuser": "⚙️ مدیریت کاربر",
-                "newuser" : "🎉یک کاربر جدید ربات را استارت کرد\n نام : %s\nنام کاربری : @%s\nآیدی عددی : %s",
+                "newuser": "🎉یک کاربر جدید ربات را استارت کرد\n نام : %s\nنام کاربری : @%s\nآیدی عددی : %s",
                 "mangebtnuserdec": "⭕️ در این بخش میتوانید تمام کاربران را مشاهده کنید \n⚠️ برای مدیریت کاربر روی دکمه مدیریت کاربر جلوی هر کاربر بزنید",
                 "backlistuser": "🏠 بازگشت به لیست کاربران",
                 "addbalanceuser": "👆افزایش موجودی",
@@ -519,7 +519,7 @@
                 "TestChannel": "تست  اتصال گروه"
             },
             "Product": {
-                "Service_location": "📌 موقعیت محصول خود را انتخاب کنید\n\n ⭕️ برای تعریف محصول در همه موقعیت ها دستور \/all را ارسال کنید",
+                "Service_location": "📌 موقعیت محصول خود را انتخاب کنید\n\n ⭕️ برای تعریف محصول در همه موقعیت ها دستور /all را ارسال کنید",
                 "nullpProduct": "⭕️ محصولی یافت نشد برای رفع مشکل با پشتیبانی در ارتباط باشید",
                 "Rmove_location": "📌 موقعیت محصول خود را انتخاب کنید",
                 "selectRemoveProduct": "محصولی که میخوای حذف کنی ر و انتخاب کن",
@@ -613,8 +613,8 @@
                 "useragentremoved": "❌ کاربر با موفقیت از حالت نماینده حذف شد",
                 "invalidvlue": "⭕️ ورودی نا معتبر",
                 "setagentproduct": "محصول برای چه کاربری نشان داده شود\nنوع اول f : کاربر عادی می باشد\nنوع دوم n : نماینده نوع دوم می باشد با قابلیت های محدود\nنوع سوم n2 : نماینده نوع سوم می باشد که قابلیت های بیشتر",
-                "agenttext" : "👋 به پنل نمایندگی خوش آمدید",
-                "submitusername" : "✅ نام کاربری شما با موفقیت ذخیره گردید."
+                "agenttext": "👋 به پنل نمایندگی خوش آمدید",
+                "submitusername": "✅ نام کاربری شما با موفقیت ذخیره گردید."
             },
             "order": {
                 "selectstep": "📌 سفارش را از چه طریقی می‌خواهید مشاهده کنید؟",
@@ -637,10 +637,10 @@
                 "confirmed": "✅ انتقال سرویس با موفقیت انجام شد.",
                 "notsendserviceyou": "❌ امکان انتقال سرویس به خود وجود ندارد."
             },
-            "change-location" : {
-                "title" : "🌐 تغییر لوکیشن",
-                "changedloc" : "✅ سرویس شما با موفقیت منتقل گردید.",
-                "confirm" : "✅ تایید انتقال"
+            "change-location": {
+                "title": "🌐 تغییر لوکیشن",
+                "changedloc": "✅ سرویس شما با موفقیت منتقل گردید.",
+                "confirm": "✅ تایید انتقال"
             },
             "month": {
                 "title": "📌 مدت زمان سرویس را انتخاب نمایید",
@@ -662,25 +662,356 @@
                 "fourstep": "📌 نام محصول  را ارسال نمایید.",
                 "fivestep": "📌 سرویس با موفقیت به حساب کاربر اضافه گردید."
             },
-            "btnkeyboardadmin":{
-                "managementpanel" : "✏️ مدیریت پنل",
-                "addpanel" : "🖥 اضافه کردن پنل",
-                "managruser" : "👤 مدیریت کاربر"
+            "btnkeyboardadmin": {
+                "managementpanel": "✏️ مدیریت پنل",
+                "addpanel": "🖥 اضافه کردن پنل",
+                "managruser": "👤 مدیریت کاربر"
             },
-            "report" : {
-                "reportnight" : "🌙 گزارش شبانه",
-                "reportcron" : "📝 گزارش اطلاع رسانی ها",
-                "reportsms" : "📨 گزارش ارسال پیام"
+            "report": {
+                "reportnight": "🌙 گزارش شبانه",
+                "reportcron": "📝 گزارش اطلاع رسانی ها",
+                "reportsms": "📨 گزارش ارسال پیام"
             },
-            "reportgroup" : {
-                "adminadded" : "👨‍💼 کاربر با مشخصات زیر یک ادمین اضافه کرده است.\n\nنام کاربری %s\nآیدی عددی : %s\nنوع دسترسی : %s\n\n⭕️ اطلاعات ادمین جدید :\nآیدی عددی : %s",
-                "new-payment-star" : "💵 پرداخت جدید\n- 👤 نام کاربری کاربر : @%s\n- ‏🆔آیدی عددی کاربر : %s\n- 💸 مبلغ تراکنش %s\n- 📥 مبلغ واریز شده استار. : %s\n- 💳 روش پرداخت : استار تلگرام",
-                "volumepurchase" : "⭕️ یک کاربر حجم اضافه خریده است\n\nاطلاعات کاربر :\n🪪 آیدی عددی : %s\n🛍 حجم خریداری شده : %s\n💰 مبلغ پرداختی : %s تومان\nموجودی کاربر قبل خرید : %s\n👤 نام کاربری کانفیگ : %s",
-                "renewaldetails" :"📣 جزئیات تمدید اکانت در ربات شما ثبت شد.\n▫️آیدی عددی کاربر : <code>%s</code>\n▫️نام کاربری کاربر : @%s\n▫️نام کاربری کانفیگ : %s\n▫️نام کاربر : %s\n▫️موقعیت سرویس : %s\n▫️نام محصول : %s\n▫️حجم محصول : %s\n▫️زمان محصول : %s\n▫️مبلغ تمدید : %s تومان\n▫️موجودی کاربر : %s تومان\n▫️زمان خرید : %s"
+            "reportgroup": {
+                "adminadded": "👨‍💼 کاربر با مشخصات زیر یک ادمین اضافه کرده است.\n\nنام کاربری %s\nآیدی عددی : %s\nنوع دسترسی : %s\n\n⭕️ اطلاعات ادمین جدید :\nآیدی عددی : %s",
+                "new-payment-star": "💵 پرداخت جدید\n- 👤 نام کاربری کاربر : @%s\n- ‏🆔آیدی عددی کاربر : %s\n- 💸 مبلغ تراکنش %s\n- 📥 مبلغ واریز شده استار. : %s\n- 💳 روش پرداخت : استار تلگرام",
+                "volumepurchase": "⭕️ یک کاربر حجم اضافه خریده است\n\nاطلاعات کاربر :\n🪪 آیدی عددی : %s\n🛍 حجم خریداری شده : %s\n💰 مبلغ پرداختی : %s تومان\nموجودی کاربر قبل خرید : %s\n👤 نام کاربری کانفیگ : %s",
+                "renewaldetails": "📣 جزئیات تمدید اکانت در ربات شما ثبت شد.\n▫️آیدی عددی کاربر : <code>%s</code>\n▫️نام کاربری کاربر : @%s\n▫️نام کاربری کانفیگ : %s\n▫️نام کاربر : %s\n▫️موقعیت سرویس : %s\n▫️نام محصول : %s\n▫️حجم محصول : %s\n▫️زمان محصول : %s\n▫️مبلغ تمدید : %s تومان\n▫️موجودی کاربر : %s تومان\n▫️زمان خرید : %s"
             },
-            "MessageBulk" :{
-                "userresponse" : "📥 یک پاسخ به پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید و پیام خود را ارسال کنید.\n\nآیدی عددی : %s\nنام کاربری کاربر : %s\n📝 متن پیام : %s",
-                "usermessage" : "📥 یک پاسخ به پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید و پیام خود را ارسال کنید.\n\nآیدی عددی : %s\nنام کاربری کاربر : @%s\n📝 متن پیام : %s"
+            "MessageBulk": {
+                "userresponse": "📥 یک پاسخ به پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید و پیام خود را ارسال کنید.\n\nآیدی عددی : %s\nنام کاربری کاربر : %s\n📝 متن پیام : %s",
+                "usermessage": "📥 یک پاسخ به پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید و پیام خود را ارسال کنید.\n\nآیدی عددی : %s\nنام کاربری کاربر : @%s\n📝 متن پیام : %s"
+            }
+        }
+    },
+    "en": {
+        "users": {
+            "Rules": "✅ Rules accepted. You can now use the bot.",
+            "back": "Returned to the main menu!",
+            "backbtn": "🏠 Back to main menu",
+            "backmenu": "🏠 Back to previous menu",
+            "time-Service": "⏳ Subscription duration",
+            "listusers": "📌 Choose one of the methods below to view users.",
+            "Volume-Service": "🌐 Service volume",
+            "selectoption": "Select an option",
+            "selectusername": "Send a custom username\n⚠️ The username must not include extra characters such as @, spaces, or hyphens.\n⚠️ The username must be in English.\n✅ Valid usernames: ali12  | mahdi  | ws1_ksdf\n❌ Invalid usernames: ali_ |  tele@  |  _mahdi | mohsen",
+            "invalidusername": "❌ Invalid username\n🔄 Please send your username again",
+            "SendMessage": "📩 Send a message to the user",
+            "erroroccurred": "❌ An error occurred. Please start over.",
+            "customusername": "Custom username",
+            "disable": "Disabled",
+            "spam": {
+                "spamed": "Sending too many messages in the bot",
+                "spamedmessage": "📌 Your account has been blocked for spamming the bot.",
+                "spamedreport": "User with ID %s was blocked for spamming the bot"
+            },
+            "block": {
+                "descriptions": "🚫 You have been blocked by the administrator.\n\n✍️ Reason:  %s"
+            },
+            "channel": {
+                "link": "Not set",
+                "text_join": "🔗 Join the channel",
+                "confirmjoin": "✅ Check membership",
+                "confirmed": "Your membership was confirmed. Thank you ❤️",
+                "notconfirmed": "❌ You have not joined the channel yet.",
+                "left_channel": "❌ You left our channel and will miss news and updates. Please join the channel again."
+            },
+            "affiliates": {
+                "affiliatesyou": "❌ You are already a referral of user %s and cannot join another user.",
+                "affiliatesidyou": "❌ You cannot become a referral with this user ID.",
+                "setpercentage": "📌 Send the percentage you want credited to the user after a purchase",
+                "changedpercentage": "✅ Referral payout percentage was set",
+                "banner": "⭕️ Send your referral banner\n\n❌ The banner must include a photo",
+                "invalidbanner": "❌ Invalid banner (it must be sent with a photo)",
+                "insertbanner": "✅ Your banner was saved.",
+                "invalidaffiliates": "❌ You cannot refer yourself",
+                "priceDiscount": "📌 Enter the amount a user should receive for each new referral",
+                "changedpriceDiscount": "✅ Referral bonus amount was saved",
+                "offaffiliates": "❌ The referral program is currently disabled",
+                "affiliateedago": "❌ You have already been referred by another user and cannot join again",
+                "affiliateinfo": "🤔 How does the referral program work?\n\n👨🏻‍💻 You can grow your wallet balance and use the bot without paying us anything.\n\n👥 Invite friends with your personal link and earn commission on their purchases.\n\n👤 Use the banner above to collect referrals.\n\n💵 Bonus per signup: %s Toman\n💴 Commission on referral purchases: %s%%\n\n📊 Your stats\n• Users who joined with your link: %s\n• Number of purchases: %s\n • Purchase amount: %s Toman"
+            },
+            "number": {
+                "false": "❌ Invalid phone number. Please send it using the button below.",
+                "Warning": "⚠️ Could not save the phone number. It must belong to this Telegram account.",
+                "erroriran": "⭕️ Invalid mobile number. Only Iranian numbers are accepted.",
+                "active": "✅ Your mobile number was verified",
+                "Confirming": "📞 Please send your mobile number for verification using the button below"
+            },
+            "sell": {
+                "deactivepanel": "❌ Sales are currently disabled",
+                "service_not_available": "⛔️ You have no active services",
+                "service_sell": "🛍 Subscriptions you purchased\n\n⚠️ Tap a username to view details and manage the service\n\n⭕️ You can also use \"🔎 Quick search\" to find a service faster",
+                "Service-select": "🛍️ Please select the service you want to buy!",
+                "error-product": "❌ The selected product does not exist",
+                "Service-select-first": "🛍️ Please select the service you want to buy!",
+                "None-credit": "📝 Your balance is not enough. Choose a payment method from the list below",
+                "ErrorConfig": "❌ An error occurred while creating the subscription. Please contact support.",
+                "selectpayment": "📌 Choose a payment method from the list above",
+                "notestep": "📌 Write a note for your config.\n⚠️ This name is used to find the service faster later\n🪪 (example: Ali, office, travel, ...)"
+            },
+            "stateus": {
+                "notUsernameget": "Username does not exist",
+                "SendUsername": "📌 Send your username",
+                "active": "✅ Active",
+                "limited": "🚫 Data limit reached",
+                "disabled": "❌ Disabled",
+                "expired": "🔚 Service expired",
+                "on_hold": "❌ Not connected",
+                "Unknown": "❌ Unknown",
+                "Unlimited": "Unlimited",
+                "month": " month ",
+                "day": " day ",
+                "hour": " hour ",
+                "min": "minute",
+                "Notconsumed": "Not used",
+                "username": "Username: ",
+                "stateus": "Status:",
+                "expirationDate": "Expires:",
+                "daysleft": "Time remaining:",
+                "usedTrafficGb": "Data used:",
+                "LastTraffic": "Total data: ",
+                "RemainingVolume": "Data remaining: ",
+                "info": "📊 Service details:",
+                "error": "❌ An error occurred",
+                "panelNotConnected": "❌ Service lookup is currently unavailable. Please try again later.",
+                "UserNotFound": "❌ This service was not found on the server!",
+                "statusdisable": "❌ This service is disabled, so details cannot be shown",
+                "errorexits": "❌ A request already exists for this username. You cannot submit a new one.",
+                "errorusertest": "❌ Refunds are not available for test accounts.",
+                "getlinksub": "🔗 Get subscription link",
+                "linksub": "🔗 Subscription link",
+                "backlist": "🏠 Back to service list",
+                "backservice": "🏠 Back to service details",
+                "backinfo": "↪️ Back",
+                "Invalidusername": "❌ Invalid username.\n🔄 Please send your username again",
+                "config": "🔰 Get config",
+                "removeservice": "❌ Request refund",
+                "descriptions_removeservice": "📌 Tapping \"✅ I want to delete this service\" will send a deletion request to the admin. After review, the service will be cancelled.\n\n❌ If approved, the unused amount will be credited to your wallet.\n\nThank you for using our services.",
+                "sendrequestsremove": "✅ Your request was sent. You will be notified after the admin reviews it.",
+                "exitsrequsts": "❌ You already have a pending request. Wait for it to be reviewed before submitting a new deletion request.",
+                "requestadmin": "📌 Deletion rejection was recorded. Send the reason for rejection.",
+                "accecptreqests": "✅ Saved successfully",
+                "disabledconfig": "❌ Your service was disabled.",
+                "activedconfig": "✅ Your service was enabled",
+                "notchanged": "❌ The service status cannot be changed."
+            },
+            "extend": {
+                "title": "💊 Renew service",
+                "titleBtn": "♻️ Renew service",
+                "confirm": "Confirm renewal",
+                "discount": "🎁 Apply discount code",
+                "thanks": "🙏 Thank you for renewing.\n\n✅ Your renewal was completed.\n⬅️ Use the buttons below to return to your services or view details.",
+                "error": "🚫 Something went wrong. Please contact support.",
+                "selectservice": " 🛍 Select a product to renew",
+                "selectOrderDirect": "📌 Select the service you want to renew.",
+                "emptyServiceforExtend": "❌ You have no services to renew.",
+                "renewalerror": "❌ A renewal error occurred. Please try again.",
+                "inactivepanel": "❌ Renewal is not available on this panel",
+                "inactiveproduct": "❌ This product is disabled and cannot be renewed",
+                "renewalinvoice": "📜 Renewal invoice created for username %s.\n\n🛍 Product: %s\n💸 Renewal price: %s\n⏱ Duration: %s days\n🔋 Data: %s GB\n✍️ Description: %s\n💸 Wallet balance: %s\n\n✅ Tap the button below to confirm and renew",
+                "autorenew_on": "✅ Auto-renew",
+                "autorenew_off": "❌ Auto-renew",
+                "autorenew_enabled": "✅ Auto-renew was enabled for this service.\n\n📌 When remaining data reaches the cron warning threshold, the service is renewed with the same plan and the amount is deducted from your wallet.",
+                "autorenew_disabled": "❌ Auto-renew was disabled for this service.",
+                "autorenew_insufficient": "Your wallet balance is not enough for auto-renew",
+                "autorenew_prewarn": "Service %s has auto-renew enabled, but your wallet balance is too low. Please add at least %s to your wallet for a successful renewal.",
+                "autorenew_success": "✅ Service %s was renewed automatically.\n\n🛍 Plan: %s\n💸 Amount deducted: %s Toman",
+                "autorenew_noproduct": "❌ No matching plan was found for auto-renew.",
+                "autorenew_cron_off": "💡 Enable auto-renew and keep your wallet funded to stay connected",
+                "autorenew_cron_on": "✅ Auto-renew is enabled for this service.",
+                "autorenew_cron_enable": "✅ Enable auto-renew"
+            },
+            "Extra_volume": {
+                "SetPrice": "⭕️ Send the price you want for each extra GB.",
+                "ChangedPrice": "✅ Amount saved.",
+                "gettypeextra": "📌 Which user type should this price apply to?\nUser types:\nf = regular user\nn = agent\nn2 = advanced agent",
+                "sellextra": "➕ Buy extra data",
+                "extracheck": "Confirm and add extra data",
+                "invalidprice": "🚫 Minimum extra data is 1 GB",
+                "setpricerxtratime": "Send the price you want for each extra day",
+                "extravolumeinvoice": "📇 Extra data invoice created.\n\n💰 Price per extra GB: %s Toman\n📝 Invoice total: %s Toman\n📥 Requested extra data: %s GB\n\n✅ Tap the button below to pay and add the data.",
+                "enterextravolume": "🔋 Enter the extra data you want (in GB):\n\n📌 Price per GB: %s Toman"
+            },
+            "Extra_time": {
+                "title": "⏳ Buy extra time",
+                "extratimecheck": "Confirm and add extra time"
+            },
+            "usertest": {
+                "limitwarning": "⚠️ You have reached the test subscription limit.",
+                "limitwarningactive": "The test account limit is {limit} account(s) every 10 days. You already have an active test account. Please try again in a few days.",
+                "errorcreat": "❌ An error occurred while creating the subscription. Please contact support.",
+                "iduser": "User ID",
+                "phonenumber": "User phone number",
+                "namepanel": "Panel name"
+            },
+            "help": {
+                "disablehelp": "The help section is currently disabled. 😔",
+                "btninlinebuy": "📚 View usage guide "
+            },
+            "support": {
+                "sendmessageadmin": "🚀 Your message was sent. Please wait for a reply.",
+                "answermessage": "Reply to message",
+                "sendmessageuser": "📨 Send your message to contact support",
+                "btnsupport": "☎️ Frequently asked questions are under the FAQ button. Tap it first; if you still need help, tap Support."
+            },
+            "Balance": {
+                "errorprice": "❌ Error\n💬 Please enter numbers only",
+                "selectPatment": "💵 Choose your payment method",
+                "nowpayments": "❌ Error\n    The minimum amount for this gateway is 1 USD.",
+                "zarinpal": "❌ Error\n    The minimum amount for this gateway is 5000 Toman.",
+                "linkpayments": "Creating payment link...",
+                "payments": "Pay",
+                "changeto": "❌ Error\n    The minimum amount for this gateway is 2 TRX.",
+                "errorLinkPayment": "❌ An error occurred while creating the payment link. Please contact support.",
+                "reject_pay": "❌ Reject payment",
+                "addbalamceuser": "⭕️ Add balance manually",
+                "blockedfake": "⭕️ Block user",
+                "Confirmpayadmin": "⭕️ This payment was already confirmed",
+                "finished": "Your payment was confirmed",
+                "sending": "Payment received and is being reviewed. Please wait.",
+                "expired": "The payment link has expired and cannot be reviewed",
+                "refunded": "The amount was returned to your wallet",
+                "waiting": "Waiting for payment confirmation",
+                "Failed": "⭕️ Your payment was not confirmed",
+                "Confirmpay": "✅ Your payment was successful and the amount was added to your balance",
+                "Invalid-receipt": "Invalid receipt. Please send a photo only.",
+                "Confirmpaying": "✅ Confirm payment",
+                "Send-receipt": "🚀 Your payment receipt was sent. After admin approval, the amount will be added to your wallet.",
+                "Send-receiptadnsendconfig": "🚀 Your receipt was sent. After review, the service details will be sent to you.",
+                "maxpurchasereached": "❌ You have reached your purchase limit. Top up your wallet first, then buy or renew a service.",
+                "insufficientbalance": "❌ Your balance is not enough to buy this service.\n💸 Enter an amount in Toman to top up:\n✅ Minimum %s Toman, maximum %s Toman",
+                "receiptimage": "🖼 Receipt image"
+            },
+            "Discount": {
+                "getcode": "💝 Send your gift code to receive credit",
+                "notcode": "❌ Invalid code",
+                "getcodesell": "🧑‍💻 Send your discount code",
+                "erorrlimit": "❌ This discount code has reached its usage limit",
+                "erorrlimitdiscount": "❌ This gift code has reached its usage limit",
+                "firstdiscount": "❌ This discount code is for first-time purchases only.",
+                "gift-deposit": "🎁 %s Toman was added to your account as a deposit bonus.",
+                "discountapplied": "Congratulations 🎉\n📌 Your purchase received a %s percent discount",
+                "giftcodeused": "⭕️ User @%s (ID %s) used gift code %s.",
+                "giftcodesuccess": "Gift code applied. %s Toman was added to your balance. 🥳",
+                "giftcodeonce": "📌 This code can only be used once."
+            },
+            "changelink": {
+                "btntitle": "⚙️ Change link",
+                "warnchange": "⚠️ Updating the subscription link will disconnect previous configs. Tap the button below to confirm.",
+                "confirm": "Change connection link",
+                "confirmed": "✅ Your connection link was updated and the previous config was disconnected. Open service settings to get the new config."
+            },
+            "customsellvolume": {
+                "title": "⚙️ Custom service"
+            },
+            "customvolume": {
+                "SetPrice": "⭕️ Send the price you want for each custom GB.",
+                "setpricetime": "📌 Set custom-service months and price multipliers in the web panel (Custom service tab).",
+                "time": "📌 Custom-service month options are set in the web panel.\n⚠️ Each month equals 30 days",
+                "savedtime": "✅ Duration saved"
+            },
+            "search": {
+                "title": "🔎 Quick search",
+                "usernamgeget": "📌 Send your username"
+            },
+            "Major": {
+                "title": "📌 Send how many services you want to buy\n⚠️ Minimum 1, maximum 15",
+                "invalidcount": "❌ You can buy between 1 and 15 services"
+            },
+            "page": {
+                "next": "Next",
+                "notusernameme": "🔎 My username is not in the list",
+                "previous": "Previous"
+            },
+            "Service": {
+                "Location": "📌 Select the service location."
+            },
+            "qrcode": {
+                "configqrcdoeservice": "📷 Config QR code",
+                "sendqrcodeconfig": "Your config QR codes 👇"
+            },
+            "agenttext": {
+                "endrequest": "✅ Your request was submitted. You will be notified after review.",
+                "requestreport": "❌ You already have a pending request and cannot submit another.",
+                "isagent": "❌ You are already an agent and cannot request agency again.",
+                "acceptrequest": "✅ Approve request",
+                "rejectrequest": "❌ Reject request",
+                "agent-request": "📣 A user requested agency. Please review and decide.\n\nUser ID: <code>%s</code>\nUsername: @%s\nAccount name: %s\nNotes: %s",
+                "insufficientbalanceagent": "❌ Your balance is not enough to request agency. Top up first, then send the request.\n\n💸 Agency fee: %s Toman",
+                "customnameusername": "👤 Choose a custom name"
+            },
+            "note": {
+                "changednote": "✅ Note updated.",
+                "ErrorLongNote": "❌ Notes can be at most 150 characters.",
+                "SendNote": "📝 Send your new note (maximum 150 characters)."
+            },
+            "app": {
+                "selectapp": "📌 Choose an option to download",
+                "appempty": "❌ There are no apps to download."
+            },
+            "pricearze": {
+                "tether-price": "Current USDT price: %s Toman",
+                "tron-price": "Current TRX price: %s Toman"
+            },
+            "wheel_luck": {
+                "notWinner": "🥲 You did not win this time. Try again tomorrow.",
+                "wheel-winner": "⭕️ User @%s (ID %s) won the lucky wheel",
+                "winner-congratulations": "🤩 Congratulations, you won! %s Toman was added to your account.",
+                "already-participated": "❌ You already played today. Try again tomorrow.",
+                "feature-disabled": "❌ This feature is currently disabled"
+            }
+        },
+        "Admin": {
+            "transfor": {
+                "title": "🚚 Transfer service to another user",
+                "transfornotvalid": "❌ Test services cannot be transferred to another user.",
+                "discription": "🛂 To transfer this subscription, you need the destination user's ID.\n\n‼️ Transfer notes:\n1 - Open Wallet to find a user ID\n2 - After transfer, the subscription will be removed from your account.\n\n🆕 Enter the destination user ID:",
+                "notusertrns": "❌ No user was found with this ID.",
+                "confirm": "✅ Tap the button below to confirm the transfer.",
+                "confirmed": "✅ The service was transferred.",
+                "notsendserviceyou": "❌ You cannot transfer a service to yourself."
+            },
+            "change-location": {
+                "title": "🌐 Change location",
+                "changedloc": "✅ Your service was moved.",
+                "confirm": "✅ Confirm transfer"
+            },
+            "month": {
+                "title": "📌 Select the service duration",
+                "1day": "⏳ 1 day",
+                "7day": "⏳ 7 days",
+                "1": "⏳ 1 month",
+                "2": "⏳ 2 months",
+                "3": "⏳ 3 months",
+                "4": "⏳ 4 months",
+                "6": "⏳ 6 months",
+                "365": "⏳ 1 year",
+                "unlimited": "🔋 Data-only"
+            },
+            "Product": {
+                "nullpProduct": "⭕️ No product was found. Please contact support.",
+                "Invalidvolume": "Invalid volume",
+                "Invalidtime": "Invalid number of days"
+            },
+            "Discount": {
+                "invalidcodedis": "❌ Invalid discount code"
+            },
+            "managepanel": {
+                "nullpanel": "⭕️ No location was found. Please contact support.",
+                "limitedpanel": "❌ This panel is at capacity. Please use another panel.",
+                "limitedpanelfirst": "❌ Account creation is at capacity. Please try again later."
+            },
+            "agent": {
+                "invalidvlue": "⭕️ Invalid input",
+                "agenttext": "👋 Welcome to the agency panel",
+                "submitusername": "✅ Your username was saved."
+            },
+            "SettingPayment": {
+                "issetpay": "❌ You have an unconfirmed payment. Wait for it to be reviewed before sending a new one."
+            },
+            "ManageUser": {
+                "GetTextResponse": "Send your reply message."
             }
         }
     }
