@@ -4,6 +4,7 @@ require_once __DIR__ . '/inc/icons.php';
 require_once __DIR__ . '/inc/payments_lib.php';
 require_once __DIR__ . '/inc/panels_lib.php';
 require_administrator();
+$pdo = panel_ensure_pdo();
 
 $gid = $_GET['g'] ?? '';
 $gw = PAYMENT_GATEWAYS[$gid] ?? null;
@@ -23,6 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($field['type'] === 'toggle') {
                 $on = !empty($_POST['toggle_' . $key]);
                 pay_set($pdo, $key, $on ? $field['on'] : $field['off']);
+            } elseif ($field['type'] === 'password') {
+                $secret = trim((string) ($_POST[$key] ?? ''));
+                if ($secret !== '') {
+                    pay_set($pdo, $key, $secret);
+                }
             } elseif (isset($_POST[$key])) {
                 pay_set($pdo, $key, trim((string) $_POST[$key]));
             }
@@ -41,6 +47,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         flash('success', 'تنظیمات درگاه ذخیره شد.');
         header('Location: payment_gateway.php?g=' . urlencode($gid));
+        exit;
+    }
+
+    if ($action === 'refresh_cryptomus_services' && $gid === 'cryptomus') {
+        $result = cryptomus_get_cached_services(3600, true);
+        flash(
+            !empty($result['ok']) ? 'success' : 'error',
+            !empty($result['ok'])
+                ? 'فهرست سرویس‌های Cryptomus به‌روز شد.'
+                : ('به‌روزرسانی سرویس‌های Cryptomus ناموفق بود: ' . ($result['error'] ?? 'خطای نامشخص'))
+        );
+        header('Location: payment_gateway.php?g=cryptomus');
         exit;
     }
 
@@ -63,6 +81,22 @@ $enabled = pay_gateway_enabled($gw);
 $displayName = pay_textbot_get($pdo, $gw['textbot_key'] ?? '', $gw['label']);
 $cards = !empty($gw['has_cards']) ? pay_list_cards($pdo) : [];
 $help = !empty($gw['help_key']) ? pay_help_get($pdo, $gw['help_key']) : null;
+$cryptomusServices = null;
+$cryptomusServiceRows = [];
+if ($gid === 'cryptomus') {
+    $cachedData = json_decode(pay_get($pdo, 'cryptomus_services_cache', '[]'), true);
+    $cachedAt = (int) pay_get($pdo, 'cryptomus_services_cached_at', '0');
+    $cryptomusServices = [
+        'ok' => is_array($cachedData) && !empty($cachedData),
+        'data' => is_array($cachedData) ? $cachedData : [],
+        'cached' => true,
+        'cached_at' => $cachedAt,
+        'error' => is_array($cachedData) && !empty($cachedData) ? null : 'هنوز کشی ثبت نشده است.',
+    ];
+    if ($cryptomusServices['ok']) {
+        $cryptomusServiceRows = panel_cryptomus_service_rows($cachedData);
+    }
+}
 
 $pageTitle = 'تنظیمات ' . $gw['label'];
 $pageLede = ($enabled ? 'فعال' : 'غیرفعال') . ' — همان گزینه‌های تنظیمات این درگاه در ربات تلگرام.';
@@ -112,6 +146,16 @@ include __DIR__ . '/inc/layout_head.php';
                 <input type="checkbox" name="toggle_<?= htmlspecialchars($field['key']) ?>" value="1" <?= $isOn ? 'checked' : '' ?>>
                 <span class="tag <?= $isOn ? 'tag-ok' : 'tag-plain' ?>"><?= $isOn ? 'روشن' : 'خاموش' ?></span>
               </label>
+            </div>
+          <?php elseif ($field['type'] === 'password'): ?>
+            <div class="field">
+              <label><?= htmlspecialchars($field['label']) ?></label>
+              <input type="password" name="<?= htmlspecialchars($field['key']) ?>" class="input"
+                value="" autocomplete="new-password"
+                placeholder="<?= ($val !== '' && $val !== '0') ? 'ثبت شده — برای حفظ کلید خالی بگذارید' : 'کلید API را وارد کنید' ?>">
+              <div style="font-size:.74rem;color:var(--mute);margin-top:6px">
+                کلید فعلی هرگز نمایش داده نمی‌شود و ارسال فیلد خالی آن را پاک نمی‌کند.
+              </div>
             </div>
           <?php else: ?>
             <div class="field">
@@ -201,6 +245,68 @@ include __DIR__ . '/inc/layout_head.php';
           <?php endforeach; ?>
         </div>
       <?php endif; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($gid === 'cryptomus'): ?>
+    <div class="card fade-up d1">
+      <div class="card-head">
+        <div>
+          <div class="card-title">راه‌اندازی و عیب‌یابی Cryptomus</div>
+          <div class="card-subtitle">اطلاعات merchant-specific ذخیره‌شده در کش</div>
+        </div>
+        <form method="POST">
+          <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+          <input type="hidden" name="action" value="refresh_cryptomus_services">
+          <button type="submit" class="btn btn-ghost btn-sm">به‌روزرسانی سرویس‌ها</button>
+        </form>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Callback URL</label>
+          <input type="text" class="input" dir="ltr" readonly
+            value="<?= htmlspecialchars('https://' . $domainhosts . '/payment/cryptomus.php') ?>">
+        </div>
+        <div style="padding:12px;border:1px solid var(--bd);border-radius:10px;font-size:.8rem;line-height:1.8;margin:14px 0">
+          در داشبورد Cryptomus، تنظیم تسویه و Auto-convert را بررسی کنید. وضعیت و هزینه فعلی را از داشبورد merchant تأیید کنید؛ پنل آن را به‌صورت خودکار تغییر نمی‌دهد.
+        </div>
+        <?php if ($cryptomusServices && !empty($cryptomusServices['ok'])): ?>
+          <div style="font-size:.76rem;color:var(--mute);margin-bottom:10px">
+            <?= !empty($cryptomusServices['cached']) ? 'نمایش از کش' : 'دریافت‌شده از API' ?>
+            <?php if (!empty($cryptomusServices['cached_at'])): ?>
+              — <?= htmlspecialchars(panel_payment_time_to_jalali((string) $cryptomusServices['cached_at'])) ?>
+            <?php endif; ?>
+          </div>
+          <?php if ($cryptomusServiceRows): ?>
+            <div class="tbl-wrap">
+              <table class="tbl-lg">
+                <thead><tr><th>ارز</th><th>شبکه</th><th>فعال</th><th>حداقل</th><th>حداکثر</th><th>کمیسیون</th></tr></thead>
+                <tbody>
+                  <?php foreach ($cryptomusServiceRows as $service): ?>
+                    <tr>
+                      <td><?= htmlspecialchars($service['currency'] ?: '—') ?></td>
+                      <td><?= htmlspecialchars($service['network'] ?: '—') ?></td>
+                      <td><?= htmlspecialchars($service['available'] ?: '—') ?></td>
+                      <td><?= htmlspecialchars($service['min'] ?: '—') ?></td>
+                      <td><?= htmlspecialchars($service['max'] ?: '—') ?></td>
+                      <td><?= htmlspecialchars($service['commission'] ?: '—') ?></td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            </div>
+          <?php else: ?>
+            <div class="empty" style="padding:20px"><p>سرویس قابل نمایش در پاسخ کش‌شده یافت نشد.</p></div>
+          <?php endif; ?>
+        <?php else: ?>
+          <div class="empty" style="padding:20px">
+            <p>اطلاعات سرویس در دسترس نیست.</p>
+            <?php if (!empty($cryptomusServices['error'])): ?>
+              <small><?= htmlspecialchars((string) $cryptomusServices['error']) ?></small>
+            <?php endif; ?>
+          </div>
+        <?php endif; ?>
+      </div>
     </div>
   <?php endif; ?>
 </div>

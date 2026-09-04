@@ -3,13 +3,14 @@ require_once __DIR__ . '/inc/config.php';
 require_once __DIR__ . '/inc/icons.php';
 require_once __DIR__ . '/inc/payments_lib.php';
 require_once __DIR__ . '/inc/payment_import_lib.php';
+require_once __DIR__ . '/inc/panels_lib.php';
 require_auth();
 
 $pdo = panel_ensure_pdo();
 panel_payment_ensure_schema($pdo);
 
 $tab = $_GET['tab'] ?? 'list';
-if (!in_array($tab, ['list', 'income', 'pending', 'costs'], true)) {
+if (!in_array($tab, ['list', 'income', 'pending', 'costs', 'cryptomus'], true)) {
     $tab = 'list';
 }
 
@@ -17,6 +18,14 @@ function payment_redirect_url(string $tab, array $extra = []): string
 {
     if ($tab === 'pending') {
         return 'payment.php?tab=pending';
+    }
+    if ($tab === 'cryptomus') {
+        $qs = array_filter([
+            'tab' => 'cryptomus',
+            'q' => $extra['q'] ?? '',
+            'page' => $extra['page'] ?? '',
+        ], static fn($v) => $v !== null && $v !== '');
+        return 'payment.php?' . http_build_query($qs, '', '&', PHP_QUERY_RFC3986);
     }
     $qs = array_filter([
         'tab' => in_array($tab, ['costs', 'income'], true) ? $tab : '',
@@ -232,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $orderId = trim($_POST['order_id'] ?? '');
     $postTab = (string) ($_POST['tab'] ?? $tab);
-    if (!in_array($postTab, ['list', 'income', 'pending', 'costs'], true)) {
+    if (!in_array($postTab, ['list', 'income', 'pending', 'costs', 'cryptomus'], true)) {
         $postTab = $tab;
     }
     $isAjax = payment_is_ajax();
@@ -249,6 +258,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'expense_status' => trim((string) ($_POST['filter_expense_status'] ?? '')),
         'page' => !empty($_POST['page']) ? (int) $_POST['page'] : '',
     ]);
+
+    if (in_array($action, ['cryptomus_approve', 'cryptomus_cancel', 'cryptomus_refund'], true)) {
+        require_administrator();
+        $redirect = 'payment.php?tab=cryptomus';
+        $payment = $orderId !== ''
+            ? db_fetch($pdo, "SELECT * FROM Payment_report WHERE id_order = ? AND Payment_Method = 'cryptomus'", [$orderId])
+            : null;
+        if (!$payment) {
+            $r = ['ok' => false, 'msg' => 'تراکنش Cryptomus یافت نشد.'];
+        } elseif ($action === 'cryptomus_approve') {
+            if (!in_array((string) ($payment['gateway_status'] ?? ''), ['wrong_amount', 'wrong_amount_waiting'], true)) {
+                $r = ['ok' => false, 'msg' => 'فقط پرداخت دارای کسری مبلغ قابل تأیید است.'];
+            } else {
+                $api = cryptomus_approve_underpayment($orderId);
+                $r = [
+                    'ok' => !empty($api['ok']),
+                    'msg' => !empty($api['ok'])
+                        ? 'درخواست پذیرش کسری مبلغ ارسال شد؛ تحویل فقط پس از webhook یا cron تأییدشده انجام می‌شود.'
+                        : ('ارسال درخواست ناموفق بود: ' . ($api['error'] ?? 'خطای نامشخص')),
+                ];
+            }
+        } elseif ($action === 'cryptomus_cancel') {
+            $reason = trim((string) ($_POST['reason'] ?? ''));
+            if ($reason === '') {
+                $reason = 'لغو کسری مبلغ توسط مدیر';
+            }
+            $cancelled = cryptomus_cancel_underpayment($orderId, $reason);
+            $r = [
+                'ok' => $cancelled,
+                'msg' => $cancelled
+                    ? 'پرداخت لغو شد؛ UUID و متادیتای درگاه حفظ شدند و بازپرداختی انجام نشد.'
+                    : 'این پرداخت دیگر شرایط لغو کسری مبلغ را ندارد.',
+            ];
+            if ($cancelled) {
+                require_once __DIR__ . '/inc/users_lib.php';
+                panel_notify_user(
+                    $payment['id_user'],
+                    "❌ پرداخت Cryptomus شما لغو شد.\n✍️ " . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . "\n🛒 کد پیگیری: " . $orderId
+                );
+            }
+        } else {
+            $address = trim((string) ($_POST['refund_address'] ?? ''));
+            $confirmed = !empty($_POST['refund_confirm']);
+            if (!$confirmed) {
+                $r = ['ok' => false, 'msg' => 'تأیید صریح بازپرداخت الزامی است.'];
+            } elseif (!panel_cryptomus_address_valid($address)) {
+                $r = ['ok' => false, 'msg' => 'آدرس مقصد معتبر نیست؛ طول و نویسه‌های آن را بررسی کنید.'];
+            } elseif (($payment['payment_Status'] ?? '') !== 'paid' || ($payment['fulfillment_state'] ?? '') !== 'completed') {
+                $r = ['ok' => false, 'msg' => 'فقط پرداخت محلی paid با تحویل completed قابل بازپرداخت است.'];
+            } else {
+                $isSubtract = !empty($_POST['is_subtract']);
+                $api = cryptomus_refund(
+                    ['uuid' => (string) ($payment['dec_not_confirmed'] ?? '')],
+                    $address,
+                    $isSubtract
+                );
+                $r = [
+                    'ok' => !empty($api['ok']),
+                    'msg' => !empty($api['ok'])
+                        ? 'درخواست بازپرداخت کامل ثبت شد؛ موجودی کیف پول و سرویس کاربر تغییری نکرد.'
+                        : ('بازپرداخت ثبت نشد: ' . ($api['error'] ?? 'خطای نامشخص')),
+                ];
+            }
+        }
+        flash(!empty($r['ok']) ? 'success' : 'error', $r['msg']);
+        header('Location: ' . $redirect);
+        exit;
+    }
 
     if ($action === 'search_users') {
         $q = ltrim(trim((string) ($_POST['q'] ?? '')), '@');
@@ -473,6 +550,12 @@ $params = [];
 if ($tab === 'pending') {
     $where[] = "Payment_Method = 'cart to cart'";
     $where[] = "payment_Status = 'waiting'";
+} elseif ($tab === 'cryptomus') {
+    $where[] = "Payment_Method = 'cryptomus'";
+    if ($search !== '') {
+        $where[] = "(`id_user` LIKE ? OR `id_order` LIKE ? OR COALESCE(`gateway_status`,'') LIKE ?)";
+        $params = ["%$search%", "%$search%", "%$search%"];
+    }
 } elseif ($tab === 'costs') {
     $where[] = "payment_Status = 'cost'";
     if ($search !== '') {
@@ -575,6 +658,7 @@ $totalCosts = 0;
 $forecastIncome = 0;
 $todayCount = 0;
 $pendingCount = 0;
+$cryptomusCount = 0;
 try {
     [$cardWhere, $cardParams] = payment_shared_filter_clauses(
         $search,
@@ -646,7 +730,13 @@ try {
         [$todayStart, $todayEnd, $todayDtStart, $todayDtEnd]
     );
     $pendingCount = db_count($pdo, "SELECT COUNT(*) FROM Payment_report WHERE Payment_Method = 'cart to cart' AND payment_Status = 'waiting'");
+    $cryptomusCount = db_count($pdo, "SELECT COUNT(*) FROM Payment_report WHERE Payment_Method = 'cryptomus'");
 } catch (Exception $e) {
+}
+try {
+    $cryptomusCount = db_count($pdo, "SELECT COUNT(*) FROM Payment_report WHERE Payment_Method = 'cryptomus'");
+} catch (Exception $e) {
+    $cryptomusCount = 0;
 }
 $netIncome = $totalSuccess - $totalCosts;
 $cardsFiltered = $search !== '' || $priceMin !== null || $priceMax !== null || $fromFilter || $toFilter
@@ -711,6 +801,7 @@ foreach (array_keys(panel_income_category_map($pdo)) as $pinKey) {
     }
 }
 $sheetMethodOptions = $pinnedMethods + $sheetMethodOptions;
+unset($sheetMethodOptions['cryptomus']);
 $categoryOptions = panel_expense_category_map($pdo);
 if ($category !== '' && !isset($categoryOptions[$category])) {
     $categoryOptions[$category] = panel_expense_category_label($pdo, $category);
@@ -759,7 +850,7 @@ $pageLede = 'گزارش پرداخت‌ها، فاکتور دستی، هزینه
 $activeNav = 'payment';
 include __DIR__ . '/inc/layout_head.php';
 ?>
-<?php if ($tab !== 'pending'): ?>
+<?php if (!in_array($tab, ['pending', 'cryptomus'], true)): ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
 <style>
   .pay-stats { grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
@@ -901,6 +992,12 @@ include __DIR__ . '/inc/layout_head.php';
       <?php endif; ?>
     </a>
     <a href="payment.php?tab=costs" class="btn btn-sm <?= $tab === 'costs' ? 'btn-primary' : 'btn-ghost' ?>">هزینه‌ها</a>
+    <a href="payment.php?tab=cryptomus" class="btn btn-sm <?= $tab === 'cryptomus' ? 'btn-primary' : 'btn-ghost' ?>">
+      Cryptomus
+      <?php if ($cryptomusCount > 0): ?>
+        <span class="tag tag-info" style="margin-right:6px;font-size:.7rem"><?= number_format($cryptomusCount) ?></span>
+      <?php endif; ?>
+    </a>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <a href="settings.php?tab=finance" class="btn btn-ghost btn-sm"><?= icon('wallet', 14) ?> دسته‌های مالی</a>
@@ -908,7 +1005,7 @@ include __DIR__ . '/inc/layout_head.php';
   </div>
 </div>
 
-<?php if ($tab !== 'pending'): ?>
+<?php if (!in_array($tab, ['pending', 'cryptomus'], true)): ?>
 <div class="stats pay-stats">
   <div class="stat success">
     <div class="stat-label">جمع درآمد کل</div>
@@ -963,6 +1060,8 @@ include __DIR__ . '/inc/layout_head.php';
           echo 'هزینه‌ها';
       } elseif ($tab === 'income') {
           echo 'درآمدها';
+      } elseif ($tab === 'cryptomus') {
+          echo 'عملیات Cryptomus';
       } else {
           echo 'همه تراکنش‌ها';
       }
@@ -975,7 +1074,7 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="action" value="reject_all">
         <button type="submit" class="btn btn-no btn-sm">حذف همه</button>
       </form>
-    <?php elseif ($tab !== 'pending'): ?>
+    <?php elseif (!in_array($tab, ['pending', 'cryptomus'], true)): ?>
     <div class="toolbar-end pay-toolbar">
       <div class="pay-toolbar-actions">
         <button type="button" class="btn btn-ghost btn-sm pay-btn-import" id="payImportOpenBtn">
@@ -1017,10 +1116,124 @@ include __DIR__ . '/inc/layout_head.php';
         </div>
       </form>
     </div>
+    <?php elseif ($tab === 'cryptomus'): ?>
+      <form method="GET" class="pay-toolbar-search">
+        <input type="hidden" name="tab" value="cryptomus">
+        <div class="search-box">
+          <?= icon('search', 14) ?>
+          <input type="text" name="q" placeholder="کاربر، سفارش یا وضعیت درگاه..." value="<?= htmlspecialchars($search) ?>">
+          <button type="submit" class="search-btn">جستجو</button>
+        </div>
+      </form>
     <?php endif; ?>
   </div>
 
   <div class="tbl-wrap">
+    <?php if ($tab === 'cryptomus'): ?>
+    <table class="tbl-lg">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>سفارش / کاربر</th>
+          <th>مبلغ USD</th>
+          <th>وضعیت محلی / درگاه</th>
+          <th>UUID</th>
+          <th>پرداخت‌کننده / شبکه</th>
+          <th>انقضا</th>
+          <th>تحویل / بازپرداخت</th>
+          <th>عملیات امن</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (!$payments): ?>
+          <tr><td colspan="9"><div class="empty"><div class="empty-mark">—</div><p>تراکنش Cryptomus یافت نشد</p></div></td></tr>
+        <?php else:
+          $i = $offset + 1;
+          foreach ($payments as $p):
+            $meta = json_decode((string) ($p['gateway_meta'] ?? ''), true);
+            $meta = is_array($meta) ? $meta : [];
+            $localStatus = (string) ($p['payment_Status'] ?? '');
+            [$localClass, $localLabel] = $statusMap[$localStatus] ?? ['tag-plain', $localStatus ?: '—'];
+            $gatewayStatus = (string) ($p['gateway_status'] ?? '');
+            $oid = (string) ($p['id_order'] ?? '');
+            $uid = trim((string) ($p['id_user'] ?? ''));
+            $uuid = trim((string) ($p['dec_not_confirmed'] ?? ''));
+            $fulfillment = trim((string) ($p['fulfillment_state'] ?? '')) ?: 'pending';
+            $refund = trim((string) ($p['refund_status'] ?? '')) ?: '—';
+            $canUnderpayment = in_array($gatewayStatus, ['wrong_amount', 'wrong_amount_waiting'], true)
+                && in_array($fulfillment, ['', 'pending'], true);
+            $canRefund = $localStatus === 'paid'
+                && $fulfillment === 'completed'
+                && !in_array($refund, ['refund_process', 'refund_paid'], true);
+            ?>
+            <tr>
+              <td style="color:var(--text-dim)"><?= $i++ ?></td>
+              <td>
+                <div class="cell-mono" style="color:var(--accent);font-size:.78rem"><?= htmlspecialchars(trunc($oid, 22)) ?></div>
+                <?php if ($uid !== '' && $uid !== '0' && !empty($knownUsers[$uid])): ?>
+                  <a href="user.php?id=<?= htmlspecialchars($uid) ?>" class="cell-mono"><?= htmlspecialchars($uid) ?></a>
+                <?php else: ?>
+                  <span class="cell-mono"><?= htmlspecialchars($uid ?: '—') ?></span>
+                <?php endif; ?>
+              </td>
+              <td class="cell-strong cell-num"><?= htmlspecialchars((string) ($p['price'] ?? '0')) ?> USD</td>
+              <td>
+                <span class="tag <?= $localClass ?>"><?= htmlspecialchars($localLabel) ?></span>
+                <div style="font-size:.74rem;color:var(--mute);margin-top:5px"><?= htmlspecialchars($gatewayStatus ?: '—') ?></div>
+              </td>
+              <td class="cell-mono" style="font-size:.75rem"><?= htmlspecialchars($uuid !== '' ? trunc($uuid, 16) : '—') ?></td>
+              <td style="font-size:.75rem;line-height:1.7">
+                <div><?= htmlspecialchars((string) ($meta['payer_amount'] ?? '—')) ?> <?= htmlspecialchars((string) ($meta['payer_currency'] ?? '')) ?></div>
+                <div>پرداخت: <?= htmlspecialchars((string) ($meta['payment_amount'] ?? '—')) ?></div>
+                <div>شبکه: <?= htmlspecialchars((string) ($meta['network'] ?? '—')) ?></div>
+              </td>
+              <td style="font-size:.75rem;white-space:nowrap">
+                <?= !empty($p['gateway_expires_at']) ? htmlspecialchars(panel_payment_time_to_jalali($p['gateway_expires_at'])) : '—' ?>
+              </td>
+              <td style="font-size:.75rem;line-height:1.8">
+                <div>تحویل: <span class="tag tag-plain"><?= htmlspecialchars($fulfillment) ?></span></div>
+                <div>بازپرداخت: <span class="tag tag-plain"><?= htmlspecialchars($refund) ?></span></div>
+              </td>
+              <td style="min-width:280px">
+                <?php if ($canUnderpayment): ?>
+                  <form method="POST" style="display:inline" onsubmit="return confirm('کسری مبلغ در Cryptomus پذیرفته شود؟ تحویل منتظر تأیید درگاه می‌ماند.')">
+                    <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+                    <input type="hidden" name="action" value="cryptomus_approve">
+                    <input type="hidden" name="order_id" value="<?= htmlspecialchars($oid) ?>">
+                    <button type="submit" class="btn btn-primary btn-sm">پذیرش کسری</button>
+                  </form>
+                  <form method="POST" style="margin-top:7px" onsubmit="return confirm('این پرداخت بدون بازپرداخت لغو شود؟')">
+                    <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+                    <input type="hidden" name="action" value="cryptomus_cancel">
+                    <input type="hidden" name="order_id" value="<?= htmlspecialchars($oid) ?>">
+                    <input type="text" name="reason" class="input" maxlength="500" placeholder="دلیل لغو برای کاربر" required>
+                    <button type="submit" class="btn btn-no btn-sm" style="margin-top:5px">لغو بدون بازپرداخت</button>
+                  </form>
+                <?php elseif ($canRefund): ?>
+                  <form method="POST" onsubmit="return confirm('بازپرداخت کامل ثبت شود؟ این کار سرویس یا موجودی داخلی را برنمی‌گرداند.')">
+                    <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+                    <input type="hidden" name="action" value="cryptomus_refund">
+                    <input type="hidden" name="order_id" value="<?= htmlspecialchars($oid) ?>">
+                    <input type="text" name="refund_address" class="input" dir="ltr" maxlength="256" required placeholder="آدرس مقصد تأییدشده">
+                    <label style="display:block;font-size:.72rem;line-height:1.7;margin-top:6px">
+                      <input type="checkbox" name="is_subtract" value="1">
+                      is_subtract (پیش‌فرض خاموش؛ هزینه شبکه بر عهده گیرنده)
+                    </label>
+                    <label style="display:block;font-size:.72rem;line-height:1.7;margin-top:4px;color:var(--mute)">
+                      <input type="checkbox" name="refund_confirm" value="1" required>
+                      بازپرداخت کامل است (پارامتر مبلغ ندارد) و تحویل سرویس/موجودی را برنمی‌گرداند.
+                    </label>
+                    <button type="submit" class="btn btn-no btn-sm" style="margin-top:6px">بازپرداخت کامل</button>
+                  </form>
+                <?php else: ?>
+                  <span style="font-size:.75rem;color:var(--mute)">عملیات مجاز فعالی ندارد</span>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endforeach; endif; ?>
+      </tbody>
+    </table>
+    <?php else: ?>
     <table class="tbl-lg<?= $tab !== 'pending' ? ' pay-sheet-table' : '' ?>">
       <thead>
         <tr>
@@ -1213,6 +1426,7 @@ include __DIR__ . '/inc/layout_head.php';
           <?php endforeach; endif; ?>
       </tbody>
     </table>
+    <?php endif; ?>
   </div>
 
   <?php if ($totalPages > 1): ?>
@@ -1274,7 +1488,7 @@ function openRejectModal(orderId) {
   openModal('rejectModal');
 }
 </script>
-<?php elseif ($tab !== 'costs'): ?>
+<?php elseif (!in_array($tab, ['costs', 'cryptomus'], true)): ?>
 <div class="modal-veil" id="statusSideModal">
   <div class="modal">
     <div class="modal-head">
@@ -1309,7 +1523,7 @@ function openRejectModal(orderId) {
 </div>
 <?php endif; ?>
 
-<?php if ($tab !== 'pending'): ?>
+<?php if (!in_array($tab, ['pending', 'cryptomus'], true)): ?>
 <div class="modal-veil" id="paymentFilterModal">
   <div class="modal">
     <div class="modal-head">
@@ -1528,7 +1742,7 @@ function openRejectModal(orderId) {
 </div>
 <?php endif; ?>
 
-<?php if ($tab !== 'pending'): ?>
+<?php if (!in_array($tab, ['pending', 'cryptomus'], true)): ?>
 <?php
 $sheetStatusJs = [];
 foreach ($listStatusMap as $k => [$cls, $lbl]) {

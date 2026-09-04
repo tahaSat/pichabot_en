@@ -628,7 +628,15 @@ try {
         message_id INT NULL,
         admin_receipt_msgs TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
         id_invoice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-        note TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL)
+        note TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+        gateway_status VARCHAR(100) NULL,
+        gateway_meta TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+        gateway_expires_at DATETIME NULL,
+        fulfillment_state VARCHAR(30) NULL,
+        fulfillment_started_at DATETIME NULL,
+        refund_status VARCHAR(30) NULL,
+        cashback_applied_at DATETIME NULL,
+        channel_reported_at DATETIME NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         if (!$result) {
             echo "table Payment_report" . mysqli_error($connect);
@@ -638,6 +646,14 @@ try {
         addFieldToTable("Payment_report", "message_id", null, "INT");
         addFieldToTable("Payment_report", "admin_receipt_msgs", null, "TEXT");
         addFieldToTable("Payment_report", "note", null, "TEXT");
+        addFieldToTable("Payment_report", "gateway_status", null, "VARCHAR(100)");
+        addFieldToTable("Payment_report", "gateway_meta", null, "TEXT");
+        addFieldToTable("Payment_report", "gateway_expires_at", null, "DATETIME NULL");
+        addFieldToTable("Payment_report", "fulfillment_state", null, "VARCHAR(30)");
+        addFieldToTable("Payment_report", "fulfillment_started_at", null, "DATETIME NULL");
+        addFieldToTable("Payment_report", "refund_status", null, "VARCHAR(30)");
+        addFieldToTable("Payment_report", "cashback_applied_at", null, "DATETIME NULL");
+        addFieldToTable("Payment_report", "channel_reported_at", null, "DATETIME NULL");
         $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'Payment_Method'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE Payment_report ADD Payment_Method VARCHAR(200)");
@@ -881,6 +897,7 @@ We hope you enjoyed the speed and quality. If you liked the test, you can buy yo
         ['text_pishinvoice', $text_invoice],
         ['accountwallet', '🏦 Wallet + top up'],
         ['carttocart', '💳 Card transfer'],
+        ['textcryptomus', '💸 Pay with Cryptomus'],
         ['textnowpayment', '💵 Crypto payment 1'],
         ['textnowpaymenttron', '💵 TRON deposit'],
         ['textsnowpayment', '💸 Pay with crypto'],
@@ -1029,6 +1046,15 @@ try {
         ['minbalancetetraminator', '50000'],
         ['maxbalancetetraminator', $max],
         ['chashbacktetraminator', '0'],
+        ['statuscryptomus', 'offcryptomus'],
+        ['merchant_cryptomus', '0'],
+        ['apicryptomus', '0'],
+        ['minbalancecryptomus', $main],
+        ['maxbalancecryptomus', $max],
+        ['chashbackcryptomus', '0'],
+        ['helpcryptomus', '2'],
+        ['cryptomus_services_cache', '[]'],
+        ['cryptomus_services_cached_at', '0'],
     ];
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE PaySetting (

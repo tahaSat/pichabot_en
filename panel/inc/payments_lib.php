@@ -90,6 +90,21 @@ const PAYMENT_GATEWAYS = [
             ['key' => 'maxbalancenowpayment', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
         ],
     ],
+    'cryptomus' => [
+        'label' => 'Cryptomus',
+        'status_key' => 'statuscryptomus',
+        'on' => 'oncryptomus',
+        'off' => 'offcryptomus',
+        'textbot_key' => 'textcryptomus',
+        'help_key' => 'helpcryptomus',
+        'fields' => [
+            ['key' => 'merchant_cryptomus', 'label' => 'Merchant UUID', 'type' => 'text'],
+            ['key' => 'apicryptomus', 'label' => 'Payment API Key', 'type' => 'password'],
+            ['key' => 'minbalancecryptomus', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
+            ['key' => 'maxbalancecryptomus', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
+            ['key' => 'chashbackcryptomus', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
+        ],
+    ],
     'arzireyali1' => [
         'label' => 'ارزی ریالی اول',
         'status_key' => 'statusSwapWallet',
@@ -377,6 +392,9 @@ function panel_payment_confirm(PDO $pdo, string $orderId): array
     if (!$payment) {
         return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
     }
+    if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
+        return ['ok' => false, 'msg' => 'تأیید عمومی Cryptomus مجاز نیست؛ تحویل فقط پس از تأیید درگاه انجام می‌شود.'];
+    }
     if (in_array($payment['payment_Status'], ['paid', 'reject'], true)) {
         return ['ok' => false, 'msg' => 'این پرداخت قبلاً بررسی شده است.'];
     }
@@ -438,6 +456,9 @@ function panel_payment_reject(PDO $pdo, string $orderId, string $reason = ''): a
     if (!$payment) {
         return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
     }
+    if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
+        return ['ok' => false, 'msg' => 'رد عمومی Cryptomus مجاز نیست؛ فقط عملیات اختصاصی کسری مبلغ قابل استفاده است.'];
+    }
     if (in_array($payment['payment_Status'], ['paid', 'reject'], true)) {
         return ['ok' => false, 'msg' => 'این پرداخت قبلاً بررسی شده است.'];
     }
@@ -458,6 +479,9 @@ function panel_payment_dismiss(PDO $pdo, string $orderId): array
     $payment = db_fetch($pdo, "SELECT * FROM Payment_report WHERE id_order = ?", [$orderId]);
     if (!$payment || $payment['payment_Status'] !== 'waiting') {
         return ['ok' => false, 'msg' => 'رسید در انتظار یافت نشد.'];
+    }
+    if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
+        return ['ok' => false, 'msg' => 'حذف عمومی تراکنش Cryptomus مجاز نیست.'];
     }
     db_query($pdo, "UPDATE Payment_report SET payment_Status = 'reject', dec_not_confirmed = 'remove_panel' WHERE id_order = ?", [$orderId]);
     return ['ok' => true, 'msg' => 'رسید حذف شد (بدون اطلاع کاربر).'];
@@ -1073,6 +1097,11 @@ function panel_payment_status_meta(): array
         'expire' => ['tag-plain', 'منقضی'],
         'reject' => ['tag-no', 'رد شده'],
         'waiting' => ['tag-warn', 'در انتظار'],
+        'processing' => ['tag-info', 'در حال تحویل'],
+        'underpaid_waiting' => ['tag-warn', 'کسری مبلغ (در انتظار)'],
+        'underpaid' => ['tag-no', 'کسری مبلغ'],
+        'review' => ['tag-warn', 'نیازمند بررسی'],
+        'creation_failed' => ['tag-no', 'ساخت پرداخت ناموفق'],
         'cost' => ['tag-plain', 'هزینه شده'],
     ];
 }
@@ -1093,6 +1122,7 @@ function panel_payment_system_method_map(): array
         'arze digital offline' => 'ارز دیجیتال آفلاین',
         'Star Telegram' => 'استار تلگرام',
         'nowpayment' => 'NowPayment',
+        'cryptomus' => 'Cryptomus',
         'tetraminator' => 'Tetraminator',
         'add order by admin' => 'سفارش توسط ادمین',
         'extend by admin' => 'تمدید توسط ادمین',
@@ -1281,7 +1311,7 @@ function panel_payment_add_manual(PDO $pdo, array $input): array
     }
 
     $method = trim((string) ($input['method'] ?? panel_income_default_slug()));
-    if ($method === '' || $method === 'cost') {
+    if ($method === '' || $method === 'cost' || $method === 'cryptomus') {
         $method = panel_income_default_slug();
     }
     $systemMethods = panel_payment_system_method_map();
@@ -1377,7 +1407,10 @@ function panel_payment_delete_cost(PDO $pdo, string $orderId): array
 /** Allowed payment_Status values for admin updates. */
 function panel_payment_status_values(): array
 {
-    return ['paid', 'Unpaid', 'waiting', 'reject', 'expire'];
+    return [
+        'paid', 'Unpaid', 'waiting', 'reject', 'expire', 'processing',
+        'underpaid_waiting', 'underpaid', 'review', 'creation_failed',
+    ];
 }
 
 /**
@@ -1423,6 +1456,9 @@ function panel_payment_set_status(
     $payment = db_fetch($pdo, 'SELECT * FROM Payment_report WHERE id_order = ?', [$orderId]);
     if (!$payment) {
         return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
+    }
+    if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
+        return ['ok' => false, 'msg' => 'وضعیت Cryptomus فقط از رویداد تأییدشده درگاه یا عملیات اختصاصی آن قابل تغییر است.'];
     }
     if (panel_payment_is_cost($payment)) {
         return ['ok' => false, 'msg' => 'تغییر وضعیت برای هزینه مجاز نیست.'];
@@ -1539,6 +1575,9 @@ function panel_payment_update_row(PDO $pdo, string $orderId, array $input): arra
     if (!$payment) {
         return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
     }
+    if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
+        return ['ok' => false, 'msg' => 'ویرایش عمومی تراکنش Cryptomus مجاز نیست؛ از نمای عملیاتی Cryptomus استفاده کنید.'];
+    }
 
     $amount = (int) ($input['amount'] ?? 0);
     if ($amount < 1) {
@@ -1548,6 +1587,9 @@ function panel_payment_update_row(PDO $pdo, string $orderId, array $input): arra
     $userId = trim((string) ($input['id_user'] ?? ''));
     $note = trim((string) ($input['note'] ?? ''));
     $method = trim((string) ($input['method'] ?? ''));
+    if ($method === 'cryptomus') {
+        return ['ok' => false, 'msg' => 'اختصاص روش Cryptomus از ویرایشگر عمومی مجاز نیست.'];
+    }
     $isCost = panel_payment_is_cost($payment);
     $category = null;
     if ($isCost) {
@@ -1613,9 +1655,12 @@ function panel_payment_update_row(PDO $pdo, string $orderId, array $input): arra
  */
 function panel_payment_delete_row(PDO $pdo, string $orderId): array
 {
-    $row = db_fetch($pdo, 'SELECT id FROM Payment_report WHERE id_order = ?', [$orderId]);
+    $row = db_fetch($pdo, 'SELECT id, Payment_Method FROM Payment_report WHERE id_order = ?', [$orderId]);
     if (!$row) {
         return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
+    }
+    if (($row['Payment_Method'] ?? '') === 'cryptomus') {
+        return ['ok' => false, 'msg' => 'حذف عمومی تراکنش Cryptomus مجاز نیست.'];
     }
     db_query($pdo, 'DELETE FROM Payment_report WHERE id_order = ?', [$orderId]);
     return ['ok' => true, 'msg' => 'تراکنش حذف شد.'];
@@ -1646,4 +1691,78 @@ function panel_payment_method_label(string $method, ?PDO $db = null): string
         return $fallback[$method];
     }
     return $method !== '' ? $method : '—';
+}
+
+function panel_cryptomus_address_valid(string $address): bool
+{
+    $address = trim($address);
+    $length = strlen($address);
+    return $length >= 8
+        && $length <= 256
+        && preg_match('/^[A-Za-z0-9:._-]+$/', $address) === 1;
+}
+
+/**
+ * Normalize the merchant-specific services response for safe diagnostics.
+ *
+ * @return array<int,array{currency:string,network:string,min:string,max:string,commission:string,available:string}>
+ */
+function panel_cryptomus_service_rows(array $services): array
+{
+    $rows = [];
+    $walk = static function ($node, string $currency = '', string $network = '') use (&$walk, &$rows): void {
+        if (!is_array($node)) {
+            return;
+        }
+        if (isset($node['currency']) && is_scalar($node['currency'])) {
+            $currency = (string) $node['currency'];
+        }
+        if (isset($node['network']) && is_scalar($node['network'])) {
+            $network = (string) $node['network'];
+        }
+        $scalar = static function (array $source, array $keys) use (&$scalar): string {
+            foreach ($keys as $key) {
+                if (array_key_exists($key, $source) && is_scalar($source[$key])) {
+                    if (is_bool($source[$key])) {
+                        return $source[$key] ? 'بله' : 'خیر';
+                    }
+                    return (string) $source[$key];
+                }
+            }
+            foreach ($source as $child) {
+                if (is_array($child)) {
+                    $found = $scalar($child, $keys);
+                    if ($found !== '') {
+                        return $found;
+                    }
+                }
+            }
+            return '';
+        };
+        $min = $scalar($node, ['minimum', 'min_amount', 'min', 'limit_min']);
+        $max = $scalar($node, ['maximum', 'max_amount', 'max', 'limit_max']);
+        $commission = $scalar($node, ['commission', 'commission_percent', 'fee_percent', 'percent', 'fee_amount', 'fee']);
+        $available = $scalar($node, ['is_available', 'available', 'enabled']);
+        if ($currency !== '' && ($network !== '' || $min !== '' || $max !== '' || $commission !== '' || $available !== '')) {
+            $key = strtolower($currency . '|' . $network . '|' . $min . '|' . $max . '|' . $commission . '|' . $available);
+            $rows[$key] = compact('currency', 'network', 'min', 'max', 'commission', 'available');
+        }
+        foreach ($node as $key => $child) {
+            if (!is_array($child)) {
+                continue;
+            }
+            $childCurrency = $currency;
+            $childNetwork = $network;
+            if (is_string($key) && !ctype_digit($key)) {
+                if ($currency === '') {
+                    $childCurrency = $key;
+                } elseif ($network === '') {
+                    $childNetwork = $key;
+                }
+            }
+            $walk($child, $childCurrency, $childNetwork);
+        }
+    };
+    $walk($services);
+    return array_values($rows);
 }

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/request.php';
+require_once __DIR__ . '/inc/cryptomus_lib.php';
 ini_set('error_log', __DIR__ . '/logs/php_errors.log');
 
 /**
@@ -2225,6 +2226,9 @@ function isPaymentReportExpiredOrPastTtl($payment)
     if (!is_array($payment)) {
         return true;
     }
+    if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
+        return ($payment['payment_Status'] ?? '') === 'expire';
+    }
     $status = (string) ($payment['payment_Status'] ?? '');
     if ($status === 'expire') {
         return true;
@@ -2257,6 +2261,9 @@ function ensurePaymentReportActive($payment)
         return false;
     }
     $status = (string) ($payment['payment_Status'] ?? '');
+    if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
+        return ($payment['fulfillment_state'] ?? '') === 'processing';
+    }
     if (in_array($status, ['paid', 'waiting', 'reject'], true)) {
         return $status !== 'reject';
     }
@@ -2290,6 +2297,9 @@ function expirePaymentReportRow($payment)
     if (!is_array($payment) || empty($payment['id_order'])) {
         return;
     }
+    if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
+        return;
+    }
     if (($payment['payment_Status'] ?? '') === 'expire') {
         return;
     }
@@ -2312,7 +2322,7 @@ function expireStalePaymentInvoices()
     $cutoffUnix = time() - paymentInvoiceTtlSeconds();
     $cutoffDate = date('Y/m/d H:i:s', $cutoffUnix);
 
-    $stmt = $pdo->prepare("SELECT * FROM Payment_report WHERE payment_Status = 'Unpaid' AND time IS NOT NULL AND time != '' AND time < :cutoff");
+    $stmt = $pdo->prepare("SELECT * FROM Payment_report WHERE payment_Status = 'Unpaid' AND (Payment_Method IS NULL OR Payment_Method != 'cryptomus') AND time IS NOT NULL AND time != '' AND time < :cutoff");
     $stmt->bindValue(':cutoff', $cutoffDate, PDO::PARAM_STR);
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -2328,6 +2338,19 @@ function expireStalePaymentInvoices()
     $stmtInv->execute();
     while ($invoice = $stmtInv->fetch(PDO::FETCH_ASSOC)) {
         if (!isUnpaidInvoicePastTtl($invoice)) {
+            continue;
+        }
+        $cryptomusLink = $pdo->prepare(
+            "SELECT 1 FROM Payment_report
+             WHERE Payment_Method = 'cryptomus'
+               AND (id_invoice = :invoice_id OR id_invoice = :purchase_payload)
+             LIMIT 1"
+        );
+        $cryptomusLink->execute([
+            ':invoice_id' => (string) ($invoice['id_invoice'] ?? ''),
+            ':purchase_payload' => 'getconfigafterpay|' . (string) ($invoice['username'] ?? ''),
+        ]);
+        if ($cryptomusLink->fetchColumn()) {
             continue;
         }
         update('invoice', 'Status', 'expire', 'id_invoice', $invoice['id_invoice']);
@@ -3234,15 +3257,15 @@ function DirectPayment($order_id, $image = 'images.jpg')
     }
     $Payment_report = select("Payment_report", "*", "id_order", $order_id, "select");
     if ($Payment_report == false || !is_array($Payment_report)) {
-        return;
+        return false;
     }
     if (!ensurePaymentReportActive($Payment_report)) {
-        return;
+        return false;
     }
     $format_price_cart = number_format($Payment_report['price']);
     $Balance_id = select("user", "*", "id", $Payment_report['id_user'], "select");
     if ($Balance_id == false || !is_array($Balance_id)) {
-        return;
+        return false;
     }
     $steppay = explode("|", $Payment_report['id_invoice']);
     update("user", "Processing_value", "0", "id", $Balance_id['id']);
@@ -3322,7 +3345,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
                     'parse_mode' => "HTML"
                 ]);
             }
-            return;
+            return false;
         }
         product_discount_consume($info_product['code_product'] ?? '', $Balance_id);
         $Shoppinginfo = json_encode([
@@ -3536,7 +3559,7 @@ $textonebuy
         $service_other = $data_order;
         if ($service_other == false) {
             sendmessage($Balance_id['id'], '❌ A renewal error occurred. Please contact support.', $keyboard, 'HTML');
-            return;
+            return false;
         }
         $service_other = json_decode($service_other['value'], true);
         $codeproduct = $service_other['code_product'];
@@ -3582,7 +3605,7 @@ $textonebuy
                     'parse_mode' => "HTML"
                 ]);
             }
-            return;
+            return false;
         }
 
         update("service_other", "output", json_encode($extend), "id", $data_order['id']);
@@ -3722,7 +3745,7 @@ $textonebuy
                     'parse_mode' => "HTML"
                 ]);
             }
-            return;
+            return false;
         }
         $stmt = $pdo->prepare("INSERT IGNORE INTO service_other (id_user, username,value,type,time,price,output) VALUES (:id_user,:username,:value,:type,:time,:price,:output)");
         $stmt->bindParam(':id_user', $Balance_id['id']);
@@ -3824,7 +3847,7 @@ Balance کاربر قبل خرید : {$Balance_id['Balance']}
                     'parse_mode' => "HTML"
                 ]);
             }
-            return;
+            return false;
         }
         $stmt = $pdo->prepare("INSERT IGNORE INTO service_other (id_user, username,value,type,time,price,output) VALUES (:id_user,:username,:value,:type,:time,:price,:output)");
         $stmt->bindParam(':id_user', $Balance_id['id']);
@@ -3909,6 +3932,7 @@ Balance کاربر قبل خرید : {$Balance_id['Balance']}
                 
 🛒 Tracking code: {$Payment_report['id_order']}", null, 'HTML');
     }
+    return true;
 }
 function plisio($order_id, $price)
 {
@@ -5497,6 +5521,7 @@ function activecron()
         $job('*/1 * * * *', 'croncard.php'),
         $job('*/5 * * * *', 'NoticationsService.php'),
         $job('0 * * * *', 'payment_expire.php'),
+        $job('*/5 * * * *', 'cryptomus.php'),
         $job('*/1 * * * *', 'sendmessage.php'),
         $job('*/5 * * * *', 'activeconfig.php'),
         $job('*/5 * * * *', 'disableconfig.php'),
@@ -5515,6 +5540,7 @@ function activecron()
         'croncard.php',
         'NoticationsService.php',
         'payment_expire.php',
+        'cryptomus.php',
         'sendmessage.php',
         'plisio.php',
         'activeconfig.php',

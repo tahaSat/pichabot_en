@@ -6088,6 +6088,201 @@ Use the button below to pay👇🏻";
 Use the button below to pay👇🏻";
         $message_id = sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
         updatePaymentMessageId($message_id, $randomString);
+    } elseif ($datain == "cryptomus") {
+        $amountUsd = trim((string) ($user['Processing_value'] ?? ''));
+        $minCryptomus = trim((string) getPaySettingValue('minbalancecryptomus', ''));
+        $maxCryptomus = trim((string) getPaySettingValue('maxbalancecryptomus', ''));
+        $merchantCryptomus = trim((string) getPaySettingValue('merchant_cryptomus', '0'));
+        $apiCryptomus = trim((string) getPaySettingValue('apicryptomus', '0'));
+        $configurationValid = is_numeric($minCryptomus)
+            && is_numeric($maxCryptomus)
+            && (float) $minCryptomus >= 0
+            && (float) $maxCryptomus >= (float) $minCryptomus
+            && $merchantCryptomus !== '' && $merchantCryptomus !== '0'
+            && $apiCryptomus !== '' && $apiCryptomus !== '0';
+        if (!$configurationValid || !is_numeric($amountUsd) || (float) $amountUsd <= 0) {
+            error_log('Cryptomus checkout unavailable: invalid payment configuration or amount');
+            sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
+            step('home', $from_id);
+            return;
+        }
+        if ((float) $amountUsd < (float) $minCryptomus || (float) $amountUsd > (float) $maxCryptomus) {
+            $minCryptomusDisplay = number_format((float) $minCryptomus, 2);
+            $maxCryptomusDisplay = number_format((float) $maxCryptomus, 2);
+            sendmessage($from_id, "❌ Minimum for this method is $minCryptomusDisplay and maximum is $maxCryptomusDisplay USD", null, 'HTML');
+            return;
+        }
+
+        $randomString = '';
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $candidate = 'cm_' . bin2hex(random_bytes(12));
+            $uniqueOrder = $pdo->prepare('SELECT COUNT(*) FROM Payment_report WHERE id_order = ?');
+            $uniqueOrder->execute([$candidate]);
+            if ((int) $uniqueOrder->fetchColumn() === 0) {
+                $randomString = $candidate;
+                break;
+            }
+        }
+        if ($randomString === '') {
+            error_log('Cryptomus checkout unavailable: could not allocate order id');
+            sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
+            step('home', $from_id);
+            return;
+        }
+
+        $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
+        $dateacc = date('Y/m/d H:i:s');
+        try {
+            $insertCryptomus = $pdo->prepare(
+                'INSERT INTO Payment_report
+                 (id_user, id_order, time, price, payment_Status, Payment_Method, id_invoice, fulfillment_state)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+            );
+            $insertCryptomus->execute([
+                $from_id, $randomString, $dateacc, $amountUsd,
+                'Unpaid', 'cryptomus', $invoice, 'pending',
+            ]);
+            clearSelectCache('Payment_report');
+        } catch (Throwable $e) {
+            error_log('Cryptomus checkout unavailable: pending payment insert failed');
+            sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
+            step('home', $from_id);
+            return;
+        }
+
+        deletemessage($from_id, $message_id);
+        sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
+        $credentialsCryptomus = ['merchant' => $merchantCryptomus, 'api_key' => $apiCryptomus];
+        $createCryptomus = cryptomus_create_invoice($randomString, $amountUsd, $from_id, $credentialsCryptomus);
+        $remoteCryptomus = !empty($createCryptomus['ok']) && is_array($createCryptomus['data'] ?? null)
+            ? $createCryptomus['data']
+            : [];
+        $validCryptomusInvoice = static function ($remote, $orderId, $amount) {
+            if (!is_array($remote)) {
+                return false;
+            }
+            $uuid = trim((string) ($remote['uuid'] ?? ''));
+            $url = trim((string) ($remote['url'] ?? ''));
+            if ($uuid === '' || !preg_match('/^[a-f0-9-]{16,64}$/i', $uuid)) {
+                return false;
+            }
+            if (filter_var($url, FILTER_VALIDATE_URL) === false
+                || strtolower((string) parse_url($url, PHP_URL_SCHEME)) !== 'https') {
+                return false;
+            }
+            if (isset($remote['order_id']) && (string) $remote['order_id'] !== (string) $orderId) {
+                return false;
+            }
+            if (isset($remote['currency']) && strtoupper((string) $remote['currency']) !== 'USD') {
+                return false;
+            }
+            return !isset($remote['amount'])
+                || cryptomus_decimal_equal((string) $remote['amount'], (string) $amount);
+        };
+
+        $lookupCryptomus = ['ok' => false, 'http_status' => 0];
+        if (!$validCryptomusInvoice($remoteCryptomus, $randomString, $amountUsd)) {
+            $lookupCryptomus = cryptomus_payment_info_by_order($randomString, $credentialsCryptomus);
+            if (!empty($lookupCryptomus['ok']) && is_array($lookupCryptomus['data'] ?? null)) {
+                $remoteCryptomus = $lookupCryptomus['data'];
+            }
+        }
+        if (!$validCryptomusInvoice($remoteCryptomus, $randomString, $amountUsd)) {
+            $createHttpStatus = (int) ($createCryptomus['http_status'] ?? 0);
+            $lookupHttpStatus = (int) ($lookupCryptomus['http_status'] ?? 0);
+            $ambiguousCreation = $createHttpStatus === 0 || $createHttpStatus >= 500 || !empty($createCryptomus['ok']);
+            $failureStatus = $ambiguousCreation ? 'review' : 'creation_failed';
+            $failureMeta = json_encode([
+                'stage' => 'invoice_creation',
+                'result' => $failureStatus,
+                'create_http_status' => $createHttpStatus,
+                'lookup_http_status' => $lookupHttpStatus,
+            ], JSON_UNESCAPED_UNICODE);
+            $failCryptomus = $pdo->prepare(
+                'UPDATE Payment_report
+                 SET payment_Status = ?, gateway_status = ?, gateway_meta = ?, at_updated = ?
+                 WHERE id_order = ? AND Payment_Method = ?'
+            );
+            $failCryptomus->execute([
+                $failureStatus, $failureStatus, $failureMeta === false ? '{}' : $failureMeta,
+                date('Y/m/d H:i:s'), $randomString, 'cryptomus',
+            ]);
+            clearSelectCache('Payment_report');
+            error_log("Cryptomus invoice creation failed for order {$randomString}: {$failureStatus}");
+            sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
+            step('home', $from_id);
+            return;
+        }
+
+        $cryptomusExpiry = date('Y-m-d H:i:s', time() + 3600);
+        if (!empty($remoteCryptomus['expired_at'])) {
+            $rawCryptomusExpiry = trim((string) $remoteCryptomus['expired_at']);
+            if (ctype_digit($rawCryptomusExpiry)) {
+                $expiryTimestamp = (int) $rawCryptomusExpiry;
+                if ($expiryTimestamp > 20000000000) {
+                    $expiryTimestamp = (int) floor($expiryTimestamp / 1000);
+                }
+            } else {
+                $expiryTimestamp = strtotime($rawCryptomusExpiry);
+            }
+            if ($expiryTimestamp !== false && $expiryTimestamp > 0) {
+                $cryptomusExpiry = date('Y-m-d H:i:s', $expiryTimestamp);
+            }
+        }
+        $cryptomusGatewayMeta = json_encode(
+            cryptomus_safe_gateway_meta($remoteCryptomus),
+            JSON_UNESCAPED_UNICODE
+        );
+        $updateCryptomus = $pdo->prepare(
+            'UPDATE Payment_report
+             SET dec_not_confirmed = ?, gateway_status = ?, gateway_meta = ?,
+                 gateway_expires_at = ?, at_updated = ?
+             WHERE id_order = ? AND Payment_Method = ?'
+        );
+        $updateCryptomus->execute([
+            (string) $remoteCryptomus['uuid'],
+            (string) ($remoteCryptomus['status'] ?? 'check'),
+            $cryptomusGatewayMeta === false ? '{}' : $cryptomusGatewayMeta,
+            $cryptomusExpiry, date('Y/m/d H:i:s'), $randomString, 'cryptomus',
+        ]);
+        clearSelectCache('Payment_report');
+
+        $gethelp = getPaySettingValue('helpcryptomus', '2');
+        if ((string) $gethelp !== '2' && trim((string) $gethelp) !== '') {
+            $helpCryptomus = json_decode((string) $gethelp, true);
+            if (is_array($helpCryptomus)) {
+                $helpType = (string) ($helpCryptomus['type'] ?? '');
+                $helpText = (string) ($helpCryptomus['text'] ?? '');
+                if ($helpType === 'text' && $helpText !== '') {
+                    sendmessage($from_id, $helpText, null, 'HTML');
+                } elseif ($helpType === 'photo' && !empty($helpCryptomus['photoid'])) {
+                    sendphoto($from_id, $helpCryptomus['photoid'], $helpText !== '' ? $helpText : null);
+                } elseif ($helpType === 'video' && !empty($helpCryptomus['videoid'])) {
+                    sendvideo($from_id, $helpCryptomus['videoid'], $helpText !== '' ? $helpText : null);
+                }
+            }
+        }
+
+        $paymentButtonText = trim((string) ($textbotlang['users']['Balance']['payments'] ?? 'Pay'));
+        $paymentButtonText = $paymentButtonText === '' ? 'Pay' : $paymentButtonText;
+        $paymentkeyboard = json_encode([
+            'inline_keyboard' => [[
+                ['text' => $paymentButtonText, 'url' => (string) $remoteCryptomus['url']],
+            ]],
+        ]);
+        $priceFormat = number_format((float) $amountUsd, 2);
+        $textCryptomus = "<b>💲 Cryptomus payment invoice created</b>
+
+🔢 Invoice number: <code>$randomString</code>
+💰 Invoice amount: <code>$priceFormat USD</code>
+
+⚠️ This hosted payment link is valid for one hour. Do not pay it after it expires.
+
+✅ After a successful payment, confirmation and account credit are automatic. Please wait for the success message.
+
+Use the button below to pay 👇🏻";
+        $message_id = sendmessage($from_id, $textCryptomus, $paymentkeyboard, 'HTML');
+        updatePaymentMessageId($message_id, $randomString);
     } elseif ($datain == "plisio") {
         $rates = rate_arze();
         if ($rates === null) {

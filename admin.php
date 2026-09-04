@@ -21,6 +21,96 @@ if (!in_array($from_id, $admin_ids))
 
 $domainhostsEscaped = htmlspecialchars($domainhosts, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
+if (!function_exists('cryptomus_admin_payment_by_id')) {
+    function cryptomus_admin_payment_by_id($id)
+    {
+        global $pdo;
+        $stmt = $pdo->prepare("SELECT * FROM Payment_report WHERE id = ? AND Payment_Method = 'cryptomus' LIMIT 1");
+        $stmt->execute([(int) $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: false;
+    }
+}
+
+if (!function_exists('cryptomus_admin_operations_view')) {
+    function cryptomus_admin_operations_view()
+    {
+        global $pdo;
+        $stmt = $pdo->query(
+            "SELECT * FROM Payment_report
+             WHERE Payment_Method = 'cryptomus' AND (
+                 gateway_status IN ('wrong_amount', 'wrong_amount_waiting', 'review', 'check', 'locked', 'fail', 'system_fail', 'refund_fail')
+                 OR payment_Status IN ('review', 'locked', 'fail', 'failed')
+                 OR (payment_Status = 'paid' AND fulfillment_state = 'completed'
+                     AND COALESCE(refund_status, '') NOT IN ('refund_process', 'refund_paid'))
+             )
+             ORDER BY id DESC LIMIT 10"
+        );
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $keyboard = ['inline_keyboard' => []];
+        $lines = ["🧾 <b>عملیات اخیر Cryptomus</b>"];
+        if (!$rows) {
+            $lines[] = "\nمورد قابل اقدامی وجود ندارد.";
+        }
+        foreach ($rows as $row) {
+            $id = (int) $row['id'];
+            $uuid = (string) ($row['dec_not_confirmed'] ?? '');
+            $shortUuid = $uuid === '' ? '—' : (strlen($uuid) > 16 ? substr($uuid, 0, 8) . '…' . substr($uuid, -6) : $uuid);
+            $esc = static function ($value) {
+                return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            };
+            $short = static function ($value, $limit) {
+                $value = (string) $value;
+                return strlen($value) > $limit ? substr($value, 0, $limit - 1) . '…' : $value;
+            };
+            $lines[] = "\n<b>#" . $id . "</b>"
+                . "\nمحلی: <code>" . $esc($short($row['payment_Status'] ?? '—', 30))
+                . " / " . $esc($short($row['fulfillment_state'] ?? '—', 30)) . "</code>"
+                . " | درگاه: <code>" . $esc($short($row['gateway_status'] ?? '—', 30)) . "</code>"
+                . "\nسفارش: <code>" . $esc($short($row['id_order'] ?? '—', 48)) . "</code>"
+                . " | کاربر: <code>" . $esc($short($row['id_user'] ?? '—', 24)) . "</code>"
+                . "\nمبلغ: <code>" . $esc($short($row['price'] ?? '—', 24)) . " USD</code>"
+                . " | UUID: <code>" . $esc($shortUuid) . "</code>"
+                . "\nبازپرداخت: <code>" . $esc($short($row['refund_status'] ?: 'none', 30)) . "</code>";
+
+            $buttons = [];
+            if (in_array((string) ($row['gateway_status'] ?? ''), ['wrong_amount', 'wrong_amount_waiting'], true)) {
+                $buttons[] = ['text' => "✅ تایید کم‌پرداختی #$id", 'callback_data' => "cm_ap_$id"];
+                $buttons[] = ['text' => "❌ لغو #$id", 'callback_data' => "cm_ca_$id"];
+            }
+            if (($row['payment_Status'] ?? '') === 'paid'
+                && ($row['fulfillment_state'] ?? '') === 'completed'
+                && !in_array((string) ($row['refund_status'] ?? ''), ['refund_process', 'refund_paid'], true)
+            ) {
+                $buttons[] = ['text' => "↩️ بازپرداخت کامل #$id", 'callback_data' => "cm_rf_$id"];
+            }
+            if ($buttons) {
+                $keyboard['inline_keyboard'][] = $buttons;
+            }
+        }
+        $keyboard['inline_keyboard'][] = [['text' => "🔄 تازه‌سازی", 'callback_data' => "cm_ops"]];
+        return ['text' => implode("\n", $lines), 'keyboard' => json_encode($keyboard)];
+    }
+}
+
+if (!function_exists('cryptomus_admin_settings_text')) {
+    function cryptomus_admin_settings_text($domain)
+    {
+        $merchantSet = !in_array((string) getPaySettingValue('merchant_cryptomus', '0'), ['', '0'], true);
+        $apiSet = !in_array((string) getPaySettingValue('apicryptomus', '0'), ['', '0'], true);
+        $min = htmlspecialchars((string) getPaySettingValue('minbalancecryptomus', '0'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $max = htmlspecialchars((string) getPaySettingValue('maxbalancecryptomus', '0'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $cashback = htmlspecialchars((string) getPaySettingValue('chashbackcryptomus', '0'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $callback = htmlspecialchars("https://{$domain}/payment/cryptomus.php", ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return "⚙️ <b>تنظیمات Cryptomus</b>"
+            . "\n\nMerchant UUID: " . ($merchantSet ? '✅ تنظیم شده' : '❌ تنظیم نشده')
+            . "\nPayment API Key: " . ($apiSet ? '✅ تنظیم شده (مخفی)' : '❌ تنظیم نشده')
+            . "\nحداقل/حداکثر: <code>$min / $max USD</code>"
+            . "\nکش‌بک: <code>$cashback%</code>"
+            . "\n\nCallback URL:\n<code>$callback</code>"
+            . "\n\n⚠️ گزینه <b>Auto-Convert to USDT</b> باید به‌صورت دستی در داشبورد Cryptomus فعال شود.";
+    }
+}
+
 $miniAppInstructionText = <<<HTML
 📌 آموزش فعالسازی مینی اپ در ربات BotFather
 
@@ -8810,6 +8900,7 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     $paymentstatussnotverify = getPaySettingValue('paymentstatussnotverify', 'offpaymentstatus');
     $paymentsstartelegram = getPaySettingValue('statusstar', '0');
     $payment_status_nowpayment = getPaySettingValue('statusnowpayment', '0');
+    $payment_status_cryptomus = getPaySettingValue('statuscryptomus', 'offcryptomus');
     $cartotcartstatus = [
         'oncard' => $textbotlang['Admin']['Status']['statuson'],
         'offcard' => $textbotlang['Admin']['Status']['statusoff']
@@ -8854,6 +8945,10 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$payment_status_nowpayment];
+    $cryptomus_status = [
+        'oncryptomus' => $textbotlang['Admin']['Status']['statuson'],
+        'offcryptomus' => $textbotlang['Admin']['Status']['statusoff']
+    ][$payment_status_cryptomus] ?? $textbotlang['Admin']['Status']['statusoff'];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -8878,6 +8973,12 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
                 ['text' => "⚙️ تنظیمات", 'callback_data' => "nowpaymentsetting"],
                 ['text' => $now_payment_status, 'callback_data' => "editpayment-nowpayment-$payment_status_nowpayment"],
                 ['text' => "📌 nowpayment", 'callback_data' => "nowpayment"],
+            ],
+            [
+                ['text' => "⚙️ تنظیمات", 'callback_data' => "cm_set"],
+                ['text' => "🧾 عملیات", 'callback_data' => "cm_ops"],
+                ['text' => $cryptomus_status, 'callback_data' => "editpayment-cryptomus-$payment_status_cryptomus"],
+                ['text' => "💠 Cryptomus", 'callback_data' => "cm_ops"],
             ],
             [
                 ['text' => "⚙️ تنظیمات", 'callback_data' => "iranpay1setting"],
@@ -8931,6 +9032,292 @@ if ($datain == "settimecornremove" && $adminrulecheck['rule'] == "administrator"
     sendmessage($from_id, "📌 از لیست زیر میتوانید درگاه ها را مدیریت کنید.
 
 ⚠️ تیم پیچا هیچ تضمینی برای درگاه ها نخواهد داشت و استفاده  و تمامی مسئولیت ها به عهده شما می باشد", $Bot_Status, 'HTML');
+} elseif (
+    in_array((string) $datain, ['cm_set', 'cm_ops'], true)
+    || preg_match('/^cm_(ap|ca|rf)_(\d+)$/', (string) $datain, $cmActionMatch)
+    || preg_match('/^cm_rc_(\d+)_([01])$/', (string) $datain, $cmRefundMatch)
+    || in_array((string) ($user['step'] ?? ''), [
+        'cm_merchant', 'cm_api', 'cm_min', 'cm_max', 'cm_cashback',
+        'cm_button_text', 'cm_help', 'cm_cancel_reason', 'cm_refund_address'
+    ], true)
+    || in_array((string) $text, [
+        '🪪 Merchant UUID کریپتوموس', '🔐 Payment API Key کریپتوموس',
+        '⬇️ حداقل USD کریپتوموس', '⬆️ حداکثر USD کریپتوموس',
+        '💰 کش بک کریپتوموس', '🗂 متن دکمه کریپتوموس', '📚 تنظیم آموزش کریپتوموس'
+    ], true)
+) {
+    if (($adminrulecheck['rule'] ?? '') !== 'administrator') {
+        if ($callback_query_id) {
+            telegram('answerCallbackQuery', [
+                'callback_query_id' => $callback_query_id,
+                'text' => 'فقط مدیر اصلی دسترسی دارد',
+                'show_alert' => true,
+            ]);
+        }
+        return;
+    }
+
+    $cmClearState = static function () use ($from_id) {
+        step('home', $from_id);
+        update('user', 'Processing_value', '0', 'id', $from_id);
+    };
+    $cmApiMessage = static function (array $result) {
+        $error = $result['error'] ?? 'خطای نامشخص';
+        if (is_array($error)) {
+            $error = json_encode($error, JSON_UNESCAPED_UNICODE);
+        }
+        return htmlspecialchars((string) $error, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    };
+
+    if ($datain === 'cm_set') {
+        step('home', $from_id);
+        sendmessage($from_id, cryptomus_admin_settings_text($domainhosts), $CryptomusManage, 'HTML');
+        return;
+    }
+    if ($datain === 'cm_ops') {
+        step('home', $from_id);
+        update('user', 'Processing_value', '0', 'id', $from_id);
+        $view = cryptomus_admin_operations_view();
+        if ($message_id) {
+            Editmessagetext($from_id, $message_id, $view['text'], $view['keyboard'], 'HTML');
+        } else {
+            sendmessage($from_id, $view['text'], $view['keyboard'], 'HTML');
+        }
+        return;
+    }
+
+    $cmActionMatch = [];
+    $cmRefundMatch = [];
+    preg_match('/^cm_(ap|ca|rf)_(\d+)$/', (string) $datain, $cmActionMatch);
+    preg_match('/^cm_rc_(\d+)_([01])$/', (string) $datain, $cmRefundMatch);
+
+    if (($cmActionMatch[1] ?? '') === 'ap') {
+        $payment = cryptomus_admin_payment_by_id((int) $cmActionMatch[2]);
+        if (!$payment || !in_array((string) ($payment['gateway_status'] ?? ''), ['wrong_amount', 'wrong_amount_waiting'], true)) {
+            sendmessage($from_id, "❌ این پرداخت دیگر در وضعیت قابل تایید کم‌پرداختی نیست.", null, 'HTML');
+            return;
+        }
+        $result = cryptomus_approve_underpayment((string) $payment['id_order']);
+        if (empty($result['ok'])) {
+            sendmessage($from_id, "❌ درخواست تایید ناموفق بود: <code>" . $cmApiMessage($result) . "</code>", null, 'HTML');
+            return;
+        }
+        sendmessage(
+            $from_id,
+            "✅ درخواست تایید کم‌پرداختی به Cryptomus ارسال شد.\n\n⚠️ تحویل سرویس/افزایش موجودی فقط بعد از وبهوک معتبر یا بررسی cron و تایید نهایی پرداخت انجام می‌شود.",
+            null,
+            'HTML'
+        );
+        return;
+    }
+
+    if (($cmActionMatch[1] ?? '') === 'ca') {
+        $payment = cryptomus_admin_payment_by_id((int) $cmActionMatch[2]);
+        if (!$payment || !in_array((string) ($payment['gateway_status'] ?? ''), ['wrong_amount', 'wrong_amount_waiting'], true)) {
+            sendmessage($from_id, "❌ این پرداخت دیگر قابل لغو نیست.", null, 'HTML');
+            return;
+        }
+        update('user', 'Processing_value', json_encode(['payment_id' => (int) $payment['id']], JSON_UNESCAPED_UNICODE), 'id', $from_id);
+        step('cm_cancel_reason', $from_id);
+        sendmessage($from_id, "✍️ دلیل لغو سفارش <code>" . htmlspecialchars((string) $payment['id_order'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "</code> را ارسال کنید.\nاین عملیات بازپرداختی انجام نمی‌دهد.", $backadmin, 'HTML');
+        return;
+    }
+
+    if (($user['step'] ?? '') === 'cm_cancel_reason') {
+        $reason = trim((string) text_from_telegram_update($update));
+        $state = json_decode((string) ($user['Processing_value'] ?? ''), true);
+        $payment = cryptomus_admin_payment_by_id((int) ($state['payment_id'] ?? 0));
+        if ($reason === '' || mb_strlen($reason) > 500) {
+            sendmessage($from_id, "❌ دلیل باید بین ۱ تا ۵۰۰ کاراکتر باشد.", $backadmin, 'HTML');
+            return;
+        }
+        if (!$payment || !in_array((string) ($payment['gateway_status'] ?? ''), ['wrong_amount', 'wrong_amount_waiting'], true)) {
+            $cmClearState();
+            sendmessage($from_id, "❌ وضعیت پرداخت تغییر کرده و لغو نشد.", $CryptomusManage, 'HTML');
+            return;
+        }
+        $cancelled = cryptomus_cancel_underpayment((string) $payment['id_order'], $reason);
+        $cmClearState();
+        if (!$cancelled) {
+            sendmessage($from_id, "❌ لغو انجام نشد؛ احتمالاً این پرداخت قبلاً پردازش شده است.", $CryptomusManage, 'HTML');
+            return;
+        }
+        $safeReason = htmlspecialchars($reason, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        sendmessage((int) $payment['id_user'], "❌ پرداخت Cryptomus شما لغو شد.\nدلیل: {$safeReason}\n\nاین لغو شامل بازپرداخت نیست؛ برای پیگیری با پشتیبانی تماس بگیرید.", null, 'HTML');
+        sendmessage($from_id, "✅ پرداخت لغو و کاربر مطلع شد. UUID و اطلاعات درگاه حفظ شدند و بازپرداختی ثبت نشد.", $CryptomusManage, 'HTML');
+        return;
+    }
+
+    if (($cmActionMatch[1] ?? '') === 'rf') {
+        $payment = cryptomus_admin_payment_by_id((int) $cmActionMatch[2]);
+        if (!$payment
+            || ($payment['payment_Status'] ?? '') !== 'paid'
+            || ($payment['fulfillment_state'] ?? '') !== 'completed'
+            || in_array((string) ($payment['refund_status'] ?? ''), ['refund_process', 'refund_paid'], true)
+        ) {
+            sendmessage($from_id, "❌ این پرداخت شرایط بازپرداخت را ندارد.", null, 'HTML');
+            return;
+        }
+        update('user', 'Processing_value', json_encode(['payment_id' => (int) $payment['id']], JSON_UNESCAPED_UNICODE), 'id', $from_id);
+        step('cm_refund_address', $from_id);
+        sendmessage($from_id, "📬 آدرس مقصد بازپرداخت کامل را ارسال کنید (۸ تا ۲۵۶ نویسه؛ بدون فاصله).\n\n⚠️ آدرس هرگز از callback حدس زده نمی‌شود.", $backadmin, 'HTML');
+        return;
+    }
+
+    if (($user['step'] ?? '') === 'cm_refund_address') {
+        $address = trim((string) $text);
+        $state = json_decode((string) ($user['Processing_value'] ?? ''), true);
+        $paymentId = (int) ($state['payment_id'] ?? 0);
+        if (strlen($address) < 8 || strlen($address) > 256 || !preg_match('/^[A-Za-z0-9:._-]+$/', $address)) {
+            sendmessage($from_id, "❌ آدرس نامعتبر است. فقط حروف لاتین، عدد و نویسه‌های <code>: . _ -</code>، بدون فاصله و با طول ۸ تا ۲۵۶ مجاز است.", $backadmin, 'HTML');
+            return;
+        }
+        $payment = cryptomus_admin_payment_by_id($paymentId);
+        if (!$payment
+            || ($payment['payment_Status'] ?? '') !== 'paid'
+            || ($payment['fulfillment_state'] ?? '') !== 'completed'
+            || in_array((string) ($payment['refund_status'] ?? ''), ['refund_process', 'refund_paid'], true)
+        ) {
+            $cmClearState();
+            sendmessage($from_id, "❌ وضعیت پرداخت تغییر کرده و بازپرداخت آماده نشد.", $CryptomusManage, 'HTML');
+            return;
+        }
+        update('user', 'Processing_value', json_encode([
+            'payment_id' => $paymentId,
+            'refund_address' => $address,
+        ], JSON_UNESCAPED_UNICODE), 'id', $from_id);
+        step('home', $from_id);
+        $confirmKeyboard = json_encode(['inline_keyboard' => [
+            [['text' => '✅ گیرنده کارمزد را می‌پردازد (پیشنهادی)', 'callback_data' => "cm_rc_{$paymentId}_0"]],
+            [['text' => '⚠️ پذیرنده کارمزد را می‌پردازد', 'callback_data' => "cm_rc_{$paymentId}_1"]],
+            [['text' => 'انصراف', 'callback_data' => 'cm_ops']],
+        ]]);
+        $safeAddress = htmlspecialchars($address, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        sendmessage(
+            $from_id,
+            "⚠️ <b>تایید بازپرداخت کامل</b>\n\nمقصد: <code>{$safeAddress}</code>\nاین عملیات کل مبلغ را بازپرداخت می‌کند و تحویل داخلی سرویس یا موجودی کاربر را برنمی‌گرداند.\n\nحالت پیشنهادی: <b>گیرنده کارمزد را می‌پردازد</b>.",
+            $confirmKeyboard,
+            'HTML'
+        );
+        return;
+    }
+
+    if (isset($cmRefundMatch[1])) {
+        $paymentId = (int) $cmRefundMatch[1];
+        $merchantBearsFee = $cmRefundMatch[2] === '1';
+        $state = json_decode((string) ($user['Processing_value'] ?? ''), true);
+        $address = (string) ($state['refund_address'] ?? '');
+        $statePaymentId = (int) ($state['payment_id'] ?? 0);
+        $payment = cryptomus_admin_payment_by_id($paymentId);
+        if ($statePaymentId !== $paymentId
+            || strlen($address) < 8
+            || strlen($address) > 256
+            || !preg_match('/^[A-Za-z0-9:._-]+$/', $address)
+            || !$payment
+            || ($payment['payment_Status'] ?? '') !== 'paid'
+            || ($payment['fulfillment_state'] ?? '') !== 'completed'
+            || in_array((string) ($payment['refund_status'] ?? ''), ['refund_process', 'refund_paid'], true)
+        ) {
+            $cmClearState();
+            sendmessage($from_id, "❌ تایید بازپرداخت منقضی یا وضعیت پرداخت تغییر کرده است.", null, 'HTML');
+            return;
+        }
+        $result = cryptomus_refund(['uuid' => (string) $payment['dec_not_confirmed']], $address, $merchantBearsFee);
+        $cmClearState();
+        if (empty($result['ok'])) {
+            sendmessage($from_id, "❌ درخواست بازپرداخت ناموفق بود: <code>" . $cmApiMessage($result) . "</code>", $CryptomusManage, 'HTML');
+            return;
+        }
+        sendmessage($from_id, "✅ درخواست بازپرداخت کامل ثبت شد. وضعیت نهایی بازپرداخت را از عملیات Cryptomus پیگیری کنید.\n⚠️ تحویل داخلی/موجودی کاربر خودکار معکوس نشده است.", $CryptomusManage, 'HTML');
+        return;
+    }
+
+    $settingPrompts = [
+        '🪪 Merchant UUID کریپتوموس' => ['cm_merchant', 'Merchant UUID را ارسال کنید.'],
+        '🔐 Payment API Key کریپتوموس' => ['cm_api', 'Payment API Key جدید را ارسال کنید. کلید فعلی هرگز نمایش داده نمی‌شود.'],
+        '⬇️ حداقل USD کریپتوموس' => ['cm_min', 'حداقل مبلغ USD را به‌صورت عدد غیرمنفی ارسال کنید.'],
+        '⬆️ حداکثر USD کریپتوموس' => ['cm_max', 'حداکثر مبلغ USD را به‌صورت عدد غیرمنفی ارسال کنید.'],
+        '💰 کش بک کریپتوموس' => ['cm_cashback', 'درصد کش‌بک را از ۰ تا ۱۰۰ ارسال کنید.'],
+        '🗂 متن دکمه کریپتوموس' => ['cm_button_text', 'متن نمایشی دکمه Cryptomus را ارسال کنید.'],
+        '📚 تنظیم آموزش کریپتوموس' => ['cm_help', "آموزش را به‌صورت متن، تصویر یا ویدیو ارسال کنید.\nبرای غیرفعال‌سازی عدد <code>2</code> را بفرستید."],
+    ];
+    if (isset($settingPrompts[$text])) {
+        step($settingPrompts[$text][0], $from_id);
+        sendmessage($from_id, $settingPrompts[$text][1], $backadmin, 'HTML');
+        return;
+    }
+
+    $currentStep = (string) ($user['step'] ?? '');
+    if ($currentStep === 'cm_merchant' || $currentStep === 'cm_api') {
+        $value = trim((string) $text);
+        if ($value === '' || strlen($value) > 500) {
+            sendmessage($from_id, "❌ مقدار نامعتبر است.", $backadmin, 'HTML');
+            return;
+        }
+        $key = $currentStep === 'cm_merchant' ? 'merchant_cryptomus' : 'apicryptomus';
+        update('PaySetting', 'ValuePay', $value, 'NamePay', $key);
+        $cmClearState();
+        sendmessage($from_id, $currentStep === 'cm_api' ? "✅ Payment API Key ذخیره شد و نمایش داده نمی‌شود." : "✅ Merchant UUID ذخیره شد.", $CryptomusManage, 'HTML');
+        return;
+    }
+
+    if (in_array($currentStep, ['cm_min', 'cm_max', 'cm_cashback'], true)) {
+        $value = trim((string) $text);
+        if (!preg_match('/^(?:0|[1-9]\d*)(?:\.\d+)?$/', $value)) {
+            sendmessage($from_id, "❌ فقط عدد غیرمنفی معتبر است.", $backadmin, 'HTML');
+            return;
+        }
+        if ($currentStep === 'cm_cashback' && cryptomus_decimal_compare($value, '100') === 1) {
+            sendmessage($from_id, "❌ کش‌بک باید بین ۰ تا ۱۰۰ باشد.", $backadmin, 'HTML');
+            return;
+        }
+        $min = $currentStep === 'cm_min' ? $value : (string) getPaySettingValue('minbalancecryptomus', '0');
+        $max = $currentStep === 'cm_max' ? $value : (string) getPaySettingValue('maxbalancecryptomus', '0');
+        if ($currentStep !== 'cm_cashback' && cryptomus_decimal_compare($min, $max) === 1) {
+            sendmessage($from_id, "❌ حداقل مبلغ نمی‌تواند از حداکثر بیشتر باشد.", $backadmin, 'HTML');
+            return;
+        }
+        $key = [
+            'cm_min' => 'minbalancecryptomus',
+            'cm_max' => 'maxbalancecryptomus',
+            'cm_cashback' => 'chashbackcryptomus',
+        ][$currentStep];
+        update('PaySetting', 'ValuePay', $value, 'NamePay', $key);
+        $cmClearState();
+        sendmessage($from_id, "✅ مقدار با موفقیت ذخیره شد.", $CryptomusManage, 'HTML');
+        return;
+    }
+
+    if ($currentStep === 'cm_button_text') {
+        $value = trim((string) text_from_telegram_update($update));
+        if ($value === '' || mb_strlen($value) > 64) {
+            sendmessage($from_id, "❌ متن دکمه باید بین ۱ تا ۶۴ کاراکتر باشد.", $backadmin, 'HTML');
+            return;
+        }
+        update('textbot', 'text', $value, 'id_text', 'textcryptomus');
+        $cmClearState();
+        sendmessage($from_id, "✅ متن دکمه Cryptomus ذخیره شد.", $CryptomusManage, 'HTML');
+        return;
+    }
+
+    if ($currentStep === 'cm_help') {
+        if ($text && trim((string) $text) === '2') {
+            $data = '2';
+        } elseif ($text) {
+            $data = json_encode(['type' => 'text', 'text' => text_from_telegram_update($update)], JSON_UNESCAPED_UNICODE);
+        } elseif ($photo) {
+            $data = json_encode(['type' => 'photo', 'text' => (string) $caption, 'photoid' => $photoid], JSON_UNESCAPED_UNICODE);
+        } elseif ($video) {
+            $data = json_encode(['type' => 'video', 'text' => (string) $caption, 'videoid' => $videoid], JSON_UNESCAPED_UNICODE);
+        } else {
+            sendmessage($from_id, "❌ فقط متن، تصویر، ویدیو یا عدد 2 مجاز است.", $backadmin, 'HTML');
+            return;
+        }
+        update('PaySetting', 'ValuePay', $data, 'NamePay', 'helpcryptomus');
+        $cmClearState();
+        sendmessage($from_id, "✅ آموزش Cryptomus ذخیره شد.", $CryptomusManage, 'HTML');
+        return;
+    }
 } elseif (
     $datain == "wd_menu"
     || preg_match('/^wd_tab_(settings|pending|history)(?:_(\d+))?$/', (string) $datain, $wdTabMatch)
@@ -9147,6 +9534,14 @@ n2", $backadmin, 'HTML');
 } elseif (preg_match('/^editpayment-(.*)-(.*)/', $datain, $dataget)) {
     $type = $dataget[1];
     $value = $dataget[2];
+    if ($type === 'cryptomus' && ($adminrulecheck['rule'] ?? '') !== 'administrator') {
+        telegram('answerCallbackQuery', [
+            'callback_query_id' => $callback_query_id,
+            'text' => 'فقط مدیر اصلی دسترسی دارد',
+            'show_alert' => true,
+        ]);
+        return;
+    }
     if ($type == "Cartstatus") {
         if ($value == "oncard") {
             $valuenew = "offcard";
@@ -9224,6 +9619,9 @@ n2", $backadmin, 'HTML');
             $valuenew = "1";
         }
         update("PaySetting", "ValuePay", $valuenew, "NamePay", "statusnowpayment");
+    } elseif ($type == "cryptomus") {
+        $valuenew = $value === "oncryptomus" ? "offcryptomus" : "oncryptomus";
+        update("PaySetting", "ValuePay", $valuenew, "NamePay", "statuscryptomus");
     }
     $zarinpal = getPaySettingValue('zarinpalstatus', 'offzarinpal');
     $cartotcart = getPaySettingValue('Cartstatus', 'offcard');
@@ -9237,6 +9635,7 @@ n2", $backadmin, 'HTML');
     $paymentstatussnotverify = getPaySettingValue('paymentstatussnotverify', 'offpaymentstatus');
     $paymentsstartelegram = getPaySettingValue('statusstar', '0');
     $payment_status_nowpayment = getPaySettingValue('statusnowpayment', '0');
+    $payment_status_cryptomus = getPaySettingValue('statuscryptomus', 'offcryptomus');
     $cartotcartstatus = [
         'oncard' => $textbotlang['Admin']['Status']['statuson'],
         'offcard' => $textbotlang['Admin']['Status']['statusoff']
@@ -9281,6 +9680,10 @@ n2", $backadmin, 'HTML');
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$payment_status_nowpayment];
+    $cryptomus_status = [
+        'oncryptomus' => $textbotlang['Admin']['Status']['statuson'],
+        'offcryptomus' => $textbotlang['Admin']['Status']['statusoff']
+    ][$payment_status_cryptomus] ?? $textbotlang['Admin']['Status']['statusoff'];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -9305,6 +9708,12 @@ n2", $backadmin, 'HTML');
                 ['text' => "⚙️ تنظیمات", 'callback_data' => "nowpaymentsetting"],
                 ['text' => $now_payment_status, 'callback_data' => "editpayment-nowpayment-$payment_status_nowpayment"],
                 ['text' => "📌 nowpayment", 'callback_data' => "nowpayment"],
+            ],
+            [
+                ['text' => "⚙️ تنظیمات", 'callback_data' => "cm_set"],
+                ['text' => "🧾 عملیات", 'callback_data' => "cm_ops"],
+                ['text' => $cryptomus_status, 'callback_data' => "editpayment-cryptomus-$payment_status_cryptomus"],
+                ['text' => "💠 Cryptomus", 'callback_data' => "cm_ops"],
             ],
             [
                 ['text' => "⚙️ تنظیمات", 'callback_data' => "iranpay1setting"],

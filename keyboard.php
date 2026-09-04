@@ -43,6 +43,7 @@ $datatextbot = array(
     'text_affiliates' => '',
     'carttocart' => '',
     'textnowpayment' => '',
+    'textcryptomus' => '',
     'textnowpaymenttron' => '',
     'iranpay1' => '',
     'iranpay2' => '',
@@ -225,6 +226,16 @@ $NowPaymentsManage = json_encode([
     ],
     'resize_keyboard' => true
 ]);
+$CryptomusManage = json_encode([
+    'keyboard' => [
+        [['text' => "🪪 Merchant UUID کریپتوموس"], ['text' => "🔐 Payment API Key کریپتوموس"]],
+        [['text' => "⬇️ حداقل USD کریپتوموس"], ['text' => "⬆️ حداکثر USD کریپتوموس"]],
+        [['text' => "💰 کش بک کریپتوموس"], ['text' => "🗂 متن دکمه کریپتوموس"]],
+        [['text' => "📚 تنظیم آموزش کریپتوموس"]],
+        [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
+    ],
+    'resize_keyboard' => true
+]);
 $setting_panel = json_encode([
     'keyboard' => [
         [['text' => "⚙️ وضعیت قابلیت ها"]],
@@ -259,6 +270,7 @@ $arzireyali3 = getPaySettingValue("statusiranpay3");
 $paymentstatussnotverify = getPaySettingValue("paymentstatussnotverify");
 $paymentsstartelegram = getPaySettingValue("statusstar");
 $payment_status_nowpayment = getPaySettingValue("statusnowpayment");
+$payment_status_cryptomus = getPaySettingValue("statuscryptomus");
 $step_payment = [
     'inline_keyboard' => []
 ];
@@ -284,6 +296,14 @@ if ($payment_status_nowpayment == "1") {
     $step_payment['inline_keyboard'][] = [
         ['text' => $datatextbot['textsnowpayment'], 'callback_data' => "nowpayment"]
     ];
+}
+if ($payment_status_cryptomus === "oncryptomus") {
+    $cryptomus_button_text = trim((string) ($datatextbot['textcryptomus'] ?? ''));
+    if ($cryptomus_button_text !== '') {
+        $step_payment['inline_keyboard'][] = [
+            ['text' => $cryptomus_button_text, 'callback_data' => "cryptomus"]
+        ];
+    }
 }
 if ($affilnecurrency == "ondigi") {
     $step_payment['inline_keyboard'][] = [
