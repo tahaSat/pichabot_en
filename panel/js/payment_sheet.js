@@ -247,7 +247,7 @@
     if (priceInput) priceInput.value = formatPrice(String(data.price || ''));
     if (priceView) {
       priceView.innerHTML = escapeHtml(data.price_fmt || '0')
-        + ' <span style="color:var(--text-dim);font-weight:400;font-size:.72rem">ت</span>';
+        + ' <span style="color:var(--text-dim);font-weight:400;font-size:.72rem">USD</span>';
     }
 
     var methodLabel = row.querySelector('.pay-method-label');
@@ -450,7 +450,7 @@
     removeEmptyRow();
     var oid = randomOrderId();
     var now = cfg.nowJalali || '';
-    var defaultMethod = 'manual invoice';
+    var defaultMethod = cfg.defaultMethod || 'manual invoice';
     var defaultStatus = 'paid';
     var defaultCategory = cfg.defaultCategory || Object.keys(cfg.categoryOptions || {})[0] || 'other';
     var methodLabel = (cfg.methodOptions && cfg.methodOptions[defaultMethod]) || 'فاکتور دستی';
@@ -484,7 +484,7 @@
       + '<td><span class="pay-view pay-user-view"><span style="color:var(--text-dim)">بدون کاربر</span></span>'
       + '<input class="input pay-edit pay-cell-input pay-user-input" type="text" value="" placeholder="آیدی یا یوزرنیم" autocomplete="off"></td>'
       + '<td class="cell-mono pay-oid">' + escapeHtml(oid) + '</td>'
-      + '<td><span class="pay-view cell-strong cell-num pay-price-view">0 <span style="color:var(--text-dim);font-weight:400;font-size:.72rem">ت</span></span>'
+      + '<td><span class="pay-view cell-strong cell-num pay-price-view">0 <span style="color:var(--text-dim);font-weight:400;font-size:.72rem">USD</span></span>'
       + '<input class="input pay-edit pay-cell-input pay-price-input" type="text" inputmode="numeric" dir="ltr" autocomplete="off" placeholder="0" value=""></td>'
       + '<td class="pay-method-view">' + methodCell + '</td>'
       + '<td><span class="pay-view pay-note-view"><span style="color:var(--text-dim)">—</span></span>'
@@ -811,12 +811,6 @@
         pendingStatus = null;
       }
       closeModal('statusSideModal');
-    });
-  }
-
-  if (window.jQuery) {
-    window.jQuery(function () {
-      document.querySelectorAll('#paymentFilterModal .jalali-datetime-picker').forEach(initJalaliPicker);
     });
   }
 })();

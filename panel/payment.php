@@ -2,6 +2,7 @@
 require_once __DIR__ . '/inc/config.php';
 require_once __DIR__ . '/inc/icons.php';
 require_once __DIR__ . '/inc/payments_lib.php';
+require_once __DIR__ . '/inc/payment_import_lib.php';
 require_auth();
 
 $pdo = panel_ensure_pdo();
@@ -151,6 +152,81 @@ function payment_append_expense_filters(array &$where, array &$params, string $c
     }
 }
 
+function payment_filter_split_datetime(string $raw): array
+{
+    $raw = trim($raw);
+    if (preg_match('/^(\d{4}\/\d{1,2}\/\d{1,2})(?:\s+(\d{1,2}:\d{2}))?/', $raw, $m)) {
+        $time = $m[2] ?? '';
+        if ($time !== '' && preg_match('/^(\d{1,2}):(\d{2})$/', $time, $tm)) {
+            $time = sprintf('%02d:%02d', (int) $tm[1], (int) $tm[2]);
+        }
+        return ['date' => $m[1], 'time' => $time];
+    }
+    return ['date' => '', 'time' => ''];
+}
+
+function payment_filter_date_presets(): array
+{
+    $tz = tehran_timezone();
+    $todayStart = (new DateTimeImmutable('today', $tz))->setTime(0, 0, 0);
+    $todayEnd = $todayStart->setTime(23, 59, 0);
+    $yesterdayStart = $todayStart->modify('-1 day');
+    $yesterdayEnd = $yesterdayStart->setTime(23, 59, 0);
+
+    $dow = (int) $todayStart->format('w');
+    $daysFromSat = ($dow + 1) % 7;
+    $weekStart = $todayStart->modify('-' . $daysFromSat . ' days')->setTime(0, 0, 0);
+    $weekEnd = $weekStart->modify('+6 days')->setTime(23, 59, 0);
+
+    $parts = jalali_tehran_now_parts();
+    $thisMonth = jalali_month_range($parts['jy'], $parts['jm']);
+    [$prevY, $prevM] = jalali_add_months($parts['jy'], $parts['jm'], -1);
+    $lastMonth = jalali_month_range($prevY, $prevM);
+
+    $pack = static function (string $label, int $start, int $end): array {
+        return [
+            'label' => $label,
+            'from' => jalali_tehran_format($start, 'Y/m/d H:i', 'en'),
+            'to' => jalali_tehran_format($end, 'Y/m/d H:i', 'en'),
+        ];
+    };
+
+    $items = [
+        $pack('امروز', $todayStart->getTimestamp(), $todayEnd->getTimestamp()),
+        $pack('دیروز', $yesterdayStart->getTimestamp(), $yesterdayEnd->getTimestamp()),
+        $pack('هفته فعلی', $weekStart->getTimestamp(), $weekEnd->getTimestamp()),
+    ];
+    if ($thisMonth) {
+        $items[] = $pack('ماه فعلی', $thisMonth['start'], $thisMonth['end']);
+    }
+    if ($lastMonth) {
+        $items[] = $pack('ماه قبل', $lastMonth['start'], $lastMonth['end']);
+    }
+    return $items;
+}
+
+function payment_sum_report_price(PDO $pdo, array $where, array $params): int
+{
+    if (!$where) {
+        return 0;
+    }
+    $sql = 'WHERE ' . implode(' AND ', $where);
+    return (int) db_query(
+        $pdo,
+        "SELECT COALESCE(SUM(CAST(price AS DECIMAL(20,0))),0) FROM Payment_report $sql",
+        $params
+    )->fetchColumn();
+}
+
+function payment_system_method_in_clause(): array
+{
+    $methods = array_keys(panel_payment_system_method_map());
+    if (!$methods) {
+        return ['', []];
+    }
+    return [implode(',', array_fill(0, count($methods), '?')), $methods];
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check_post();
     $action = $_POST['action'] ?? '';
@@ -181,6 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $like = '%' . $q . '%';
         $prefix = $q . '%';
+        $rows = [];
         try {
             $rows = db_fetchAll(
                 $pdo,
@@ -219,6 +296,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
         }
         payment_json_exit(['ok' => true, 'users' => $users]);
+    }
+
+    if ($action === 'import_parse') {
+        $r = panel_payment_import_parse_file($pdo, $_FILES['file'] ?? null, $_POST['usd_rate'] ?? '');
+        payment_json_exit($r, !empty($r['ok']) ? 200 : 400);
+    }
+
+    if ($action === 'import_commit') {
+        $rows = json_decode((string) ($_POST['rows'] ?? ''), true);
+        if (!is_array($rows)) {
+            payment_json_exit(['ok' => false, 'msg' => 'داده پیش‌نمایش نامعتبر است.'], 400);
+        }
+        $r = panel_payment_import_commit($pdo, $rows);
+        payment_json_exit($r, !empty($r['ok']) ? 200 : 400);
     }
 
     if ($action === 'save_row') {
@@ -349,6 +440,20 @@ if ($fromFilter && $toFilter && $fromFilter['ts'] > $toFilter['ts']) {
 }
 $fromInput = $fromFilter['input'] ?? '';
 $toInput = $toFilter['input'] ?? '';
+$fromParts = payment_filter_split_datetime($fromInput);
+$toParts = payment_filter_split_datetime($toInput);
+$fromDate = $fromParts['date'];
+$fromTime = $fromParts['time'] !== '' ? $fromParts['time'] : '00:00';
+$toDate = $toParts['date'];
+$toTime = $toParts['time'] !== '' ? $toParts['time'] : '23:59';
+$priceBoundMax = 100000000;
+$priceFilterOn = $priceMin !== null || $priceMax !== null;
+$priceSliderMin = $priceMin !== null ? max(0, min($priceBoundMax, $priceMin)) : 0;
+$priceSliderMax = $priceMax !== null ? max(0, min($priceBoundMax, $priceMax)) : $priceBoundMax;
+if ($priceSliderMin > $priceSliderMax) {
+    [$priceSliderMin, $priceSliderMax] = [$priceSliderMax, $priceSliderMin];
+}
+$datePresets = payment_filter_date_presets();
 $method = trim((string) ($_GET['method'] ?? ''));
 $category = trim((string) ($_GET['category'] ?? ''));
 $kind = trim((string) ($_GET['kind'] ?? ''));
@@ -464,6 +569,8 @@ if ($userIds) {
 }
 
 $totalSuccess = 0;
+$totalTxnIncome = 0;
+$totalCapitalIncome = 0;
 $totalCosts = 0;
 $forecastIncome = 0;
 $todayCount = 0;
@@ -487,12 +594,18 @@ try {
     $successWhere = array_merge(["payment_Status = 'paid'"], $cardWhere);
     $successParams = $cardParams;
     payment_append_income_filters($successWhere, $successParams, $status, $tab === 'costs' ? '' : $method);
-    $successSQL = 'WHERE ' . implode(' AND ', $successWhere);
-    $totalSuccess = $hideIncomeCards ? 0 : (int) db_query(
-        $pdo,
-        "SELECT COALESCE(SUM(CAST(price AS DECIMAL(20,0))),0) FROM Payment_report $successSQL",
-        $successParams
-    )->fetchColumn();
+    if ($hideIncomeCards) {
+        $totalSuccess = $totalTxnIncome = $totalCapitalIncome = 0;
+    } else {
+        $totalSuccess = payment_sum_report_price($pdo, $successWhere, $successParams);
+        [$sysPlaceholders, $sysMethods] = payment_system_method_in_clause();
+        if ($sysPlaceholders !== '') {
+            $txnWhere = array_merge($successWhere, ["Payment_Method IN ($sysPlaceholders)"]);
+            $totalTxnIncome = payment_sum_report_price($pdo, $txnWhere, array_merge($successParams, $sysMethods));
+            $capitalWhere = array_merge($successWhere, ["(Payment_Method NOT IN ($sysPlaceholders) OR Payment_Method IS NULL OR Payment_Method = '')"]);
+            $totalCapitalIncome = payment_sum_report_price($pdo, $capitalWhere, array_merge($successParams, $sysMethods));
+        }
+    }
 
     $costWhere = array_merge(["payment_Status = 'cost'"], $cardWhere);
     $costParams = $cardParams;
@@ -540,6 +653,8 @@ $cardsFiltered = $search !== '' || $priceMin !== null || $priceMax !== null || $
     || $method !== '' || $category !== '' || $kind !== '' || $expenseStatus !== ''
     || ($tab !== 'costs' && $status !== '');
 $successMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'از ابتدای فعالیت';
+$txnMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'درگاه‌ها و متدهای پرداخت';
+$capitalMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'دسته‌های غیرتراکنش ثبت‌شده';
 $costMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'هزینه شده';
 $netMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'درآمد منهای هزینه';
 
@@ -564,27 +679,38 @@ try {
         if ($key === '') {
             continue;
         }
-        $methodOptions[$key] = panel_payment_method_label($key);
+        $methodOptions[$key] = panel_payment_method_label($key, $pdo);
     }
 } catch (Exception $e) {
 }
-if (!isset($methodOptions['manual invoice'])) {
-    $methodOptions['manual invoice'] = panel_payment_method_label('manual invoice');
+foreach (panel_income_category_map($pdo) as $key => $lbl) {
+    if (!isset($methodOptions[$key])) {
+        $methodOptions[$key] = $lbl;
+    }
 }
 if ($method !== '' && !isset($methodOptions[$method]) && $method !== 'cost') {
-    $methodOptions[$method] = panel_payment_method_label($method);
+    $methodOptions[$method] = panel_payment_method_label($method, $pdo);
 }
 asort($methodOptions, SORT_STRING);
 
-$sheetMethodOptions = panel_payment_method_map();
-unset($sheetMethodOptions['cost']);
+// Sheet picker: income categories first (editable in settings), then system gateways/methods.
+$sheetMethodOptions = panel_payment_income_method_options($pdo);
 foreach ($methodOptions as $k => $lbl) {
     if ($k === 'cost') {
         continue;
     }
-    $sheetMethodOptions[$k] = $lbl;
+    if (!isset($sheetMethodOptions[$k])) {
+        $sheetMethodOptions[$k] = $lbl;
+    }
 }
-asort($sheetMethodOptions, SORT_STRING);
+$pinnedMethods = [];
+foreach (array_keys(panel_income_category_map($pdo)) as $pinKey) {
+    if (isset($sheetMethodOptions[$pinKey])) {
+        $pinnedMethods[$pinKey] = $sheetMethodOptions[$pinKey];
+        unset($sheetMethodOptions[$pinKey]);
+    }
+}
+$sheetMethodOptions = $pinnedMethods + $sheetMethodOptions;
 $categoryOptions = panel_expense_category_map($pdo);
 if ($category !== '' && !isset($categoryOptions[$category])) {
     $categoryOptions[$category] = panel_expense_category_label($pdo, $category);
@@ -622,6 +748,11 @@ if ($tab !== 'pending') {
     }
 }
 $clearFiltersUrl = payment_redirect_url($tab, $search !== '' ? ['q' => $search] : []);
+$financialExportUrl = 'payment_export.php?' . http_build_query([
+    '_csrf' => csrf_token(),
+    'from' => $fromInput,
+    'to' => $toInput,
+], '', '&', PHP_QUERY_RFC3986);
 
 $pageTitle = 'مالی';
 $pageLede = 'گزارش پرداخت‌ها، فاکتور دستی، هزینه‌ها و درآمد خالص.';
@@ -631,8 +762,37 @@ include __DIR__ . '/inc/layout_head.php';
 <?php if ($tab !== 'pending'): ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
 <style>
-  .datepicker-plot-area { z-index: 3000 !important; }
-  #paymentFilterModal .modal { overflow: visible; }
+  .pay-stats { grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .pay-stats .stat { padding: 12px 14px; min-height: 0; gap: 4px; }
+  .pay-stats .stat-label { font-size: .68rem; letter-spacing: 0; text-transform: none; }
+  .pay-stats .stat-num { font-size: 1.25rem; }
+  .pay-stats .stat-num small { font-size: .68rem; }
+  .pay-stats .stat-meta { font-size: .68rem; }
+  @media (max-width: 1100px) {
+    .pay-stats { grid-template-columns: repeat(2, 1fr); }
+  }
+  #paymentFilterModal .modal {
+    display: flex;
+    flex-direction: column;
+    max-height: min(90vh, 100%);
+    overflow: hidden;
+  }
+  #paymentFilterModal .modal > form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+  #paymentFilterModal .modal-head,
+  #paymentFilterModal .modal-foot { flex-shrink: 0; }
+  #paymentFilterModal .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
   .pay-sheet-row td { vertical-align: middle; }
   .pay-sheet-row .pay-edit { display: none; width: 100%; min-width: 0; }
   .pay-sheet-row .pay-cell-input { height: 32px; padding: 0 8px; font-size: .8rem; }
@@ -667,6 +827,66 @@ include __DIR__ . '/inc/layout_head.php';
   .pay-time-now { flex-shrink: 0; font-size: .72rem; padding: 0 8px; height: 32px; }
   .pay-filter-group { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; border: 1px solid var(--bd); border-radius: 10px; background: var(--sf); }
   .pay-filter-group-title { grid-column: 1 / -1; font-size: .75rem; font-weight: 700; color: var(--mute); }
+  .pay-filter-group.is-disabled { opacity: .45; pointer-events: none; }
+  .pay-price-range { grid-column: 1 / -1; }
+  .pay-price-check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .pay-price-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .pay-price-range-wrap { margin-top: 10px; }
+  .pay-price-range-wrap.is-off { opacity: .55; }
+  .pay-price-range-labels { display: flex; justify-content: space-between; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--text-dim); direction: ltr; }
+  .pay-price-range-track { direction: ltr; position: relative; height: 32px; margin-top: 8px; }
+  .pay-price-range-rail { position: absolute; left: 0; right: 0; top: 50%; height: 6px; transform: translateY(-50%); background: var(--bd); border-radius: 99px; }
+  .pay-price-range-fill { position: absolute; top: 50%; height: 6px; transform: translateY(-50%); background: var(--accent); border-radius: 99px; pointer-events: none; }
+  .pay-price-range-track input[type="range"] {
+    position: absolute; inset: 0; width: 100%; height: 32px; margin: 0; background: transparent;
+    pointer-events: none; -webkit-appearance: none; -moz-appearance: none; appearance: none; accent-color: var(--accent);
+  }
+  .pay-price-range-track input[type="range"]::-webkit-slider-runnable-track { background: transparent; height: 6px; }
+  .pay-price-range-track input[type="range"]::-moz-range-track { background: transparent; height: 6px; border: 0; }
+  .pay-price-range-track input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); border: 2px solid #fff; box-shadow: 0 0 0 1px var(--bd);
+    pointer-events: auto; cursor: pointer;
+  }
+  .pay-price-range-track input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--accent);
+    border: 2px solid #fff; box-shadow: 0 0 0 1px var(--bd); pointer-events: auto; cursor: pointer;
+  }
+  .pay-date-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .pay-date-presets .btn { font-size: .75rem; }
+  .pay-dt-row { display: flex; gap: 8px; align-items: stretch; }
+  .pay-dt-date { position: relative; flex: 1; min-width: 0; }
+  .pay-filter-time { width: 128px; flex-shrink: 0; direction: ltr; }
+  .pay-btn-export {
+    color: #c05621;
+    border-color: color-mix(in srgb, #c05621 50%, var(--bd));
+    background: color-mix(in srgb, #c05621 12%, transparent);
+  }
+  .pay-btn-export:hover { background: color-mix(in srgb, #c05621 20%, transparent); }
+  .pay-btn-import {
+    color: #2f855a;
+    border-color: color-mix(in srgb, #2f855a 50%, var(--bd));
+    background: color-mix(in srgb, #2f855a 12%, transparent);
+  }
+  .pay-btn-import:hover { background: color-mix(in srgb, #2f855a 20%, transparent); }
+  #paymentImportModal .modal { width: min(1100px, 96vw); max-width: 1100px; overflow: visible; }
+  .pay-import-drop {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    padding: 28px 16px; border: 1px dashed var(--bd); border-radius: 12px; background: var(--sf); cursor: pointer;
+  }
+  .pay-import-drop strong { font-size: .9rem; }
+  .pay-import-drop span { font-size: .78rem; color: var(--mute); }
+  .pay-import-file-name { margin-top: 10px; font-size: .8rem; color: var(--text-dim); }
+  .pay-import-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .pay-import-table-wrap { max-height: min(58vh, 560px); overflow: auto; border: 1px solid var(--bd); border-radius: 10px; }
+  .pay-import-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  .pay-import-table th, .pay-import-table td { padding: 6px 8px; border-bottom: 1px solid var(--bd); vertical-align: middle; }
+  .pay-import-table th { position: sticky; top: 0; background: var(--sf); z-index: 1; font-size: .72rem; color: var(--mute); }
+  .pay-import-table .input, .pay-import-table .select { height: 32px; padding: 0 8px; font-size: .78rem; width: 100%; }
+  .pay-import-row-warn { background: color-mix(in srgb, #c05621 10%, transparent); }
+  .pay-import-cat-missing { color: #c05621; font-weight: 700; }
+  .pay-import-hint { font-size: .75rem; color: var(--mute); line-height: 1.6; }
+  .pay-import-error { color: #c53030; font-size: .8rem; margin-top: 8px; }
 </style>
 <?php endif; ?>
 
@@ -683,31 +903,41 @@ include __DIR__ . '/inc/layout_head.php';
     <a href="payment.php?tab=costs" class="btn btn-sm <?= $tab === 'costs' ? 'btn-primary' : 'btn-ghost' ?>">هزینه‌ها</a>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <a href="settings.php?tab=finance" class="btn btn-ghost btn-sm"><?= icon('wallet', 14) ?> دسته‌های هزینه</a>
+    <a href="settings.php?tab=finance" class="btn btn-ghost btn-sm"><?= icon('wallet', 14) ?> دسته‌های مالی</a>
     <a href="payment_methods.php" class="btn btn-ghost btn-sm"><?= icon('settings', 14) ?> درگاه‌های پرداخت</a>
   </div>
 </div>
 
 <?php if ($tab !== 'pending'): ?>
-<div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+<div class="stats pay-stats">
   <div class="stat success">
-    <div class="stat-label">جمع تراکنش‌های موفق</div>
-    <div class="stat-num"><?= number_format($totalSuccess) ?><small>تومان</small></div>
+    <div class="stat-label">جمع درآمد کل</div>
+    <div class="stat-num"><?= number_format($totalSuccess) ?><small>USD</small></div>
     <div class="stat-meta"><?= $successMeta ?></div>
   </div>
   <div class="stat">
-    <div class="stat-label">درآمد پیش‌بینی‌شده ماهانه</div>
-    <div class="stat-num"><?= number_format($forecastIncome) ?><small>تومان</small></div>
+    <div class="stat-label">جمع کل تراکنش‌ها</div>
+    <div class="stat-num"><?= number_format($totalTxnIncome) ?><small>USD</small></div>
+    <div class="stat-meta"><?= $txnMeta ?></div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">جمع سرمایه ورودی</div>
+    <div class="stat-num"><?= number_format($totalCapitalIncome) ?><small>USD</small></div>
+    <div class="stat-meta"><?= $capitalMeta ?></div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">تراکنش‌های پیش‌بینی‌شده ماهانه</div>
+    <div class="stat-num"><?= number_format($forecastIncome) ?><small>USD</small></div>
     <div class="stat-meta">بر اساس ۲۸ روز اخیر</div>
   </div>
   <div class="stat warn">
     <div class="stat-label">جمع هزینه‌ها</div>
-    <div class="stat-num"><?= number_format($totalCosts) ?><small>تومان</small></div>
+    <div class="stat-num"><?= number_format($totalCosts) ?><small>USD</small></div>
     <div class="stat-meta"><?= $costMeta ?></div>
   </div>
   <div class="stat <?= $netIncome >= 0 ? 'ok' : 'no' ?>">
     <div class="stat-label">درآمد خالص</div>
-    <div class="stat-num"><?= number_format($netIncome) ?><small>تومان</small></div>
+    <div class="stat-num"><?= number_format($netIncome) ?><small>USD</small></div>
     <div class="stat-meta"><?= $netMeta ?></div>
   </div>
   <div class="stat">
@@ -748,6 +978,12 @@ include __DIR__ . '/inc/layout_head.php';
     <?php elseif ($tab !== 'pending'): ?>
     <div class="toolbar-end pay-toolbar">
       <div class="pay-toolbar-actions">
+        <button type="button" class="btn btn-ghost btn-sm pay-btn-import" id="payImportOpenBtn">
+          <?= icon('arrow-up', 14) ?> ورود دیتا با اکسل
+        </button>
+        <a href="<?= htmlspecialchars($financialExportUrl, ENT_QUOTES) ?>" class="btn btn-ghost btn-sm pay-btn-export">
+          <?= icon('arrow-down', 14) ?> خروجی اکسل مالی
+        </a>
         <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('paymentFilterModal')">
           <?= icon('filter', 14) ?> فیلترها
           <?php if ($activeFilterCount > 0): ?>
@@ -833,7 +1069,7 @@ include __DIR__ . '/inc/layout_head.php';
             $st = $p['payment_Status'] ?? '';
             [$cls, $lbl] = $statusMap[$st] ?? ['tag-plain', $st ?: '—'];
             $methodKey = (string) ($p['Payment_Method'] ?? '');
-            $methodLabel = panel_payment_method_label($methodKey);
+            $methodLabel = panel_payment_method_label($methodKey, $pdo);
             $categoryKey = panel_expense_resolve_slug($pdo, (string) ($p['expense_category'] ?? ''));
             $categoryLabel = panel_expense_category_label($pdo, $categoryKey);
             $oid = (string) ($p['id_order'] ?? '');
@@ -865,7 +1101,7 @@ include __DIR__ . '/inc/layout_head.php';
                 <?= htmlspecialchars(trunc((string) $oid, 22)) ?>
               </td>
               <td class="cell-strong cell-num"><?= number_format($price) ?> <span
-                  style="color:var(--text-dim);font-weight:400;font-size:.72rem">ت</span></td>
+                  style="color:var(--text-dim);font-weight:400;font-size:.72rem">USD</span></td>
               <td style="font-size:.8rem"><?= htmlspecialchars($methodLabel) ?></td>
               <td style="font-size:.78rem;max-width:180px" title="<?= htmlspecialchars($note) ?>">
                 <?= $note !== '' ? htmlspecialchars(trunc($note, 40)) : '<span style="color:var(--text-dim)">—</span>' ?>
@@ -919,7 +1155,7 @@ include __DIR__ . '/inc/layout_head.php';
               <td class="cell-mono pay-oid"><?= htmlspecialchars($oid) ?></td>
               <td>
                 <span class="pay-view cell-strong cell-num pay-price-view"><?= number_format($price) ?> <span
-                    style="color:var(--text-dim);font-weight:400;font-size:.72rem">ت</span></span>
+                    style="color:var(--text-dim);font-weight:400;font-size:.72rem">USD</span></span>
                 <input class="input pay-edit pay-cell-input pay-price-input" type="text" inputmode="numeric"
                   dir="ltr" autocomplete="off" placeholder="0"
                   value="<?= htmlspecialchars($price > 0 ? number_format($price) : '') ?>">
@@ -1090,17 +1326,17 @@ function openRejectModal(orderId) {
           <?php if ($tab === 'list'): ?>
           <div class="field" style="grid-column:1/-1">
             <label class="lbl">نوع تراکنش</label>
-            <select name="kind" class="select" style="width:100%">
+            <select name="kind" id="payFilterKind" class="select" style="width:100%">
               <option value="" <?= $kind === '' ? 'selected' : '' ?>>همه (درآمد و هزینه)</option>
               <option value="income" <?= $kind === 'income' ? 'selected' : '' ?>>فقط درآمد</option>
               <option value="expense" <?= $kind === 'expense' ? 'selected' : '' ?>>فقط هزینه</option>
             </select>
           </div>
-          <div class="pay-filter-group">
+          <div class="pay-filter-group<?= $kind === 'expense' ? ' is-disabled' : '' ?>" id="payFilterIncomeGroup">
             <div class="pay-filter-group-title">درآمد</div>
             <div class="field">
               <label class="lbl">وضعیت درآمد</label>
-              <select name="status" class="select" style="width:100%">
+              <select name="status" class="select" style="width:100%"<?= $kind === 'expense' ? ' disabled' : '' ?>>
                 <option value="">همه وضعیت‌ها</option>
                 <?php foreach ($filterStatusMap as $k => [$_, $lbl]): ?>
                   <option value="<?= htmlspecialchars($k) ?>" <?= $status === $k ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
@@ -1109,7 +1345,7 @@ function openRejectModal(orderId) {
             </div>
             <div class="field">
               <label class="lbl">روش پرداخت</label>
-              <select name="method" class="select" style="width:100%">
+              <select name="method" class="select" style="width:100%"<?= $kind === 'expense' ? ' disabled' : '' ?>>
                 <option value="">همه روش‌ها</option>
                 <?php foreach ($methodOptions as $k => $lbl): ?>
                   <option value="<?= htmlspecialchars($k) ?>" <?= $method === $k ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
@@ -1117,18 +1353,18 @@ function openRejectModal(orderId) {
               </select>
             </div>
           </div>
-          <div class="pay-filter-group">
+          <div class="pay-filter-group<?= $kind === 'income' ? ' is-disabled' : '' ?>" id="payFilterExpenseGroup">
             <div class="pay-filter-group-title">هزینه</div>
             <div class="field">
               <label class="lbl">وضعیت هزینه</label>
-              <select name="expense_status" class="select" style="width:100%">
+              <select name="expense_status" class="select" style="width:100%"<?= $kind === 'income' ? ' disabled' : '' ?>>
                 <option value="">همه وضعیت‌ها</option>
                 <option value="cost" <?= $expenseStatus === 'cost' ? 'selected' : '' ?>><?= htmlspecialchars($statusMap['cost'][1] ?? 'هزینه شده') ?></option>
               </select>
             </div>
             <div class="field">
               <label class="lbl">دسته هزینه</label>
-              <select name="category" class="select" style="width:100%">
+              <select name="category" class="select" style="width:100%"<?= $kind === 'income' ? ' disabled' : '' ?>>
                 <option value="">همه دسته‌ها</option>
                 <?php foreach ($categoryOptions as $k => $lbl): ?>
                   <option value="<?= htmlspecialchars($k) ?>" <?= $category === $k ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
@@ -1166,33 +1402,67 @@ function openRejectModal(orderId) {
             </select>
           </div>
           <?php endif; ?>
-          <div class="field">
-            <label class="lbl">حداقل مبلغ</label>
-            <input type="number" name="price_min" class="input" min="0" step="1" placeholder="تومان"
-              value="<?= $priceMin !== null ? (int) $priceMin : '' ?>">
+          <div class="field pay-price-range">
+            <label class="lbl pay-price-check">
+              <input type="checkbox" id="payPriceFilterOn" <?= $priceFilterOn ? 'checked' : '' ?>>
+              اعمال فیلتر مبلغ
+            </label>
+            <div class="pay-price-range-wrap<?= $priceFilterOn ? '' : ' is-off' ?>" id="payPriceRangeWrap">
+              <div class="pay-price-range-labels">
+                <span id="payPriceMinLabel"><?= number_format($priceSliderMin) ?></span>
+                <span id="payPriceMaxLabel"><?= number_format($priceSliderMax) ?></span>
+              </div>
+              <div class="pay-price-range-track">
+                <div class="pay-price-range-rail"></div>
+                <div class="pay-price-range-fill" id="payPriceFill" style="left:<?= $priceBoundMax > 0 ? (int) round(($priceSliderMin / $priceBoundMax) * 100) : 0 ?>%;width:<?= $priceBoundMax > 0 ? (int) round((($priceSliderMax - $priceSliderMin) / $priceBoundMax) * 100) : 0 ?>%"></div>
+                <input type="range" id="payPriceMinRange" min="0" max="<?= (int) $priceBoundMax ?>" step="1"
+                  value="<?= (int) $priceSliderMin ?>" aria-label="حداقل مبلغ">
+                <input type="range" id="payPriceMaxRange" min="0" max="<?= (int) $priceBoundMax ?>" step="1"
+                  value="<?= (int) $priceSliderMax ?>" aria-label="حداکثر مبلغ">
+              </div>
+            </div>
+            <input type="hidden" name="price_min" id="payPriceMinHidden" value="<?= $priceFilterOn ? (int) $priceSliderMin : '' ?>">
+            <input type="hidden" name="price_max" id="payPriceMaxHidden" value="<?= $priceFilterOn ? (int) $priceSliderMax : '' ?>">
           </div>
-          <div class="field">
-            <label class="lbl">حداکثر مبلغ</label>
-            <input type="number" name="price_max" class="input" min="0" step="1" placeholder="تومان"
-              value="<?= $priceMax !== null ? (int) $priceMax : '' ?>">
-          </div>
-          <div class="field">
-            <label class="lbl">از تاریخ و ساعت</label>
-            <div style="position:relative">
-              <input class="input jalali-datetime-picker" style="padding-left:30px" type="text" name="from"
-                placeholder="انتخاب تاریخ و ساعت" value="<?= htmlspecialchars($fromInput) ?>"
-                aria-label="تاریخ و ساعت شروع شمسی به وقت تهران" autocomplete="off" readonly>
-              <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none">🗓</span>
+          <div class="field" style="grid-column:1/-1">
+            <label class="lbl">بازه تاریخ</label>
+            <div class="pay-date-presets">
+              <?php foreach ($datePresets as $preset): ?>
+                <button type="button" class="btn btn-sm btn-ghost pay-date-preset"
+                  data-from="<?= htmlspecialchars($preset['from']) ?>"
+                  data-to="<?= htmlspecialchars($preset['to']) ?>">
+                  <?= htmlspecialchars($preset['label']) ?>
+                </button>
+              <?php endforeach; ?>
             </div>
           </div>
-          <div class="field">
-            <label class="lbl">تا تاریخ و ساعت</label>
-            <div style="position:relative">
-              <input class="input jalali-datetime-picker" style="padding-left:30px" type="text" name="to"
-                placeholder="انتخاب تاریخ و ساعت" value="<?= htmlspecialchars($toInput) ?>"
-                aria-label="تاریخ و ساعت پایان شمسی به وقت تهران" autocomplete="off" readonly>
-              <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none">🗓</span>
+          <div class="field" style="grid-column:1/-1">
+            <label class="lbl">از تاریخ</label>
+            <div class="pay-dt-row">
+              <div class="pay-dt-date">
+                <input class="input jalali-date-picker" id="payFilterFromDate" style="padding-left:30px" type="text"
+                  placeholder="انتخاب تاریخ" value="<?= htmlspecialchars($fromDate) ?>"
+                  aria-label="تاریخ شروع شمسی به وقت تهران" autocomplete="off" readonly>
+                <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none">🗓</span>
+              </div>
+              <input type="time" class="input pay-filter-time" id="payFilterFromTime" value="<?= htmlspecialchars($fromTime) ?>"
+                step="60" aria-label="ساعت شروع">
             </div>
+            <input type="hidden" name="from" id="payFilterFrom" value="<?= htmlspecialchars($fromInput) ?>">
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <label class="lbl">تا تاریخ</label>
+            <div class="pay-dt-row">
+              <div class="pay-dt-date">
+                <input class="input jalali-date-picker" id="payFilterToDate" style="padding-left:30px" type="text"
+                  placeholder="انتخاب تاریخ" value="<?= htmlspecialchars($toDate) ?>"
+                  aria-label="تاریخ پایان شمسی به وقت تهران" autocomplete="off" readonly>
+                <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none">🗓</span>
+              </div>
+              <input type="time" class="input pay-filter-time" id="payFilterToTime" value="<?= htmlspecialchars($toTime) ?>"
+                step="60" aria-label="ساعت پایان">
+            </div>
+            <input type="hidden" name="to" id="payFilterTo" value="<?= htmlspecialchars($toInput) ?>">
           </div>
         </div>
       </div>
@@ -1202,6 +1472,58 @@ function openRejectModal(orderId) {
         <button type="button" class="btn btn-ghost" onclick="closeModal('paymentFilterModal')">انصراف</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="modal-veil" id="paymentImportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="payImportTitle">ورود دیتا با اکسل</h3>
+      <button type="button" class="modal-x" onclick="closeModal('paymentImportModal')"><?= icon('close', 14) ?></button>
+    </div>
+    <div class="modal-body">
+      <div id="payImportStepFile">
+        <label class="pay-import-drop" for="payImportFile">
+          <?= icon('arrow-up', 20) ?>
+          <strong>انتخاب فایل CSV یا XLSX</strong>
+          <span>حداکثر ۵ مگابایت — ستون‌ها مطابق نمونه مالی</span>
+        </label>
+        <input type="file" id="payImportFile" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+        <div class="pay-import-file-name" id="payImportFileName"></div>
+      </div>
+      <div id="payImportStepRate" hidden>
+        <p class="pay-import-hint">نرخ تبدیل برای سطرهایی که واحد آن‌ها تومان است استفاده می‌شود. اگر فایل فقط دلار (USD) دارد می‌توانید این فیلد را خالی بگذارید.</p>
+        <div class="field" style="margin-top:12px">
+          <label class="lbl">هر ۱ دلار چند تومان؟</label>
+          <input type="number" class="input" id="payImportUsdRate" min="1" step="1" placeholder="مثلاً 100000">
+        </div>
+      </div>
+      <div id="payImportStepPreview" hidden>
+        <div class="pay-import-stats" id="payImportStats"></div>
+        <p class="pay-import-hint">مبالغ به دلار (USD) تبدیل شده‌اند. قبل از ورود به دیتابیس همه فیلدها را بررسی و در صورت نیاز ویرایش کنید. سطرهای بدون دسته باید دستی انتخاب شوند.</p>
+        <div class="pay-import-table-wrap" style="margin-top:10px">
+          <table class="pay-import-table">
+            <thead>
+              <tr>
+                <th style="width:42px">#</th>
+                <th style="width:110px">نوع</th>
+                <th style="width:170px">تاریخ</th>
+                <th style="width:140px">مبلغ (USD)</th>
+                <th>یادداشت</th>
+                <th style="width:180px">دسته‌بندی</th>
+              </tr>
+            </thead>
+            <tbody id="payImportPreviewBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="pay-import-error" id="payImportError" hidden></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" id="payImportBackBtn" hidden>بازگشت</button>
+      <button type="button" class="btn btn-primary" id="payImportNextBtn" disabled>ادامه</button>
+      <button type="button" class="btn btn-ghost" onclick="closeModal('paymentImportModal')">انصراف</button>
+    </div>
   </div>
 </div>
 <?php endif; ?>
@@ -1228,14 +1550,21 @@ window.PAYMENT_SHEET = <?= json_encode([
     'methodOptions' => $sheetMethodOptions,
     'categoryOptions' => $categoryOptions,
     'defaultCategory' => panel_expense_default_slug(),
+    'defaultMethod' => panel_income_default_slug(),
     'icons' => [
         'edit' => icon('edit', 14),
         'save' => icon('check', 14),
         'trash' => icon('trash', 14),
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+window.PAYMENT_IMPORT = <?= json_encode([
+    'csrf' => csrf_token(),
+    'tab' => $tab,
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 </script>
 <script src="<?= htmlspecialchars(panel_asset('js/payment_sheet.js')) ?>"></script>
+<script src="<?= htmlspecialchars(panel_asset('js/payment_filter.js')) ?>"></script>
+<script src="<?= htmlspecialchars(panel_asset('js/payment_import.js')) ?>"></script>
 <?php endif; ?>
 
 <?php include __DIR__ . '/inc/layout_foot.php'; ?>

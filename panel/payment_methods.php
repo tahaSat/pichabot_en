@@ -66,11 +66,11 @@ include __DIR__ . '/inc/layout_head.php';
     <input type="hidden" name="action" value="save_global">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:480px">
       <div class="field">
-        <label>حداقل (تومان)</label>
+        <label>حداقل (USD)</label>
         <input type="number" name="minbalance" class="input" value="<?= htmlspecialchars($minBalance) ?>" min="0">
       </div>
       <div class="field">
-        <label>حداکثر (تومان)</label>
+        <label>حداکثر (USD)</label>
         <input type="number" name="maxbalance" class="input" value="<?= htmlspecialchars($maxBalance) ?>" min="0">
       </div>
     </div>
