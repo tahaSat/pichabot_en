@@ -6807,23 +6807,18 @@ Use the button below to pay👇🏻";
         $message_id = sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
         updatePaymentMessageId($message_id, $randomString);
     } elseif ($datain == "startelegrams") {
-        $rates = rate_arze(['USD', 'Ton']);
-        if ($rates === null) {
-            sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
-            step('home', $from_id);
-            return;
-        }
-        $usd = $rates['USD'];
-        $ton = $rates['Ton'];
-        $usdprice = round($user['Processing_value'] / $usd, 2);
-        $starAmount = $usd * 0.016;
-        $starAmount = intval($user['Processing_value'] / $starAmount);
+        $priceUsd = money_amount($user['Processing_value']);
+        // XTR invoices require a positive integer. 1 star ≈ $0.016 (same rate as the old toman formula).
+        $starAmount = (int) round($priceUsd / 0.016);
         $mainbalance = select("PaySetting", "ValuePay", "NamePay", "minbalancestar", "select")['ValuePay'];
         $maxbalance = select("PaySetting", "ValuePay", "NamePay", "maxbalancestar", "select")['ValuePay'];
-        if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
-            $mainbalance = number_format($mainbalance);
-            $maxbalance = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is \$mainbalance and maximum is \$maxbalance", null, 'HTML');
+        if ($priceUsd < money_amount($mainbalance) || $priceUsd > money_amount($maxbalance)) {
+            sendmessage($from_id, "❌ Minimum for this method is " . format_money_display($mainbalance) . " and maximum is " . format_money_display($maxbalance), null, 'HTML');
+            return;
+        }
+        if ($starAmount < 1) {
+            sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
+            step('home', $from_id);
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6838,7 +6833,7 @@ Use the button below to pay👇🏻";
         $stmt->execute();
         $affilnecurrency = select("PaySetting", "*", "NamePay", "walletaddress", "select")['ValuePay'];
         $straCreateLink = telegram('createInvoiceLink', [
-            'title' => "Buy for Price {$user['Processing_value']}",
+            'title' => "Buy for Price " . format_money_display($priceUsd),
             'description' => "Buy price",
             'payload' => $randomString,
             'currency' => "XTR",
@@ -6877,13 +6872,13 @@ Use the button below to pay👇🏻";
                 ]
             ]
         ]);
-        $formatprice = number_format($user['Processing_value'], 0);
+        $formatprice = format_money_display($priceUsd);
         $textstar = "✅ Your transaction was created
 
 🛒 Tracking code: <code>$randomString</code>
-💲 Transaction amount: $starAmount ⭐ (equal to \$formatprice)
+💲 Transaction amount: $starAmount ⭐ (equal to $formatprice)
 
-📌 Please send \$formatprice as Telegram Stars.
+📌 Please send $formatprice as Telegram Stars.
 
 💢 Important notes before paying: 👇
 🔹 Each transaction is valid for 1 day; do not pay after it expires.
@@ -8296,8 +8291,8 @@ if (isset($update['message']['successful_payment'])) {
     $pricecashback = select("PaySetting", "ValuePay", "NamePay", "chashbackstar", "select")['ValuePay'];
     $Balance_id = select("user", "*", "id", $Payment_report['id_user'], "select");
     if ($pricecashback != "0") {
-        $result = ($Payment_report['price'] * $pricecashback) / 100;
-        $Balance_confrim = intval($Balance_id['Balance']) + $result;
+        $result = money_amount(($Payment_report['price'] * $pricecashback) / 100);
+        $Balance_confrim = money_amount($Balance_id['Balance']) + $result;
         update("user", "Balance", $Balance_confrim, "id", $Balance_id['id']);
         $text_report = sprintf($textbotlang['users']['Discount']['gift-deposit'], $result);
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
