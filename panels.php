@@ -14,6 +14,14 @@ require_once __DIR__ . '/mikrotik.php';
 class ManagePanel
 {
     public $pdo, $domainhosts, $name_panel;
+    private function unsuccessfulCreateUser($msg): array
+    {
+        return [
+            'status' => 'Unsuccessful',
+            'msg' => $msg,
+            'username' => null,
+        ];
+    }
     private function logCreateUserFailure(array $panel, string $username, string $codeProduct, array $dataConfig, $reason): void
     {
         $line = sprintf(
@@ -30,13 +38,14 @@ class ManagePanel
     }
     function createUser($name_panel, $code_product, $usernameC, array $Data_Config)
     {
-        $Output = [];
+        $Output = [
+            'status' => 'Unsuccessful',
+            'msg' => '',
+            'username' => null,
+        ];
         global $pdo, $domainhosts;
-        if (strlen($usernameC) < 3) {
-            return array(
-                "status" => "Unsuccessful",
-                "msg" => "Username must be at least 3 characters long."
-            );
+        if (strlen((string) $usernameC) < 3) {
+            return $this->unsuccessfulCreateUser("Username must be at least 3 characters long.");
         }
         // input time expire timestep use $Data_Config
         // input data_limit byte use $Data_Config
@@ -61,31 +70,30 @@ class ManagePanel
             $stmt->bindParam(':code_product', $code_product);
             $stmt->execute();
             $Get_Data_Product = $stmt->fetch(PDO::FETCH_ASSOC);
-        } else {
-            if ($code_product == "usertest") {
-                $Get_Data_Product['name_product'] = "usertest";
-            } else {
-                $Get_Data_Product['name_product'] = false;
+            if (!is_array($Get_Data_Product)) {
+                $Get_Data_Product = [];
             }
-            $Get_Data_Product['data_limit_reset'] = "no_reset";
+        } else {
+            $Get_Data_Product = [
+                'name_product' => $code_product == "usertest" ? "usertest" : false,
+                'data_limit_reset' => "no_reset",
+                'inbounds' => null,
+            ];
         }
-        $expire = $Data_Config['expire'];
-        $data_limit = $Data_Config['data_limit'];
-        $note = "{$Data_Config['from_id']} | {$Data_Config['username']} | {$Data_Config['type']}";
+        $expire = $Data_Config['expire'] ?? 0;
+        $data_limit = $Data_Config['data_limit'] ?? 0;
+        $noteFromId = $Data_Config['from_id'] ?? '';
+        $noteUsername = $Data_Config['username'] ?? '';
+        $noteType = $Data_Config['type'] ?? '';
+        $note = "{$noteFromId} | {$noteUsername} | {$noteType}";
         if ($Get_Data_Panel['type'] == "marzban") {
             //create user
             $ConnectToPanel = adduser($Get_Data_Panel['name_panel'], $data_limit, $usernameC, $expire, $note, $Get_Data_Product['data_limit_reset'], $Get_Data_Product['name_product']);
             if (!empty($ConnectToPanel['status']) && $ConnectToPanel['status'] == 500) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $ConnectToPanel['status']
-                );
+                return $this->unsuccessfulCreateUser($ConnectToPanel['status']);
             }
             if (!empty($ConnectToPanel['error'])) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $ConnectToPanel['error']
-                );
+                return $this->unsuccessfulCreateUser($ConnectToPanel['error']);
             }
             $data_Output = json_decode($ConnectToPanel['body'], true);
             if (!empty($data_Output['detail']) && $data_Output['detail']) {
@@ -118,16 +126,10 @@ class ManagePanel
             //create user
             $ConnectToPanel = adduserm($Get_Data_Panel['name_panel'], $data_limit, $usernameC, $expire, $Get_Data_Product['name_product'], $note, $Get_Data_Product['data_limit_reset']);
             if (!empty($ConnectToPanel['status']) && $ConnectToPanel['status'] == 500) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $ConnectToPanel['status']
-                );
+                return $this->unsuccessfulCreateUser($ConnectToPanel['status']);
             }
             if (!empty($ConnectToPanel['error'])) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $ConnectToPanel['error']
-                );
+                return $this->unsuccessfulCreateUser($ConnectToPanel['error']);
             }
             $data_Output = json_decode($ConnectToPanel['body'], true);
             if (isset($data_Output['detail']) && $data_Output['detail']) {
@@ -165,15 +167,9 @@ class ManagePanel
             }
             $data_Output = addClient($Get_Data_Panel['name_panel'], $usernameC, $expire, $data_limit, generateUUID(), "", $subId, $inbounds, $Get_Data_Product['name_product'], $note);
             if (!empty($data_Output['error'])) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $data_Output['error']
-                );
+                return $this->unsuccessfulCreateUser($data_Output['error']);
             } elseif (!empty($data_Output['status']) && $data_Output['status'] != 200) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $data_Output['status']
-                );
+                return $this->unsuccessfulCreateUser($data_Output['status']);
             } else {
                 $data_Output = json_decode($data_Output['body'], true);
                 if (!$data_Output['success']) {
@@ -204,15 +200,9 @@ class ManagePanel
             }
             $data_Output = addClientalireza_singel($Get_Data_Panel['name_panel'], $usernameC, $Expireac, $data_limit, generateUUID(), "", $subId, $inbounds);
             if (!empty($data_Output['error'])) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $data_Output['error']
-                );
+                return $this->unsuccessfulCreateUser($data_Output['error']);
             } elseif (!empty($data_Output['status']) && $data_Output['status'] != 200) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $data_Output['status']
-                );
+                return $this->unsuccessfulCreateUser($data_Output['status']);
             } else {
                 $data_Output = json_decode($data_Output['body'], true);
                 if (!$data_Output['success']) {
@@ -248,15 +238,9 @@ class ManagePanel
             );
             $data_Output = adduserhi($Get_Data_Panel['name_panel'], $data);
             if (!empty($data_Output['error'])) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $data_Output['error']
-                );
+                return $this->unsuccessfulCreateUser($data_Output['error']);
             } elseif (!empty($data_Output['status']) && $data_Output['status'] != 200) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $data_Output['status']
-                );
+                return $this->unsuccessfulCreateUser($data_Output['status']);
             }
             $data_Output = json_decode($data_Output['body'], true);
             if (isset($data_Output['message']) && $data_Output['message']) {
@@ -285,16 +269,10 @@ class ManagePanel
             $data_limit = round($data_limit / (1024 * 1024 * 1024), 2);
             $data_Output = addpear($Get_Data_Panel['name_panel'], $usernameC);
             if (!empty($data_Output['status']) && $data_Output['status'] != 200) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $data_Output['status']
-                );
+                return $this->unsuccessfulCreateUser($data_Output['status']);
             }
             if (!empty($data_Output['error'])) {
-                return array(
-                    'status' => 'Unsuccessful',
-                    'msg' => $data_Output['error']
-                );
+                return $this->unsuccessfulCreateUser($data_Output['error']);
             }
             $data_Output = $data_Output['body'];
             $response = json_decode($data_Output['response'], true);
@@ -311,16 +289,10 @@ class ManagePanel
             } else {
                 $download_config = downloadconfig($Get_Data_Panel['name_panel'], $data_Output['public_key']);
                 if (!empty($download_config['status']) && $download_config['status'] != 200) {
-                    return array(
-                        'status' => 'Unsuccessful',
-                        'msg' => $download_config['status']
-                    );
+                    return $this->unsuccessfulCreateUser($download_config['status']);
                 }
                 if (!empty($download_config['error'])) {
-                    return array(
-                        'status' => 'Unsuccessful',
-                        'msg' => $download_config['error']
-                    );
+                    return $this->unsuccessfulCreateUser($download_config['error']);
                 }
                 $download_config = json_decode($download_config['body'], true)['data'];
                 $Output['status'] = 'successful';
@@ -329,7 +301,7 @@ class ManagePanel
                 $Output['configs'] = [];
             }
         } elseif ($Get_Data_Panel['type'] == "s_ui") {
-            if ($Get_Data_Product['inbounds'] != null) {
+            if (!empty($Get_Data_Product['inbounds'])) {
                 $Get_Data_Panel['inbounds'] = $Get_Data_Product['inbounds'];
             }
             $data_Output = addClientS_ui($Get_Data_Panel['name_panel'], $usernameC, $expire, $data_limit, json_decode($Get_Data_Panel['proxies']), $note);
@@ -348,7 +320,7 @@ class ManagePanel
         } elseif ($Get_Data_Panel['type'] == "ibsng") {
             $password = bin2hex(random_bytes(6));
             $name_group = $Get_Data_Panel['proxies'];
-            if ($Get_Data_Product['inbounds'] != null) {
+            if (!empty($Get_Data_Product['inbounds'])) {
                 $name_group = $Get_Data_Panel['inbounds'];
             } elseif ($code_product == "usertest") {
                 $name_group = "usertest";
@@ -366,7 +338,7 @@ class ManagePanel
         } elseif ($Get_Data_Panel['type'] == "mikrotik") {
             $password = bin2hex(random_bytes(6));
             $name_group = $Get_Data_Panel['proxies'];
-            if ($Get_Data_Product['inbounds'] != null) {
+            if (!empty($Get_Data_Product['inbounds'])) {
                 $name_group = $Get_Data_Product['inbounds'];
             } elseif ($code_product == "usertest") {
                 $name_group = "usertest";

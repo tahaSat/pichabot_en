@@ -3342,19 +3342,22 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         }
     }
     $marzban_list_get = select("marzban_panel", "*", "code_panel", $location, "select");
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+    if (!is_array($marzban_list_get)) {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
+        return;
+    }
+    $name_panel = $location;
+    if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
         if ($user['step'] != "createusertest") {
             step('createusertest', $from_id);
             update("user", "Processing_value_one", $location, "id", $from_id);
             sendmessage($from_id, textbot_get('text_select_username', $textbotlang['users']['selectusername']), $backuser, 'html');
             return;
         }
-    } else {
-        $name_panel = $location;
     }
     if ($user['step'] == "createusertest") {
         $name_panel = $user['Processing_value_one'];
-        if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
+        if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', (string) $text)) {
             sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser, 'HTML');
             return;
         }
@@ -3379,21 +3382,25 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         update("user", "time_usertest", time(), "id", $from_id);
     }
     $randomString = bin2hex(random_bytes(4));
-    $text = strtolower($text);
     $marzban_list_get = select("marzban_panel", "*", "code_panel", $name_panel, "select");
-    $text = strtolower($text);
-    $username_ac = generateUsername($from_id, $marzban_list_get['MethodUsername'], $user['username'], $randomString, $text, panel_username_prefix($marzban_list_get, true), $user['namecustom']);
-    $username_ac = strtolower($username_ac);
-    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $username_ac);
-    $random_number = rand(1000000, 9999999);
-    if (isset($DataUserOut['username']) || rowExists('invoice', 'username', $username_ac)) {
-        $username_ac = $random_number . "_" . $username_ac;
+    if (!is_array($marzban_list_get)) {
+        update("user", "limit_usertest", $userlimit['limit_usertest'], "id", $from_id);
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], $keyboard, 'HTML');
+        return;
     }
+    $customText = $user['step'] == "createusertest" ? strtolower((string) $text) : '';
+    $allocated = allocate_service_username($marzban_list_get, $user, $customText, $ManagePanel, true);
+    if (empty($allocated['ok']) || ($allocated['username'] ?? '') === '') {
+        update("user", "limit_usertest", $userlimit['limit_usertest'], "id", $from_id);
+        sendmessage($from_id, $allocated['msg'] ?? $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
+        return;
+    }
+    $username_ac = $allocated['username'];
     $datac = array(
         'expire' => strtotime(date("Y-m-d H:i:s", strtotime("+" . $marzban_list_get['time_usertest'] . "hours"))),
         'data_limit' => $marzban_list_get['val_usertest'] * 1048576,
         'from_id' => $from_id,
-        'username' => $username,
+        'username' => $username ?? ($user['username'] ?? 'NOT_USERNAME'),
         'type' => 'usertest'
     );
     $date = time();
@@ -3410,8 +3417,15 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
     $stmt->execute();
     $stmt->close();
     $dataoutput = $ManagePanel->createUser($marzban_list_get['name_panel'], "usertest", $username_ac, $datac);
-    if ($dataoutput['username'] == null) {
-        $dataoutput['msg'] = json_encode($dataoutput['msg']);
+    if (!isset($dataoutput['username']) || $dataoutput['username'] === null || $dataoutput['username'] === '') {
+        $errorMessage = $dataoutput['msg'] ?? 'unknown error';
+        if (is_array($errorMessage) || is_object($errorMessage)) {
+            $errorMessage = json_encode($errorMessage, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } else {
+            $errorMessage = (string) $errorMessage;
+        }
+        $dataoutput['msg'] = $errorMessage;
+        error_log("Create test account failed | panel={$marzban_list_get['name_panel']} | user={$from_id} | username={$username_ac} | reason={$errorMessage}");
         sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
         $texterros = "
 ⭕️ یک کاربر قصد دریافت اکانت  تست داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
@@ -3430,6 +3444,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         }
         step('home', $from_id);
         update("invoice", "Status", "Unsuccessful", "id_invoice", $randomString);
+        update("user", "limit_usertest", $userlimit['limit_usertest'], "id", $from_id);
         return;
     }
     $output_config_link = "";
@@ -3475,14 +3490,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
     sendMessageService($marzban_list_get, $dataoutput['configs'], $output_config_link, $dataoutput['username'], $usertestinfo, $textcreatuser, $randomString);
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
     step('home', $from_id);
-    if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "نام کاربری + pcs به ترتیب" || $marzban_list_get['MethodUsername'] == "آیدی pcsی+عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
-        $value = intval($user['number_username']) + 1;
-        update("user", "number_username", $value, "id", $from_id);
-        if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
-            $value = intval($setting['numbercount']) + 1;
-            update("setting", "numbercount", $value);
-        }
-    }
+    bump_username_sequence_counters($marzban_list_get, $from_id);
     $Response = json_encode([
         'inline_keyboard' => [
             [
@@ -4234,7 +4242,7 @@ $textinvite
             } else {
                 $query = "SELECT * FROM product WHERE (Location = '$location' OR Location = '/all')AND " . agent_product_access_sql($user['agent'], $from_id) . "";
                 $marzban_list_get = select("marzban_panel", "*", "name_panel", $location, "select");
-                if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+                if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
                     $datakeyboard = "prodcutservices_";
                 } else {
                     $datakeyboard = "prodcutservice_";
@@ -4318,7 +4326,7 @@ $textinvite
         } else {
             $query = "SELECT * FROM product WHERE (Location = '$location' OR Location = '/all')AND " . agent_product_access_sql($user['agent'], $from_id) . "";
             $statuscustomvolume = json_decode($marzban_list_get['customvolume'], true)[$user['agent']];
-            if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+            if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
                 $datakeyboard = "prodcutservices_";
             } else {
                 $datakeyboard = "prodcutservice_";
@@ -4372,7 +4380,7 @@ $textinvite
         step("home", $from_id);
         return;
     }
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+    if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
         $datakeyboard = "prodcutservices_";
     } else {
         $datakeyboard = "prodcutservice_";
@@ -4401,7 +4409,7 @@ $textinvite
     } else {
         $query = "SELECT * FROM product WHERE (Location = '{$userdate['name_panel']}' OR Location = '/all') AND " . agent_product_access_sql($user['agent'], $from_id) . " AND Service_time = '$monthenumber'";
         $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
-        if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+        if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
             $datakeyboard = "prodcutservices_";
         } else {
             $datakeyboard = "prodcutservice_";
@@ -4475,7 +4483,7 @@ $textinvite
     $customvalue = "customvolume_" . $days . "_" . $gb;
     update("user", "Processing_value_one", $customvalue, "id", $from_id);
     deletemessage($from_id, $message_id);
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+    if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
         step('endstepusers', $from_id);
         $invoiceBack = purchase_invoice_back_callback(is_array($userdate) ? $userdate : [], (string) $user['agent']);
         sendmessage($from_id, textbot_get('text_select_username', $textbotlang['users']['selectusername']), purchase_inline_back_keyboard($invoiceBack), 'html');
@@ -4594,7 +4602,7 @@ $textinvite
         step("home", $from_id);
         return;
     }
-    if ($clickedProduct === '' && ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم")) {
+    if ($clickedProduct === '' && panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
         if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', (string) $text)) {
             $invoiceBack = purchase_invoice_back_callback($userdate, (string) $user['agent']);
             sendmessage($from_id, $textbotlang['users']['invalidusername'], purchase_inline_back_keyboard($invoiceBack), 'HTML');
@@ -4685,7 +4693,7 @@ $textinvite
     }
     $edited = null;
     $invoiceKeyboard = KeyboardPayment(purchase_invoice_back_callback($userdate, (string) $user['agent']));
-    if ($clickedProduct !== '' || ($user['step'] != "getvolumecustomuser" && !in_array($marzban_list_get['MethodUsername'], ["نام کاربری دلخواه", "نام کاربری دلخواه + pcs رندوم"], true))) {
+    if ($clickedProduct !== '' || ($user['step'] != "getvolumecustomuser" && !panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? ''))) {
         $edited = Editmessagetext($from_id, $message_id, $textin, $invoiceKeyboard, 'HTML');
     }
     if (!is_array($edited) || empty($edited['ok'])) {
@@ -4990,14 +4998,7 @@ $textinvite
         $Balance_prim = $user['Balance'] - $priceproduct;
         update("user", "Balance", $Balance_prim, "id", $from_id);
     }
-    if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "نام کاربری + pcs به ترتیب" || $marzban_list_get['MethodUsername'] == "آیدی pcsی+عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
-        $value = intval($user['number_username']) + 1;
-        update("user", "number_username", $value, "id", $from_id);
-        if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
-            $value = intval($setting['numbercount']) + 1;
-            update("setting", "numbercount", $value);
-        }
-    }
+    bump_username_sequence_counters($marzban_list_get, $from_id);
     $affiliatescommission = select("affiliates", "*", null, null, "select");
     $marzbanporsant_one_buy = select("affiliates", "*", null, null, "select");
     $countinvoice = bot_non_test_purchase_count($pdo, $from_id, $randomString);
@@ -5275,7 +5276,7 @@ $textonebuy
     }
     update("user", "Processing_value", $location, "id", $from_id);
     $statuscustomvolume = json_decode($marzban_list_get['customvolume'], true)[$user['agent']];
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+    if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
         $datakeyboard = "prodcutservicesom_";
     } else {
         $datakeyboard = "prodcutserviceom_";
@@ -5327,7 +5328,7 @@ $textonebuy
     $customvalue = "customvolume_" . $days . "_" . $gb;
     update("user", "Processing_value_one", $customvalue, "id", $from_id);
     deletemessage($from_id, $message_id);
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+    if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
         step('endstepusersom', $from_id);
         sendmessage($from_id, textbot_get('text_select_username', $textbotlang['users']['selectusername']), $backuser, 'html');
         return;
@@ -5389,7 +5390,7 @@ $textonebuy
         $prodcut = $dataget[1];
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+    if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
         if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
             sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser, 'HTML');
             return;
@@ -5536,10 +5537,11 @@ $textonebuy
         }
     }
     $datep = strtotime("+" . $info_product['Service_time'] . "days");
-    if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "نام کاربری + pcs به ترتیب" || $marzban_list_get['MethodUsername'] == "آیدی pcsی+عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
+    if (panel_method_uses_sequential_username($marzban_list_get['MethodUsername'] ?? '')) {
         $value = intval($user['number_username']) + $user['Processing_value_four'];
         update("user", "number_username", $value, "id", $from_id);
-        if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
+        $methodUsername = (string) ($marzban_list_get['MethodUsername'] ?? '');
+        if ($methodUsername === 'متن دلخواه + عدد ترتیبی' || $methodUsername === 'متن دلخواه نماینده + عدد ترتیبی') {
             $value = intval($setting['numbercount']) + $user['Processing_value_four'];
             update("setting", "numbercount", $value);
         }
@@ -8323,7 +8325,7 @@ if (isset($update['message']['successful_payment'])) {
     $query = "SELECT * FROM product WHERE (Location = '$location' OR Location = '/all') AND " . agent_product_access_sql($user['agent'], $from_id) . "";
     $marzban_list_get = select("marzban_panel", "*", "code_panel", $location, "select");
     $statuscustomvolume = json_decode($marzban_list_get['customvolume'], true)[$user['agent']];
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
+    if (panel_method_asks_custom_username($marzban_list_get['MethodUsername'] ?? '')) {
         $datakeyboard = "prodcutservicesom_";
     } else {
         $datakeyboard = "prodcutserviceom_";

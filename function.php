@@ -2930,7 +2930,7 @@ function bump_username_sequence_counters($panel, $userId): void
  *
  * @return array{ok:bool,username:string,msg:string}
  */
-function allocate_service_username($panel, $user, string $customText = '', $ManagePanel = null): array
+function allocate_service_username($panel, $user, string $customText = '', $ManagePanel = null, bool $isTest = false): array
 {
     if (!is_array($panel) || !is_array($user)) {
         return ['ok' => false, 'username' => '', 'msg' => 'Invalid panel or user.'];
@@ -2946,7 +2946,7 @@ function allocate_service_username($panel, $user, string $customText = '', $Mana
     $userId = $user['id'] ?? '';
     $tgUsername = (string) ($user['username'] ?? '');
     $namecustomUser = (string) ($user['namecustom'] ?? 'none');
-    $prefix = panel_username_prefix($panel);
+    $prefix = panel_username_prefix($panel, $isTest);
     $panelName = (string) ($panel['name_panel'] ?? '');
 
     for ($i = 0; $i < 8; $i++) {
