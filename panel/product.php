@@ -62,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
     exit;
   }
   $sort_order = product_next_sort_order((string) ($_POST['cetegory_product'] ?? ''));
+  $price_product = money_amount($_POST['price_product'] ?? 0);
   $emoji_id = parse_posted_custom_emoji_id($_POST['emoji_id'] ?? '');
   if ($emoji_id === null) {
     flash('error', 'Premium emoji ID must be numeric.');
@@ -73,13 +74,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
       db_query(
         $pdo,
         "INSERT INTO product (name_product,code_product,price_product,Volume_constraint,Service_time,Location,agent,data_limit_reset,note,category,hide_panel,one_buy_status,hwid_limit,sort_order,emoji_id) VALUES (?,?,?,?,?,?,?,'no_reset',?,?,'{}','0',?,?,?)",
-        [$name, $code, (int) ($_POST['price_product'] ?? 0), (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order, $emoji_id !== '' ? $emoji_id : null]
+        [$name, $code, $price_product, (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order, $emoji_id !== '' ? $emoji_id : null]
       );
     } else {
       db_query(
         $pdo,
         "INSERT INTO product (name_product,code_product,price_product,Volume_constraint,Service_time,Location,agent,data_limit_reset,note,category,hide_panel,one_buy_status,hwid_limit,sort_order) VALUES (?,?,?,?,?,?,?,'no_reset',?,?,'{}','0',?,?)",
-        [$name, $code, (int) ($_POST['price_product'] ?? 0), (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order]
+        [$name, $code, $price_product, (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order]
       );
     }
     flash('success', 'Product “' . $name . '” was added.');
@@ -103,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit'
       exit;
     }
     $category = (string) ($_POST['cetegory_product'] ?? '');
+    $price_product = money_amount($_POST['price_product'] ?? 0);
     $emoji_id = parse_posted_custom_emoji_id($_POST['emoji_id'] ?? '');
     if ($emoji_id === null) {
       flash('error', 'Premium emoji ID must be numeric.');
@@ -121,13 +123,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit'
         db_query(
           $pdo,
           "UPDATE product SET name_product=?,price_product=?,Volume_constraint=?,Service_time=?,Location=?,agent=?,note=?,category=?,hwid_limit=?,sort_order=?,emoji_id=? WHERE id=?",
-          [$name, (int) ($_POST['price_product'] ?? 0), (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order, $emoji_id !== '' ? $emoji_id : null, $pid]
+          [$name, $price_product, (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order, $emoji_id !== '' ? $emoji_id : null, $pid]
         );
       } else {
         db_query(
           $pdo,
           "UPDATE product SET name_product=?,price_product=?,Volume_constraint=?,Service_time=?,Location=?,agent=?,note=?,category=?,hwid_limit=?,sort_order=? WHERE id=?",
-          [$name, (int) ($_POST['price_product'] ?? 0), (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order, $pid]
+          [$name, $price_product, (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order, $pid]
         );
       }
       flash('success', 'Product updated.');
@@ -330,7 +332,7 @@ include __DIR__ . '/inc/layout_head.php';
                     <td class="product-sort-handle" title="Drag to reorder"><?= icon('menu', 14) ?></td>
                     <td class="cn product-sort-index"><?= $index + 1 ?></td>
                     <td class="cs"><?= htmlspecialchars($p['name_product'] ?? '') ?></td>
-                    <td class="cn cs"><?= number_format((int) ($p['price_product'] ?? 0)) ?> <span class="cf">USD</span></td>
+                    <td class="cn cs"><?= htmlspecialchars(format_money_amount($p['price_product'] ?? 0)) ?> <span class="cf">USD</span></td>
                     <td class="cn"><?= htmlspecialchars($p['Volume_constraint'] ?? '—') ?> <span class="cf">GB</span></td>
                     <td class="cn"><?= htmlspecialchars($p['Service_time'] ?? '—') ?> <span class="cf">days</span></td>
                     <td class="cf"><?= htmlspecialchars(trunc($p['Location'] ?? '—', 16)) ?></td>
@@ -391,7 +393,7 @@ include __DIR__ . '/inc/layout_head.php';
           <?php endif; ?>
           <div class="field">
             <label>Price (USD)</label>
-            <input type="number" name="price_product" class="input" placeholder="0" min="0">
+            <input type="number" name="price_product" class="input" placeholder="0.00" min="0" step="0.01">
           </div>
           <div class="field">
             <label>Volume (GB)</label>
@@ -471,7 +473,7 @@ include __DIR__ . '/inc/layout_head.php';
           <?php endif; ?>
           <div class="field">
             <label>Price (USD)</label>
-            <input type="number" name="price_product" id="edit_price" class="input" min="0">
+            <input type="number" name="price_product" id="edit_price" class="input" min="0" step="0.01">
           </div>
           <div class="field">
             <label>Volume (GB)</label>

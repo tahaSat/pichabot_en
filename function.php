@@ -4761,19 +4761,20 @@ function invoice_auto_renew_clear_prewarn($invoice): void
     invoice_notifctions_patch($invoice, ['auto_renew_prewarn' => false]);
 }
 
-function invoice_auto_renew_final_price(array $product, array $user): int
+function invoice_auto_renew_final_price(array $product, array $user): float
 {
-    $price = (int) round((float) ($product['price_product'] ?? 0));
+    $price = money_amount($product['price_product'] ?? 0);
     if (intval($user['pricediscount'] ?? 0) != 0) {
-        $price = (int) round($price - (($price * $user['pricediscount']) / 100));
+        $price = money_amount($price - (($price * $user['pricediscount']) / 100));
     }
-    return max(0, $price);
+    return max(0.0, $price);
 }
 
-function invoice_auto_renew_balance_short(array $user, int $price): bool
+function invoice_auto_renew_balance_short(array $user, $price): bool
 {
     $agent = (string) ($user['agent'] ?? 'f');
-    $balance = (int) ($user['Balance'] ?? 0);
+    $balance = (float) ($user['Balance'] ?? 0);
+    $price = money_amount($price);
     $notEnough = $balance < $price && $agent !== 'n2' && $price != 0;
     if ($agent === 'n2' && intval($user['maxbuyagent'] ?? 0) != 0) {
         if (($balance - $price) < intval('-' . $user['maxbuyagent'])) {
@@ -5078,7 +5079,7 @@ function invoice_try_auto_renew(array $invoice, array $user, array $userData, $p
     }
     $price = invoice_auto_renew_final_price($product, $user);
     $agent = (string) ($user['agent'] ?? 'f');
-    $balance = (int) ($user['Balance'] ?? 0);
+    $balance = (float) ($user['Balance'] ?? 0);
     $notEnough = invoice_auto_renew_balance_short($user, $price);
     if (!is_array($textbotlang)) {
         $textbotlang = languagechange(__DIR__ . '/text.json');
@@ -5130,10 +5131,10 @@ Error reason : {$extendMsg}";
         $cashback = is_array($cashbackMap) ? ($cashbackMap[$agent] ?? 0) : 0;
     }
     if (intval($cashback) != 0 && $price != 0) {
-        $gift = ((int) ($product['price_product'] ?? 0) * intval($cashback)) / 100;
-        $price = (int) round($price - $gift);
+        $gift = (money_amount($product['price_product'] ?? 0) * intval($cashback)) / 100;
+        $price = money_amount($price - $gift);
         if ($price < 0) {
-            $price = 0;
+            $price = 0.0;
         }
     }
     update('user', 'Balance', $balance - $price, 'id', $user['id']);
@@ -10445,16 +10446,46 @@ function product_discount_encode_products($values): string
     return json_encode($clean, JSON_UNESCAPED_UNICODE);
 }
 
-function product_discount_sale_price(int $original, string $type, int $amount): int
+function money_amount($value): float
 {
+    if (is_string($value)) {
+        $value = str_replace(['٬', ','], '.', trim($value));
+    }
+    if (!is_numeric($value)) {
+        return 0.0;
+    }
+    $n = (float) $value;
+    if (!is_numeric($n) || is_nan($n) || is_infinite($n) || $n < 0) {
+        return 0.0;
+    }
+    return round($n, 2);
+}
+
+function is_valid_money_input($text): bool
+{
+    $text = str_replace(['٬', ','], '.', trim((string) $text));
+    return (bool) preg_match('/^\d+(\.\d{1,2})?$/', $text);
+}
+
+function format_money_amount($value): string
+{
+    $n = money_amount($value);
+    $decimals = (fmod(abs($n * 100), 100) < 0.00001) ? 0 : 2;
+    return number_format($n, $decimals);
+}
+
+function product_discount_sale_price($original, string $type, $amount): float
+{
+    $original = money_amount($original);
+    $amount = (float) $amount;
     if ($original <= 0 || $amount <= 0) {
-        return max(0, $original);
+        return max(0.0, $original);
     }
     if ($type === 'percent') {
         $amount = min(100, $amount);
-        return (int) max(0, round($original - (($original * $amount) / 100)));
+        return money_amount($original - (($original * $amount) / 100));
     }
-    return (int) max(0, $original - $amount);
+    return money_amount(max(0, $original - $amount));
 }
 
 function product_discount_row_has_quota(array $row): bool
@@ -10515,7 +10546,7 @@ function product_discount_consume($codeProduct, $user = null): bool
         if ($pdo instanceof PDO) {
             $stmt = $pdo->prepare('SELECT price_product FROM product WHERE code_product = ? LIMIT 1');
             $stmt->execute([$codeProduct]);
-            $original = (int) round((float) ($stmt->fetchColumn() ?: 0));
+            $original = money_amount($stmt->fetchColumn() ?: 0);
         } elseif (isset($connect) && $connect) {
             $stmt = $connect->prepare('SELECT price_product FROM product WHERE code_product = ? LIMIT 1');
             $stmt->bind_param('s', $codeProduct);
@@ -10523,7 +10554,7 @@ function product_discount_consume($codeProduct, $user = null): bool
             $res = $stmt->get_result();
             $rowPrice = $res ? $res->fetch_assoc() : null;
             $stmt->close();
-            $original = (int) round((float) ($rowPrice['price_product'] ?? 0));
+            $original = money_amount($rowPrice['price_product'] ?? 0);
         }
     } catch (Throwable $e) {
         error_log('product_discount_consume price: ' . $e->getMessage());
@@ -10580,7 +10611,7 @@ function product_discount_for_product(string $codeProduct): ?array
 
 function product_discount_apply($original, $codeProduct): array
 {
-    $original = (int) round((float) $original);
+    $original = money_amount($original);
     $codeProduct = trim((string) $codeProduct);
     $result = [
         'original' => $original,
@@ -10616,18 +10647,18 @@ function product_discount_apply($original, $codeProduct): array
     return $result;
 }
 
-function product_discount_apply_for_user($original, $codeProduct, $user = null): int
+function product_discount_apply_for_user($original, $codeProduct, $user = null): float
 {
     $agent = is_array($user) ? (string) ($user['agent'] ?? '') : '';
     if ($agent === 'n') {
-        return (int) round((float) $original);
+        return money_amount($original);
     }
-    return product_discount_apply($original, $codeProduct)['sale'];
+    return money_amount(product_discount_apply($original, $codeProduct)['sale']);
 }
 
 function product_discount_payable($original, $codeProduct, $userPercent = 0, $user = null): array
 {
-    $original = (int) round((float) $original);
+    $original = money_amount($original);
     $agent = is_array($user) ? (string) ($user['agent'] ?? '') : '';
     if ($agent === 'n') {
         return [
@@ -10638,17 +10669,17 @@ function product_discount_payable($original, $codeProduct, $userPercent = 0, $us
         ];
     }
     $pd = product_discount_apply($original, $codeProduct);
-    $sale = (int) $pd['sale'];
+    $sale = money_amount($pd['sale']);
     $payable = $sale;
     $pct = (int) $userPercent;
     if ($pct !== 0) {
-        $payable = (int) round($sale - (($sale * $pct) / 100));
+        $payable = money_amount($sale - (($sale * $pct) / 100));
     }
     if ($payable < 0) {
-        $payable = 0;
+        $payable = 0.0;
     }
     return [
-        'original' => (int) $pd['original'],
+        'original' => money_amount($pd['original']),
         'sale' => $sale,
         'payable' => $payable,
         'applied' => (bool) $pd['applied'],
@@ -10672,21 +10703,25 @@ function product_discount_strikethrough_text(string $text): string
     return $out;
 }
 
-function product_discount_format_html(int $original, int $sale, bool $applied): string
+function product_discount_format_html($original, $sale, bool $applied): string
 {
+    $original = money_amount($original);
+    $sale = money_amount($sale);
     if ($applied && $original !== $sale) {
         // Telegram HTML: <s> draws one continuous line across the whole original price.
-        return '<s>' . number_format($original) . '</s> ' . number_format($sale);
+        return '<s>' . format_money_amount($original) . '</s> ' . format_money_amount($sale);
     }
-    return number_format($sale);
+    return format_money_amount($sale);
 }
 
-function product_discount_format_button(int $original, int $sale, bool $applied): string
+function product_discount_format_button($original, $sale, bool $applied): string
 {
+    $original = money_amount($original);
+    $sale = money_amount($sale);
     if ($applied && $original !== $sale) {
-        return product_discount_strikethrough_text(number_format($original)) . ' ' . number_format($sale);
+        return product_discount_strikethrough_text(format_money_amount($original)) . ' ' . format_money_amount($sale);
     }
-    return number_format($sale);
+    return format_money_amount($sale);
 }
 
 function product_discount_to_latin_digits(string $text): string
@@ -10707,18 +10742,15 @@ function product_discount_to_persian_digits(string $text): string
     );
 }
 
-function product_discount_format_like(string $sample, int $amount): string
+function product_discount_format_like(string $sample, $amount): string
 {
     $hasPersianDigits = (bool) preg_match('/[۰-۹٠-٩]/u', $sample);
     $latin = product_discount_to_latin_digits($sample);
+    $formatted = format_money_amount($amount);
     if (strpos($sample, '٬') !== false) {
-        $formatted = str_replace(',', '٬', number_format($amount));
-    } elseif (strpos($latin, ',') !== false) {
-        $formatted = number_format($amount);
+        $formatted = str_replace(',', '٬', $formatted);
     } elseif (preg_match('/\d\.\d{3}/', $latin)) {
-        $formatted = str_replace(',', '.', number_format($amount));
-    } else {
-        $formatted = (string) $amount;
+        $formatted = str_replace(',', '.', $formatted);
     }
     if ($hasPersianDigits) {
         $formatted = product_discount_to_persian_digits($formatted);
@@ -10747,17 +10779,24 @@ function product_discount_button_emoji($productEmojiId, bool $applied): string
  * Temporarily rewrite the catalog price inside a product title (display-only).
  * Matches 50000 / 50,000 / 50.000 / ۵۰٬۰۰۰ without touching other numbers like volume.
  */
-function product_discount_rewrite_name(string $name, int $original, int $sale, bool $html = false): string
+function product_discount_rewrite_name(string $name, $original, $sale, bool $html = false): string
 {
+    $original = money_amount($original);
+    $sale = money_amount($sale);
     if ($name === '' || $original <= 0 || $sale === $original) {
         return $name;
     }
     $replaced = preg_replace_callback(
-        '/(?<![\d۰-۹٠-٩])([۰-۹٠-٩\d]{1,3}(?:[,.٬][۰-۹٠-٩\d]{3})+|[۰-۹٠-٩\d]+)(?![\d۰-۹٠-٩])/u',
+        '/(?<![\d۰-۹٠-٩])([۰-۹٠-٩\d]{1,3}(?:[,.٬][۰-۹٠-٩\d]{3})+|[۰-۹٠-٩\d]+(?:[.,][۰-۹٠-٩\d]{1,2})?)(?![\d۰-۹٠-٩])/u',
         static function (array $m) use ($original, $sale, $html): string {
             $token = $m[1];
-            $digits = preg_replace('/\D+/', '', product_discount_to_latin_digits($token));
-            if ($digits === '' || (int) $digits !== $original) {
+            $tokenLatin = str_replace('٬', ',', product_discount_to_latin_digits($token));
+            if (preg_match('/^\d{1,3}(,\d{3})+$/', $tokenLatin)) {
+                $tokenAmount = money_amount(str_replace(',', '', $tokenLatin));
+            } else {
+                $tokenAmount = money_amount($tokenLatin);
+            }
+            if ($tokenAmount <= 0 || abs($tokenAmount - $original) > 0.001) {
                 return $m[0];
             }
             $new = product_discount_format_like($token, $sale);

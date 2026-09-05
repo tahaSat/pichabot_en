@@ -640,7 +640,7 @@ switch ($data['actions']) {
                 $countorder = $stmts2->rowCount();
                 if ($result['one_buy_status'] == "1" && $countorder != 0)
                     continue;
-                $catalogPrice = (int) round((float) ($result['price_product'] ?? 0));
+                $catalogPrice = money_amount($result['price_product'] ?? 0);
                 $displayName = (string) ($result['name_product'] ?? '');
                 if (($user_info['agent'] ?? '') !== 'n') {
                     $priceInfo = product_discount_payable($catalogPrice, $result['code_product'] ?? '', $user_info['pricediscount'] ?? 0, $user_info);
@@ -648,8 +648,8 @@ switch ($data['actions']) {
                     if (!empty($priceInfo['applied'])) {
                         $displayName = product_discount_rewrite_name(
                             $displayName,
-                            (int) $priceInfo['original'],
-                            (int) $priceInfo['payable'],
+                            $priceInfo['original'],
+                            $priceInfo['payable'],
                             false
                         );
                     }

@@ -1581,7 +1581,7 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
         $discountApplied = false;
         if ($isAgentN) {
             $result['price_product'] = agent_wholesale_cost($user, (int) ($result['Volume_constraint'] ?? 0));
-            $namekeyboard = $result['name_product'] . " - " . number_format($result['price_product']) . " USD";
+            $namekeyboard = $result['name_product'] . " - " . format_money_amount($result['price_product']) . " USD";
         } else {
             $priceInfo = product_discount_payable($result['price_product'], $result['code_product'] ?? '', $pricediscount, $user);
             $result['price_product'] = $priceInfo['payable'];
@@ -1590,13 +1590,13 @@ function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $stat
             if ($discountApplied) {
                 $displayName = product_discount_rewrite_name(
                     $displayName,
-                    (int) $priceInfo['original'],
-                    (int) $priceInfo['payable'],
+                    $priceInfo['original'],
+                    $priceInfo['payable'],
                     false
                 );
             }
             $result['name_product'] = $displayName;
-            $namekeyboard = $displayName . " - " . product_discount_format_button((int) $priceInfo['original'], (int) $priceInfo['payable'], (bool) $priceInfo['applied']) . " USD";
+            $namekeyboard = $displayName . " - " . product_discount_format_button($priceInfo['original'], $priceInfo['payable'], (bool) $priceInfo['applied']) . " USD";
         }
         if ($statusshowprice == "onshowprice") {
             $result['name_product'] = $namekeyboard;

@@ -4513,7 +4513,7 @@ $textinvite
         $info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
     if (intval($info_product['Service_time']) == 0)
         $info_product['Service_time'] = $textbotlang['users']['stateus']['Unlimited'];
-    $info_product_price_product = number_format($info_product['price_product']);
+    $info_product_price_product = format_money_amount($info_product['price_product']);
     $userBalance = number_format($user['Balance']);
     $replacements = [
         '{username}' => $username_ac,
@@ -4662,14 +4662,14 @@ $textinvite
     if (intval($info_product['Service_time']) == 0)
         $info_product['Service_time'] = $textbotlang['users']['stateus']['Unlimited'];
     $info_product_price_product = (is_array($priceInfo) && !empty($priceInfo['applied']))
-        ? product_discount_format_html((int) $priceInfo['original'], (int) $priceInfo['payable'], true)
-        : number_format($info_product['price_product']);
+        ? product_discount_format_html($priceInfo['original'], $priceInfo['payable'], true)
+        : format_money_amount($info_product['price_product']);
     $displayName = (string) ($info_product['name_product'] ?? '');
     if (is_array($priceInfo) && !empty($priceInfo['applied'])) {
         $displayName = product_discount_rewrite_name(
             $displayName,
-            (int) $priceInfo['original'],
-            (int) $priceInfo['payable'],
+            $priceInfo['original'],
+            $priceInfo['payable'],
             true
         );
     }
@@ -4827,7 +4827,7 @@ $textinvite
             $info_product['price_product'] = $priceproduct;
             update("invoice", "price_product", $priceproduct, "id_invoice", $randomString);
         }
-    } elseif ($priceproduct > $user['Balance'] && $user['agent'] != "n2" && intval($priceproduct) != 0) {
+    } elseif ($priceproduct > $user['Balance'] && $user['agent'] != "n2" && money_amount($priceproduct) != 0) {
         $marzbandirectpay = select("shopSetting", "*", "Namevalue", "statusdirectpabuy", "select")['value'];
         $Balance_prim = $priceproduct - $user['Balance'];
         if ($Balance_prim <= 1)
@@ -4990,7 +4990,7 @@ $textinvite
                 'created_at' => time(),
             ]);
         }
-    } elseif (intval($priceproduct) != 0) {
+    } elseif (money_amount($priceproduct) != 0) {
         $Balance_prim = $user['Balance'] - $priceproduct;
         update("user", "Balance", $Balance_prim, "id", $from_id);
     }
@@ -5354,8 +5354,8 @@ $textonebuy
         $info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
     if ($info_product['Service_time'] == 0)
         $info_product['Service_time'] = $textbotlang['users']['stateus']['Unlimited'];
-    $info_product['price_product'] = intval($info_product['price_product']) * intval($user['Processing_value_four']);
-    $price_product_format = number_format($info_product['price_product']);
+    $info_product['price_product'] = money_amount($info_product['price_product']) * intval($user['Processing_value_four']);
+    $price_product_format = format_money_amount($info_product['price_product']);
     $userbalancepish = number_format($user['Balance']);
     $textin = "
 📇 Your invoice:
@@ -5425,12 +5425,12 @@ $textonebuy
         $info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
     if ($info_product['Service_time'] == 0)
         $info_product['Service_time'] = $textbotlang['users']['stateus']['Unlimited'];
-    $unitPrice = intval($info_product['price_product']);
+    $unitPrice = money_amount($info_product['price_product']);
     if (($parts[0] ?? '') !== 'customvolume' && ($user['agent'] ?? '') !== 'n') {
         $unitPrice = product_discount_apply($unitPrice, $info_product['code_product'] ?? '')['sale'];
     }
-    $info_product['price_product'] = $unitPrice * intval($user['Processing_value_four']);
-    $price_product_format = number_format($info_product['price_product']);
+    $info_product['price_product'] = money_amount($unitPrice * intval($user['Processing_value_four']));
+    $price_product_format = format_money_amount($info_product['price_product']);
     $userbalancepish = number_format($user['Balance']);
     $textin = "
 📇 Your invoice:

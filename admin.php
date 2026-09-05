@@ -3871,11 +3871,11 @@ Error:  {$outputcheck['description']}";
     sendmessage($from_id, $textbotlang['Admin']['Product']['GetPrice'], $backadmin, 'HTML');
     step('gettimereset', $from_id);
 } elseif ($user['step'] == "gettimereset") {
-    if (!ctype_digit($text)) {
+    if (!is_valid_money_input($text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
-    savedata("save", "price_product", $text);
+    savedata("save", "price_product", (string) money_amount($text));
     $userdata = json_decode($user['Processing_value'], true);
     $panel = select("marzban_panel", "*", "name_panel", $userdata['Location'], "select");
     if ($panel['type'] == "marzban" || $panel['type'] == "marzneshin") {
@@ -4293,13 +4293,14 @@ Sold count: $count_invoice
     sendmessage($from_id, "Send the new price", $backadmin, 'HTML');
     step('change_price', $from_id);
 } elseif ($user['step'] == "change_price") {
-    if (!ctype_digit($text)) {
+    if (!is_valid_money_input($text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
+    $price_product = (string) money_amount($text);
     $panel = select("marzban_panel", "*", "code_panel", $user['Processing_value_one'], "select");
     $stmt = $pdo->prepare("UPDATE product SET price_product = :price_product WHERE id = :name_product AND (Location = :Location OR Location = '/all') AND agent = :agent");
-    $stmt->bindParam(':price_product', $text);
+    $stmt->bindParam(':price_product', $price_product);
     $stmt->bindParam(':name_product', $user['Processing_value']);
     $stmt->bindParam(':Location', $panel['name_panel']);
     $stmt->bindParam(':agent', $user['Processing_value_tow']);

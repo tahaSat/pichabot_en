@@ -752,7 +752,7 @@ function panel_extend_user_service(PDO $pdo, $userId, string $idInvoice, string 
     ], JSON_UNESCAPED_UNICODE);
     $output = json_encode($extend);
     $dateacc = date('Y/m/d H:i:s');
-    $price = (string) max(0, (int) ($infoProduct['price_product'] ?? 0));
+    $price = (string) money_amount($infoProduct['price_product'] ?? 0);
     $type = 'extend_user_by_admin';
     $status = 'paid';
 
@@ -775,7 +775,7 @@ function panel_extend_user_service(PDO $pdo, $userId, string $idInvoice, string 
 
     db_query($pdo, "UPDATE invoice SET Status = 'active' WHERE id_invoice = ?", [$idInvoice]);
 
-    $priceFmt = number_format((int) ($infoProduct['price_product'] ?? 0));
+    $priceFmt = format_money_amount($infoProduct['price_product'] ?? 0);
     panel_notify_user(
         $userId,
         "✅ Your service was renewed by an admin.\n\n▫️Service : {$username}\n▫️Product : {$infoProduct['name_product']}\n▫️Renewal amount {$priceFmt} USD"
