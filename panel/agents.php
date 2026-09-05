@@ -6,13 +6,13 @@ require_auth();
 $pdo = panel_ensure_pdo();
 agent_ensure_volume_columns();
 
-$defaultAgentRequestMessage = '📌 توضیحات خود را برای ثبت درخواست نمایندگی ارسال نمایید.';
+$defaultAgentRequestMessage = 'Send your details to request an agent account.';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_agent_request_message') {
     csrf_check_post();
     $message = trim((string) ($_POST['agent_request_message'] ?? ''));
     if ($message === '') {
-        flash('error', 'متن پیام نمی‌تواند خالی باشد.');
+        flash('error', 'Message text cannot be empty.');
     } else {
         $exists = db_fetch($pdo, "SELECT id_text FROM textbot WHERE id_text = ?", ['text_request_agent_dec']);
         if ($exists) {
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
             db_query($pdo, "INSERT INTO textbot (id_text, text) VALUES (?, ?)", ['text_request_agent_dec', $message]);
         }
         clearSelectCache('textbot');
-        flash('success', 'متن پیام درخواست نمایندگی ذخیره شد.');
+        flash('success', 'Agent request message was saved.');
     }
     header('Location: agents.php');
     exit;
@@ -79,8 +79,8 @@ try {
 } catch (Exception $e) {
 }
 
-$pageTitle = 'نمایندگان';
-$pageLede = 'مدیریت نمایندگان، سهمیه حجم و ربات فروش.';
+$pageTitle = 'Agents';
+$pageLede = 'Manage agents, volume quotas, and sales bots.';
 $activeNav = 'agents';
 include __DIR__ . '/inc/layout_head.php';
 ?>
@@ -88,52 +88,52 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="card fade-up" style="margin-bottom:14px">
     <div class="card-head">
         <div>
-            <div class="card-title">پیام دکمه درخواست نمایندگی</div>
-            <div class="card-subtitle">متنی که بعد از کلیک روی «درخواست نمایندگی» برای کاربر ارسال می‌شود</div>
+            <div class="card-title">Agent request button message</div>
+            <div class="card-subtitle">Text sent to the user after they tap “Request agent”</div>
         </div>
     </div>
     <form method="POST" class="card-body">
         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
         <input type="hidden" name="action" value="save_agent_request_message">
         <div class="field">
-            <label>متن پیام</label>
+            <label>Message text</label>
             <textarea name="agent_request_message" class="input" rows="4" required
                 placeholder="<?= htmlspecialchars($defaultAgentRequestMessage) ?>"><?= htmlspecialchars($agentRequestMessage) ?></textarea>
         </div>
-        <button type="submit" class="btn btn-primary btn-sm"><?= icon('check', 13) ?> ذخیره</button>
+        <button type="submit" class="btn btn-primary btn-sm"><?= icon('check', 13) ?> Save</button>
     </form>
 </div>
 
 <div class="card fade-up">
     <div class="toolbar">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <div class="toolbar-title">نمایندگان <small>(<?= number_format($total) ?>)</small></div>
+            <div class="toolbar-title">Agents <small>(<?= number_format($total) ?>)</small></div>
             <?php if ($agentCount > 0): ?>
-                <a href="?role=n" class="tag tag-info" style="cursor:pointer"><?= $agentCount ?> نماینده</a>
+                <a href="?role=n" class="tag tag-info" style="cursor:pointer"><?= $agentCount ?> agents</a>
             <?php endif; ?>
             <?php if ($agentAdvCount > 0): ?>
-                <a href="?role=n2" class="tag tag-warn" style="cursor:pointer"><?= $agentAdvCount ?> پیشرفته</a>
+                <a href="?role=n2" class="tag tag-warn" style="cursor:pointer"><?= $agentAdvCount ?> advanced</a>
             <?php endif; ?>
             <button type="button" class="btn btn-primary btn-sm" onclick="openModal('promoteModal')">
-                <?= icon('plus', 13) ?> افزودن نماینده
+                <?= icon('plus', 13) ?> Add agent
             </button>
         </div>
 
         <form method="GET" id="agentsForm" class="toolbar-end">
             <select name="role" class="select" style="width:auto"
                 onchange="document.getElementById('agentsForm').submit()">
-                <option value="">همه نقش‌ها</option>
-                <option value="n" <?= $role === 'n' ? 'selected' : '' ?>>نماینده</option>
-                <option value="n2" <?= $role === 'n2' ? 'selected' : '' ?>>نماینده پیشرفته</option>
+                <option value="">All roles</option>
+                <option value="n" <?= $role === 'n' ? 'selected' : '' ?>>Agent</option>
+                <option value="n2" <?= $role === 'n2' ? 'selected' : '' ?>>Advanced agent</option>
             </select>
             <div class="search-box" style="min-width:240px">
                 <?= icon('search', 15) ?>
-                <input type="text" name="q" placeholder="آیدی، یوزرنیم..."
+                <input type="text" name="q" placeholder="ID, username..."
                     value="<?= htmlspecialchars($search) ?>" autocomplete="off">
-                <button type="submit" class="search-btn">جستجو</button>
+                <button type="submit" class="search-btn">Search</button>
             </div>
             <?php if ($search || $role): ?>
-                <a href="agents.php" class="btn-link" style="font-size:.78rem">پاک کردن</a>
+                <a href="agents.php" class="btn-link" style="font-size:.78rem">Clear</a>
             <?php endif; ?>
         </form>
     </div>
@@ -143,13 +143,13 @@ include __DIR__ . '/inc/layout_head.php';
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>آیدی</th>
-                    <th>یوزرنیم</th>
-                    <th>نقش</th>
-                    <th>موجودی</th>
-                    <th>قیمت هر گیگ</th>
-                    <th>ربات فروش</th>
-                    <th>انقضا</th>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Balance</th>
+                    <th>Price per GB</th>
+                    <th>Sales bot</th>
+                    <th>Expiry</th>
                     <th></th>
                 </tr>
             </thead>
@@ -157,7 +157,7 @@ include __DIR__ . '/inc/layout_head.php';
                 <?php if (empty($agents)): ?>
                     <tr>
                         <td colspan="9">
-                            <div class="empty" style="padding:36px"><p>نماینده‌ای یافت نشد</p></div>
+                            <div class="empty" style="padding:36px"><p>No agents found</p></div>
                         </td>
                     </tr>
                 <?php else:
@@ -187,12 +187,12 @@ include __DIR__ . '/inc/layout_head.php';
                                 <?php if ($hasBot): ?>
                                     <span class="tag tag-ok">@<?= htmlspecialchars($a['bot_username']) ?></span>
                                 <?php else: ?>
-                                    <span class="tag tag-plain">ندارد</span>
+                                    <span class="tag tag-plain">None</span>
                                 <?php endif; ?>
                             </td>
                             <td class="cs"><?= htmlspecialchars($expireLabel) ?></td>
                             <td>
-                                <a href="agent.php?id=<?= $uid ?>" class="btn btn-ghost btn-sm">مدیریت</a>
+                                <a href="agent.php?id=<?= $uid ?>" class="btn btn-ghost btn-sm">Manage</a>
                             </td>
                         </tr>
                     <?php endforeach; endif; ?>
@@ -215,7 +215,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="promoteModal">
     <div class="modal">
         <div class="modal-head">
-            <h3>افزودن نماینده</h3>
+            <h3>Add agent</h3>
             <button class="modal-x" onclick="closeModal('promoteModal')"><?= icon('close', 14) ?></button>
         </div>
         <form method="POST" action="agent_action.php">
@@ -224,20 +224,20 @@ include __DIR__ . '/inc/layout_head.php';
                 <input type="hidden" name="action" value="promote">
                 <input type="hidden" name="back" value="agents.php">
                 <div class="field">
-                    <label>آیدی عددی تلگرام</label>
-                    <input type="text" name="telegram_id" class="input" required placeholder="مثلاً 123456789" inputmode="numeric">
+                    <label>Numeric Telegram ID</label>
+                    <input type="text" name="telegram_id" class="input" required placeholder="e.g. 123456789" inputmode="numeric">
                 </div>
                 <div class="field">
-                    <label>نقش</label>
+                    <label>Role</label>
                     <select name="new_role" class="select" required>
-                        <option value="n">نماینده (n)</option>
-                        <option value="n2">نماینده پیشرفته (n2)</option>
+                        <option value="n">Agent (n)</option>
+                        <option value="n2">Advanced agent (n2)</option>
                     </select>
                 </div>
             </div>
             <div class="modal-foot">
-                <button type="submit" class="btn btn-primary">ثبت</button>
-                <button type="button" class="btn btn-ghost" onclick="closeModal('promoteModal')">انصراف</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-ghost" onclick="closeModal('promoteModal')">Cancel</button>
             </div>
         </form>
     </div>

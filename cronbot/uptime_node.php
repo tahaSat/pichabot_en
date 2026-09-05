@@ -23,9 +23,9 @@ $Getdnodes = json_decode($Getdnodes['body'],true);
 if(count($Getdnodes) == 0)return;
 foreach($Getdnodes as $data){
     if(!in_array($data['status'],["connected","disabled"])){
-            $textnode = "🚨 ادمین عزیز نود با اسم {$data['name']} متصل نیست.
-وضعیت نود : {$data['status']}
-✍️ دلیل خطا : <code> {$data['message']}</code>";
+            $textnode = "🚨 Dear admin, the node {$data['name']} is not connected.
+Node status : {$data['status']}
+✍️ Error reason : <code> {$data['message']}</code>";
         if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage',[
         'chat_id' => $setting['Channel_Report'],

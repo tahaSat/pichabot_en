@@ -51,8 +51,8 @@
         }
         if (label) {
             label.textContent = allFiltered
-                ? (filteredCount.toLocaleString('en-US') + ' کاربر فیلترشده')
-                : (selected.size.toLocaleString('en-US') + ' کاربر انتخاب شده');
+                ? (filteredCount.toLocaleString('en-US') + ' filtered users')
+                : (selected.size.toLocaleString('en-US') + ' users selected');
         }
         if (openBtn) {
             openBtn.disabled = openBtn.hasAttribute('data-busy') || selectedCount() < 1;
@@ -118,8 +118,8 @@
             }
             if (hint) {
                 hint.textContent = allFiltered
-                    ? ('پیام برای همه ' + filteredCount.toLocaleString('en-US') + ' کاربر مطابق فیلتر فعلی ارسال می‌شود.')
-                    : ('پیام برای ' + selected.size.toLocaleString('en-US') + ' کاربر انتخاب‌شده ارسال می‌شود.');
+                    ? ('The message will be sent to all ' + filteredCount.toLocaleString('en-US') + ' users matching the current filter.')
+                    : ('The message will be sent to ' + selected.size.toLocaleString('en-US') + ' selected users.');
             }
             if (typeof openModal === 'function') openModal('usersCampaignModal');
         });
@@ -132,7 +132,7 @@
                 event.preventDefault();
                 return;
             }
-            if (!window.confirm('ارسال پیام به ' + count.toLocaleString('en-US') + ' کاربر آغاز شود؟')) {
+            if (!window.confirm('Start sending the message to ' + count.toLocaleString('en-US') + ' users?')) {
                 event.preventDefault();
             }
         });

@@ -134,11 +134,11 @@ class ServiceMonitor
                 "If you want extra data or a renewal, open «{$this->text_Purchased_services}».";
             $notice = invoice_volume_cron_auto_renew_notice($invoice, $this->textBotLang);
             $message .= $notice['text'];
-            $reportMessage = "📌 اطلاعیه کرون حجم\n\n" .
-                "نام کاربری سرویس :‌ <code>{$username}</code>\n" .
-                "آیدی عددی کاربر :‌ <code>{$invoice['id_user']}</code>\n" .
-                "وضعیت سرویس : {$userData['status']}\n" .
-                "حجم باقی مانده : {$formattedVolume}";
+            $reportMessage = "📌 Volume cron notice\n\n" .
+                "Service username : <code>{$username}</code>\n" .
+                "User ID : <code>{$invoice['id_user']}</code>\n" .
+                "Service status : {$userData['status']}\n" .
+                "Remaining volume : {$formattedVolume}";
             $keyboard = invoice_volume_cron_keyboard($invoice, $this->textBotLang);
             $this->send_notifactions($invoice, $user, $message, true, $invoice['bottype'], $keyboard);
             $this->sendReportNotification($reportMessage);
@@ -167,7 +167,7 @@ class ServiceMonitor
             update("invoice", "status", "removeTime", "username", $username);
             $this->Panel->RemoveUser($invoice['Service_location'], $username);
             $message = "📌 Because it was not renewed, service {$invoice['username']} was removed from your services\n\n🌟 You can buy a new service from the shop";
-            $reportMessage = "📌 اطلاعیه کرون حذف\n\nنام کاربری سرویس :‌ <code>{$invoice['username']}</code>\nآیدی عددی کاربر :‌ <code>{$invoice['id_user']}</code>\nوضعیت سرویس : $statusText\nتعداد روز باقی مانده ‌:‌$daysRemaining\nحجم باقی مانده : $remainingVolume";
+            $reportMessage = "📌 Removal cron notice\n\nService username : <code>{$invoice['username']}</code>\nUser ID : <code>{$invoice['id_user']}</code>\nService status : $statusText\nDays remaining : $daysRemaining\nRemaining volume : $remainingVolume";
             $this->send_notifactions($invoice, $user, $message, false, $invoice['bottype']);
             $this->sendReportNotification($reportMessage);
         }
@@ -212,7 +212,7 @@ class ServiceMonitor
             $message = "📌 Because it was not renewed, service $username was removed from your services
 
 🌟 You can buy a new service from the shop";
-            $reportMessage = "📌  اطلاعیه کرون حذف حجم \nنام کاربری سرویس : $username \nآیدی عددی کاربر :‌ <code>{$invoice['id_user']}</code>\n وضعیت سرویس : $statusText \nتعداد روز باقی مانده :$daysRemaining \n حجم باقی مانده : $remainingVolume\nآخرین اتصال کاربر : {$userData['online_at']}";
+            $reportMessage = "📌 Volume-removal cron notice\nService username : $username\nUser ID : <code>{$invoice['id_user']}</code>\nService status : $statusText\nDays remaining : $daysRemaining\nRemaining volume : $remainingVolume\nLast connection : {$userData['online_at']}";
             $this->send_notifactions($invoice, $user, $message, false, $invoice['bottype']);
             $this->sendReportNotification($reportMessage);
         }
@@ -251,11 +251,11 @@ class ServiceMonitor
                 "Thank you";
             $notice = invoice_volume_cron_auto_renew_notice($invoice, $this->textBotLang);
             $message .= $notice['text'];
-            $reportMessage = "📌 اطلاعیه کرون زمان\n\n" .
-                "نام کاربری سرویس :‌ <code>{$invoice['username']}</code>\n" .
-                "آیدی عددی کاربر :‌ <code>{$invoice['id_user']}</code>\n" .
-                "وضعیت سرویس : {$userData['status']}\n" .
-                "تعداد روز باقی مانده ‌:‌{$daysRemaining}";
+            $reportMessage = "📌 Time cron notice\n\n" .
+                "Service username : <code>{$invoice['username']}</code>\n" .
+                "User ID : <code>{$invoice['id_user']}</code>\n" .
+                "Service status : {$userData['status']}\n" .
+                "Days remaining : {$daysRemaining}";
             $keyboard = invoice_volume_cron_keyboard($invoice, $this->textBotLang);
             $this->send_notifactions($invoice, $user, $message, true, $invoice['bottype'], $keyboard);
             $this->sendReportNotification($reportMessage);

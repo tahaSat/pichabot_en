@@ -114,8 +114,8 @@ window.toast = function (msg, type, dur) {
 var _confirmCb = null;
 
 window.showConfirm = function (msg, cb, title) {
-    document.getElementById('confirm-title').textContent = title || 'تأیید عملیات';
-    document.getElementById('confirm-msg').textContent   = msg   || 'آیا اطمینان دارید؟';
+    document.getElementById('confirm-title').textContent = title || 'Confirm action';
+    document.getElementById('confirm-msg').textContent   = msg   || 'Are you sure?';
     _confirmCb = cb;
     document.getElementById('confirm-veil').classList.add('open');
 };
@@ -145,7 +145,7 @@ document.querySelectorAll('[data-confirm]').forEach(function (el) {
     el.addEventListener('click', function (e) {
         e.preventDefault();
         var href = el.href;
-        showConfirm(el.dataset.confirm || 'این عملیات قابل بازگشت نیست. ادامه؟', function () {
+        showConfirm(el.dataset.confirm || 'This action cannot be undone. Continue?', function () {
             _lb.start();
             window.location.href = href;
         });
@@ -201,7 +201,7 @@ var _swipeSb = document.getElementById('sidebar');
 if (_swipeSb) {
     var _swipeX = 0;
     _swipeSb.addEventListener('touchstart', function (e) { _swipeX = e.touches[0].clientX; }, { passive: true });
-    _swipeSb.addEventListener('touchmove',  function (e) { if (e.touches[0].clientX - _swipeX > 40) closeSidebar(); }, { passive: true });
+    _swipeSb.addEventListener('touchmove',  function (e) { if (_swipeX - e.touches[0].clientX > 40) closeSidebar(); }, { passive: true });
 }
 
 document.querySelectorAll('.modal-veil').forEach(function (v) {

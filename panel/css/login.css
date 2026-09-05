@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap');
 
 .login-page {
   --ink: #f4f4f5;
@@ -10,8 +10,8 @@
   --accent-press: #ffffff;
   --danger: #f87171;
   --danger-bg: rgba(248, 113, 113, 0.12);
-  --font-fa: 'Vazirmatn', system-ui, sans-serif;
-  --font-display: 'Syne', 'Vazirmatn', sans-serif;
+  --font-fa: 'Inter', system-ui, sans-serif;
+  --font-display: 'Syne', 'Inter', sans-serif;
 
   min-height: 100vh;
   min-height: 100dvh;
@@ -125,7 +125,7 @@
 
 .login-form-wrap {
   width: 100%;
-  text-align: right;
+  text-align: left;
   animation: loginRise 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
 }
 
@@ -137,7 +137,7 @@
   color: #fecaca;
   padding: 12px 14px;
   font-size: 0.84rem;
-  text-align: right;
+  text-align: left;
 }
 
 .login-form {
@@ -169,6 +169,8 @@
   color: var(--ink);
   font-family: var(--font-fa);
   font-size: 0.95rem;
+  direction: ltr;
+  text-align: left;
   outline: none;
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }

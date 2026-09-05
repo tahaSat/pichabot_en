@@ -11,7 +11,7 @@ referral_ensure_schema();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_master') {
     csrf_check_post();
     $new = referral_lib_toggle_master($pdo);
-    flash('success', $new === 'onreferral' ? 'سیستم دعوت فعال شد.' : 'سیستم دعوت غیرفعال شد.');
+    flash('success', $new === 'onreferral' ? 'Invite system enabled.' : 'Invite system disabled.');
     header('Location: referral.php');
     exit;
 }
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
             'status' => $_POST['status'] ?? 'inactive',
             'new_users_only' => isset($_POST['new_users_only']) ? 1 : 0,
         ], $id ?: null);
-        flash('success', $id ? 'کمپین ویرایش شد.' : 'کمپین ایجاد شد.');
+        flash('success', $id ? 'Campaign updated.' : 'Campaign created.');
     } catch (Exception $e) {
         flash('error', $e->getMessage());
     }
@@ -41,7 +41,7 @@ if (isset($_GET['toggle'])) {
     csrf_check_get();
     try {
         referral_lib_toggle_status($pdo, (int) $_GET['toggle']);
-        flash('success', 'وضعیت کمپین تغییر کرد.');
+        flash('success', 'Campaign status changed.');
     } catch (Exception $e) {
         flash('error', $e->getMessage());
     }
@@ -52,7 +52,7 @@ if (isset($_GET['toggle'])) {
 if (isset($_GET['delete'])) {
     csrf_check_get();
     db_query($pdo, "DELETE FROM referral_campaign WHERE id = ?", [(int) $_GET['delete']]);
-    flash('success', 'کمپین حذف شد.');
+    flash('success', 'Campaign deleted.');
     header('Location: referral.php');
     exit;
 }
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'grant
         $result = referral_lib_manual_grant($pdo, $grantCampaignId, $grantUserId);
     } catch (Throwable $e) {
         error_log('grant_reward: ' . $e->getMessage());
-        $result = ['ok' => false, 'msg' => 'خطای سیستمی: ' . $e->getMessage()];
+        $result = ['ok' => false, 'msg' => 'System error: ' . $e->getMessage()];
     }
     flash($result['ok'] ? 'success' : 'error', $result['msg']);
     header('Location: referral.php?view=' . $grantCampaignId . '&scan=1#pending');
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'grant
         $result = referral_lib_grant_last_product($pdo, $grantCampaignId, $grantUserId);
     } catch (Throwable $e) {
         error_log('grant_last_product: ' . $e->getMessage());
-        $result = ['ok' => false, 'msg' => 'خطای سیستمی: ' . $e->getMessage()];
+        $result = ['ok' => false, 'msg' => 'System error: ' . $e->getMessage()];
     }
     flash($result['ok'] ? 'success' : 'error', $result['msg']);
     header('Location: referral.php?view=' . $grantCampaignId . '&scan=1#pending');
@@ -118,8 +118,8 @@ if ($view_campaign) {
     }
 }
 
-$pageTitle = 'کمپین محصول رایگان';
-$pageLede = 'مدیریت لینک دعوت، تعداد دعوت موردنیاز و جایزه سرویس.';
+$pageTitle = 'Free product campaign';
+$pageLede = 'Manage invite links, required invite count, and the service reward.';
 $activeNav = 'referral';
 $referralTab = 'campaign';
 include __DIR__ . '/inc/layout_head.php';
@@ -129,40 +129,40 @@ include __DIR__ . '/inc/referral_nav.php';
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px" class="fade-up">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <span class="tag <?= $master_status === 'onreferral' ? 'tag-ok' : 'tag-no' ?>">
-      <?= $master_status === 'onreferral' ? 'سیستم فعال' : 'سیستم غیرفعال' ?>
+      <?= $master_status === 'onreferral' ? 'System on' : 'System off' ?>
     </span>
     <form method="post" style="margin:0">
       <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="action" value="toggle_master">
       <button type="submit" class="btn btn-ghost btn-sm">
-        <?= $master_status === 'onreferral' ? 'غیرفعال کردن' : 'فعال کردن' ?> سیستم
+        <?= $master_status === 'onreferral' ? 'Disable' : 'Enable' ?> system
       </button>
     </form>
   </div>
-  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> کمپین جدید</button>
+  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> New campaign</button>
 </div>
 
 <div class="card fade-up d1">
   <?php if (empty($campaigns)): ?>
     <div class="empty" style="padding:60px 20px">
-      <p>هنوز کمپین دعوتی ثبت نشده است.</p>
-      <button class="btn btn-primary" style="margin-top:14px" onclick="openModal('addModal')"><?= icon('plus', 14) ?> ایجاد اولین کمپین</button>
+      <p>No invite campaigns yet.</p>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="openModal('addModal')"><?= icon('plus', 14) ?> Create the first campaign</button>
     </div>
   <?php else: ?>
     <div class="toolbar">
-      <div class="toolbar-title">کمپین‌ها <small>(<?= count($campaigns) ?>)</small></div>
+      <div class="toolbar-title">Campaigns <small>(<?= count($campaigns) ?>)</small></div>
     </div>
     <div class="tbl-wrap">
       <table class="tbl-lg">
         <thead>
           <tr>
             <th>#</th>
-            <th>عنوان</th>
-            <th>محصول</th>
-            <th>دعوت</th>
-            <th>آمار</th>
-            <th>وضعیت</th>
-            <th>عملیات</th>
+            <th>Title</th>
+            <th>Product</th>
+            <th>Invites</th>
+            <th>Stats</th>
+            <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -175,20 +175,20 @@ include __DIR__ . '/inc/referral_nav.php';
               <td class="cf"><?= htmlspecialchars($product['name_product'] ?? $c['code_product']) ?></td>
               <td class="cn"><?= (int) $c['required_invites'] ?></td>
               <td class="cf">
-                <?= (int) ($c['stats']['invites'] ?? 0) ?> دعوت ·
-                <?= (int) ($c['stats']['rewards'] ?? 0) ?> جایزه
+                <?= (int) ($c['stats']['invites'] ?? 0) ?> invites ·
+                <?= (int) ($c['stats']['rewards'] ?? 0) ?> rewards
               </td>
               <td>
                 <span class="tag <?= ($c['status'] ?? '') === 'active' ? 'tag-ok' : 'tag-warn' ?>">
-                  <?= ($c['status'] ?? '') === 'active' ? 'فعال' : 'غیرفعال' ?>
+                  <?= ($c['status'] ?? '') === 'active' ? 'Active' : 'Inactive' ?>
                 </span>
               </td>
               <td>
                 <div style="display:flex;gap:5px;flex-wrap:wrap">
-                  <a href="referral.php?view=<?= (int) $c['id'] ?>#invites" class="btn btn-ghost btn-sm">جزئیات</a>
-                  <button class="btn btn-ghost btn-sm" onclick="openEditModal(<?= htmlspecialchars(json_encode($c), ENT_QUOTES) ?>)">ویرایش</button>
-                  <a href="referral.php?toggle=<?= (int) $c['id'] ?>&_csrf=<?= csrf_token() ?>" class="btn btn-ghost btn-sm">تغییر وضعیت</a>
-                  <a href="referral.php?delete=<?= (int) $c['id'] ?>&_csrf=<?= csrf_token() ?>" class="btn btn-no btn-sm" data-confirm="حذف کمپین «<?= htmlspecialchars($c['title']) ?>»؟">حذف</a>
+                  <a href="referral.php?view=<?= (int) $c['id'] ?>#invites" class="btn btn-ghost btn-sm">Details</a>
+                  <button class="btn btn-ghost btn-sm" onclick="openEditModal(<?= htmlspecialchars(json_encode($c), ENT_QUOTES) ?>)">Edit</button>
+                  <a href="referral.php?toggle=<?= (int) $c['id'] ?>&_csrf=<?= csrf_token() ?>" class="btn btn-ghost btn-sm">Toggle status</a>
+                  <a href="referral.php?delete=<?= (int) $c['id'] ?>&_csrf=<?= csrf_token() ?>" class="btn btn-no btn-sm" data-confirm="Delete campaign “<?= htmlspecialchars($c['title']) ?>”?">Delete</a>
                 </div>
               </td>
             </tr>
@@ -202,46 +202,46 @@ include __DIR__ . '/inc/referral_nav.php';
 <?php if ($view_campaign): ?>
   <div class="card fade-up d2" style="margin-top:18px" id="invites">
     <div class="toolbar" style="flex-wrap:wrap;gap:10px">
-      <div class="toolbar-title">دعوت‌ها — <?= htmlspecialchars($view_campaign['title']) ?></div>
+      <div class="toolbar-title">Invites — <?= htmlspecialchars($view_campaign['title']) ?></div>
       <div class="toolbar-end" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span class="tag"><?= number_format((int) $view_stats['invites']) ?> جوین</span>
-        <span class="tag"><?= number_format((int) $view_stats['referrers']) ?> معرف</span>
-        <span class="tag tag-ok"><?= number_format((int) $view_stats['rewards']) ?> جایزه</span>
-        <span class="tag tag-warn"><?= (int) $view_campaign['required_invites'] ?> دعوت لازم</span>
+        <span class="tag"><?= number_format((int) $view_stats['invites']) ?> joins</span>
+        <span class="tag"><?= number_format((int) $view_stats['referrers']) ?> referrers</span>
+        <span class="tag tag-ok"><?= number_format((int) $view_stats['rewards']) ?> rewards</span>
+        <span class="tag tag-warn"><?= (int) $view_campaign['required_invites'] ?> required invites</span>
         <a href="referral.php?view=<?= (int) $view_id ?>&scan=1#pending" class="btn btn-primary btn-sm">
-          <?= icon('search', 14) ?> اسکن واجدین بدون جایزه
+          <?= icon('search', 14) ?> Scan eligible without reward
         </a>
       </div>
     </div>
     <div class="toolbar" style="border-top:1px solid var(--bd,rgba(0,0,0,.06));padding-top:12px">
-      <div class="toolbar-title" style="font-size:.9rem">لیست دعوت‌ها <small>(<?= number_format($invite_total) ?>)</small></div>
+      <div class="toolbar-title" style="font-size:.9rem">Invite list <small>(<?= number_format($invite_total) ?>)</small></div>
       <form method="GET" class="toolbar-end">
         <input type="hidden" name="view" value="<?= (int) $view_id ?>">
         <?php if ($do_scan): ?><input type="hidden" name="scan" value="1"><?php endif; ?>
         <div class="search-box" style="min-width:240px">
           <?= icon('search', 15) ?>
-          <input type="text" name="q" value="<?= htmlspecialchars($invite_search) ?>" placeholder="آیدی یا یوزرنیم..." autocomplete="off">
-          <button type="submit" class="search-btn">جستجو</button>
+          <input type="text" name="q" value="<?= htmlspecialchars($invite_search) ?>" placeholder="ID or username..." autocomplete="off">
+          <button type="submit" class="search-btn">Search</button>
         </div>
         <?php if ($invite_search !== ''): ?>
-          <a href="referral.php?view=<?= (int) $view_id ?><?= $do_scan ? '&scan=1' : '' ?>#invites" class="btn-link" style="font-size:.78rem">پاک کردن</a>
+          <a href="referral.php?view=<?= (int) $view_id ?><?= $do_scan ? '&scan=1' : '' ?>#invites" class="btn-link" style="font-size:.78rem">Clear</a>
         <?php endif; ?>
       </form>
     </div>
     <?php if (empty($recent_invites)): ?>
       <div class="empty" style="padding:36px">
-        <p><?= $invite_search !== '' ? 'نتیجه‌ای یافت نشد.' : 'هنوز دعوتی ثبت نشده.' ?></p>
+        <p><?= $invite_search !== '' ? 'No results found.' : 'No invites yet.' ?></p>
       </div>
     <?php else: ?>
       <div class="tbl-wrap">
         <table class="tbl-lg">
           <thead>
             <tr>
-              <th>معرف</th>
-              <th>آیدی تلگرام معرف</th>
-              <th>دعوت‌شده</th>
-              <th>آیدی تلگرام دعوت‌شده</th>
-              <th>زمان</th>
+              <th>Referrer</th>
+              <th>Referrer Telegram ID</th>
+              <th>Invitee</th>
+              <th>Invitee Telegram ID</th>
+              <th>Time</th>
             </tr>
           </thead>
           <tbody>
@@ -259,7 +259,7 @@ include __DIR__ . '/inc/referral_nav.php';
       </div>
       <?php if ($invite_total_pages > 1): ?>
         <div class="tbl-foot">
-          <span><?= number_format($invite_total) ?> دعوت · صفحه <?= $invite_page ?> از <?= $invite_total_pages ?></span>
+          <span><?= number_format($invite_total) ?> invites · page <?= $invite_page ?> of <?= $invite_total_pages ?></span>
           <div class="pager">
             <?php
             $invite_qs = fn($p) => 'referral.php?view=' . (int) $view_id
@@ -283,28 +283,28 @@ include __DIR__ . '/inc/referral_nav.php';
     <div class="card fade-up d3" style="margin-top:18px" id="pending">
       <div class="toolbar">
         <div class="toolbar-title">
-          واجدین بدون جایزه
-          <small>(<?= count($pending_rewards) ?> نفر · حداقل <?= (int) $view_campaign['required_invites'] ?> دعوت)</small>
+          Eligible without reward
+          <small>(<?= count($pending_rewards) ?> people · min. <?= (int) $view_campaign['required_invites'] ?> invites)</small>
         </div>
-        <a href="referral.php?view=<?= (int) $view_id ?>#invites" class="btn btn-ghost btn-sm">بستن اسکن</a>
+        <a href="referral.php?view=<?= (int) $view_id ?>#invites" class="btn btn-ghost btn-sm">Close scan</a>
       </div>
       <?php if (empty($pending_rewards)): ?>
         <div class="empty" style="padding:36px">
-          <p>کسی با دعوت کافی و بدون جایزه پیدا نشد.</p>
+          <p>No one with enough invites and no reward was found.</p>
         </div>
       <?php else: ?>
         <p class="cf" style="padding:0 16px 12px;margin:0">
-          این کاربران به حد نصاب رسیده‌اند ولی رکورد جایزه ندارند (احتمالاً ساخت ساب ناموفق بوده). با تأیید، سرویس ساخته و در تلگرام ارسال می‌شود.
+          These users have reached the required invites but have no reward record (the subscription may have failed to create). Confirm to create the service and send it on Telegram.
         </p>
         <div class="tbl-wrap">
           <table class="tbl-lg">
             <thead>
               <tr>
-                <th>معرف</th>
-                <th>آیدی تلگرام</th>
-                <th>تعداد دعوت</th>
-                <th>لازم</th>
-                <th>عملیات</th>
+                <th>Referrer</th>
+                <th>Telegram ID</th>
+                <th>Invite count</th>
+                <th>Required</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -324,8 +324,8 @@ include __DIR__ . '/inc/referral_nav.php';
                         <button
                           type="submit"
                           class="btn btn-primary btn-sm"
-                          onclick="return confirm('ارسال جایزه برای این کاربر؟');"
-                        ><?= icon('check', 13) ?> تأیید و ارسال جایزه</button>
+                          onclick="return confirm('Send the reward to this user?');"
+                        ><?= icon('check', 13) ?> Confirm and send reward</button>
                       </form>
                       <form method="post" style="margin:0">
                         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
@@ -335,8 +335,8 @@ include __DIR__ . '/inc/referral_nav.php';
                         <button
                           type="submit"
                           class="btn btn-ghost btn-sm"
-                          onclick="return confirm('آخرین محصول این کاربر به‌عنوان جایزه ثبت شود و از لیست حذف گردد؟');"
-                        >انتخاب آخرین محصول به‌عنوان جایزه</button>
+                          onclick="return confirm('Record this user’s latest product as the reward and remove them from the list?');"
+                        >Use latest product as reward</button>
                       </form>
                     </div>
                   </td>
@@ -353,37 +353,37 @@ include __DIR__ . '/inc/referral_nav.php';
 <div class="modal-veil" id="addModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>کمپین دعوت جدید</h3>
+      <h3>New invite campaign</h3>
       <button type="button" class="modal-x" onclick="closeModal('addModal')">✕</button>
     </div>
     <form method="post">
       <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="action" value="save">
       <div class="modal-body">
-        <p class="cf" style="margin-bottom:12px">لینک هر کاربر با <b>آیدی عددی تلگرام</b> او ساخته می‌شود (خودکار).</p>
-        <label class="lbl">عنوان</label>
-        <input class="inp" name="title" placeholder="کمپین تابستان">
-        <label class="lbl">توضیحات</label>
-        <textarea class="inp" name="description" rows="3" placeholder="متن نمایش به کاربر"></textarea>
-        <label class="lbl">محصول جایزه</label>
+        <p class="cf" style="margin-bottom:12px">Each user’s link is built from their <b>numeric Telegram ID</b> automatically.</p>
+        <label class="lbl">Title</label>
+        <input class="inp" name="title" placeholder="Summer campaign">
+        <label class="lbl">Description</label>
+        <textarea class="inp" name="description" rows="3" placeholder="Text shown to the user"></textarea>
+        <label class="lbl">Reward product</label>
         <select class="inp" name="code_product" required>
-          <option value="">انتخاب محصول</option>
+          <option value="">Select a product</option>
           <?php foreach ($products as $p): ?>
             <option value="<?= htmlspecialchars($p['code_product']) ?>"><?= htmlspecialchars($p['name_product']) ?> (<?= htmlspecialchars($p['Location']) ?>)</option>
           <?php endforeach; ?>
         </select>
-        <label class="lbl">تعداد دعوت موردنیاز</label>
+        <label class="lbl">Required invites</label>
         <input class="inp" type="number" name="required_invites" min="1" value="3" required>
-        <label class="lbl"><input type="checkbox" name="new_users_only" value="1" checked> فقط کاربران جدید</label>
-        <label class="lbl">وضعیت</label>
+        <label class="lbl"><input type="checkbox" name="new_users_only" value="1" checked> New users only</label>
+        <label class="lbl">Status</label>
         <select class="inp" name="status">
-          <option value="active">فعال</option>
-          <option value="inactive">غیرفعال</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
         </select>
       </div>
       <div class="modal-foot">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">انصراف</button>
-        <button type="submit" class="btn btn-primary">ذخیره</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
       </div>
     </form>
   </div>
@@ -392,7 +392,7 @@ include __DIR__ . '/inc/referral_nav.php';
 <div class="modal-veil" id="editModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>ویرایش کمپین</h3>
+      <h3>Edit campaign</h3>
       <button type="button" class="modal-x" onclick="closeModal('editModal')">✕</button>
     </div>
     <form method="post">
@@ -400,30 +400,30 @@ include __DIR__ . '/inc/referral_nav.php';
       <input type="hidden" name="action" value="save">
       <input type="hidden" name="edit_id" id="edit_id">
       <div class="modal-body">
-        <label class="lbl">شناسه کمپین</label>
+        <label class="lbl">Campaign ID</label>
         <input class="inp" id="edit_id_display" readonly disabled>
-        <label class="lbl">عنوان</label>
+        <label class="lbl">Title</label>
         <input class="inp" name="title" id="edit_title">
-        <label class="lbl">توضیحات</label>
+        <label class="lbl">Description</label>
         <textarea class="inp" name="description" id="edit_description" rows="3"></textarea>
-        <label class="lbl">محصول جایزه</label>
+        <label class="lbl">Reward product</label>
         <select class="inp" name="code_product" id="edit_code_product" required>
           <?php foreach ($products as $p): ?>
             <option value="<?= htmlspecialchars($p['code_product']) ?>"><?= htmlspecialchars($p['name_product']) ?></option>
           <?php endforeach; ?>
         </select>
-        <label class="lbl">تعداد دعوت</label>
+        <label class="lbl">Invite count</label>
         <input class="inp" type="number" name="required_invites" id="edit_required_invites" min="1" required>
-        <label class="lbl"><input type="checkbox" name="new_users_only" id="edit_new_users_only" value="1"> فقط کاربران جدید</label>
-        <label class="lbl">وضعیت</label>
+        <label class="lbl"><input type="checkbox" name="new_users_only" id="edit_new_users_only" value="1"> New users only</label>
+        <label class="lbl">Status</label>
         <select class="inp" name="status" id="edit_status">
-          <option value="active">فعال</option>
-          <option value="inactive">غیرفعال</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
         </select>
       </div>
       <div class="modal-foot">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">انصراف</button>
-        <button type="submit" class="btn btn-primary">ذخیره</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
       </div>
     </form>
   </div>

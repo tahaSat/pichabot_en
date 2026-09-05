@@ -9,7 +9,7 @@ header('Cache-Control: no-store');
 $token = (string) ($_GET['_csrf'] ?? '');
 if (!hash_equals($_SESSION['csrf'] ?? '', $token)) {
     http_response_code(403);
-    echo json_encode(['ok' => false, 'error' => 'درخواست نامعتبر.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => 'Invalid request.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

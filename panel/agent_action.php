@@ -43,32 +43,32 @@ if ($action === 'promote') {
     $telegramId = trim((string) ($_POST['telegram_id'] ?? ''));
     $newRole = $_POST['new_role'] ?? 'n';
     if (!ctype_digit($telegramId)) {
-        flash('error', 'آیدی تلگرام نامعتبر است.');
+        flash('error', 'Invalid Telegram ID.');
         agent_action_redirect('agents.php');
     }
     if (!in_array($newRole, ['n', 'n2'], true)) {
-        flash('error', 'نقش نامعتبر است.');
+        flash('error', 'Invalid role.');
         agent_action_redirect('agents.php');
     }
     $user = db_fetch($pdo, 'SELECT * FROM user WHERE id = ?', [(int) $telegramId]);
     if (!$user) {
-        flash('error', 'کاربری با این آیدی در ربات یافت نشد.');
+        flash('error', 'No user with this ID was found in the bot.');
         agent_action_redirect('agents.php');
     }
     db_query($pdo, 'UPDATE user SET agent = ?, expire = NULL WHERE id = ?', [$newRole, (int) $telegramId]);
-    flash('success', 'کاربر به «' . user_role_label($newRole) . '» تبدیل شد.');
+    flash('success', 'User was promoted to “' . user_role_label($newRole) . '”.');
     header('Location: agent.php?id=' . (int) $telegramId);
     exit;
 }
 
 if (!$id && $action !== 'promote') {
-    flash('error', 'شناسه کاربر نامعتبر است.');
+    flash('error', 'Invalid user ID.');
     agent_action_redirect('agents.php');
 }
 
 $user = $id ? db_fetch($pdo, 'SELECT * FROM user WHERE id = ?', [$id]) : null;
 if ($id && !$user) {
-    flash('error', 'کاربر یافت نشد.');
+    flash('error', 'User not found.');
     agent_action_redirect('agents.php');
 }
 
@@ -76,7 +76,7 @@ switch ($action) {
     case 'set_role':
         $newRole = $_POST['new_role'] ?? 'f';
         if (!in_array($newRole, ['f', 'n', 'n2'], true)) {
-            flash('error', 'نقش نامعتبر است.');
+            flash('error', 'Invalid role.');
             break;
         }
         if ($newRole === 'f') {
@@ -85,43 +85,43 @@ switch ($action) {
                 db_query($pdo, 'DELETE FROM Requestagent WHERE id = ?', [$id]);
             } catch (Throwable $e) {
             }
-            flash('success', 'نمایندگی حذف شد.');
+            flash('success', 'Agent role was removed.');
             $back = 'agents.php';
         } else {
             db_query($pdo, 'UPDATE user SET agent = ? WHERE id = ?', [$newRole, $id]);
-            flash('success', 'نقش به «' . user_role_label($newRole) . '» تغییر کرد.');
+            flash('success', 'Role changed to “' . user_role_label($newRole) . '”.');
         }
         break;
 
     case 'set_volume_remaining':
         $volume = (int) ($_POST['volume'] ?? -1);
         if ($volume < 0) {
-            flash('error', 'حجم نامعتبر است.');
+            flash('error', 'Invalid volume.');
             break;
         }
         db_query($pdo, 'UPDATE user SET agent_volume_remaining = ? WHERE id = ?', [(string) $volume, $id]);
-        flash('success', 'حجم باقیمانده به ' . number_format($volume) . ' گیگ تنظیم شد.');
+        flash('success', 'Remaining volume was set to ' . number_format($volume) . ' GB.');
         break;
 
     case 'add_volume':
         $volume = (int) ($_POST['volume'] ?? 0);
         if ($volume < 1) {
-            flash('error', 'مقدار افزودن باید حداقل ۱ گیگ باشد.');
+            flash('error', 'Amount to add must be at least 1 GB.');
             break;
         }
         $current = (int) ($user['agent_volume_remaining'] ?? 0);
         db_query($pdo, 'UPDATE user SET agent_volume_remaining = ? WHERE id = ?', [(string) ($current + $volume), $id]);
-        flash('success', number_format($volume) . ' گیگ به سهمیه افزوده شد.');
+        flash('success', number_format($volume) . ' GB was added to the quota.');
         break;
 
     case 'set_price_per_gb':
         $price = (int) ($_POST['price'] ?? -1);
         if ($price < 0) {
-            flash('error', 'قیمت نامعتبر است.');
+            flash('error', 'Invalid price.');
             break;
         }
         db_query($pdo, 'UPDATE user SET agent_price_per_gb = ? WHERE id = ?', [(string) $price, $id]);
-        flash('success', 'قیمت هر گیگ به ' . number_format($price) . ' تومان تنظیم شد.');
+        flash('success', 'Price per GB was set to ' . number_format($price) . ' USD.');
         break;
 
     case 'set_price_tiers':
@@ -156,7 +156,7 @@ switch ($action) {
                 continue;
             }
             if ((float) $t['upto_tb'] <= $prev) {
-                flash('error', 'سقف‌های ترابایت باید صعودی باشند (مثلاً ۱۰ سپس ۳۰).');
+                flash('error', 'TB ceilings must be strictly increasing (e.g. 10 then 30).');
                 $tiersValid = false;
                 break;
             }
@@ -169,62 +169,62 @@ switch ($action) {
         // Keep flat fallback in sync with first tier / current marginal for list views
         $fallback = !empty($tiers) ? (int) $tiers[0]['price_per_gb'] : 0;
         db_query($pdo, 'UPDATE user SET agent_price_tiers = ?, agent_price_per_gb = ? WHERE id = ?', [$json, (string) $fallback, $id]);
-        flash('success', 'پله‌های قیمتی ذخیره شد (' . count($tiers) . ' پله).');
+        flash('success', 'Price tiers were saved (' . count($tiers) . ' tiers).');
         break;
 
     case 'set_max_buy':
         $max = (int) ($_POST['max'] ?? -1);
         if ($max < 0) {
-            flash('error', 'سقف نامعتبر است.');
+            flash('error', 'Invalid cap.');
             break;
         }
         db_query($pdo, 'UPDATE user SET maxbuyagent = ? WHERE id = ?', [(string) $max, $id]);
-        flash('success', 'سقف خرید نماینده ذخیره شد.');
+        flash('success', 'Agent purchase cap was saved.');
         break;
 
     case 'set_expire':
         $days = (int) ($_POST['days'] ?? -1);
         if ($days < 0) {
-            flash('error', 'تعداد روز نامعتبر است.');
+            flash('error', 'Invalid number of days.');
             break;
         }
         if ($days === 0) {
             db_query($pdo, 'UPDATE user SET expire = NULL WHERE id = ?', [$id]);
-            flash('success', 'انقضای نمایندگی حذف شد.');
+            flash('success', 'Agent expiry was removed.');
         } else {
             $ts = time() + ($days * 86400);
             db_query($pdo, 'UPDATE user SET expire = ? WHERE id = ?', [(string) $ts, $id]);
-            flash('success', "انقضای نمایندگی $days روز دیگر تنظیم شد.");
+            flash('success', "Agent expiry was set to $days days from now.");
         }
         break;
 
     case 'add_balance':
         $amount = (int) ($_POST['amount'] ?? 0);
-        if ($amount < 1000 || $amount > 100000000) {
-            flash('error', 'مبلغ باید بین ۱٬۰۰۰ تا ۱۰۰٬۰۰۰٬۰۰۰ تومان باشد.');
+        if ($amount < 1 || $amount > 1000000) {
+            flash('error', 'Amount must be between 1 and 1,000,000 USD.');
             break;
         }
         db_query($pdo, 'UPDATE user SET Balance = Balance + ? WHERE id = ?', [$amount, $id]);
         panel_record_admin_balance_change($pdo, $id, $amount, 'add balance by admin');
         panel_notify_user($id, '💎 ' . number_format($amount) . ' USD was added to your wallet.');
-        flash('success', number_format($amount) . ' تومان به موجودی افزوده شد.');
+        flash('success', number_format($amount) . ' USD was added to the balance.');
         break;
 
     case 'low_balance':
         $amount = (int) ($_POST['amount'] ?? 0);
-        if ($amount < 1 || $amount > 100000000) {
-            flash('error', 'مبلغ نامعتبر است.');
+        if ($amount < 1 || $amount > 1000000) {
+            flash('error', 'Invalid amount.');
             break;
         }
         db_query($pdo, 'UPDATE user SET Balance = GREATEST(0, Balance - ?) WHERE id = ?', [$amount, $id]);
         panel_record_admin_balance_change($pdo, $id, $amount, 'low balance by admin');
         panel_notify_user($id, '❌ ' . number_format($amount) . ' USD was deducted from your wallet.');
-        flash('success', number_format($amount) . ' تومان از موجودی کسر شد.');
+        flash('success', number_format($amount) . ' USD was deducted from the balance.');
         break;
 
     case 'create_bot':
         if (!agent_is_reseller($user['agent'] ?? 'f')) {
-            flash('error', 'ابتدا نقش نمایندگی را تنظیم کنید.');
+            flash('error', 'Set an agent role first.');
             break;
         }
         $token = trim((string) ($_POST['token'] ?? ''));
@@ -239,7 +239,7 @@ switch ($action) {
 
     case 'repair_bot':
         if (!agent_is_reseller($user['agent'] ?? 'f')) {
-            flash('error', 'ابتدا نقش نمایندگی را تنظیم کنید.');
+            flash('error', 'Set an agent role first.');
             break;
         }
         $result = agent_repair_sell_bot($id, $projectRoot);
@@ -249,41 +249,41 @@ switch ($action) {
     case 'set_bot_min_volume':
         $amount = (int) ($_POST['amount'] ?? -1);
         if ($amount < 0) {
-            flash('error', 'مبلغ نامعتبر است.');
+            flash('error', 'Invalid amount.');
             break;
         }
         $row = db_fetch($pdo, 'SELECT setting FROM botsaz WHERE id_user = ?', [(string) $id]);
         if (!$row) {
-            flash('error', 'ربات فروش یافت نشد.');
+            flash('error', 'Sales bot not found.');
             break;
         }
         $setting = json_decode($row['setting'] ?? '{}', true) ?: [];
         $setting['minpricevolume'] = $amount;
         db_query($pdo, 'UPDATE botsaz SET setting = ? WHERE id_user = ?', [json_encode($setting), (string) $id]);
-        flash('success', 'حداقل قیمت حجم ذخیره شد.');
+        flash('success', 'Minimum volume price was saved.');
         break;
 
     case 'set_bot_min_time':
         $amount = (int) ($_POST['amount'] ?? -1);
         if ($amount < 0) {
-            flash('error', 'مبلغ نامعتبر است.');
+            flash('error', 'Invalid amount.');
             break;
         }
         $row = db_fetch($pdo, 'SELECT setting FROM botsaz WHERE id_user = ?', [(string) $id]);
         if (!$row) {
-            flash('error', 'ربات فروش یافت نشد.');
+            flash('error', 'Sales bot not found.');
             break;
         }
         $setting = botsaz_normalize_setting(json_decode($row['setting'] ?? '{}', true) ?: []);
         $setting['minpricetime'] = $amount;
         db_query($pdo, 'UPDATE botsaz SET setting = ? WHERE id_user = ?', [json_encode($setting, JSON_UNESCAPED_UNICODE), (string) $id]);
-        flash('success', 'حداقل قیمت زمان ذخیره شد.');
+        flash('success', 'Minimum time price was saved.');
         break;
 
     case 'set_bot_card_payment':
         $row = db_fetch($pdo, 'SELECT setting FROM botsaz WHERE id_user = ?', [(string) $id]);
         if (!$row) {
-            flash('error', 'ربات فروش یافت نشد.');
+            flash('error', 'Sales bot not found.');
             break;
         }
         $setting = botsaz_normalize_setting(json_decode($row['setting'] ?? '{}', true) ?: []);
@@ -291,18 +291,18 @@ switch ($action) {
         $cardHolder = trim((string) ($_POST['card_holder'] ?? ''));
         $cartInfo = trim((string) ($_POST['cart_info'] ?? ''));
         if ($cardNumber !== '' && !preg_match('/^\d{16}$/', $cardNumber)) {
-            flash('error', 'شماره کارت باید ۱۶ رقم باشد (یا خالی بگذارید).');
+            flash('error', 'Card number must be 16 digits (or leave it empty).');
             break;
         }
         if ($cardHolder !== '' && (mb_strlen($cardHolder) < 2 || mb_strlen($cardHolder) > 80)) {
-            flash('error', 'نام صاحب کارت نامعتبر است.');
+            flash('error', 'Invalid cardholder name.');
             break;
         }
         $setting['card_number'] = $cardNumber;
         $setting['card_holder'] = $cardHolder;
-        $setting['cart_info'] = $cartInfo !== '' ? $cartInfo : 'پس از واریز، تصویر رسید را در همین چت ارسال کنید.';
+        $setting['cart_info'] = $cartInfo !== '' ? $cartInfo : 'After paying, send a photo of the receipt in this chat.';
         db_query($pdo, 'UPDATE botsaz SET setting = ? WHERE id_user = ?', [json_encode($setting, JSON_UNESCAPED_UNICODE), (string) $id]);
-        flash('success', 'تنظیمات کارت به کارت ربات نماینده ذخیره شد.');
+        flash('success', 'Agent bot card-to-card settings were saved.');
         break;
 
     case 'set_hide_panels':
@@ -313,16 +313,16 @@ switch ($action) {
         $panels = array_values(array_filter(array_map('strval', $panels)));
         $exists = db_fetch($pdo, 'SELECT id FROM botsaz WHERE id_user = ?', [(string) $id]);
         if (!$exists) {
-            flash('error', 'ربات فروش یافت نشد.');
+            flash('error', 'Sales bot not found.');
             break;
         }
         db_query($pdo, 'UPDATE botsaz SET hide_panel = ? WHERE id_user = ?', [json_encode($panels, JSON_UNESCAPED_UNICODE), (string) $id]);
-        flash('success', 'پنل‌های مخفی ذخیره شدند.');
+        flash('success', 'Hidden panels were saved.');
         break;
 
     case 'set_n2_categories':
         if (!agent_uses_category_whitelist($user['agent'] ?? 'f')) {
-            flash('error', 'این عملیات فقط برای نمایندگان گروه n و n2 است.');
+            flash('error', 'This action is only for agents in groups n and n2.');
             break;
         }
         agent_ensure_n2_tables();
@@ -340,13 +340,13 @@ switch ($action) {
                 $ins->execute([$agentIdKey, $cat]);
             }
         }
-        flash('success', 'دسته‌بندی‌های مجاز نماینده ذخیره شد (' . count($selected) . ' مورد).');
+        flash('success', 'Allowed agent categories were saved (' . count($selected) . ').');
         break;
 
     case 'set_n2_products':
         // legacy action kept for old forms — convert to categories of selected products
         if (!agent_uses_category_whitelist($user['agent'] ?? 'f')) {
-            flash('error', 'این عملیات فقط برای نمایندگان گروه n و n2 است.');
+            flash('error', 'This action is only for agents in groups n and n2.');
             break;
         }
         agent_ensure_n2_tables();
@@ -370,11 +370,11 @@ switch ($action) {
                 $ins->execute([$agentIdKey, (string) $cat]);
             }
         }
-        flash('success', 'دسته‌بندی‌های مشتق‌شده از محصولات ذخیره شد (' . count($cats) . ' دسته).');
+        flash('success', 'Categories derived from products were saved (' . count($cats) . ').');
         break;
 
     default:
-        flash('error', 'عملیات نامعتبر است.');
+        flash('error', 'Invalid action.');
         break;
 }
 

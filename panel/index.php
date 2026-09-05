@@ -74,7 +74,7 @@ try {
 } catch (Exception $e) {
 }
 
-$pageTitle = 'داشبورد';
+$pageTitle = 'Dashboard';
 $activeNav = 'dashboard';
 $showPageHead = false;
 include __DIR__ . '/inc/layout_head.php';
@@ -85,46 +85,46 @@ include __DIR__ . '/inc/layout_head.php';
         <strong>development_mode</strong>
         = <code><?= $devModeOn ? 'true' : 'false' ?></code>
         <?php if ($devModeOn): ?>
-            — ربات برای کاربران متوقف است؛ کرون و پرداخت اجرا نمی‌شود. ادمین‌ها همچنان دسترسی دارند.
+            — The bot is paused for users; cron and payments will not run. Admins still have access.
         <?php else: ?>
-            — ربات در حالت عادی کار می‌کند.
+            — The bot is running normally.
         <?php endif; ?>
     </div>
-    <span class="tag <?= $devModeOn ? 'tag-warn' : 'tag-ok' ?>"><?= $devModeOn ? 'فعال' : 'غیرفعال' ?></span>
+    <span class="tag <?= $devModeOn ? 'tag-warn' : 'tag-ok' ?>"><?= $devModeOn ? 'Active' : 'Inactive' ?></span>
 </div>
 
 <div class="stats fade-up">
     <div class="stat">
-        <div class="stat-label">کل کاربران</div>
+        <div class="stat-label">Total users</div>
         <div class="stat-num"><?= number_format($totalUsers) ?></div>
-        <div class="stat-meta"><?= $newToday > 0 ? '<span class="up">+' . $newToday . ' امروز</span>' : 'بدون تغییر' ?>
+        <div class="stat-meta"><?= $newToday > 0 ? '<span class="up">+' . $newToday . ' today</span>' : 'No change' ?>
         </div>
     </div>
     <div class="stat ok">
-        <div class="stat-label">درآمد کل</div>
+        <div class="stat-label">Total revenue</div>
         <div class="stat-num">
             <?= $totalRevenue >= 1_000_000
-                ? number_format($totalRevenue / 1_000_000, 1) . '<small>M ت</small>'
-                : number_format($totalRevenue) . '<small>ت</small>' ?>
+                ? number_format($totalRevenue / 1_000_000, 1) . '<small>M USD</small>'
+                : number_format($totalRevenue) . '<small>USD</small>' ?>
         </div>
         <div class="stat-meta">
             <?= $revenueToday > 0
-                ? '<span class="up">+' . number_format($revenueToday) . ' امروز</span>'
-                : 'پرداخت‌های موفق' ?>
+                ? '<span class="up">+' . number_format($revenueToday) . ' today</span>'
+                : 'Successful payments' ?>
         </div>
     </div>
     <div class="stat warn">
-        <div class="stat-label">سرویس فعال</div>
+        <div class="stat-label">Active services</div>
         <div class="stat-num"><?= number_format($activeNow) ?></div>
-        <div class="stat-meta">بدون سرویس تست</div>
+        <div class="stat-meta">Excluding test services</div>
     </div>
     <div class="stat <?= $pendingPay > 0 ? 'no' : '' ?>">
-        <div class="stat-label"><?= $pendingPay > 0 ? 'پرداخت در انتظار' : 'تراکنش امروز' ?></div>
+        <div class="stat-label"><?= $pendingPay > 0 ? 'Pending payments' : 'Transactions today' ?></div>
         <div class="stat-num" style="<?= $pendingPay > 0 ? 'color:var(--no)' : '' ?>">
             <?= number_format($pendingPay > 0 ? $pendingPay : $txToday) ?>
         </div>
         <div class="stat-meta">
-            <?= $pendingPay > 0 ? '<a href="payment.php?tab=pending" style="color:var(--no)">بررسی ←</a>' : 'پرداخت موفق' ?>
+            <?= $pendingPay > 0 ? '<a href="payment.php?tab=pending" style="color:var(--no)">Review →</a>' : 'Successful payments' ?>
         </div>
     </div>
 </div>
@@ -133,21 +133,21 @@ include __DIR__ . '/inc/layout_head.php';
     <div class="card fade-up d1">
         <div class="card-head">
             <div>
-                <div class="card-title">آخرین سفارشات</div>
-                <div class="card-subtitle"><?= count($recentInvoices) ?> مورد اخیر</div>
+                <div class="card-title">Latest orders</div>
+                <div class="card-subtitle"><?= count($recentInvoices) ?> recent</div>
             </div>
-            <a href="invoice.php" class="btn-link" style="font-size:.78rem">همه ←</a>
+            <a href="invoice.php" class="btn-link" style="font-size:.78rem">All →</a>
         </div>
         <?php
         $statusMap = [
-            'active' => ['tag-ok', 'فعال'],
-            'end_of_time' => ['tag-warn', 'منقضی'],
-            'end_of_volume' => ['tag-no', 'اتمام حجم'],
-            'sendedwarn' => ['tag-warn', 'اخطار'],
-            'send_on_hold' => ['tag-plain', 'در انتظار'],
+            'active' => ['tag-ok', 'Active'],
+            'end_of_time' => ['tag-warn', 'Expired'],
+            'end_of_volume' => ['tag-no', 'Data exhausted'],
+            'sendedwarn' => ['tag-warn', 'Warning'],
+            'send_on_hold' => ['tag-plain', 'Pending'],
         ];
         if (empty($recentInvoices)): ?>
-            <div class="empty" style="padding:24px"><p>سفارشی ثبت نشده</p></div>
+            <div class="empty" style="padding:24px"><p>No orders yet</p></div>
         <?php else: ?>
             <div class="data-list">
                 <?php foreach ($recentInvoices as $inv):
@@ -161,14 +161,14 @@ include __DIR__ . '/inc/layout_head.php';
                             </div>
                             <div class="data-row-fields">
                                 <div class="data-field">
-                                    <span class="data-field-label">کاربر</span>
+                                    <span class="data-field-label">User</span>
                                     <span class="data-field-val cm">
                                         <a href="user.php?id=<?= (int) ($inv['id_user'] ?? 0) ?>"><?= htmlspecialchars($inv['id_user'] ?? '—') ?></a>
                                     </span>
                                 </div>
                                 <div class="data-field">
-                                    <span class="data-field-label">مبلغ</span>
-                                    <span class="data-field-val cn"><?= number_format((int) ($inv['price_product'] ?? 0)) ?> ت</span>
+                                    <span class="data-field-label">Amount</span>
+                                    <span class="data-field-val cn"><?= number_format((int) ($inv['price_product'] ?? 0)) ?> USD</span>
                                 </div>
                             </div>
                         </div>
@@ -181,13 +181,13 @@ include __DIR__ . '/inc/layout_head.php';
     <div class="card fade-up d2">
         <div class="card-head">
             <div>
-                <div class="card-title">آخرین کاربران</div>
-                <div class="card-subtitle"><?= count($recentUsers) ?> مورد اخیر</div>
+                <div class="card-title">Latest users</div>
+                <div class="card-subtitle"><?= count($recentUsers) ?> recent</div>
             </div>
-            <a href="users.php" class="btn-link" style="font-size:.78rem">همه ←</a>
+            <a href="users.php" class="btn-link" style="font-size:.78rem">All →</a>
         </div>
         <?php if (empty($recentUsers)): ?>
-            <div class="empty" style="padding:24px"><p>کاربری ثبت نشده</p></div>
+            <div class="empty" style="padding:24px"><p>No users yet</p></div>
         <?php else: ?>
             <div class="data-list">
                 <?php foreach ($recentUsers as $u):
@@ -199,7 +199,7 @@ include __DIR__ . '/inc/layout_head.php';
                     $uname = $u['username'] ?? '';
                     if ($uname === 'none')
                         $uname = '';
-                    $displayName = $name ?: ($uname ? '@' . $uname : 'کاربر #' . $u['id']);
+                    $displayName = $name ?: ($uname ? '@' . $uname : 'User #' . $u['id']);
                     ?>
                     <div class="data-row">
                         <div class="data-row-body">
@@ -208,19 +208,19 @@ include __DIR__ . '/inc/layout_head.php';
                                     <a href="user.php?id=<?= (int) $u['id'] ?>"><?= htmlspecialchars($displayName) ?></a>
                                 </div>
                                 <?php if ($isBlocked): ?>
-                                    <span class="tag tag-no">مسدود</span>
+                                    <span class="tag tag-no">Blocked</span>
                                 <?php else: ?>
                                     <span class="tag <?= user_role_tag($agent) ?>"><?= user_role_label($agent) ?></span>
                                 <?php endif; ?>
                             </div>
                             <div class="data-row-fields">
                                 <div class="data-field">
-                                    <span class="data-field-label">آیدی</span>
+                                    <span class="data-field-label">ID</span>
                                     <span class="data-field-val cm"><?= htmlspecialchars($u['id']) ?></span>
                                 </div>
                                 <div class="data-field">
-                                    <span class="data-field-label">موجودی</span>
-                                    <span class="data-field-val cn"><?= number_format((int) ($u['Balance'] ?? 0)) ?> ت</span>
+                                    <span class="data-field-label">Balance</span>
+                                    <span class="data-field-val cn"><?= number_format((int) ($u['Balance'] ?? 0)) ?> USD</span>
                                 </div>
                             </div>
                         </div>

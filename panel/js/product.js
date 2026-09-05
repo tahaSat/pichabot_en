@@ -62,16 +62,16 @@ function saveProductOrder(tbody) {
         .then(function (res) { return res.json(); })
         .then(function (data) {
             if (!data.ok) {
-                throw new Error(data.error || 'ذخیره ترتیب ناموفق بود.');
+                throw new Error(data.error || 'Could not save order.');
             }
             updateProductSortIndexes(tbody);
             if (window.toast) {
-                window.toast('ترتیب محصولات ذخیره شد.', 'ok', 2200);
+                window.toast('Product order saved.', 'ok', 2200);
             }
         })
         .catch(function (err) {
             if (window.toast) {
-                window.toast(err.message || 'خطا در ذخیره ترتیب.', 'no');
+                window.toast(err.message || 'Could not save order.', 'no');
             }
             location.reload();
         })

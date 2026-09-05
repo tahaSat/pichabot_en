@@ -409,12 +409,12 @@ function record_admin_order_payment(PDO $pdo, $userId, $price, string $username,
     $dateacc = date('Y/m/d H:i:s');
     $orderId = bin2hex(random_bytes(5));
     $invoiceRef = 'getconfigafterpay|' . $username;
-    $noteParts = ['سفارش ساخته‌شده توسط ادمین'];
+    $noteParts = ['Order created by admin'];
     if ($productName !== '') {
         $noteParts[] = $productName;
     }
     if ($idInvoice !== '') {
-        $noteParts[] = 'فاکتور ' . $idInvoice;
+        $noteParts[] = 'Invoice ' . $idInvoice;
     }
     $note = implode(' | ', $noteParts);
     try {
@@ -453,7 +453,7 @@ function record_admin_extend_payment(PDO $pdo, $userId, $price, string $username
         $orderId = bin2hex(random_bytes(5));
     }
     $invoiceRef = 'getextenduser|' . $username . '%' . $orderId;
-    $noteParts = ['تمدید توسط ادمین'];
+    $noteParts = ['Renewal by admin'];
     if ($productName !== '') {
         $noteParts[] = $productName;
     }
@@ -692,7 +692,7 @@ function stats_tehran_named_range(string $name): array
         'end_label' => jalali_tehran_format($end, 'Y/m/d H:i:s'),
         'start_dt' => tehran_datetime_string($start),
         'end_dt' => tehran_datetime_string($end),
-        'label' => jalali_tehran_format($start, 'Y/m/d H:i:s') . ' تا ' . jalali_tehran_format($end, 'Y/m/d H:i:s'),
+        'label' => jalali_tehran_format($start, 'Y/m/d H:i:s') . ' until ' . jalali_tehran_format($end, 'Y/m/d H:i:s'),
     ];
 }
 
@@ -996,20 +996,20 @@ function bot_format_sold_volume_block(array $vol, bool $html = false): string
     $invoice = $fmt($vol['invoice'] ?? 0);
     $extra = $fmt($vol['extra'] ?? 0);
     if ($html) {
-        $lines = "🔋 <b>حجم فروخته شده:</b> <code>$total</code> GB\n"
-            . "🛒 <b>از خرید سرویس:</b> <code>$invoice</code> GB\n"
-            . "📦 <b>از Extra data:</b> <code>$extra</code> GB";
+        $lines = "🔋 <b>Sold volume:</b> <code>$total</code> GB\n"
+            . "🛒 <b>From service purchases:</b> <code>$invoice</code> GB\n"
+            . "📦 <b>From extra data:</b> <code>$extra</code> GB";
     } else {
-        $lines = "🔋 حجم فروخته شده : $total GB\n"
-            . "🛒 از خرید سرویس : $invoice GB\n"
-            . "📦 از Extra data : $extra GB";
+        $lines = "🔋 Sold volume : $total GB\n"
+            . "🛒 From service purchases : $invoice GB\n"
+            . "📦 From extra data : $extra GB";
     }
 
     $panels = $vol['panels'] ?? [];
     if ($panels === []) {
         return $lines;
     }
-    $lines .= $html ? "\n\n📡 <b>حجم فروخته‌شده هر پنل:</b>" : "\n\n📡 حجم فروخته‌شده هر پنل :";
+    $lines .= $html ? "\n\n📡 <b>Sold volume per panel:</b>" : "\n\n📡 Sold volume per panel :";
     $shown = 0;
     $totalPanels = count($panels);
     foreach ($panels as $panel) {
@@ -1021,8 +1021,8 @@ function bot_format_sold_volume_block(array $vol, bool $html = false): string
         if ($shown > 0 && mb_strlen($lines . $line) > 1800) {
             $remaining = $totalPanels - $shown;
             $lines .= $html
-                ? "\n• … و <code>$remaining</code> پنل دیگر"
-                : "\n• … و $remaining پنل دیگر";
+                ? "\n• … and <code>$remaining</code> more panels"
+                : "\n• … and $remaining more panels";
             break;
         }
         $lines .= $line;
@@ -1111,11 +1111,11 @@ function bot_format_first_purchase_block(array $fp, int $ordersCount, float $ord
     $pctMoney = $ordersSum > 0 ? round(((float) ($fp['sum'] ?? 0) / $ordersSum) * 100, 2) : 0;
     $rlm = "\u{200F}";
     if ($html) {
-        return "{$rlm}🆕 <b>خرید اول:</b> <code>$count</code> عدد — <code>$pct</code>٪ از فروش\n"
-            . "{$rlm}💰 <b>مبلغ خرید اول:</b> <code>$sum</code> USD — <code>$pctMoney</code>٪ از مبلغ فروش";
+        return "{$rlm}🆕 <b>First purchase:</b> <code>$count</code> — <code>$pct</code>% of sales\n"
+            . "{$rlm}💰 <b>First-purchase amount:</b> <code>$sum</code> USD — <code>$pctMoney</code>% of sales amount";
     }
-    return "{$rlm}🆕 خرید اول : $count عدد — $pct٪ از سفارشات\n"
-        . "{$rlm}💰 مبلغ خرید اول : $sum USD — $pctMoney٪ از مبلغ سفارشات";
+    return "{$rlm}🆕 First purchase : $count — $pct% of orders\n"
+        . "{$rlm}💰 First-purchase amount : $sum USD — $pctMoney% of order amount";
 }
 
 /**
@@ -1227,7 +1227,7 @@ function bot_period_stats(PDO $pdo, int $startTs, int $endTs): array
 function bot_format_period_stats(array $s, string $title, ?string $rangeLabel = null): string
 {
     $rangeLine = $rangeLabel !== null && $rangeLabel !== ''
-        ? "\n⏳ بازه تایم : $rangeLabel\n"
+        ? "\n⏳ Time range : $rangeLabel\n"
         : "\n";
     $sumOrder = number_format($s['orders_sum'], 0);
     $sumExtend = number_format($s['extends_sum'], 0);
@@ -1242,7 +1242,7 @@ function bot_format_period_stats(array $s, string $title, ?string $rangeLabel = 
     $soldVolumeBlock = bot_format_sold_volume_block($s['sold_volume'] ?? []);
     $forecastVolume = $s['forecast_sold_volume'] ?? null;
     if ($forecastVolume !== null) {
-        $soldVolumeBlock .= "\n📅 حجم فروخته‌شده پیش‌بینی‌شده ماهانه : " . bot_format_gb($forecastVolume) . " GB";
+        $soldVolumeBlock .= "\n📅 Forecast monthly sold volume : " . bot_format_gb($forecastVolume) . " GB";
     }
     $firstPurchaseBlock = bot_format_first_purchase_block(
         $s['first_purchase'] ?? [],
@@ -1253,36 +1253,36 @@ function bot_format_period_stats(array $s, string $title, ?string $rangeLabel = 
     return "
 🕐 <b>$title</b>
 $rangeLine
-🛍 تعداد سفارشات : {$s['orders']} عدد
-💸 جمع مبلغ سفارشات  : $sumOrder USD
+🛍 Orders : {$s['orders']}
+💸 Order total : $sumOrder USD
 $firstPurchaseBlock
 
-🧲 تعداد تمدید  : {$s['extends']} عدد
-💰 جمع Renewal price: $sumExtend USD
+🧲 Renewals : {$s['extends']}
+💰 Renewal total : $sumExtend USD
 
-📦 حجم‌های اضافه  :{$s['extra_volume']} عدد
-💰 مبلغ حجم‌های اضافه : $sumExtraVolume USD
+📦 Extra data : {$s['extra_volume']}
+💰 Extra data amount : $sumExtraVolume USD
 
-⏱️ زمان‌های اضافه  : {$s['extra_time']} عدد
-💰 مبلغ زمان‌های اضافه  : $sumExtraTime USD
+⏱️ Extra time : {$s['extra_time']}
+💰 Extra time amount : $sumExtraTime USD
 
-📍 تغییر لوکیشن  : {$s['change_location']} عدد
-💰 مبلغ تغییر لوکیشن : $sumChange USD
+📍 Location changes : {$s['change_location']}
+💰 Location-change amount : $sumChange USD
 
-💳 شارژ کیف پول : $walletCount عدد
-💰 مبلغ شارژ کیف پول : $sumWallet USD
+💳 Wallet top-ups : $walletCount
+💰 Wallet top-up amount : $sumWallet USD
 
-💸 تعداد برداشت از کیف پول : $withdrawCount عدد
-💰 مبلغ برداشت از کیف پول : $sumWithdraw USD
+💸 Wallet withdrawals : $withdrawCount
+💰 Withdrawal amount : $sumWithdraw USD
 
-📊 تعداد کل : {$s['total_count']} عدد
-💵 جمع مبلغ کل : $sumTotal USD
+📊 Total count : {$s['total_count']}
+💵 Total amount : $sumTotal USD
 
 $soldVolumeBlock
 
-🔑 اکانت‌های تست  : {$s['tests']} عدد
-👤 تعداد کاربران  : {$s['users']} نفر
-⏱ میانگین زمان عضویت تا اولین خرید : {$s['avg_join']}
+🔑 Test accounts : {$s['tests']}
+👤 Users : {$s['users']}
+⏱ Average time from join to first purchase : {$s['avg_join']}
 ";
 }
 
@@ -1293,7 +1293,7 @@ function format_duration_fa(?float $seconds): string
     }
     $seconds = (int) round($seconds);
     if ($seconds < 60) {
-        return 'کمتر از ۱ minutes';
+        return 'less than 1 minute';
     }
     $days = intdiv($seconds, 86400);
     $hours = intdiv($seconds % 86400, 3600);
@@ -1308,7 +1308,7 @@ function format_duration_fa(?float $seconds): string
     if ($minutes > 0 && $days === 0) {
         $parts[] = $minutes . ' minutes';
     }
-    return $parts === [] ? 'کمتر از ۱ minutes' : implode(' و ', $parts);
+    return $parts === [] ? 'less than 1 minute' : implode(' ', $parts);
 }
 
 /**
@@ -1319,7 +1319,7 @@ function format_duration_fa(?float $seconds): string
  */
 function avg_join_to_first_purchase(PDO $pdo, ?int $joinStart = null, ?int $joinEnd = null): array
 {
-    $empty = ['avg_seconds' => null, 'buyers' => 0, 'formatted' => 'داده کافی نیست'];
+    $empty = ['avg_seconds' => null, 'buyers' => 0, 'formatted' => 'Not enough data'];
     $registerEpoch = unix_column_epoch_sql('u.register');
     $sellEpoch = unix_column_epoch_sql('i.time_sell');
     $paidSql = invoice_paid_status_sql('i.Status');
@@ -1367,7 +1367,7 @@ function avg_join_to_first_purchase(PDO $pdo, ?int $joinStart = null, ?int $join
         return [
             'avg_seconds' => $avg,
             'buyers' => $buyers,
-            'formatted' => format_duration_fa($avg) . ' (' . number_format($buyers) . ' کاربر)',
+            'formatted' => format_duration_fa($avg) . ' (' . number_format($buyers) . ' users)',
         ];
     } catch (Exception $e) {
         error_log('avg_join_to_first_purchase: ' . $e->getMessage());
@@ -2000,7 +2000,7 @@ function paymentReceiptAutoConfirmedKeyboard()
     return json_encode([
         'inline_keyboard' => [
             [
-                ['text' => 'رسید توسط ربات تایید شده', 'callback_data' => 'receipt_bot_confirmed'],
+                ['text' => 'Receipt confirmed by bot', 'callback_data' => 'receipt_bot_confirmed'],
             ],
         ],
     ]);
@@ -2011,7 +2011,7 @@ function paymentReceiptAdminConfirmedKeyboard()
     return json_encode([
         'inline_keyboard' => [
             [
-                ['text' => 'رسید توسط ادمین تایید شد', 'callback_data' => 'receipt_admin_confirmed'],
+                ['text' => 'Receipt confirmed by admin', 'callback_data' => 'receipt_admin_confirmed'],
             ],
         ],
     ]);
@@ -3331,12 +3331,12 @@ function DirectPayment($order_id, $image = 'images.jpg')
             sendmessage($Balance_id['id'], $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
             sendmessage($Balance_id['id'], "💎 The service could not be created, so $balance USD was added back to your wallet.", $keyboard, 'HTML');
             $texterros = "
-⭕️ خطا در ساخت کانفیگ
-✍️ دلیل خطا : 
+⭕️ Config creation error
+✍️ Error reason :
 {$dataoutput['msg']}
-آیدی کابر : {$Balance_id['id']}
-نام کاربری کاربر : @{$Balance_id['username']}
-نام پنل : {$marzban_list_get['name_panel']}";
+User ID : {$Balance_id['id']}
+Username : @{$Balance_id['username']}
+Panel : {$marzban_list_get['name_panel']}";
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],
@@ -3395,7 +3395,7 @@ function DirectPayment($order_id, $image = 'images.jpg')
                 'price_original' => null,
                 'price_final' => $get_invoice['price_product'] ?? ($Payment_report['price'] ?? null),
             ]);
-            $text_report = "⭕️ یک کاربر با Username @{$Balance_id['username']}  و آیدی عددی {$Balance_id['id']} از کد تخفیف {$partsdic[1]} استفاده کرد.";
+            $text_report = "⭕️ User @{$Balance_id['username']} (ID {$Balance_id['id']}) used discount code {$partsdic[1]}.";
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],
@@ -3425,8 +3425,8 @@ function DirectPayment($order_id, $image = 'images.jpg')
 
         $result USD was added to your wallet from your referral";
                     $textreportport = "
-مبلغ $result به کاربر {$Balance_id['affiliates']} برای پورسانت از کاربر {$Balance_id['id']} واریز گردید 
-تایم : $dateacc";
+$result USD was credited to user {$Balance_id['affiliates']} as commission from user {$Balance_id['id']}
+Time : $dateacc";
                     if (strlen($setting['Channel_Report']) > 0) {
                         telegram('sendmessage', [
                             'chat_id' => $setting['Channel_Report'],
@@ -3454,8 +3454,8 @@ function DirectPayment($order_id, $image = 'images.jpg')
 
         $result USD was added to your wallet from your referral";
                 $textreportport = "
-مبلغ $result به کاربر {$Balance_id['affiliates']} برای پورسانت از کاربر {$Balance_id['id']} واریز گردید 
-تایم : $dateacc";
+$result USD was credited to user {$Balance_id['affiliates']} as commission from user {$Balance_id['id']}
+Time : $dateacc";
                 if (strlen($setting['Channel_Report']) > 0) {
                     telegram('sendmessage', [
                         'chat_id' => $setting['Channel_Report'],
@@ -3494,24 +3494,24 @@ function DirectPayment($order_id, $image = 'images.jpg')
                 ],
             ]
         ]);
-        $text_report = "📣 جزئیات ساخت اکانت در ربات بعد پرداخت ثبت شد .
+        $text_report = "📣 Account creation details after payment.
 
 $textonebuy
-▫️آیدی عددی کاربر : <code>{$Balance_id['id']}</code>
-▫️نام کاربری کاربر :@{$Balance_id['username']}
-▫️نام کاربری کانفیگ :$username_ac
-▫️لوکیشن سرویس : {$get_invoice['Service_location']}
-▫️زمان خریداری شده :{$get_invoice['Service_time']} روز
-▫️نام محصول خریداری شده :{$get_invoice['name_product']}
-▫️حجم خریداری شده : {$get_invoice['Volume']} GB
-▫️موجودی قبل خرید : $balancebefore تومان
-▫️موجودی بعد خرید : $balanceformatsell تومان
-▫️کد پیگیری: {$get_invoice['id_invoice']}
-▫️نوع کاربر : {$Balance_id['agent']}
-▫️شماره تلفن کاربر : {$Balance_id['number']}
-▫️قیمت محصول : {$get_invoice['price_product']} تومان
-▫️قیمت نهایی : {$Payment_report['price']} تومان
-▫️زمان خرید : $timejalali";
+▫️User ID : <code>{$Balance_id['id']}</code>
+▫️Username : @{$Balance_id['username']}
+▫️Config username : $username_ac
+▫️Service location : {$get_invoice['Service_location']}
+▫️Purchased duration : {$get_invoice['Service_time']} days
+▫️Purchased product : {$get_invoice['name_product']}
+▫️Purchased volume : {$get_invoice['Volume']} GB
+▫️Balance before purchase : $balancebefore USD
+▫️Balance after purchase : $balanceformatsell USD
+▫️Tracking code : {$get_invoice['id_invoice']}
+▫️User type : {$Balance_id['agent']}
+▫️Phone number : {$Balance_id['number']}
+▫️Product price : {$get_invoice['price_product']} USD
+▫️Final price : {$Payment_report['price']} USD
+▫️Purchase time : $timejalali";
         if (strlen($setting['Channel_Report']) > 0) {
             telegram('sendmessage', [
                 'chat_id' => $setting['Channel_Report'],
@@ -3529,16 +3529,16 @@ $textonebuy
         update("invoice", "Status", "active", "username", $get_invoice['username']);
         if ($Payment_report['Payment_Method'] == "cart to cart" or $Payment_report['Payment_Method'] == "arze digital offline") {
             update("invoice", "Status", "active", "id_invoice", $get_invoice['id_invoice']);
-            $textconfrom = "✅ پرداخت تایید شده
- 🛍خرید سرویس 
- ▫️Config username :$username_ac
-▫️لوکیشن سرویس : {$get_invoice['Service_location']}
-👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 Tracking code پرداخت: {$Payment_report['id_order']}
-⚜️ Username: @{$Balance_id['username']}
-💎 Balance قبل خرید  : {$Balance_id['Balance']}
-💸 Amount paid: $format_price_cart USD
-✍️ توضیحات : {$Payment_report['dec_not_confirmed']}
+            $textconfrom = "✅ Payment confirmed
+🛍 Service purchase
+▫️Config username : $username_ac
+▫️Service location : {$get_invoice['Service_location']}
+👤 User ID : <code>{$Balance_id['id']}</code>
+🛒 Payment tracking code : {$Payment_report['id_order']}
+⚜️ Username : @{$Balance_id['username']}
+💎 Balance before purchase : {$Balance_id['Balance']}
+💸 Amount paid : $format_price_cart USD
+✍️ Notes : {$Payment_report['dec_not_confirmed']}
 
 ";
             if (!empty($from_id) && !empty($message_id)) {
@@ -3592,10 +3592,10 @@ $textonebuy
             sendmessage($Balance_id['id'], "💎 The service could not be renewed, so $balance USD was added back to your wallet.", $keyboard, 'HTML');
             $extend['msg'] = json_encode($extend['msg']);
             $textreports = "
-        خطای تمدید سرویس
-نام پنل : {$marzban_list_get['name_panel']}
-نام کاربری سرویس : {$nameloc['username']}
-دلیل خطا : {$extend['msg']}";
+        Service renewal error
+Panel : {$marzban_list_get['name_panel']}
+Service username : {$nameloc['username']}
+Error reason : {$extend['msg']}";
             sendmessage($nameloc['id_user'], "❌ A renewal error occurred. Please contact support.", null, 'HTML');
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
@@ -3625,7 +3625,7 @@ $textonebuy
                 'price_original' => $prodcut['price_product'] ?? null,
                 'price_final' => $Payment_report['price'] ?? null,
             ]);
-            $text_report = "⭕️ یک کاربر با Username @{$Balance_id['username']}  و آیدی عددی {$Balance_id['id']} از کد تخفیف {$partsdic[1]} استفاده کرد.";
+            $text_report = "⭕️ User @{$Balance_id['username']} (ID {$Balance_id['id']}) used discount code {$partsdic[1]}.";
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],
@@ -3670,18 +3670,18 @@ $textonebuy
             update("user", "score", $scorenew, "id", $Balance_id['id']);
         }
         $timejalali = jdate('Y/m/d H:i:s');
-        $text_report = "📣 جزئیات تمدید اکانت در ربات شما ثبت شد .
-    
-▫️آیدی عددی کاربر : <code>{$Balance_id['id']}</code>
-▫️نام کاربری کاربر : @{$Balance_id['username']}
-▫️نام کاربری کانفیگ :$usernamepanel
-▫️موقعیت سرویس سرویس : {$nameloc['Service_location']}
-▫️نام محصول : {$prodcut['name_product']}
-▫️حجم محصول : {$prodcut['Volume_constraint']}
-▫️زمان محصول : {$prodcut['Service_time']}
-▫️مبلغ تمدید : $priceproductformat تومان
-▫️موجودی قبل از خرید : $balanceformatsell تومان
-▫️زمان خرید : $timejalali";
+        $text_report = "📣 Account renewal details.
+
+▫️User ID : <code>{$Balance_id['id']}</code>
+▫️Username : @{$Balance_id['username']}
+▫️Config username : $usernamepanel
+▫️Service location : {$nameloc['Service_location']}
+▫️Product : {$prodcut['name_product']}
+▫️Product volume : {$prodcut['Volume_constraint']}
+▫️Product duration : {$prodcut['Service_time']}
+▫️Renewal amount : $priceproductformat USD
+▫️Balance before purchase : $balanceformatsell USD
+▫️Purchase time : $timejalali";
         if (strlen($setting['Channel_Report']) > 0) {
             telegram('sendmessage', [
                 'chat_id' => $setting['Channel_Report'],
@@ -3693,17 +3693,17 @@ $textonebuy
         update("invoice", "Status", "active", "id_invoice", $nameloc['id_invoice']);
         if ($Payment_report['Payment_Method'] == "cart to cart" or $Payment_report['Payment_Method'] == "arze digital offline") {
 
-            $textconfrom = "✅ پرداخت تایید شده
-🔋 تمدید سرویس
+            $textconfrom = "✅ Payment confirmed
+🔋 Service renewal
 🪪 Config username : $usernamepanel
 🛍 Product : {$prodcut['name_product']}
-🌏 نام لوکیشن : {$nameloc['Service_location']}
-👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 Tracking code پرداخت: {$Payment_report['id_order']}
-⚜️ Username: @{$Balance_id['username']}
-💎 Balance قبل تمدید  : {$Balance_id['Balance']}
-💸 Amount paid: $format_price_cart USD
-✍️ توضیحات : {$Payment_report['dec_not_confirmed']}
+🌏 Location : {$nameloc['Service_location']}
+👤 User ID : <code>{$Balance_id['id']}</code>
+🛒 Payment tracking code : {$Payment_report['id_order']}
+⚜️ Username : @{$Balance_id['username']}
+💎 Balance before renewal : {$Balance_id['Balance']}
+💸 Amount paid : $format_price_cart USD
+✍️ Notes : {$Payment_report['dec_not_confirmed']}
 
 ";
             if (!empty($from_id) && !empty($message_id)) {
@@ -3732,10 +3732,10 @@ $textonebuy
         $extra_volume = $ManagePanel->extra_volume($nameloc['username'], $marzban_list_get['code_panel'], $volume);
         if ($extra_volume['status'] == false) {
             $extra_volume['msg'] = json_encode($extra_volume['msg']);
-            $textreports = "خطای خرید حجم اضافه
-نام پنل : {$marzban_list_get['name_panel']}
-نام کاربری سرویس : {$nameloc['username']}
-دلیل خطا : {$extra_volume['msg']}";
+            $textreports = "Extra data purchase error
+Panel : {$marzban_list_get['name_panel']}
+Service username : {$nameloc['username']}
+Error reason : {$extra_volume['msg']}";
             sendmessage($nameloc['id_user'], "❌ Extra-data purchase failed. Please contact support.", null, 'HTML');
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
@@ -3778,29 +3778,29 @@ $textonebuy
         sendmessage($Balance_id['id'], $textvolume, $keyboardextrafnished, 'HTML');
         $volumes = $volume;
         if ($Payment_report['Payment_Method'] == "cart to cart") {
-            $textconfrom = "✅ پرداخت تایید شده
-🔋 خرید Extra data
-🛍 حجم خریداری شده  : $volumes GB
-👤 Config username {$steppay[0]}
-👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 Tracking code پرداخت: {$Payment_report['id_order']}
-⚜️ Username: @{$Balance_id['username']}
-💎 Balance قبل ازافزایش Balance : {$Balance_id['Balance']}
-💸 Amount paid: $format_price_cart USD
+            $textconfrom = "✅ Payment confirmed
+🔋 Extra data purchase
+🛍 Volume purchased : $volumes GB
+👤 Config username : {$steppay[0]}
+👤 User ID : <code>{$Balance_id['id']}</code>
+🛒 Payment tracking code : {$Payment_report['id_order']}
+⚜️ Username : @{$Balance_id['username']}
+💎 Balance before top-up : {$Balance_id['Balance']}
+💸 Amount paid : $format_price_cart USD
 ";
             if (!empty($from_id) && !empty($message_id)) {
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
             }
         }
         update("invoice", "Status", "active", "id_invoice", $nameloc['id_invoice']);
-        $text_report = "⭕️ یک کاربر Extra data خریده است
-        
-اطلاعات کاربر : 
-🪪 آیدی عددی : {$Balance_id['id']}
-🛍 حجم خریداری شده  : $volumes GB
-💰 مبلغ پرداختی : {$Payment_report['price']} USD
-👤 Config username {$steppay[0]}
-Balance کاربر قبل خرید : {$Balance_id['Balance']}
+        $text_report = "⭕️ A user purchased extra data
+
+User info :
+🪪 User ID : {$Balance_id['id']}
+🛍 Volume purchased : $volumes GB
+💰 Amount paid : {$Payment_report['price']} USD
+👤 Config username : {$steppay[0]}
+Balance before purchase : {$Balance_id['Balance']}
 ";
         if (strlen($setting['Channel_Report']) > 0) {
             telegram('sendmessage', [
@@ -3834,10 +3834,10 @@ Balance کاربر قبل خرید : {$Balance_id['Balance']}
         $extra_time = $ManagePanel->extra_time($nameloc['username'], $marzban_list_get['code_panel'], $tmieextra);
         if ($extra_time['status'] == false) {
             $extra_time['msg'] = json_encode($extra_time['msg']);
-            $textreports = "خطای خرید حجم اضافه
-نام پنل : {$marzban_list_get['name_panel']}
-نام کاربری سرویس : {$nameloc['username']}
-دلیل خطا : {$extra_time['msg']}";
+            $textreports = "Extra time purchase error
+Panel : {$marzban_list_get['name_panel']}
+Service username : {$nameloc['username']}
+Error reason : {$extra_time['msg']}";
             sendmessage($from_id, "❌ Extra-data purchase failed. Please contact support.", null, 'HTML');
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage', [
@@ -3880,28 +3880,28 @@ Balance کاربر قبل خرید : {$Balance_id['Balance']}
         sendmessage($Balance_id['id'], $textextratime, $keyboardextrafnished, 'HTML');
         if ($Payment_report['Payment_Method'] == "cart to cart") {
             $volumes = $tmieextra;
-            $textconfrom = "✅ پرداخت تایید شده
-🔋 خرید Extra time
-🛍 زمان خریداری شده  : $volumes days
-👤 Config username {$steppay[0]}
-👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 Tracking code پرداخت: {$Payment_report['id_order']}
-⚜️ Username: @{$Balance_id['username']}
-💎 Balance قبل ازافزایش Balance : {$Balance_id['Balance']}
-💸 Amount paid: $format_price_cart USD
+            $textconfrom = "✅ Payment confirmed
+🔋 Extra time purchase
+🛍 Time purchased : $volumes days
+👤 Config username : {$steppay[0]}
+👤 User ID : <code>{$Balance_id['id']}</code>
+🛒 Payment tracking code : {$Payment_report['id_order']}
+⚜️ Username : @{$Balance_id['username']}
+💎 Balance before top-up : {$Balance_id['Balance']}
+💸 Amount paid : $format_price_cart USD
 ";
             if (!empty($from_id) && !empty($message_id)) {
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
             }
         }
         update("invoice", "Status", "active", "id_invoice", $nameloc['id_invoice']);
-        $text_report = "⭕️ یک کاربر Extra time خریده است
-        
-اطلاعات کاربر : 
-🪪 آیدی عددی : {$Balance_id['id']}
-🛍 زمان خریداری شده  : $volumes days
-💰 مبلغ پرداختی : {$Payment_report['price']} USD
-👤 Config username {$steppay[0]}";
+        $text_report = "⭕️ A user purchased extra time
+
+User info :
+🪪 User ID : {$Balance_id['id']}
+🛍 Time purchased : $volumes days
+💰 Amount paid : {$Payment_report['price']} USD
+👤 Config username : {$steppay[0]}";
         if (strlen($setting['Channel_Report']) > 0) {
             telegram('sendmessage', [
                 'chat_id' => $setting['Channel_Report'],
@@ -3916,14 +3916,14 @@ Balance کاربر قبل خرید : {$Balance_id['Balance']}
         $Payment_report['price'] = number_format($Payment_report['price'], 0);
         $format_price_cart = $Payment_report['price'];
         if ($Payment_report['Payment_Method'] == "cart to cart" or $Payment_report['Payment_Method'] == "arze digital offline") {
-            $textconfrom = "⭕️ یک پرداخت جدید انجام شده است
-        افزایش موجودی.
-👤 شناسه کاربر: <code>{$Balance_id['id']}</code>
-🛒 کد پیگیری پرداخت: {$Payment_report['id_order']}
-⚜️ نام کاربری: @{$Balance_id['username']}
-💸 مبلغ پرداختی: $format_price_cart تومان
-💎 موجودی قبل ازافزایش موجودی : {$Balance_id['Balance']}
-✍️ توضیحات : {$Payment_report['dec_not_confirmed']}";
+            $textconfrom = "⭕️ A new payment was completed
+Wallet top-up.
+👤 User ID : <code>{$Balance_id['id']}</code>
+🛒 Payment tracking code : {$Payment_report['id_order']}
+⚜️ Username : @{$Balance_id['username']}
+💸 Amount paid : $format_price_cart USD
+💎 Balance before top-up : {$Balance_id['Balance']}
+✍️ Notes : {$Payment_report['dec_not_confirmed']}";
             if (!empty($from_id) && !empty($message_id)) {
                 Editmessagetext($from_id, $message_id, $textconfrom, $Confirm_pay);
             }
@@ -4688,18 +4688,18 @@ function invoice_auto_renew_notify_enabled(array $invoice, $fromId, $telegramUse
     $otherreportRow = select('topicid', 'idreport', 'report', 'otherreport', 'select');
     $otherreport = is_array($otherreportRow) ? ($otherreportRow['idreport'] ?? null) : null;
     $tgUser = ltrim((string) $telegramUsername, '@');
-    $tgUser = $tgUser !== '' ? '@' . $tgUser : 'ندارد';
-    $firstName = $firstName !== '' ? $firstName : 'نامشخص';
+    $tgUser = $tgUser !== '' ? '@' . $tgUser : 'none';
+    $firstName = $firstName !== '' ? $firstName : 'Unknown';
     $timeText = function_exists('jdate') ? jdate('Y/m/d H:i:s') : date('Y/m/d H:i:s');
-    $text_report = "♻️ یک کاربر تمدید خودکار را روشن کرد.
+    $text_report = "♻️ A user enabled auto-renew.
 
-▫️آیدی عددی کاربر : <code>{$fromId}</code>
-▫️نام کاربر : {$firstName}
-▫️Username تلگرام : {$tgUser}
+▫️User ID : <code>{$fromId}</code>
+▫️Name : {$firstName}
+▫️Telegram username : {$tgUser}
 ▫️Service username : <code>{$invoice['username']}</code>
 ▫️Product : {$invoice['name_product']}
 ▫️Service location : {$invoice['Service_location']}
-▫️زمان : {$timeText}";
+▫️Time : {$timeText}";
     telegram('sendmessage', [
         'chat_id' => $setting['Channel_Report'],
         'message_thread_id' => $otherreport,
@@ -5104,10 +5104,10 @@ function invoice_try_auto_renew(array $invoice, array $user, array $userData, $p
     );
     if (($extend['status'] ?? false) == false) {
         $extendMsg = json_encode($extend['msg'] ?? $extend, JSON_UNESCAPED_UNICODE);
-        $textreports = "خطای تمدید خودکار سرویس
-نام پنل : {$panel['name_panel']}
+        $textreports = "Auto-renew error
+Panel : {$panel['name_panel']}
 Service username : {$invoice['username']}
-دلیل خطا : {$extendMsg}";
+Error reason : {$extendMsg}";
         $errorreportRow = select('topicid', 'idreport', 'report', 'errorreport', 'select');
         $errorreport = is_array($errorreportRow) ? ($errorreportRow['idreport'] ?? null) : null;
         if (strlen($setting['Channel_Report'] ?? '') > 0) {
@@ -5175,18 +5175,18 @@ Service username : {$invoice['username']}
     $balanceAfter = number_format((int) (is_array($balanceAfterRow) ? ($balanceAfterRow['Balance'] ?? 0) : 0));
     $balanceBefore = number_format($balance);
     $timeText = function_exists('jdate') ? jdate('Y/m/d H:i:s') : $dateacc;
-    $text_report = "📣 تمدید خودکار سرویس ثبت شد.
+    $text_report = "📣 Auto-renew was recorded.
 
-▫️آیدی عددی کاربر : <code>{$user['id']}</code>
+▫️User ID : <code>{$user['id']}</code>
 ▫️Config username : {$invoice['username']}
 ▫️Service location : {$invoice['Service_location']}
 ▫️Product : {$product['name_product']}
-▫️حجم محصول : {$product['Volume_constraint']}
-▫️زمان محصول : {$product['Service_time']}
+▫️Product volume : {$product['Volume_constraint']}
+▫️Product duration : {$product['Service_time']}
 ▫️Renewal price : {$priceFormat} USD
-▫️Balance قبل : {$balanceBefore} USD
-▫️Balance بعد : {$balanceAfter} USD
-▫️زمان : {$timeText}";
+▫️Balance before : {$balanceBefore} USD
+▫️Balance after : {$balanceAfter} USD
+▫️Time : {$timeText}";
     $otherserviceRow = select('topicid', 'idreport', 'report', 'otherservice', 'select');
     $otherservice = is_array($otherserviceRow) ? ($otherserviceRow['idreport'] ?? null) : null;
     if (strlen($setting['Channel_Report'] ?? '') > 0) {
@@ -5762,15 +5762,19 @@ function languagechange($path_dir)
     $ru = $decoded['ru'] ?? [];
     if (intval($setting['languageen'] ?? 0) === 1 && isset($en['users'])) {
         $out = $en;
-        if (isset($fa['Admin']) && is_array($fa['Admin'])) {
-            $out['Admin'] = array_replace_recursive($fa['Admin'], is_array($en['Admin'] ?? null) ? $en['Admin'] : []);
+        if (isset($en['Admin']) && is_array($en['Admin'])) {
+            $out['Admin'] = $en['Admin'];
+        } elseif (isset($fa['Admin']) && is_array($fa['Admin'])) {
+            $out['Admin'] = $fa['Admin'];
         }
         return $out;
     }
     if (intval($setting['languageru'] ?? 0) === 1 && isset($ru['users'])) {
         $out = $ru;
-        if (isset($fa['Admin']) && is_array($fa['Admin'])) {
-            $out['Admin'] = array_replace_recursive($fa['Admin'], is_array($ru['Admin'] ?? null) ? $ru['Admin'] : []);
+        if (isset($ru['Admin']) && is_array($ru['Admin'])) {
+            $out['Admin'] = $ru['Admin'];
+        } elseif (isset($fa['Admin']) && is_array($fa['Admin'])) {
+            $out['Admin'] = $fa['Admin'];
         }
         return $out;
     }
@@ -8311,7 +8315,7 @@ function provision_free_service($user_id, $product, $panel, $note = 'referral_re
             telegram('sendmessage', [
                 'chat_id' => $setting['Channel_Report'],
                 'message_thread_id' => $errorreport ?? 0,
-                'text' => "⭕️ خطای ساخت هدیه دعوت\n{$errorMessage}\nکاربر: {$user_id}",
+                'text' => "⭕️ Invite-gift creation error\n{$errorMessage}\nUser: {$user_id}",
                 'parse_mode' => "HTML",
             ]);
         }
@@ -8370,7 +8374,7 @@ function provision_free_service($user_id, $product, $panel, $note = 'referral_re
 
     sendMessageService($panel, $dataoutput['configs'] ?? [], $output_config_link, $dataoutput['username'], $Shoppinginfo, $textcreatuser, $randomString, $user_id);
 
-    if ($panel['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $panel['MethodUsername'] == "Username + عدد به ترتیب" || $panel['MethodUsername'] == "آیدی عددی+عدد ترتیبی" || $panel['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
+    if ($panel['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $panel['MethodUsername'] == "نام کاربری + عدد به ترتیب" || $panel['MethodUsername'] == "آیدی عددی+عدد ترتیبی" || $panel['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
         $value = intval($user_info['number_username']) + 1;
         update("user", "number_username", $value, "id", $user_id);
         if ($panel['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $panel['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
@@ -8425,7 +8429,7 @@ function referral_check_and_grant_reward($campaign, $referrer_id)
         telegram('sendmessage', [
             'chat_id' => $setting['Channel_Report'],
             'message_thread_id' => $buyreport ?? 0,
-            'text' => "🎁 هدیه دعوت\nکمپین: {$campaign['title']}\nکاربر: {$referrer_id}\nسرویس: {$product['name_product']}",
+            'text' => "🎁 Invite gift\nCampaign: {$campaign['title']}\nUser: {$referrer_id}\nService: {$product['name_product']}",
             'parse_mode' => "HTML",
         ]);
     }
@@ -11041,7 +11045,7 @@ function broadcast_btn_label($btn_type, $texts = null)
         $texts = is_array($datatextbot) ? $datatextbot : [];
     }
     if ($btn_type === 'none') {
-        return 'بدون دکمه';
+        return 'No button';
     }
     $meta = broadcast_attachable_buttons()[$btn_type] ?? null;
     if ($meta === null) {
@@ -11207,11 +11211,11 @@ function broadcast_continue_after_btn_title($from_id)
 function broadcast_type_label($type)
 {
     $labels = [
-        'sendmessage' => 'ارسال همگانی',
-        'forwardmessage' => 'فوروارد همگانی',
-        'xdaynotmessage' => 'ارسال به کاربران غیرفعال',
-        'channelpost' => 'ارسال پست کانال',
-        'unpinmessage' => 'لغو پین پیام',
+        'sendmessage' => 'Broadcast',
+        'forwardmessage' => 'Broadcast forward',
+        'xdaynotmessage' => 'Send to inactive users',
+        'channelpost' => 'Channel post',
+        'unpinmessage' => 'Unpin message',
     ];
     return $labels[$type] ?? $type;
 }
@@ -11226,7 +11230,7 @@ function ensure_reportsms_topic()
     if (!empty($setting['Channel_Report']) && (empty($topic_id) || $topic_id === '0')) {
         $create = telegram('createForumTopic', [
             'chat_id' => $setting['Channel_Report'],
-            'name' => '📨 گزارش ارسال پیام',
+            'name' => '📨 Message reports',
         ]);
         if (!empty($create['ok']) && isset($create['result']['message_thread_id'])) {
             $topic_id = $create['result']['message_thread_id'];
@@ -11242,34 +11246,34 @@ function build_broadcast_report_text($row)
     $btn = broadcast_btn_label($row['btn_type'] ?? 'none');
     $type = broadcast_type_label($row['type'] ?? '');
     $status_map = [
-        'started' => 'در حال انجام',
-        'completed' => 'تمام شد',
-        'cancelled' => 'لغو شد',
-        'published' => 'منتشر شد',
+        'started' => 'In progress',
+        'completed' => 'Completed',
+        'cancelled' => 'Cancelled',
+        'published' => 'Published',
     ];
     $status = $status_map[$row['status'] ?? 'started'] ?? ($row['status'] ?? '');
     $message = trim(html_entity_decode(strip_tags((string) ($row['message_text'] ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     if (mb_strlen($message) > 2500) {
         $message = mb_substr($message, 0, 2500) . '…';
     }
-    $media = (($row['media_type'] ?? 'text') === 'photo') ? 'عکس' : 'متن';
+    $media = (($row['media_type'] ?? 'text') === 'photo') ? 'Photo' : 'Text';
     $click_line = '';
     if (($row['btn_type'] ?? 'none') !== 'none') {
-        $click_line = "\n👆 کلیک دکمه (یونیک): <b>" . intval($row['click_count'] ?? 0) . "</b>";
+        $click_line = "\n👆 Button clicks (unique): <b>" . intval($row['click_count'] ?? 0) . "</b>";
     }
-    $text = "📨 <b>گزارش ارسال پیام</b>\n\n"
-        . "🕒 زمان: <code>{$time}</code>\n"
-        . "👤 ادمین: <code>{$row['admin_id']}</code>\n"
-        . "📋 نوع: {$type}\n"
-        . "👥 مخاطب: " . htmlspecialchars((string) ($row['audience_label'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "\n"
-        . "📊 تعداد مخاطب: <b>" . intval($row['recipient_count'] ?? 0) . "</b>\n"
-        . "🎛 رسانه: {$media}\n"
-        . "🔘 دکمه: {$btn}"
+    $text = "📨 <b>Message report</b>\n\n"
+        . "🕒 Time: <code>{$time}</code>\n"
+        . "👤 Admin: <code>{$row['admin_id']}</code>\n"
+        . "📋 Type: {$type}\n"
+        . "👥 Audience: " . htmlspecialchars((string) ($row['audience_label'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "\n"
+        . "📊 Recipients: <b>" . intval($row['recipient_count'] ?? 0) . "</b>\n"
+        . "🎛 Media: {$media}\n"
+        . "🔘 Button: {$btn}"
         . $click_line
-        . "\n📌 وضعیت: {$status}";
+        . "\n📌 Status: {$status}";
     if ($message !== '') {
         $safe = htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-        $text .= "\n\n💬 متن پیام:\n<blockquote>{$safe}</blockquote>";
+        $text .= "\n\n💬 Message text:\n<blockquote>{$safe}</blockquote>";
     }
     return $text;
 }
@@ -11372,7 +11376,7 @@ function log_broadcast_to_report(array $data)
                 'chat_id' => $setting['Channel_Report'],
                 'message_thread_id' => $topic_id,
                 'photo' => $photo_id,
-                'caption' => "🖼 تصویر پیام همگانی #{$broadcast_id}",
+                'caption' => "🖼 Broadcast photo #{$broadcast_id}",
             ]);
         }
     }
@@ -11732,11 +11736,11 @@ function execute_broadcast_resend($broadcast_id, $admin_id): array
     $cancelmessage = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => 'لغو عملیات', 'callback_data' => 'cancel_sendmessage'],
+                ['text' => 'Cancel operation', 'callback_data' => 'cancel_sendmessage'],
             ],
         ],
     ]);
-    $progress = sendmessage($admin_id, "✅ عملیات ارسال مجدد آغاز گردید پس از پایان اطلاع رسانی خواهد شد.", $cancelmessage, 'HTML');
+    $progress = sendmessage($admin_id, "✅ Resend started. You will be notified when it finishes.", $cancelmessage, 'HTML');
     $progress_mid = intval($progress['result']['message_id'] ?? 0);
 
     $broadcast = log_broadcast_to_report([

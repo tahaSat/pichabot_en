@@ -9,7 +9,7 @@ $pdo = panel_ensure_pdo();
 $gid = $_GET['g'] ?? '';
 $gw = PAYMENT_GATEWAYS[$gid] ?? null;
 if (!$gw) {
-    flash('error', 'درگاه نامعتبر است.');
+    flash('error', 'Invalid gateway.');
     header('Location: payment_methods.php');
     exit;
 }
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'videoid' => $_POST['help_videoid'] ?? '',
             ]);
         }
-        flash('success', 'تنظیمات درگاه ذخیره شد.');
+        flash('success', 'Gateway settings saved.');
         header('Location: payment_gateway.php?g=' . urlencode($gid));
         exit;
     }
@@ -55,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash(
             !empty($result['ok']) ? 'success' : 'error',
             !empty($result['ok'])
-                ? 'فهرست سرویس‌های Cryptomus به‌روز شد.'
-                : ('به‌روزرسانی سرویس‌های Cryptomus ناموفق بود: ' . ($result['error'] ?? 'خطای نامشخص'))
+                ? 'Cryptomus service list updated.'
+                : ('Failed to refresh Cryptomus services: ' . ($result['error'] ?? 'Unknown error'))
         );
         header('Location: payment_gateway.php?g=cryptomus');
         exit;
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'delete_card' && !empty($gw['has_cards'])) {
         pay_delete_card($pdo, $_POST['cardnumber'] ?? '');
-        flash('success', 'شماره کارت حذف شد.');
+        flash('success', 'Card number deleted.');
         header('Location: payment_gateway.php?g=cart');
         exit;
     }
@@ -91,21 +91,21 @@ if ($gid === 'cryptomus') {
         'data' => is_array($cachedData) ? $cachedData : [],
         'cached' => true,
         'cached_at' => $cachedAt,
-        'error' => is_array($cachedData) && !empty($cachedData) ? null : 'هنوز کشی ثبت نشده است.',
+        'error' => is_array($cachedData) && !empty($cachedData) ? null : 'No cache has been saved yet.',
     ];
     if ($cryptomusServices['ok']) {
         $cryptomusServiceRows = panel_cryptomus_service_rows($cachedData);
     }
 }
 
-$pageTitle = 'تنظیمات ' . $gw['label'];
-$pageLede = ($enabled ? 'فعال' : 'غیرفعال') . ' — همان گزینه‌های تنظیمات این درگاه در ربات تلگرام.';
+$pageTitle = 'Settings: ' . $gw['label'];
+$pageLede = ($enabled ? 'Active' : 'Inactive') . ' — Same gateway settings as in the Telegram bot.';
 $activeNav = 'payment_methods';
 include __DIR__ . '/inc/layout_head.php';
 ?>
 
 <div style="margin-bottom:14px" class="fade-up">
-  <a href="payment_methods.php" class="btn btn-ghost btn-sm">← همه درگاه‌ها</a>
+  <a href="payment_methods.php" class="btn btn-ghost btn-sm">← All gateways</a>
 </div>
 
 <div class="two-col">
@@ -114,14 +114,14 @@ include __DIR__ . '/inc/layout_head.php';
       <div>
         <div class="card-title"><?= htmlspecialchars($gw['label']) ?></div>
         <div class="card-subtitle">
-          <span class="tag <?= $enabled ? 'tag-ok' : 'tag-plain' ?>"><?= $enabled ? 'فعال' : 'غیرفعال' ?></span>
+          <span class="tag <?= $enabled ? 'tag-ok' : 'tag-plain' ?>"><?= $enabled ? 'Active' : 'Inactive' ?></span>
         </div>
       </div>
       <form method="POST" action="payment_methods.php">
         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
         <input type="hidden" name="action" value="toggle">
         <input type="hidden" name="gateway" value="<?= htmlspecialchars($gid) ?>">
-        <button type="submit" class="btn btn-ghost btn-sm"><?= $enabled ? 'خاموش کردن' : 'فعال کردن' ?></button>
+        <button type="submit" class="btn btn-ghost btn-sm"><?= $enabled ? 'Turn off' : 'Activate' ?></button>
       </form>
     </div>
     <form method="POST" class="card-body">
@@ -130,7 +130,7 @@ include __DIR__ . '/inc/layout_head.php';
       <div style="display:flex;flex-direction:column;gap:14px">
         <?php if (!empty($gw['textbot_key'])): ?>
           <div class="field">
-            <label>نام دکمه در ربات</label>
+            <label>Bot button name</label>
             <input type="text" name="gateway_display_name" class="input" value="<?= htmlspecialchars($displayName) ?>">
           </div>
         <?php endif; ?>
@@ -144,7 +144,7 @@ include __DIR__ . '/inc/layout_head.php';
               <label style="margin:0"><?= htmlspecialchars($field['label']) ?></label>
               <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
                 <input type="checkbox" name="toggle_<?= htmlspecialchars($field['key']) ?>" value="1" <?= $isOn ? 'checked' : '' ?>>
-                <span class="tag <?= $isOn ? 'tag-ok' : 'tag-plain' ?>"><?= $isOn ? 'روشن' : 'خاموش' ?></span>
+                <span class="tag <?= $isOn ? 'tag-ok' : 'tag-plain' ?>"><?= $isOn ? 'On' : 'Off' ?></span>
               </label>
             </div>
           <?php elseif ($field['type'] === 'password'): ?>
@@ -152,9 +152,9 @@ include __DIR__ . '/inc/layout_head.php';
               <label><?= htmlspecialchars($field['label']) ?></label>
               <input type="password" name="<?= htmlspecialchars($field['key']) ?>" class="input"
                 value="" autocomplete="new-password"
-                placeholder="<?= ($val !== '' && $val !== '0') ? 'ثبت شده — برای حفظ کلید خالی بگذارید' : 'کلید API را وارد کنید' ?>">
+                placeholder="<?= ($val !== '' && $val !== '0') ? 'Saved — leave empty to keep the current key' : 'Enter the API key' ?>">
               <div style="font-size:.74rem;color:var(--mute);margin-top:6px">
-                کلید فعلی هرگز نمایش داده نمی‌شود و ارسال فیلد خالی آن را پاک نمی‌کند.
+                The current key is never shown; leaving the field empty does not clear it.
               </div>
             </div>
           <?php else: ?>
@@ -168,65 +168,65 @@ include __DIR__ . '/inc/layout_head.php';
 
         <?php if ($help !== null): ?>
           <div style="margin-top:8px;padding-top:16px;border-top:1px solid var(--bd)">
-            <div style="font-weight:600;margin-bottom:4px">آموزش قبل از پرداخت</div>
+            <div style="font-weight:600;margin-bottom:4px">Pre-payment help</div>
             <div style="font-size:.78rem;color:var(--mute);margin-bottom:14px">
-              این پیام قبل از جزئیات پرداخت، وقتی کاربر این درگاه را انتخاب می‌کند، ارسال می‌شود.
+              This message is sent before payment details when the user selects this gateway.
             </div>
             <div class="field" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-              <label style="margin:0">فعال بودن آموزش</label>
+              <label style="margin:0">Help enabled</label>
               <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
                 <input type="checkbox" name="help_enabled" value="1" <?= $help['enabled'] ? 'checked' : '' ?> id="help_enabled">
-                <span class="tag <?= $help['enabled'] ? 'tag-ok' : 'tag-plain' ?>" id="help_enabled_tag"><?= $help['enabled'] ? 'فعال' : 'غیرفعال' ?></span>
+                <span class="tag <?= $help['enabled'] ? 'tag-ok' : 'tag-plain' ?>" id="help_enabled_tag"><?= $help['enabled'] ? 'Active' : 'Inactive' ?></span>
               </label>
             </div>
             <div class="field">
-              <label>نوع محتوا</label>
+              <label>Content type</label>
               <select name="help_type" class="input" id="help_type">
-                <option value="text" <?= $help['type'] === 'text' ? 'selected' : '' ?>>متن</option>
-                <option value="photo" <?= $help['type'] === 'photo' ? 'selected' : '' ?>>تصویر</option>
-                <option value="video" <?= $help['type'] === 'video' ? 'selected' : '' ?>>ویدیو</option>
+                <option value="text" <?= $help['type'] === 'text' ? 'selected' : '' ?>>Text</option>
+                <option value="photo" <?= $help['type'] === 'photo' ? 'selected' : '' ?>>Photo</option>
+                <option value="video" <?= $help['type'] === 'video' ? 'selected' : '' ?>>Video</option>
               </select>
             </div>
             <div class="field">
-              <label>متن / کپشن</label>
-              <textarea name="help_text" class="input" rows="4" placeholder="متن آموزش یا کپشن تصویر/ویدیو"><?= htmlspecialchars($help['text']) ?></textarea>
+              <label>Text / caption</label>
+              <textarea name="help_text" class="input" rows="4" placeholder="Help text or photo/video caption"><?= htmlspecialchars($help['text']) ?></textarea>
             </div>
             <div class="field" id="help_photoid_wrap" style="<?= $help['type'] === 'photo' ? '' : 'display:none' ?>">
-              <label>Telegram file_id تصویر</label>
+              <label>Telegram photo file_id</label>
               <input type="text" name="help_photoid" class="input" value="<?= htmlspecialchars($help['photoid']) ?>" placeholder="AgACAgQAAxkB...">
             </div>
             <div class="field" id="help_videoid_wrap" style="<?= $help['type'] === 'video' ? '' : 'display:none' ?>">
-              <label>Telegram file_id ویدیو</label>
+              <label>Telegram video file_id</label>
               <input type="text" name="help_videoid" class="input" value="<?= htmlspecialchars($help['videoid']) ?>" placeholder="BAACAgQAAxkB...">
             </div>
           </div>
         <?php endif; ?>
       </div>
-      <button type="submit" class="btn btn-primary" style="margin-top:16px"><?= icon('check', 14) ?> ذخیره تنظیمات</button>
+      <button type="submit" class="btn btn-primary" style="margin-top:16px"><?= icon('check', 14) ?> Save settings</button>
     </form>
   </div>
 
   <?php if (!empty($gw['has_cards'])): ?>
     <div class="card fade-up d1">
       <div class="card-head">
-        <div class="card-title">شماره‌های کارت</div>
-        <div class="card-subtitle">چند کارت — به کاربر به‌صورت تصادفی نمایش داده می‌شود</div>
+        <div class="card-title">Card numbers</div>
+        <div class="card-subtitle">Multiple cards — shown to the user at random</div>
       </div>
       <form method="POST" class="card-body" style="border-bottom:1px solid var(--bd);padding-bottom:16px;margin-bottom:16px">
         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
         <input type="hidden" name="action" value="add_card">
         <div class="field">
-          <label>شماره کارت</label>
+          <label>Card number</label>
           <input type="text" name="cardnumber" class="input" inputmode="numeric" required placeholder="6037...">
         </div>
         <div class="field">
-          <label>نام صاحب کارت</label>
+          <label>Cardholder name</label>
           <input type="text" name="namecard" class="input" required>
         </div>
-        <button type="submit" class="btn btn-primary btn-sm"><?= icon('plus', 14) ?> افزودن</button>
+        <button type="submit" class="btn btn-primary btn-sm"><?= icon('plus', 14) ?> Add</button>
       </form>
       <?php if (empty($cards)): ?>
-        <div class="empty" style="padding:24px"><p>کارتی ثبت نشده</p></div>
+        <div class="empty" style="padding:24px"><p>No cards saved</p></div>
       <?php else: ?>
         <div class="kv-list">
           <?php foreach ($cards as $c): ?>
@@ -235,11 +235,11 @@ include __DIR__ . '/inc/layout_head.php';
                 <div class="kv-val cm" style="font-size:.82rem"><?= htmlspecialchars($c['cardnumber']) ?></div>
                 <div style="font-size:.75rem;color:var(--mute)"><?= htmlspecialchars($c['namecard']) ?></div>
               </div>
-              <form method="POST" onsubmit="return confirm('حذف این کارت؟')">
+              <form method="POST" onsubmit="return confirm('Delete this card?')">
                 <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                 <input type="hidden" name="action" value="delete_card">
                 <input type="hidden" name="cardnumber" value="<?= htmlspecialchars($c['cardnumber']) ?>">
-                <button type="submit" class="btn btn-no btn-sm">حذف</button>
+                <button type="submit" class="btn btn-no btn-sm">Delete</button>
               </form>
             </div>
           <?php endforeach; ?>
@@ -252,13 +252,13 @@ include __DIR__ . '/inc/layout_head.php';
     <div class="card fade-up d1">
       <div class="card-head">
         <div>
-          <div class="card-title">راه‌اندازی و عیب‌یابی Cryptomus</div>
-          <div class="card-subtitle">اطلاعات merchant-specific ذخیره‌شده در کش</div>
+          <div class="card-title">Cryptomus setup and troubleshooting</div>
+          <div class="card-subtitle">Merchant-specific data stored in cache</div>
         </div>
         <form method="POST">
           <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
           <input type="hidden" name="action" value="refresh_cryptomus_services">
-          <button type="submit" class="btn btn-ghost btn-sm">به‌روزرسانی سرویس‌ها</button>
+          <button type="submit" class="btn btn-ghost btn-sm">Refresh services</button>
         </form>
       </div>
       <div class="card-body">
@@ -268,11 +268,11 @@ include __DIR__ . '/inc/layout_head.php';
             value="<?= htmlspecialchars('https://' . $domainhosts . '/payment/cryptomus.php') ?>">
         </div>
         <div style="padding:12px;border:1px solid var(--bd);border-radius:10px;font-size:.8rem;line-height:1.8;margin:14px 0">
-          در داشبورد Cryptomus، تنظیم تسویه و Auto-convert را بررسی کنید. وضعیت و هزینه فعلی را از داشبورد merchant تأیید کنید؛ پنل آن را به‌صورت خودکار تغییر نمی‌دهد.
+          In the Cryptomus dashboard, review settlement and Auto-convert. Confirm the current status and fees in the merchant dashboard; this panel does not change them automatically.
         </div>
         <?php if ($cryptomusServices && !empty($cryptomusServices['ok'])): ?>
           <div style="font-size:.76rem;color:var(--mute);margin-bottom:10px">
-            <?= !empty($cryptomusServices['cached']) ? 'نمایش از کش' : 'دریافت‌شده از API' ?>
+            <?= !empty($cryptomusServices['cached']) ? 'Showing cached data' : 'Fetched from API' ?>
             <?php if (!empty($cryptomusServices['cached_at'])): ?>
               — <?= htmlspecialchars(panel_payment_time_to_jalali((string) $cryptomusServices['cached_at'])) ?>
             <?php endif; ?>
@@ -280,7 +280,7 @@ include __DIR__ . '/inc/layout_head.php';
           <?php if ($cryptomusServiceRows): ?>
             <div class="tbl-wrap">
               <table class="tbl-lg">
-                <thead><tr><th>ارز</th><th>شبکه</th><th>فعال</th><th>حداقل</th><th>حداکثر</th><th>کمیسیون</th></tr></thead>
+                <thead><tr><th>Currency</th><th>Network</th><th>Active</th><th>Min</th><th>Max</th><th>Commission</th></tr></thead>
                 <tbody>
                   <?php foreach ($cryptomusServiceRows as $service): ?>
                     <tr>
@@ -296,11 +296,11 @@ include __DIR__ . '/inc/layout_head.php';
               </table>
             </div>
           <?php else: ?>
-            <div class="empty" style="padding:20px"><p>سرویس قابل نمایش در پاسخ کش‌شده یافت نشد.</p></div>
+            <div class="empty" style="padding:20px"><p>No displayable services in the cached response.</p></div>
           <?php endif; ?>
         <?php else: ?>
           <div class="empty" style="padding:20px">
-            <p>اطلاعات سرویس در دسترس نیست.</p>
+            <p>Service information is not available.</p>
             <?php if (!empty($cryptomusServices['error'])): ?>
               <small><?= htmlspecialchars((string) $cryptomusServices['error']) ?></small>
             <?php endif; ?>
@@ -327,7 +327,7 @@ include __DIR__ . '/inc/layout_head.php';
   function syncEnabled() {
     if (!enabled || !tag) return;
     var on = enabled.checked;
-    tag.textContent = on ? 'فعال' : 'غیرفعال';
+    tag.textContent = on ? 'Active' : 'Inactive';
     tag.className = 'tag ' + (on ? 'tag-ok' : 'tag-plain');
   }
   if (typeSel) typeSel.addEventListener('change', syncType);

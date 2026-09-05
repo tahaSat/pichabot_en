@@ -259,7 +259,7 @@ function panel_payment_import_read_csv(string $path): array
 {
     $fh = fopen($path, 'rb');
     if ($fh === false) {
-        throw new RuntimeException('خواندن فایل CSV ناموفق بود.');
+        throw new RuntimeException('Failed to read the CSV file.');
     }
     $bom = fread($fh, 3);
     if ($bom !== "\xEF\xBB\xBF") {
@@ -342,27 +342,27 @@ function panel_payment_import_read_xlsx(string $path): array
 function panel_payment_import_validate_upload(?array $file): array
 {
     if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
-        return ['ok' => false, 'msg' => 'فایل را انتخاب کنید.'];
+        return ['ok' => false, 'msg' => 'Please choose a file.'];
     }
     $error = (int) ($file['error'] ?? UPLOAD_ERR_OK);
     if ($error !== UPLOAD_ERR_OK) {
-        return ['ok' => false, 'msg' => 'آپلود فایل ناموفق بود.'];
+        return ['ok' => false, 'msg' => 'File upload failed.'];
     }
     $size = (int) ($file['size'] ?? 0);
     if ($size < 1) {
-        return ['ok' => false, 'msg' => 'فایل خالی است.'];
+        return ['ok' => false, 'msg' => 'The file is empty.'];
     }
     if ($size > PANEL_PAYMENT_IMPORT_MAX_BYTES) {
-        return ['ok' => false, 'msg' => 'حجم فایل نباید بیشتر از ۵ مگابایت باشد.'];
+        return ['ok' => false, 'msg' => 'File size must not exceed 5 MB.'];
     }
     $name = (string) ($file['name'] ?? '');
     $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
     if (!in_array($ext, ['csv', 'xlsx'], true)) {
-        return ['ok' => false, 'msg' => 'فقط فایل CSV یا XLSX پذیرفته می‌شود.'];
+        return ['ok' => false, 'msg' => 'Only CSV or XLSX files are accepted.'];
     }
     $tmp = (string) ($file['tmp_name'] ?? '');
     if ($tmp === '' || !is_uploaded_file($tmp)) {
-        return ['ok' => false, 'msg' => 'فایل آپلود معتبر نیست.'];
+        return ['ok' => false, 'msg' => 'Uploaded file is not valid.'];
     }
     return ['ok' => true, 'ext' => $ext];
 }
@@ -393,10 +393,10 @@ function panel_payment_import_transform(
         }
     }
     if ($headerIdx === null) {
-        return ['ok' => false, 'msg' => 'سطر عنوان فایل پیدا نشد. ستون‌های نوع، تاریخ و مقدار الزامی است.'];
+        return ['ok' => false, 'msg' => 'Header row not found. Type, date, and amount columns are required.'];
     }
     if (!isset($columns['type'], $columns['date'], $columns['amount'])) {
-        return ['ok' => false, 'msg' => 'ستون‌های نوع، تاریخ و مقدار در فایل موجود نیست.'];
+        return ['ok' => false, 'msg' => 'The file is missing type, date, and amount columns.'];
     }
 
     $out = [];
@@ -410,7 +410,7 @@ function panel_payment_import_transform(
         }
         $dataCount++;
         if ($dataCount > PANEL_PAYMENT_IMPORT_MAX_ROWS) {
-            return ['ok' => false, 'msg' => 'تعداد سطرها بیشتر از ۲۰۰۰ مورد است.'];
+            return ['ok' => false, 'msg' => 'Row count exceeds 2000.'];
         }
         $get = static function (string $key) use ($row, $columns): string {
             if (!isset($columns[$key])) {
@@ -475,7 +475,7 @@ function panel_payment_import_transform(
             'amount' => $amountUsd,
             'note' => $note,
             'category' => $slug ?? '',
-            'category_label' => $slug !== null ? (string) ($map[$slug] ?? $slug) : 'یافت نشده',
+            'category_label' => $slug !== null ? (string) ($map[$slug] ?? $slug) : 'Not found',
             'source_amount' => $amountRaw,
             'source_unit' => $unitRaw,
             'source_category' => $categoryRaw,
@@ -484,10 +484,10 @@ function panel_payment_import_transform(
     }
 
     if ($out === []) {
-        return ['ok' => false, 'msg' => 'سطر داده‌ای در فایل پیدا نشد.'];
+        return ['ok' => false, 'msg' => 'No data rows found in the file.'];
     }
     if ($tomanCount > 0 && (!$rateProvided || $usdRate <= 0)) {
-        return ['ok' => false, 'msg' => 'فایل شامل مبلغ تومانی است. نرخ تبدیل تومان به دلار را وارد کنید.'];
+        return ['ok' => false, 'msg' => 'The file includes toman amounts. Enter a toman-to-USD conversion rate.'];
     }
 
     return [
@@ -513,7 +513,7 @@ function panel_payment_import_parse_file(PDO $pdo, ?array $file, $usdRateRaw): a
     $rateProvided = trim((string) $usdRateRaw) !== '';
     $usdRate = $rateProvided ? (panel_payment_import_parse_number($usdRateRaw) ?? 0.0) : 0.0;
     if ($rateProvided && $usdRate <= 0) {
-        return ['ok' => false, 'msg' => 'نرخ تبدیل دلار باید عدد مثبت باشد.'];
+        return ['ok' => false, 'msg' => 'USD conversion rate must be a positive number.'];
     }
 
     $path = (string) $file['tmp_name'];
@@ -524,7 +524,7 @@ function panel_payment_import_parse_file(PDO $pdo, ?array $file, $usdRateRaw): a
             : panel_payment_import_read_csv($path);
     } catch (Throwable $e) {
         error_log('payment import read: ' . $e->getMessage());
-        return ['ok' => false, 'msg' => 'خواندن فایل ناموفق بود.'];
+        return ['ok' => false, 'msg' => 'Failed to read the file.'];
     }
 
     $expenseMap = panel_expense_category_map($pdo);
@@ -548,30 +548,30 @@ function panel_payment_import_validate_row(PDO $pdo, array $row, int $index): ar
     $line = $index + 1;
     $kind = (string) ($row['kind'] ?? '');
     if (!in_array($kind, ['income', 'expense'], true)) {
-        return ['ok' => false, 'msg' => 'سطر ' . $line . ': نوع تراکنش نامعتبر است.'];
+        return ['ok' => false, 'msg' => 'Row ' . $line . ': invalid transaction type.'];
     }
     $amount = (int) round(panel_payment_import_parse_number((string) ($row['amount'] ?? '')) ?? 0);
     if ($amount < 1) {
-        return ['ok' => false, 'msg' => 'سطر ' . $line . ': مبلغ باید عدد مثبت USD باشد.'];
+        return ['ok' => false, 'msg' => 'Row ' . $line . ': amount must be a positive USD number.'];
     }
     $time = trim((string) ($row['time'] ?? ''));
     $ts = panel_payment_import_parse_date($time);
     if ($ts === null) {
-        return ['ok' => false, 'msg' => 'سطر ' . $line . ': تاریخ نامعتبر است.'];
+        return ['ok' => false, 'msg' => 'Row ' . $line . ': date is invalid.'];
     }
     $category = trim((string) ($row['category'] ?? ''));
     if ($category === '') {
-        return ['ok' => false, 'msg' => 'سطر ' . $line . ': دسته را انتخاب کنید.'];
+        return ['ok' => false, 'msg' => 'Row ' . $line . ': select a category.'];
     }
     if ($kind === 'expense') {
         $map = panel_expense_category_map($pdo);
         if (!isset($map[$category])) {
-            return ['ok' => false, 'msg' => 'سطر ' . $line . ': دسته هزینه نامعتبر است.'];
+            return ['ok' => false, 'msg' => 'Row ' . $line . ': invalid expense category.'];
         }
     } else {
         $map = panel_income_category_map($pdo);
         if (!isset($map[$category])) {
-            return ['ok' => false, 'msg' => 'سطر ' . $line . ': دسته درآمد نامعتبر است.'];
+            return ['ok' => false, 'msg' => 'Row ' . $line . ': invalid income category.'];
         }
     }
     return [
@@ -591,16 +591,16 @@ function panel_payment_import_validate_row(PDO $pdo, array $row, int $index): ar
 function panel_payment_import_commit(PDO $pdo, array $rows): array
 {
     if ($rows === []) {
-        return ['ok' => false, 'msg' => 'سطری برای ورود وجود ندارد.'];
+        return ['ok' => false, 'msg' => 'There are no rows to import.'];
     }
     if (count($rows) > PANEL_PAYMENT_IMPORT_MAX_ROWS) {
-        return ['ok' => false, 'msg' => 'تعداد سطرها بیشتر از ۲۰۰۰ مورد است.'];
+        return ['ok' => false, 'msg' => 'Row count exceeds 2000.'];
     }
 
     $prepared = [];
     foreach ($rows as $i => $row) {
         if (!is_array($row)) {
-            return ['ok' => false, 'msg' => 'سطر ' . ($i + 1) . ' نامعتبر است.'];
+            return ['ok' => false, 'msg' => 'Row ' . ($i + 1) . ' is invalid.'];
         }
         $valid = panel_payment_import_validate_row($pdo, $row, $i);
         if (empty($valid['ok'])) {
@@ -630,7 +630,7 @@ function panel_payment_import_commit(PDO $pdo, array $rows): array
                 ]);
             }
             if (empty($r['ok'])) {
-                throw new RuntimeException((string) ($r['msg'] ?? 'ثبت سطر ناموفق بود.'));
+                throw new RuntimeException((string) ($r['msg'] ?? 'Failed to save the row.'));
             }
         }
         $pdo->commit();
@@ -639,13 +639,13 @@ function panel_payment_import_commit(PDO $pdo, array $rows): array
             $pdo->rollBack();
         }
         error_log('payment import commit: ' . $e->getMessage());
-        return ['ok' => false, 'msg' => $e->getMessage() !== '' ? $e->getMessage() : 'ورود داده‌ها ناموفق بود.'];
+        return ['ok' => false, 'msg' => $e->getMessage() !== '' ? $e->getMessage() : 'Import failed.'];
     }
 
     $count = count($prepared);
     return [
         'ok' => true,
-        'msg' => $count . ' سطر با موفقیت وارد شد.',
+        'msg' => $count . ' row(s) imported successfully.',
         'inserted' => $count,
     ];
 }

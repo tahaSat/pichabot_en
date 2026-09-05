@@ -26,14 +26,14 @@ if ($userId) {
 }
 
 if (!$userId) {
-    flash('error', 'شناسه کاربر نامعتبر است.');
+    flash('error', 'Invalid user ID.');
     header('Location: users.php');
     exit;
 }
 
 $user = db_fetch($pdo, 'SELECT id FROM user WHERE id = ?', [$userId]);
 if (!$user) {
-    flash('error', 'کاربر یافت نشد.');
+    flash('error', 'User not found.');
     header('Location: users.php');
     exit;
 }
@@ -88,7 +88,7 @@ switch ($action) {
         $idInvoice = trim((string) ($_POST['id_invoice'] ?? ''));
         $invoice = db_fetch($pdo, 'SELECT id_invoice FROM invoice WHERE id_invoice = ? AND id_user = ?', [$idInvoice, (string) $userId]);
         if (!$invoice) {
-            flash('error', 'سرویس یافت نشد یا متعلق به این کاربر نیست.');
+            flash('error', 'Service not found or does not belong to this user.');
             break;
         }
         $result = panel_invoice_apply_refund(
@@ -106,7 +106,7 @@ switch ($action) {
         break;
 
     default:
-        flash('error', 'عملیات نامعتبر است.');
+        flash('error', 'Invalid action.');
 }
 
 header('Location: ' . $back);

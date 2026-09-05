@@ -9,23 +9,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
     $name = trim($_POST['name_panel'] ?? '');
     $type = $_POST['type'] ?? 'marzban';
     if ($name === '') {
-        flash('error', 'نام پنل الزامی است.');
+        flash('error', 'Panel name is required.');
         header('Location: panels.php');
         exit;
     }
     if (!isset(PANEL_TYPES[$type])) {
-        flash('error', 'نوع پنل نامعتبر است.');
+        flash('error', 'Invalid panel type.');
         header('Location: panels.php');
         exit;
     }
     if (panel_name_exists($pdo, $name)) {
-        flash('error', 'پنلی با این نام قبلاً ثبت شده است.');
+        flash('error', 'A panel with this name already exists.');
         header('Location: panels.php');
         exit;
     }
     $url = trim($_POST['url_panel'] ?? '');
     if (in_array($type, ['marzban', 'marzneshin', 'x-ui_single', 'alireza_single', 'ibsng', 'mikrotik'], true) && $url !== '' && !filter_var($url, FILTER_VALIDATE_URL)) {
-        flash('error', 'آدرس پنل معتبر نیست.');
+        flash('error', 'Panel URL is not valid.');
         header('Location: panels.php');
         exit;
     }
@@ -38,11 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
             'password_panel' => $_POST['password_panel'] ?? '',
             'limit_panel' => trim($_POST['limit_panel'] ?? '') ?: 'unlimted',
         ]);
-        flash('success', 'پنل «' . $name . '» اضافه شد. تنظیمات تکمیلی را در صفحه ویرایش انجام دهید.');
+        flash('success', 'Panel “' . $name . '” was added. Complete the extra settings on the edit page.');
         header('Location: panel.php?id=' . $id);
         exit;
     } catch (Exception $e) {
-        flash('error', 'خطا: ' . $e->getMessage());
+        flash('error', 'Error: ' . $e->getMessage());
         header('Location: panels.php');
         exit;
     }
@@ -52,15 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     csrf_check_post();
     $id = (int) ($_POST['id'] ?? 0);
     $confirm = trim($_POST['confirm'] ?? '');
-    if ($confirm !== 'تایید') {
-        flash('error', 'برای حذف باید کلمه «تایید» را وارد کنید.');
+    if ($confirm !== 'CONFIRM') {
+        flash('error', 'Type CONFIRM to delete.');
         header('Location: panel.php?id=' . $id);
         exit;
     }
     $row = db_fetch($pdo, "SELECT name_panel FROM marzban_panel WHERE id = ?", [$id]);
     if ($row) {
         db_query($pdo, "DELETE FROM marzban_panel WHERE id = ?", [$id]);
-        flash('success', 'پنل «' . $row['name_panel'] . '» حذف شد.');
+        flash('success', 'Panel “' . $row['name_panel'] . '” was deleted.');
     }
     header('Location: panels.php');
     exit;
@@ -86,39 +86,39 @@ try {
     $panels = [];
 }
 
-$pageTitle = 'پنل‌های VPN';
-$pageLede = 'مدیریت اتصال و تنظیمات پنل‌های مرزبان، ثنایی، هیدیفای و سایر انواع.';
+$pageTitle = 'VPN panels';
+$pageLede = 'Manage connections and settings for Marzban, Sanaei, Hiddify, and other panel types.';
 $activeNav = 'panels';
 include __DIR__ . '/inc/layout_head.php';
 ?>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px" class="fade-up">
-  <div style="font-size:.85rem;color:var(--mute)"><?= count($panels) ?> پنل</div>
-  <button class="btn btn-primary" onclick="openModal('addPanelModal')"><?= icon('plus', 14) ?> افزودن پنل</button>
+  <div style="font-size:.85rem;color:var(--mute)"><?= count($panels) ?> panels</div>
+  <button class="btn btn-primary" onclick="openModal('addPanelModal')"><?= icon('plus', 14) ?> Add panel</button>
 </div>
 
 <div class="card fade-up d1">
   <div class="toolbar">
-    <div class="toolbar-title">فهرست پنل‌ها</div>
+    <div class="toolbar-title">Panel list</div>
     <form method="GET" class="toolbar-end" style="display:flex;gap:8px;flex-wrap:wrap">
       <div class="search-box" style="min-width:200px">
         <?= icon('search', 14) ?>
-        <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="جستجو نام یا کد...">
+        <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Search name or code...">
       </div>
       <select name="type" class="select" style="width:auto" onchange="this.form.submit()">
-        <option value="">همه انواع</option>
+        <option value="">All types</option>
         <?php foreach (PANEL_TYPES as $k => $label): ?>
           <option value="<?= htmlspecialchars($k) ?>" <?= $typeFilter === $k ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
         <?php endforeach; ?>
       </select>
-      <button type="submit" class="btn btn-ghost btn-sm">فیلتر</button>
+      <button type="submit" class="btn btn-ghost btn-sm">Filter</button>
     </form>
   </div>
 
   <?php if (empty($panels)): ?>
     <div class="empty" style="padding:50px 20px">
-      <p>پنلی ثبت نشده است</p>
-      <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('addPanelModal')"><?= icon('plus', 14) ?> افزودن پنل</button>
+      <p>No panels yet</p>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('addPanelModal')"><?= icon('plus', 14) ?> Add panel</button>
     </div>
   <?php else: ?>
     <div class="tbl-wrap">
@@ -126,12 +126,12 @@ include __DIR__ . '/inc/layout_head.php';
         <thead>
           <tr>
             <th>#</th>
-            <th>نام</th>
-            <th>نوع</th>
-            <th>وضعیت</th>
-            <th>گروه</th>
-            <th>محدودیت</th>
-            <th>عملیات</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Group</th>
+            <th>Limit</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -142,7 +142,7 @@ include __DIR__ . '/inc/layout_head.php';
                 <a href="panel.php?id=<?= (int) $p['id'] ?>" style="color:var(--text);font-weight:600;text-decoration:none">
                   <?= htmlspecialchars($p['name_panel'] ?? '') ?>
                 </a>
-                <div class="cf" style="font-size:.7rem;margin-top:2px">کد: <?= htmlspecialchars($p['code_panel'] ?? '') ?></div>
+                <div class="cf" style="font-size:.7rem;margin-top:2px">Code: <?= htmlspecialchars($p['code_panel'] ?? '') ?></div>
               </td>
               <td><span class="tag tag-info"><?= htmlspecialchars(panel_type_label($p['type'] ?? '')) ?></span></td>
               <td>
@@ -153,7 +153,7 @@ include __DIR__ . '/inc/layout_head.php';
               <td class="cf"><?= htmlspecialchars(panel_agent_label($p['agent'] ?? 'all')) ?></td>
               <td class="cn"><?= htmlspecialchars($p['limit_panel'] ?? '—') ?></td>
               <td>
-                <a href="panel.php?id=<?= (int) $p['id'] ?>" class="btn btn-ghost btn-sm"><?= icon('edit', 13) ?> مدیریت</a>
+                <a href="panel.php?id=<?= (int) $p['id'] ?>" class="btn btn-ghost btn-sm"><?= icon('edit', 13) ?> Manage</a>
               </td>
             </tr>
           <?php endforeach; ?>
@@ -166,7 +166,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="addPanelModal">
   <div class="modal" style="max-width:520px">
     <div class="modal-head">
-      <h3>افزودن پنل جدید</h3>
+      <h3>Add new panel</h3>
       <button class="modal-x" onclick="closeModal('addPanelModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST">
@@ -175,7 +175,7 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="action" value="add">
         <div class="form-grid">
           <div class="field full">
-            <label>نوع پنل *</label>
+            <label>Panel type *</label>
             <select name="type" class="select" required id="addPanelType">
               <?php foreach (PANEL_TYPES as $k => $label): ?>
                 <option value="<?= htmlspecialchars($k) ?>"><?= htmlspecialchars($label) ?></option>
@@ -183,31 +183,31 @@ include __DIR__ . '/inc/layout_head.php';
             </select>
           </div>
           <div class="field full">
-            <label>نام پنل (لوکیشن) *</label>
-            <input type="text" name="name_panel" class="input" placeholder="مثلاً: آلمان ۱" required>
+            <label>Panel name (location) *</label>
+            <input type="text" name="name_panel" class="input" placeholder="e.g. Germany 1" required>
           </div>
           <div class="field full" id="urlField">
-            <label>آدرس پنل (URL)</label>
+            <label>Panel URL</label>
             <input type="url" name="url_panel" class="input" placeholder="https://panel.example.com">
-            <small class="cf" style="display:block;margin-top:4px">برای فروش دستی و هیدیفای اختیاری است</small>
+            <small class="cf" style="display:block;margin-top:4px">Optional for manual sale and Hiddify</small>
           </div>
           <div class="field" id="userField">
-            <label>نام کاربری پنل</label>
+            <label>Panel username</label>
             <input type="text" name="username_panel" class="input" autocomplete="off">
           </div>
           <div class="field" id="passField">
-            <label>رمز / توکن</label>
+            <label>Password / token</label>
             <input type="text" name="password_panel" class="input" autocomplete="off">
           </div>
           <div class="field full">
-            <label>محدودیت ساخت اکانت</label>
-            <input type="text" name="limit_panel" class="input" placeholder="unlimted یا عدد">
+            <label>Account creation limit</label>
+            <input type="text" name="limit_panel" class="input" placeholder="unlimted or a number">
           </div>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary"><?= icon('plus', 13) ?> ایجاد پنل</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('addPanelModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary"><?= icon('plus', 13) ?> Create panel</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('addPanelModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -223,7 +223,7 @@ include __DIR__ . '/inc/layout_head.php';
     var tokenOnly = t === 's_ui' || t === 'WGDashboard';
     document.getElementById('userField').style.display = tokenOnly ? 'none' : '';
     document.getElementById('passField').querySelector('label').textContent =
-      tokenOnly ? 'توکن API' : 'رمز / توکن';
+      tokenOnly ? 'API token' : 'Password / token';
   }
   sel.addEventListener('change', sync);
   sync();

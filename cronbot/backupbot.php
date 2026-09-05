@@ -35,7 +35,7 @@ if ($return_var !== 0) {
     telegram('sendmessage', [
         'chat_id' => $setting['Channel_Report'],
         'message_thread_id' => $reportbackup,
-        'text' => "❌❌❌❌❌❌ خطا در بکاپ گیری ",
+        'text' => "❌❌❌❌❌❌ Backup error",
     ]);
 } else {
     $zip = new ZipArchive();
@@ -48,8 +48,8 @@ if ($return_var !== 0) {
             'chat_id' => $setting['Channel_Report'],
             'message_thread_id' => $reportbackup,
             'document' => new CURLFile($zip_file_name),
-            'caption' => "📌 خروجی دیتابیس ربات اصلی 
-توضیحات : https://t.me/mirzapanel/915",
+            'caption' => "📌 Main bot database export
+Details : https://t.me/mirzapanel/915",
         ]);
         unlink($zip_file_name);
         unlink($backup_file_name);

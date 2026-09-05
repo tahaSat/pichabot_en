@@ -31,9 +31,9 @@ $finishGift = static function (array $job): void {
     $success = intval($job['success_count'] ?? 0);
     $failed = intval($job['failed_count'] ?? 0);
     $skipped = intval($job['skipped_count'] ?? 0);
-    $summary = "📌 عملیات برای تمامی سرویس‌های درخواستی انجام شد.";
+    $summary = "📌 The operation was completed for all requested services.";
     if (!empty($job['bulk_service_charge']) || isset($job['success_count'])) {
-        $summary .= "\n\n✅ موفق: {$success}\n❌ ناموفق: {$failed}\n⏭ ردشده: {$skipped}";
+        $summary .= "\n\n✅ Succeeded: {$success}\n❌ Failed: {$failed}\n⏭ Skipped: {$skipped}";
     }
     if (isset($job['id_admin'])) {
         sendmessage($job['id_admin'], $summary, null, 'HTML');
@@ -67,7 +67,7 @@ $isTimeoutError = static function ($reason): bool {
 };
 
 $reportFailure = static function (array $panel, string $username, array $result) use ($setting, $errorreport): void {
-    $reason = $result['msg'] ?? 'خطای نامشخص';
+    $reason = $result['msg'] ?? 'Unknown error';
     if (!is_string($reason)) {
         $reason = json_encode($reason, JSON_UNESCAPED_UNICODE);
     }
@@ -77,10 +77,10 @@ $reportFailure = static function (array $panel, string $username, array $result)
     telegram('sendmessage', [
         'chat_id' => $setting['Channel_Report'],
         'message_thread_id' => $errorreport,
-        'text' => "خطای اعمال شارژ همگانی سرویس\n"
-            . "نام پنل : {$panel['name_panel']}\n"
-            . "نام کاربری سرویس : {$username}\n"
-            . "دلیل خطا : {$reason}",
+        'text' => "Bulk service charge error\n"
+            . "Panel : {$panel['name_panel']}\n"
+            . "Service username : {$username}\n"
+            . "Error reason : {$reason}",
         'parse_mode' => 'HTML',
     ]);
 };
@@ -140,7 +140,7 @@ $opPauseSeconds = $isBulk ? 1 : 0;
 $resultMessage = static function ($result): string {
     $reason = is_array($result) ? ($result['msg'] ?? '') : '';
     if (!is_string($reason) || $reason === '') {
-        return 'پاسخ نامعتبر پنل';
+        return 'Invalid panel response';
     }
     return $reason;
 };
@@ -174,7 +174,7 @@ while ($services && $processed < $maxPerRun) {
     $liveUser = $ManagePanel->DataUser($panelName, $invoice['username'], true);
     $liveFailed = !is_array($liveUser) || ($liveUser['status'] ?? '') === 'Unsuccessful';
     if ($liveFailed) {
-        $failPayload = is_array($liveUser) ? $liveUser : ['msg' => 'پاسخ نامعتبر پنل'];
+        $failPayload = is_array($liveUser) ? $liveUser : ['msg' => 'Invalid panel response'];
         $failReason = $isTimeoutError($resultMessage($failPayload)) ? 'timeout' : $resultMessage($failPayload);
         gift_append_unfinished($info, (string) $invoice['username'], (string) $panelName, $failReason);
         $info['failed_count'] = intval($info['failed_count'] ?? 0) + 1;
@@ -217,7 +217,7 @@ while ($services && $processed < $maxPerRun) {
             $result = $ManagePanel->extra_time($invoice['username'], $panel['code_panel'], $value, $liveUser);
         }
         if (!is_array($result)) {
-            $result = ['status' => false, 'msg' => 'پاسخ نامعتبر پنل'];
+            $result = ['status' => false, 'msg' => 'Invalid panel response'];
         }
         $logResult($invoice, $liveUser, $kind, $value, $result);
         if (($result['status'] ?? false) === false) {
@@ -236,7 +236,7 @@ while ($services && $processed < $maxPerRun) {
         }
         $applyCharge('volume', $volumeValue);
         if ($timedOut || $hardFailed) {
-            $label = $timedOut ? 'timeout (حجم)' : 'خطا (حجم)';
+            $label = $timedOut ? 'timeout (volume)' : 'error (volume)';
             gift_append_unfinished($info, (string) $invoice['username'], (string) $panelName, $label);
             $info['failed_count'] = intval($info['failed_count'] ?? 0) + 1;
             if ($pauseBetweenServices > 0) {
@@ -251,7 +251,7 @@ while ($services && $processed < $maxPerRun) {
         }
         $applyCharge('time', $timeValue);
         if ($timedOut || $hardFailed) {
-            $label = $timedOut ? 'timeout (زمان)' : 'خطا (زمان)';
+            $label = $timedOut ? 'timeout (time)' : 'error (time)';
             gift_append_unfinished($info, (string) $invoice['username'], (string) $panelName, $label);
             $info['failed_count'] = intval($info['failed_count'] ?? 0) + 1;
             if ($pauseBetweenServices > 0) {
@@ -287,15 +287,15 @@ if (!empty($info['id_admin']) && !empty($info['id_message'])) {
     $cancelKeyboard = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => "❌ لغو عملیات", 'callback_data' => 'cancel_gift'],
+                ['text' => "❌ Cancel operation", 'callback_data' => 'cancel_gift'],
             ],
         ],
     ]);
     Editmessagetext(
         $info['id_admin'],
         $info['id_message'],
-        "✏️ عملیات شارژ سرویس‌ها در حال انجام است...\n\n"
-        . "باقی‌مانده: {$remaining}\n✅ موفق: {$success}\n❌ ناموفق: {$failed}\n⏭ ردشده: {$skipped}\n⏱ Timeout: {$unfinished}",
+        "✏️ Service charging is in progress...\n\n"
+        . "Remaining: {$remaining}\n✅ Succeeded: {$success}\n❌ Failed: {$failed}\n⏭ Skipped: {$skipped}\n⏱ Timeout: {$unfinished}",
         $cancelKeyboard
     );
 }

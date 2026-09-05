@@ -423,11 +423,11 @@ function withdraw_card_picker_keyboard(string $userId, bool $canBackToReview = f
 
 function withdraw_user_review_text(int $amount, string $card, string $holder): string
 {
-    return "📋 لطفاً اطلاعات درخواست برداشت را بررسی کنید:\n\n"
-        . '💰 مبلغ: <code>' . number_format($amount) . "</code> تومان\n"
-        . '💳 شماره کارت: <code>' . withdraw_esc(withdraw_format_card($card)) . "</code>\n"
-        . '👤 نام صاحب حساب: <code>' . withdraw_esc($holder) . "</code>\n\n"
-        . 'در صورت صحت اطلاعات تأیید کنید.';
+    return "📋 Please review the withdrawal request:\n\n"
+        . '💰 Amount: <code>' . number_format($amount) . "</code> USD\n"
+        . '💳 Card number: <code>' . withdraw_esc(withdraw_format_card($card)) . "</code>\n"
+        . '👤 Account holder: <code>' . withdraw_esc($holder) . "</code>\n\n"
+        . 'If the details are correct, confirm.';
 }
 
 function withdraw_user_confirm_keyboard(): string
@@ -473,7 +473,7 @@ function withdraw_amount_keyboard(int $balance): string
     $back = is_array($textbotlang) ? ($textbotlang['users']['stateus']['backinfo'] ?? '🔙 Back') : '🔙 Back';
     $allLabel = '💰 Withdraw full balance';
     if ($balance > 0) {
-        $allLabel .= ' (' . number_format($balance) . ' ت)';
+        $allLabel .= ' (' . number_format($balance) . ' USD)';
     }
     return json_encode([
         'inline_keyboard' => [
@@ -557,7 +557,7 @@ function withdraw_admin_request_keyboard(int $id): string
         'inline_keyboard' => [
             [
                 ['text' => '✅ Confirm', 'callback_data' => 'wd_ok_' . $id],
-                ['text' => '❌ رد', 'callback_data' => 'wd_no_' . $id],
+                ['text' => '❌ Reject', 'callback_data' => 'wd_no_' . $id],
             ],
         ],
     ], JSON_UNESCAPED_UNICODE);
@@ -566,7 +566,7 @@ function withdraw_admin_request_keyboard(int $id): string
 function withdraw_admin_menu_keyboard(string $tab = 'pending'): string
 {
     $pending = withdraw_pending_count();
-    $pendingLabel = 'درخواست‌ها';
+    $pendingLabel = 'Requests';
     if ($pending > 0) {
         $pendingLabel .= ' (' . $pending . ')';
     }
@@ -576,9 +576,9 @@ function withdraw_admin_menu_keyboard(string $tab = 'pending'): string
     return json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $mark('تنظیمات', 'settings'), 'callback_data' => 'wd_tab_settings'],
+                ['text' => $mark('Settings', 'settings'), 'callback_data' => 'wd_tab_settings'],
                 ['text' => $mark($pendingLabel, 'pending'), 'callback_data' => 'wd_tab_pending'],
-                ['text' => $mark('تاریخچه', 'history'), 'callback_data' => 'wd_tab_history'],
+                ['text' => $mark('History', 'history'), 'callback_data' => 'wd_tab_history'],
             ],
         ],
     ], JSON_UNESCAPED_UNICODE);
@@ -595,12 +595,12 @@ function withdraw_user_account_line(array $userRow, string $fallbackName = '', s
     if ($name === '' || $name === 'none') {
         $name = $fallbackName;
     }
-    $line = '🪪 آیدی: <code>' . withdraw_esc($id) . '</code>';
+    $line = '🪪 ID: <code>' . withdraw_esc($id) . '</code>';
     if ($username !== '' && $username !== 'NOT_USERNAME') {
-        $line .= "\n👤 یوزرنیم: @" . withdraw_esc(ltrim($username, '@'));
+        $line .= "\n👤 Username: @" . withdraw_esc(ltrim($username, '@'));
     }
     if ($name !== '') {
-        $line .= "\n📛 نام: " . withdraw_esc($name);
+        $line .= "\n📛 Name: " . withdraw_esc($name);
     }
     return $line;
 }
@@ -611,23 +611,23 @@ function withdraw_admin_detail_text(array $row, array $userRow = [], string $fal
     $amount = (int) ($row['amount'] ?? 0);
     $status = (string) ($row['status'] ?? '');
     $statusLabel = [
-        WITHDRAW_STATUS_PENDING => 'در انتظار',
-        WITHDRAW_STATUS_PAID => 'پرداخت شده',
-        WITHDRAW_STATUS_REJECTED => 'رد شده',
+        WITHDRAW_STATUS_PENDING => 'Pending',
+        WITHDRAW_STATUS_PAID => 'Paid',
+        WITHDRAW_STATUS_REJECTED => 'Rejected',
     ][$status] ?? $status;
     $created = (int) ($row['created_at'] ?? 0);
     $when = $created > 0 && function_exists('jalali_tehran_format')
         ? jalali_tehran_format($created, 'Y/m/d H:i')
         : date('Y/m/d H:i', $created);
-    $text = "💸 درخواست برداشت #$id\n";
-    $text .= "📌 وضعیت: $statusLabel\n";
-    $text .= "📅 زمان: $when\n\n";
+    $text = "💸 Withdrawal request #$id\n";
+    $text .= "📌 Status: $statusLabel\n";
+    $text .= "📅 Time: $when\n\n";
     $text .= withdraw_user_account_line($userRow, $fallbackName, $fallbackUsername) . "\n\n";
-    $text .= '💰 مبلغ: <code>' . number_format($amount) . "</code> تومان\n";
-    $text .= '💳 شماره کارت: <code>' . withdraw_esc(withdraw_format_card((string) ($row['card_number'] ?? ''))) . "</code>\n";
-    $text .= '👤 صاحب حساب: <code>' . withdraw_esc((string) ($row['card_holder'] ?? '')) . '</code>';
+    $text .= '💰 Amount: <code>' . number_format($amount) . "</code> USD\n";
+    $text .= '💳 Card number: <code>' . withdraw_esc(withdraw_format_card((string) ($row['card_number'] ?? ''))) . "</code>\n";
+    $text .= '👤 Account holder: <code>' . withdraw_esc((string) ($row['card_holder'] ?? '')) . '</code>';
     if ($status === WITHDRAW_STATUS_REJECTED && trim((string) ($row['reject_reason'] ?? '')) !== '') {
-        $text .= "\n\n📝 دلیل رد: " . withdraw_esc((string) $row['reject_reason']);
+        $text .= "\n\n📝 Rejection reason: " . withdraw_esc((string) $row['reject_reason']);
     }
     return $text;
 }
@@ -648,7 +648,7 @@ function withdraw_create_request(string $userId, int $amount, string $card, stri
 {
     $pdo = withdraw_pdo($pdo);
     if (!$pdo instanceof PDO) {
-        return ['ok' => false, 'msg' => 'خطای پایگاه داده'];
+        return ['ok' => false, 'msg' => 'Database error'];
     }
     $userRow = withdraw_fetch_user($userId, $pdo);
     $balance = (int) ($userRow['Balance'] ?? 0);
@@ -678,7 +678,7 @@ function withdraw_notify_admins(array $row, array $userRow, string $fallbackName
         return;
     }
     $pdo = withdraw_pdo($pdo);
-    $text = "🔔 درخواست برداشت از کیف پول\n\n" . withdraw_admin_detail_text($row, $userRow, $fallbackName, $fallbackUsername);
+    $text = "🔔 Wallet withdrawal request\n\n" . withdraw_admin_detail_text($row, $userRow, $fallbackName, $fallbackUsername);
     $keyboard = withdraw_admin_request_keyboard((int) $row['id']);
     $adminIds = select('admin', 'id_admin', null, null, 'FETCH_COLUMN') ?: [];
     $stored = [];
@@ -804,14 +804,14 @@ function withdraw_save_receipt_from_telegram(int $id, string $fileId): array
 function withdraw_save_receipt_from_upload(int $id, array $file): array
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'] ?? '')) {
-        return ['ok' => false, 'msg' => 'بارگذاری تصویر رسید الزامی است.'];
+        return ['ok' => false, 'msg' => 'A receipt image is required.'];
     }
     if (($file['size'] ?? 0) < 1 || $file['size'] > 20 * 1024 * 1024) {
-        return ['ok' => false, 'msg' => 'حجم تصویر باید حداکثر ۲۰ مگابایت باشد.'];
+        return ['ok' => false, 'msg' => 'The image must be 20 MB or smaller.'];
     }
     $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']) ?: '';
     if (!str_starts_with($mime, 'image/')) {
-        return ['ok' => false, 'msg' => 'فقط تصویر رسید قابل قبول است.'];
+        return ['ok' => false, 'msg' => 'Only a receipt image is accepted.'];
     }
     $extMap = [
         'image/jpeg' => 'jpg',
@@ -822,11 +822,11 @@ function withdraw_save_receipt_from_upload(int $id, array $file): array
     $ext = $extMap[$mime] ?? 'jpg';
     $bytes = file_get_contents($file['tmp_name']);
     if ($bytes === false) {
-        return ['ok' => false, 'msg' => 'خواندن فایل ناموفق بود.'];
+        return ['ok' => false, 'msg' => 'Could not read the file.'];
     }
     $path = withdraw_save_bytes($id, $bytes, $ext);
     if ($path === null) {
-        return ['ok' => false, 'msg' => 'ذخیره رسید ناموفق بود.'];
+        return ['ok' => false, 'msg' => 'Could not save the receipt.'];
     }
     return ['ok' => true, 'path' => $path, 'mime' => $mime, 'name' => basename($path)];
 }
@@ -883,13 +883,13 @@ function withdraw_approve(int $id, string $adminId, array $receipt, ?PDO $pdo = 
 {
     $pdo = withdraw_pdo($pdo);
     if (!$pdo instanceof PDO) {
-        return ['ok' => false, 'msg' => 'خطای پایگاه داده'];
+        return ['ok' => false, 'msg' => 'Database error'];
     }
     withdraw_ensure_schema($pdo);
     $receiptPath = (string) ($receipt['path'] ?? '');
     $receiptFileId = (string) ($receipt['file_id'] ?? '');
     if ($receiptPath === '' && $receiptFileId === '') {
-        return ['ok' => false, 'msg' => 'ارسال عکس رسید الزامی است.'];
+        return ['ok' => false, 'msg' => 'A receipt photo is required.'];
     }
 
     try {
@@ -899,11 +899,11 @@ function withdraw_approve(int $id, string $adminId, array $receipt, ?PDO $pdo = 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
             $pdo->rollBack();
-            return ['ok' => false, 'msg' => 'درخواست یافت نشد.'];
+            return ['ok' => false, 'msg' => 'Request not found.'];
         }
         if (($row['status'] ?? '') !== WITHDRAW_STATUS_PENDING) {
             $pdo->rollBack();
-            return ['ok' => false, 'msg' => 'این درخواست قبلاً بررسی شده است.', 'already' => true];
+            return ['ok' => false, 'msg' => 'This request was already reviewed.', 'already' => true];
         }
         $userId = (string) $row['id_user'];
         $amount = (int) $row['amount'];
@@ -912,21 +912,21 @@ function withdraw_approve(int $id, string $adminId, array $receipt, ?PDO $pdo = 
         $userRow = $userStmt->fetch(PDO::FETCH_ASSOC);
         if (!$userRow) {
             $pdo->rollBack();
-            return ['ok' => false, 'msg' => 'کاربر یافت نشد.'];
+            return ['ok' => false, 'msg' => 'User not found.'];
         }
         $balance = (int) ($userRow['Balance'] ?? 0);
         if ($amount > $balance) {
             $pdo->rollBack();
-            return ['ok' => false, 'msg' => 'مبلغ برداشت از موجودی کیف پول کاربر بیشتر است.'];
+            return ['ok' => false, 'msg' => 'The withdrawal amount is greater than the user wallet balance.'];
         }
         $pdo->prepare('UPDATE user SET Balance = Balance - ? WHERE id = ?')->execute([$amount, $userId]);
         $orderId = withdraw_new_order_id($pdo);
         $time = function_exists('tehran_datetime_string')
             ? tehran_datetime_string(time())
             : date('Y/m/d H:i:s');
-        $note = 'برداشت از کیف پول | کارت: ' . withdraw_format_card((string) $row['card_number'])
-            . ' | صاحب: ' . (string) $row['card_holder']
-            . ' | درخواست #' . $id;
+        $note = 'Wallet withdrawal | card: ' . withdraw_format_card((string) $row['card_number'])
+            . ' | holder: ' . (string) $row['card_holder']
+            . ' | request #' . $id;
         $pdo->prepare(
             'INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method, id_invoice, note, tx_type, expense_category)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
@@ -962,7 +962,7 @@ function withdraw_approve(int $id, string $adminId, array $receipt, ?PDO $pdo = 
             $pdo->rollBack();
         }
         error_log('withdraw_approve: ' . $e->getMessage());
-        return ['ok' => false, 'msg' => 'ثبت تأیید ناموفق بود.'];
+        return ['ok' => false, 'msg' => 'Could not save the approval.'];
     }
 
     $row = withdraw_get($id, $pdo);
@@ -979,23 +979,23 @@ function withdraw_approve(int $id, string $adminId, array $receipt, ?PDO $pdo = 
     }
     if (is_array($row)) {
         $row['status'] = WITHDRAW_STATUS_PAID;
-        withdraw_update_admin_messages($row, '✅ پرداخت شده');
+        withdraw_update_admin_messages($row, '✅ Paid');
     }
     if (function_exists('clearSelectCache')) {
         clearSelectCache('user');
     }
-    return ['ok' => true, 'msg' => 'درخواست پرداخت شد.', 'row' => $row, 'order_id' => $orderId ?? ''];
+    return ['ok' => true, 'msg' => 'The request was paid.', 'row' => $row, 'order_id' => $orderId ?? ''];
 }
 
 function withdraw_reject(int $id, string $adminId, string $reason, ?PDO $pdo = null): array
 {
     $pdo = withdraw_pdo($pdo);
     if (!$pdo instanceof PDO) {
-        return ['ok' => false, 'msg' => 'خطای پایگاه داده'];
+        return ['ok' => false, 'msg' => 'Database error'];
     }
     $reason = trim($reason);
     if ($reason === '') {
-        return ['ok' => false, 'msg' => 'دلیل رد را وارد کنید.'];
+        return ['ok' => false, 'msg' => 'Enter a rejection reason.'];
     }
     try {
         $pdo->beginTransaction();
@@ -1004,11 +1004,11 @@ function withdraw_reject(int $id, string $adminId, string $reason, ?PDO $pdo = n
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
             $pdo->rollBack();
-            return ['ok' => false, 'msg' => 'درخواست یافت نشد.'];
+            return ['ok' => false, 'msg' => 'Request not found.'];
         }
         if (($row['status'] ?? '') !== WITHDRAW_STATUS_PENDING) {
             $pdo->rollBack();
-            return ['ok' => false, 'msg' => 'این درخواست قبلاً بررسی شده است.', 'already' => true];
+            return ['ok' => false, 'msg' => 'This request was already reviewed.', 'already' => true];
         }
         $now = time();
         $pdo->prepare(
@@ -1020,7 +1020,7 @@ function withdraw_reject(int $id, string $adminId, string $reason, ?PDO $pdo = n
             $pdo->rollBack();
         }
         error_log('withdraw_reject: ' . $e->getMessage());
-        return ['ok' => false, 'msg' => 'رد درخواست ناموفق بود.'];
+        return ['ok' => false, 'msg' => 'Could not reject the request.'];
     }
     $row = withdraw_get($id, $pdo);
     withdraw_telegram_ready();
@@ -1029,27 +1029,27 @@ function withdraw_reject(int $id, string $adminId, string $reason, ?PDO $pdo = n
         sendmessage($row['id_user'], $text, null, 'HTML');
         $row['status'] = WITHDRAW_STATUS_REJECTED;
         $row['reject_reason'] = $reason;
-        withdraw_update_admin_messages($row, '❌ رد شده');
+        withdraw_update_admin_messages($row, '❌ Rejected');
     }
-    return ['ok' => true, 'msg' => 'درخواست رد شد.', 'row' => $row];
+    return ['ok' => true, 'msg' => 'The request was rejected.', 'row' => $row];
 }
 
 function withdraw_admin_settings_text(): string
 {
     $min = number_format(withdraw_min_amount());
-    return "⚙️ تنظیمات برداشت از کیف پول\n\n"
-        . "⬇️ حداقل برداشت: <code>$min</code> تومان\n\n"
-        . "📝 متن دکمه تسویه حساب:\n" . withdraw_prompt_text() . "\n\n"
-        . "✅ متن پس از ثبت موفق:\n" . withdraw_success_text();
+    return "⚙️ Wallet withdrawal settings\n\n"
+        . "⬇️ Minimum withdrawal: <code>$min</code> USD\n\n"
+        . "📝 Settlement button text:\n" . withdraw_prompt_text() . "\n\n"
+        . "✅ Success text after submit:\n" . withdraw_success_text();
 }
 
 function withdraw_admin_settings_keyboard(): string
 {
     $base = json_decode(withdraw_admin_menu_keyboard('settings'), true);
     $rows = $base['inline_keyboard'] ?? [];
-    $rows[] = [['text' => '⬇️ تغییر حداقل برداشت', 'callback_data' => 'wd_set_min']];
-    $rows[] = [['text' => '📝 ویرایش متن دکمه', 'callback_data' => 'wd_set_prompt']];
-    $rows[] = [['text' => '✅ ویرایش متن موفقیت', 'callback_data' => 'wd_set_success']];
+    $rows[] = [['text' => '⬇️ Change minimum withdrawal', 'callback_data' => 'wd_set_min']];
+    $rows[] = [['text' => '📝 Edit button text', 'callback_data' => 'wd_set_prompt']];
+    $rows[] = [['text' => '✅ Edit success text', 'callback_data' => 'wd_set_success']];
     return json_encode(['inline_keyboard' => $rows], JSON_UNESCAPED_UNICODE);
 }
 
@@ -1083,11 +1083,11 @@ function withdraw_admin_pending_view(int $page = 1): array
     $rows = withdraw_list(WITHDRAW_STATUS_PENDING, $perPage, ($page - 1) * $perPage);
     if ($rows === []) {
         return [
-            'text' => "📭 درخواست در انتظاری وجود ندارد.",
+            'text' => "📭 There are no pending requests.",
             'keyboard' => withdraw_admin_menu_keyboard('pending'),
         ];
     }
-    $text = "📥 درخواست‌های در انتظار برداشت\n\n";
+    $text = "📥 Pending withdrawal requests\n\n";
     $extra = [];
     foreach ($rows as $row) {
         $id = (int) $row['id'];
@@ -1096,7 +1096,7 @@ function withdraw_admin_pending_view(int $page = 1): array
                 $who = $uname !== '' && $uname !== 'none'
                     ? '@' . withdraw_esc(ltrim($uname, '@'))
                     : withdraw_esc((string) $row['id_user']);
-                $text .= "▪️ #$id — " . number_format((int) $row['amount']) . " ت — $who\n";
+                $text .= "▪️ #$id — " . number_format((int) $row['amount']) . " USD — $who\n";
                 $text .= '💳 ' . withdraw_esc(withdraw_format_card((string) $row['card_number']))
                     . ' | ' . withdraw_esc((string) $row['card_holder']) . "\n\n";
         $extra[] = [
@@ -1119,17 +1119,17 @@ function withdraw_admin_history_view(int $page = 1): array
     $rows = withdraw_list(WITHDRAW_STATUS_PAID, $perPage, ($page - 1) * $perPage);
     if ($rows === []) {
         return [
-            'text' => "📭 تاریخچه برداشتی وجود ندارد.",
+            'text' => "📭 There is no withdrawal history.",
             'keyboard' => withdraw_admin_menu_keyboard('history'),
         ];
     }
-    $text = "✅ برداشت‌های پرداخت‌شده\n\n";
+    $text = "✅ Paid withdrawals\n\n";
     foreach ($rows as $row) {
         $when = (int) ($row['updated_at'] ?? $row['created_at'] ?? 0);
         $whenTxt = $when > 0 && function_exists('jalali_tehran_format')
             ? jalali_tehran_format($when, 'Y/m/d H:i')
             : date('Y/m/d H:i', $when);
-        $text .= '▪️ #' . (int) $row['id'] . ' — ' . number_format((int) $row['amount']) . ' ت — '
+        $text .= '▪️ #' . (int) $row['id'] . ' — ' . number_format((int) $row['amount']) . ' USD — '
             . (string) $row['id_user'] . "\n📅 $whenTxt\n\n";
     }
     return [

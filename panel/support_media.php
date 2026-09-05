@@ -5,13 +5,13 @@ $pdo = panel_ensure_pdo();
 
 if (!support_ensure_media_table($pdo)) {
     http_response_code(503);
-    exit('سامانه فایل پشتیبانی در دسترس نیست.');
+    exit('Support file system is unavailable.');
 }
 
 $mediaId = (int) ($_GET['id'] ?? 0);
 if ($mediaId < 1) {
     http_response_code(404);
-    exit('فایل یافت نشد.');
+    exit('File not found.');
 }
 
 $media = db_fetch(
@@ -21,7 +21,7 @@ $media = db_fetch(
 );
 if (!$media) {
     http_response_code(404);
-    exit('فایل یافت نشد.');
+    exit('File not found.');
 }
 
 global $APIKEY;
@@ -80,7 +80,7 @@ if (empty($fileLookup['ok']) || $filePath === '') {
     error_log('support_media getFile failed id=' . $mediaId . ' err=' . ($fileLookup['error'] ?? ''));
     http_response_code(502);
     header('Content-Type: text/plain; charset=UTF-8');
-    exit('دریافت فایل از تلگرام ناموفق بود.');
+    exit('Could not fetch the file from Telegram.');
 }
 
 $url = 'https://api.telegram.org/file/bot' . $APIKEY . '/' . ltrim($filePath, '/');
@@ -113,7 +113,7 @@ if (empty($download['ok'])) {
     error_log('support_media download failed id=' . $mediaId . ' http=' . ($download['http'] ?? 0) . ' err=' . ($download['error'] ?? ''));
     http_response_code(502);
     header('Content-Type: text/plain; charset=UTF-8');
-    exit('دریافت فایل از تلگرام ناموفق بود.');
+    exit('Could not fetch the file from Telegram.');
 }
 
 $body = $download['body'];

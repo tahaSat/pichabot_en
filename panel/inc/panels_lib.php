@@ -3,27 +3,27 @@
 /** VPN panel (marzban_panel) helpers — mirrors Telegram admin defaults. */
 
 const PANEL_TYPES = [
-    'marzban' => 'مرزبان',
-    'marzneshin' => 'مرزنشین',
-    'x-ui_single' => 'ثنایی تک‌پورت',
-    'alireza_single' => 'علیرضا تک‌پورت',
-    'Manualsale' => 'فروش دستی',
-    'hiddify' => 'هیدیفای',
+    'marzban' => 'Marzban',
+    'marzneshin' => 'Marzneshin',
+    'x-ui_single' => 'Sanaei single-port',
+    'alireza_single' => 'Alireza single-port',
+    'Manualsale' => 'Manual sale',
+    'hiddify' => 'Hiddify',
     'WGDashboard' => 'WGDashboard',
     's_ui' => 's_ui',
     'ibsng' => 'ibsng',
-    'mikrotik' => 'میکروتیک',
+    'mikrotik' => 'MikroTik',
 ];
 
 const METHOD_USERNAME_OPTIONS = [
-    'نام کاربری + عدد به ترتیب',
-    'آیدی عددی + حروف و عدد رندوم',
-    'نام کاربری دلخواه',
-    'نام کاربری دلخواه + عدد رندوم',
-    'متن دلخواه + عدد رندوم',
-    'متن دلخواه + عدد ترتیبی',
-    'آیدی عددی+عدد ترتیبی',
-    'متن دلخواه نماینده + عدد ترتیبی',
+    'نام کاربری + عدد به ترتیب' => 'Username + sequential number',
+    'آیدی عددی + حروف و عدد رندوم' => 'Numeric ID + random letters and numbers',
+    'نام کاربری دلخواه' => 'Custom username',
+    'نام کاربری دلخواه + عدد رندوم' => 'Custom username + random number',
+    'متن دلخواه + عدد رندوم' => 'Custom text + random number',
+    'متن دلخواه + عدد ترتیبی' => 'Custom text + sequential number',
+    'آیدی عددی+عدد ترتیبی' => 'Numeric ID + sequential number',
+    'متن دلخواه نماینده + عدد ترتیبی' => 'Agent custom text + sequential number',
 ];
 
 const METHOD_USERNAME_PREFIX_OPTIONS = [
@@ -34,11 +34,11 @@ const METHOD_USERNAME_PREFIX_OPTIONS = [
 ];
 
 const METHOD_EXTEND_OPTIONS = [
-    'ریست حجم و زمان',
-    'اضافه شدن زمان و حجم به ماه بعد',
-    'ریست زمان و اضافه کردن حجم قبلی',
-    'ریست شدن حجم و اضافه شدن زمان',
-    'اضافه شدن زمان و تبدیل حجم کل به حجم باقی مانده',
+    'ریست حجم و زمان' => 'Reset volume and time',
+    'اضافه شدن زمان و حجم به ماه بعد' => 'Add time and volume to next month',
+    'ریست زمان و اضافه کردن حجم قبلی' => 'Reset time and keep previous volume',
+    'ریست شدن حجم و اضافه شدن زمان' => 'Reset volume and add time',
+    'اضافه شدن زمان و تبدیل حجم کل به حجم باقی مانده' => 'Add time and convert total volume to remaining volume',
 ];
 
 function require_administrator(): void
@@ -47,7 +47,7 @@ function require_administrator(): void
     global $pdo;
     $admin = db_fetch($pdo, "SELECT rule FROM admin WHERE username = ?", [$_SESSION['admin_user'] ?? '']);
     if (!$admin || ($admin['rule'] ?? '') !== 'administrator') {
-        flash('error', 'فقط مدیر اصلی به این بخش دسترسی دارد.');
+        flash('error', 'Only the main administrator can access this section.');
         header('Location: index.php');
         exit;
     }
@@ -292,7 +292,7 @@ function panel_type_label(?string $type): string
 
 function panel_status_label(?string $status): string
 {
-    return ($status ?? '') === 'active' ? 'فعال' : 'غیرفعال';
+    return ($status ?? '') === 'active' ? 'Active' : 'Inactive';
 }
 
 function panel_bool_on(string $value, string $onValue): bool
@@ -464,8 +464,8 @@ function panel_probe_connection(array $panel): array
     if ($type === 'Manualsale') {
         return [
             'ok' => true,
-            'title' => 'فروش دستی — بدون اتصال API',
-            'lines' => ['این پنل به سرور خارجی متصل نمی‌شود.'],
+            'title' => 'Manual sale — no API connection',
+            'lines' => ['This panel does not connect to an external server.'],
         ];
     }
 
@@ -473,8 +473,8 @@ function panel_probe_connection(array $panel): array
     if ($url === '' || $url === 'null') {
         return [
             'ok' => false,
-            'title' => 'آدرس پنل تنظیم نشده',
-            'lines' => ['آدرس URL را در فرم زیر وارد کنید.'],
+            'title' => 'Panel URL is not set',
+            'lines' => ['Enter the URL in the form below.'],
         ];
     }
 
@@ -485,24 +485,24 @@ function panel_probe_connection(array $panel): array
                 $tok = token_panel($panel['code_panel'], false);
                 if (!empty($tok['access_token'])) {
                     $sys = Get_System_Stats($panel['name_panel']);
-                    $lines[] = 'اتصال به API مرزبان برقرار است.';
+                    $lines[] = 'Connected to the Marzban API.';
                     if (is_array($sys) && isset($sys['version'])) {
-                        $lines[] = 'نسخه پنل: ' . $sys['version'];
+                        $lines[] = 'Panel version: ' . $sys['version'];
                     }
                     if (is_array($sys) && isset($sys['total_user'])) {
-                        $lines[] = 'کل کاربران: ' . number_format((int) $sys['total_user']);
+                        $lines[] = 'Total users: ' . number_format((int) $sys['total_user']);
                     }
                     $vu = $sys['users_active'] ?? $sys['active_users'] ?? $sys['online_users'] ?? null;
                     if ($vu !== null) {
-                        $lines[] = 'کاربران فعال: ' . number_format((int) $vu);
+                        $lines[] = 'Active users: ' . number_format((int) $vu);
                     }
-                    return ['ok' => true, 'title' => 'پنل متصل است', 'lines' => $lines];
+                    return ['ok' => true, 'title' => 'Panel is connected', 'lines' => $lines];
                 }
                 if (!empty($tok['detail']) && $tok['detail'] === 'Incorrect username or password') {
-                    return ['ok' => false, 'title' => 'نام کاربری یا رمز اشتباه', 'lines' => []];
+                    return ['ok' => false, 'title' => 'Wrong username or password', 'lines' => []];
                 }
                 $err = $tok['error'] ?? $tok['detail'] ?? json_encode($tok, JSON_UNESCAPED_UNICODE);
-                return ['ok' => false, 'title' => 'خطا در اتصال', 'lines' => [(string) $err]];
+                return ['ok' => false, 'title' => 'Connection error', 'lines' => [(string) $err]];
 
             case 'marzneshin':
                 require_once $root . '/marzneshin.php';
@@ -510,16 +510,16 @@ function panel_probe_connection(array $panel): array
                 if (!empty($tok['access_token'])) {
                     $sys = Get_System_Statsm($panel['name_panel']);
                     $body = json_decode(is_array($sys) ? ($sys['body'] ?? '{}') : '{}', true) ?: [];
-                    $lines[] = 'اتصال به مرزنشین برقرار است.';
+                    $lines[] = 'Connected to Marzneshin.';
                     if (isset($body['total'])) {
-                        $lines[] = 'کل کاربران: ' . number_format((int) $body['total']);
+                        $lines[] = 'Total users: ' . number_format((int) $body['total']);
                     }
                     if (isset($body['active'])) {
-                        $lines[] = 'کاربران فعال: ' . number_format((int) $body['active']);
+                        $lines[] = 'Active users: ' . number_format((int) $body['active']);
                     }
-                    return ['ok' => true, 'title' => 'پنل متصل است', 'lines' => $lines];
+                    return ['ok' => true, 'title' => 'Panel is connected', 'lines' => $lines];
                 }
-                return ['ok' => false, 'title' => 'خطا در اتصال', 'lines' => [(string) ($tok['detail'] ?? $tok['errror'] ?? 'احراز ناموفق')]];
+                return ['ok' => false, 'title' => 'Connection error', 'lines' => [(string) ($tok['detail'] ?? $tok['errror'] ?? 'Authentication failed')]];
 
             case 'x-ui_single':
             case 'alireza_single':
@@ -527,65 +527,65 @@ function panel_probe_connection(array $panel): array
                 require_once $root . $file;
                 $res = login($panel['code_panel'], false);
                 if (is_array($res) && !empty($res['success'])) {
-                    return ['ok' => true, 'title' => 'پنل متصل است', 'lines' => ['ورود به پنل ثنایی موفق بود.']];
+                    return ['ok' => true, 'title' => 'Panel is connected', 'lines' => ['Logged in to the Sanaei panel.']];
                 }
-                $msg = is_array($res) ? ($res['msg'] ?? json_encode($res, JSON_UNESCAPED_UNICODE)) : 'پاسخ نامعتبر';
-                return ['ok' => false, 'title' => 'خطا در اتصال', 'lines' => [(string) $msg]];
+                $msg = is_array($res) ? ($res['msg'] ?? json_encode($res, JSON_UNESCAPED_UNICODE)) : 'Invalid response';
+                return ['ok' => false, 'title' => 'Connection error', 'lines' => [(string) $msg]];
 
             case 'hiddify':
                 require_once $root . '/hiddify.php';
                 $res = serverstatus($panel['name_panel']);
                 if (!empty($res['status']) && (int) $res['status'] !== 200) {
-                    return ['ok' => false, 'title' => 'خطا', 'lines' => ['کد HTTP: ' . $res['status']]];
+                    return ['ok' => false, 'title' => 'Error', 'lines' => ['HTTP status: ' . $res['status']]];
                 }
                 if (!empty($res['error'])) {
-                    return ['ok' => false, 'title' => 'خطا', 'lines' => [(string) $res['error']]];
+                    return ['ok' => false, 'title' => 'Error', 'lines' => [(string) $res['error']]];
                 }
                 $body = json_decode($res['body'] ?? '', true);
                 if (isset($body['stats'])) {
-                    return ['ok' => true, 'title' => 'پنل متصل است', 'lines' => ['اتصال به هیدیفای برقرار است.']];
+                    return ['ok' => true, 'title' => 'Panel is connected', 'lines' => ['Connected to Hiddify.']];
                 }
                 if (($body['message'] ?? '') === 'Unathorized') {
-                    return ['ok' => false, 'title' => 'لینک یا UUID اشتباه', 'lines' => []];
+                    return ['ok' => false, 'title' => 'Wrong link or UUID', 'lines' => []];
                 }
-                return ['ok' => false, 'title' => 'پنل متصل نیست', 'lines' => []];
+                return ['ok' => false, 'title' => 'Panel is not connected', 'lines' => []];
 
             case 'ibsng':
                 require_once $root . '/ibsng.php';
                 $res = loginIBsng($url, $panel['username_panel'], $panel['password_panel']);
                 if (!empty($res['status'])) {
-                    return ['ok' => true, 'title' => 'پنل متصل است', 'lines' => [$res['msg'] ?? 'ورود موفق']];
+                    return ['ok' => true, 'title' => 'Panel is connected', 'lines' => [$res['msg'] ?? 'Login successful']];
                 }
-                return ['ok' => false, 'title' => 'خطا در اتصال', 'lines' => [(string) ($res['msg'] ?? 'ناموفق')]];
+                return ['ok' => false, 'title' => 'Connection error', 'lines' => [(string) ($res['msg'] ?? 'Failed')]];
 
             case 'mikrotik':
                 require_once $root . '/mikrotik.php';
                 $res = login_mikrotik($url, $panel['username_panel'], $panel['password_panel']);
                 if (!isset($res['error'])) {
-                    $lines[] = 'اتصال به میکروتیک برقرار است.';
+                    $lines[] = 'Connected to MikroTik.';
                     if (isset($res['version'])) {
-                        $lines[] = 'نسخه: ' . $res['version'];
+                        $lines[] = 'Version: ' . $res['version'];
                     }
-                    return ['ok' => true, 'title' => 'پنل متصل است', 'lines' => $lines];
+                    return ['ok' => true, 'title' => 'Panel is connected', 'lines' => $lines];
                 }
-                return ['ok' => false, 'title' => 'خطا', 'lines' => [json_encode($res, JSON_UNESCAPED_UNICODE)]];
+                return ['ok' => false, 'title' => 'Error', 'lines' => [json_encode($res, JSON_UNESCAPED_UNICODE)]];
 
             case 's_ui':
             case 'WGDashboard':
                 if (trim($panel['password_panel'] ?? '') === '' || ($panel['password_panel'] ?? '') === 'null') {
-                    return ['ok' => false, 'title' => 'توکن تنظیم نشده', 'lines' => ['توکن API را وارد کنید.']];
+                    return ['ok' => false, 'title' => 'Token is not set', 'lines' => ['Enter the API token.']];
                 }
                 return [
                     'ok' => true,
-                    'title' => 'آماده (تست کامل از ربات)',
-                    'lines' => ['توکن ثبت شده است. برای تست اینباند از ربات «تنظیم پروتکل و اینباند» را انجام دهید.'],
+                    'title' => 'Ready (full test from the bot)',
+                    'lines' => ['Token is saved. Use the bot protocol and inbound settings to test the inbound.'],
                 ];
 
             default:
-                return ['ok' => false, 'title' => 'نوع پنل ناشناخته', 'lines' => [$type]];
+                return ['ok' => false, 'title' => 'Unknown panel type', 'lines' => [$type]];
         }
     } catch (Throwable $e) {
-        return ['ok' => false, 'title' => 'خطای سیستم', 'lines' => [$e->getMessage()]];
+        return ['ok' => false, 'title' => 'System error', 'lines' => [$e->getMessage()]];
     }
 }
 
@@ -615,13 +615,13 @@ function panel_report_log_files(): array
 {
     $root = dirname(__DIR__, 2);
     $candidates = [
-        'subscription_failures' => ['label' => 'خطای ساخت اشتراک (logs/subscription_failures.log)', 'path' => $root . '/logs/subscription_failures.log'],
-        'php_errors' => ['label' => 'خطاهای PHP (logs/php_errors.log)', 'path' => $root . '/logs/php_errors.log'],
-        'error_log' => ['label' => 'گزارش خطا (error_log)', 'path' => $root . '/error_log'],
-        'error_dot_log' => ['label' => 'گزارش خطا (error.log)', 'path' => $root . '/error.log'],
-        'polling_log' => ['label' => 'لاگ پولینگ (polling.log)', 'path' => $root . '/polling.log'],
-        'storage_polling' => ['label' => 'لاگ پولینگ (storage/logs)', 'path' => $root . '/storage/logs/polling.log'],
-        'storage_panel' => ['label' => 'لاگ پنل (storage/logs/panel.log)', 'path' => $root . '/storage/logs/panel.log'],
+        'subscription_failures' => ['label' => 'Subscription create errors (logs/subscription_failures.log)', 'path' => $root . '/logs/subscription_failures.log'],
+        'php_errors' => ['label' => 'PHP errors (logs/php_errors.log)', 'path' => $root . '/logs/php_errors.log'],
+        'error_log' => ['label' => 'Error log (error_log)', 'path' => $root . '/error_log'],
+        'error_dot_log' => ['label' => 'Error log (error.log)', 'path' => $root . '/error.log'],
+        'polling_log' => ['label' => 'Polling log (polling.log)', 'path' => $root . '/polling.log'],
+        'storage_polling' => ['label' => 'Polling log (storage/logs)', 'path' => $root . '/storage/logs/polling.log'],
+        'storage_panel' => ['label' => 'Panel log (storage/logs/panel.log)', 'path' => $root . '/storage/logs/panel.log'],
     ];
 
     $out = [];

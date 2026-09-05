@@ -41,7 +41,7 @@ $progress_admin = intval($info['progress_admin'] ?? $info['id_admin'] ?? 0);
 if(count($userid) == 0){
     if($progress_admin > 0){
     deletemessage($progress_admin, $info['id_message']);
-    sendmessage($progress_admin, "📌 عملیات برای تمامی کاربران درخواستی انجام شد.", null, 'HTML');
+    sendmessage($progress_admin, "📌 The operation was completed for all requested users.", null, 'HTML');
     if (!empty($info['broadcast_id'])) {
         update("broadcast_log", "status", "completed", "id", intval($info['broadcast_id']));
         refresh_broadcast_report_message(intval($info['broadcast_id']));
@@ -53,13 +53,13 @@ if(count($userid) == 0){
     
 }
 $count_remein = count($userid);
-$textprocces = "✏️ عملیات ارسال پیام درحال انجام می باشد...
+$textprocces = "✏️ Message sending is in progress...
 
-تعداد نفرات باقی مانده :  $count_remein";
+Remaining users : $count_remein";
 $cancelmessage = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => "لغو عملیات", 'callback_data' => 'cancel_sendmessage'],
+                ['text' => "Cancel operation", 'callback_data' => 'cancel_sendmessage'],
             ],
         ]
     ]);

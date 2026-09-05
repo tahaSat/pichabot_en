@@ -84,7 +84,7 @@
       navigator: { scroll: { enabled: false } },
       toolbox: {
         calendarSwitch: { enabled: false },
-        todayButton: { enabled: true, text: { fa: 'اکنون', en: 'Now' } },
+        todayButton: { enabled: true, text: { fa: 'Now', en: 'Now' } },
         submitButton: { enabled: true }
       },
       timePicker: {
@@ -108,7 +108,7 @@
 
   function categoryOptionsHtml(kind, selected) {
     var map = categoryMap(kind);
-    var html = '<option value="">یافت نشده</option>';
+    var html = '<option value="">Not found</option>';
     Object.keys(map).forEach(function (slug) {
       html += '<option value="' + escapeHtml(slug) + '"' + (slug === selected ? ' selected' : '') + '>'
         + escapeHtml(map[slug]) + '</option>';
@@ -124,16 +124,16 @@
     backBtn.hidden = name === 'file';
     showError('');
     if (name === 'file') {
-      titleEl.textContent = 'ورود دیتا با اکسل';
-      nextBtn.textContent = 'ادامه';
+      titleEl.textContent = 'Import from Excel';
+      nextBtn.textContent = 'Continue';
       nextBtn.disabled = !selectedFile;
     } else if (name === 'rate') {
-      titleEl.textContent = 'نرخ تبدیل تومان';
-      nextBtn.textContent = 'پردازش فایل';
+      titleEl.textContent = 'Toman conversion rate';
+      nextBtn.textContent = 'Process file';
       nextBtn.disabled = false;
     } else {
-      titleEl.textContent = 'پیش‌نمایش ورود داده';
-      nextBtn.textContent = 'ورود به دیتابیس';
+      titleEl.textContent = 'Import preview';
+      nextBtn.textContent = 'Import to database';
       updateConfirmState();
     }
   }
@@ -203,9 +203,9 @@
       unmatched = stats.unmatched || 0;
     }
     statsEl.innerHTML = ''
-      + '<span class="tag tag-info">' + (stats.total || previewRows.length) + ' سطر</span>'
-      + (stats.toman ? '<span class="tag tag-ok">' + stats.toman + ' سطر تومانی</span>' : '')
-      + (unmatched ? '<span class="tag tag-warn">' + unmatched + ' دسته یافت نشده</span>' : '');
+      + '<span class="tag tag-info">' + (stats.total || previewRows.length) + ' rows</span>'
+      + (stats.toman ? '<span class="tag tag-ok">' + stats.toman + ' Toman rows</span>' : '')
+      + (unmatched ? '<span class="tag tag-warn">' + unmatched + ' unmatched categories</span>' : '');
   }
 
   function renderPreview(payload) {
@@ -220,11 +220,11 @@
       return '<tr class="' + warnClass + '" data-source-row="' + escapeHtml(row.source_row || '') + '">'
         + '<td>' + (idx + 1) + '</td>'
         + '<td><select class="select pay-import-kind">'
-        + '<option value="expense"' + (kind === 'expense' ? ' selected' : '') + '>هزینه</option>'
-        + '<option value="income"' + (kind === 'income' ? ' selected' : '') + '>درآمد</option>'
+        + '<option value="expense"' + (kind === 'expense' ? ' selected' : '') + '>Expense</option>'
+        + '<option value="income"' + (kind === 'income' ? ' selected' : '') + '>Income</option>'
         + '</select></td>'
         + '<td><input class="input jalali-datetime-picker pay-import-time" type="text" value="'
-        + escapeHtml(row.time || '') + '" placeholder="تاریخ و ساعت" autocomplete="off"></td>'
+        + escapeHtml(row.time || '') + '" placeholder="Date and time" autocomplete="off"></td>'
         + '<td><input class="input pay-import-amount" type="text" inputmode="numeric" value="'
         + escapeHtml(formatPrice(String(row.amount || ''))) + '"></td>'
         + '<td><input class="input pay-import-note" type="text" value="' + escapeHtml(row.note || '') + '"></td>'
@@ -240,7 +240,7 @@
 
   function parseFile() {
     if (!selectedFile) {
-      showError('فایل را انتخاب کنید.');
+      showError('Select a file.');
       return;
     }
     var fd = new FormData();
@@ -261,7 +261,7 @@
     }).then(function (res) {
       return res.json().then(function (data) {
         if (!res.ok || !data.ok) {
-          throw new Error(data.msg || 'پردازش فایل ناموفق بود.');
+          throw new Error(data.msg || 'Could not process the file.');
         }
         return data;
       });
@@ -269,7 +269,7 @@
       renderPreview(data);
       setStep('preview');
     }).catch(function (err) {
-      showError(err.message || 'پردازش فایل ناموفق بود.');
+      showError(err.message || 'Could not process the file.');
     }).finally(function () {
       setBusy(false);
       if (step === 'rate') nextBtn.disabled = false;
@@ -280,14 +280,14 @@
   function commitRows() {
     var rows = collectPreviewRows();
     if (!rows.length) {
-      showError('سطری برای ورود وجود ندارد.');
+      showError('There are no rows to import.');
       return;
     }
     var invalid = rows.findIndex(function (row) {
       return !row.kind || !row.time || !row.amount || parseInt(row.amount, 10) < 1 || !row.category;
     });
     if (invalid !== -1) {
-      showError('سطر ' + (invalid + 1) + ' را کامل کنید. دسته، تاریخ و مبلغ الزامی است.');
+      showError('Complete row ' + (invalid + 1) + '. Category, date, and amount are required.');
       updateConfirmState();
       return;
     }
@@ -309,16 +309,16 @@
     }).then(function (res) {
       return res.json().then(function (data) {
         if (!res.ok || !data.ok) {
-          throw new Error(data.msg || 'ورود داده‌ها ناموفق بود.');
+          throw new Error(data.msg || 'Could not import the data.');
         }
         return data;
       });
     }).then(function (data) {
-      toast(data.msg || 'ورود داده انجام شد.', 'ok');
+      toast(data.msg || 'Import completed.', 'ok');
       closeModal('paymentImportModal');
       window.location.reload();
     }).catch(function (err) {
-      showError(err.message || 'ورود داده‌ها ناموفق بود.');
+      showError(err.message || 'Could not import the data.');
       setBusy(false);
       updateConfirmState();
     });
@@ -341,7 +341,7 @@
     if (busy) return;
     if (step === 'file') {
       if (!selectedFile) {
-        showError('فایل را انتخاب کنید.');
+        showError('Select a file.');
         return;
       }
       setStep('rate');

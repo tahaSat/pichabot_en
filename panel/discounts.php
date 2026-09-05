@@ -10,10 +10,10 @@ $discountTab = (($_GET['tab'] ?? 'codes') === 'product') ? 'product' : 'codes';
 function discount_agent_label(string $agent): string
 {
   return match ($agent) {
-    'f' => 'کاربر عادی',
-    'n' => 'نماینده',
-    'n2' => 'نماینده پیشرفته',
-    'allusers' => 'همه کاربران',
+    'f' => 'Regular user',
+    'n' => 'Agent',
+    'n2' => 'Advanced agent',
+    'allusers' => 'All users',
     default => $agent !== '' ? $agent : '—',
   };
 }
@@ -21,9 +21,9 @@ function discount_agent_label(string $agent): string
 function discount_type_label(string $type): string
 {
   return match ($type) {
-    'buy' => 'خرید',
-    'extend' => 'تمدید',
-    'all' => 'خرید و تمدید',
+    'buy' => 'Purchase',
+    'extend' => 'Renewal',
+    'all' => 'Purchase and renewal',
     default => $type !== '' ? $type : '—',
   };
 }
@@ -41,17 +41,17 @@ function discount_normalize_time(?string $hoursRaw): string
 function discount_expiry_label(?string $time): string
 {
   if ($time === null || $time === '' || $time === '0') {
-    return 'نامحدود';
+    return 'Unlimited';
   }
   if (!is_numeric($time)) {
     return (string) $time;
   }
   $ts = (int) $time;
   if ($ts <= 0) {
-    return 'نامحدود';
+    return 'Unlimited';
   }
   if ($ts < time()) {
-    return 'منقضی (' . date('Y/m/d H:i', $ts) . ')';
+    return 'Expired (' . date('Y/m/d H:i', $ts) . ')';
   }
   return date('Y/m/d H:i', $ts);
 }
@@ -85,34 +85,34 @@ function discount_collect_fields(): array
 function discount_validate_fields(array $f, bool $requireCode = true): ?string
 {
   if ($requireCode && $f['code'] === '') {
-    return 'کد تخفیف الزامی است.';
+    return 'Discount code is required.';
   }
   if ($requireCode && !preg_match('/^[A-Za-z\d]+$/', $f['code'])) {
-    return 'کد فقط می‌تواند شامل حروف انگلیسی و عدد باشد.';
+    return 'Code may only contain English letters and numbers.';
   }
   if ($f['percent'] === '' || !ctype_digit($f['percent']) || (int) $f['percent'] < 1 || (int) $f['percent'] > 100) {
-    return 'درصد تخفیف باید عددی بین ۱ تا ۱۰۰ باشد.';
+    return 'Discount percent must be a number from 1 to 100.';
   }
   if ($f['limitUse'] === '' || !ctype_digit($f['limitUse']) || (int) $f['limitUse'] < 1) {
-    return 'محدودیت کل استفاده نامعتبر است.';
+    return 'Total usage limit is invalid.';
   }
   if ($f['useUser'] === '' || !ctype_digit($f['useUser']) || (int) $f['useUser'] < 1) {
-    return 'محدودیت استفاده هر کاربر نامعتبر است.';
+    return 'Per-user usage limit is invalid.';
   }
   if ((int) $f['useUser'] > (int) $f['limitUse']) {
-    return 'محدودیت هر کاربر نباید بیشتر از محدودیت کل باشد.';
+    return 'Per-user limit cannot exceed the total limit.';
   }
   if (!in_array($f['agent'], ['f', 'n', 'n2', 'allusers'], true)) {
-    return 'گروه کاربری نامعتبر است.';
+    return 'Invalid user group.';
   }
   if (!in_array($f['usefirst'], ['0', '1'], true)) {
-    return 'نوع محدودیت خرید نامعتبر است.';
+    return 'Invalid purchase-limit type.';
   }
   if (!in_array($f['type'], ['buy', 'extend', 'all'], true)) {
-    return 'نوع کاربرد کد نامعتبر است.';
+    return 'Invalid code usage type.';
   }
   if ($f['timeHours'] !== '' && !ctype_digit($f['timeHours'])) {
-    return 'مدت اعتبار باید عدد ساعت باشد (۰ = نامحدود).';
+    return 'Validity must be a number of hours (0 = unlimited).';
   }
   return null;
 }
@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
     exit;
   }
   if (db_count($pdo, 'SELECT COUNT(*) FROM DiscountSell WHERE codeDiscount = ?', [$f['code']])) {
-    flash('error', 'این کد تخفیف قبلاً ثبت شده است.');
+    flash('error', 'This discount code already exists.');
     header('Location: discounts.php');
     exit;
   }
@@ -150,9 +150,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
         $f['usefirst'] === '1' ? 'all' : $f['type'],
       ]
     );
-    flash('success', 'کد تخفیف «' . $f['code'] . '» ساخته شد.');
+    flash('success', 'Discount code “' . $f['code'] . '” was created.');
   } catch (Exception $e) {
-    flash('error', 'خطای پایگاه داده: ' . $e->getMessage());
+    flash('error', 'Database error: ' . $e->getMessage());
   }
   header('Location: discounts.php');
   exit;
@@ -164,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit'
   $f = discount_collect_fields();
   $err = discount_validate_fields($f, true);
   if (!$id) {
-    flash('error', 'شناسه نامعتبر است.');
+    flash('error', 'Invalid ID.');
     header('Location: discounts.php');
     exit;
   }
@@ -175,13 +175,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit'
   }
   $old = db_fetch($pdo, 'SELECT * FROM DiscountSell WHERE id = ?', [$id]);
   if (!$old) {
-    flash('error', 'کد تخفیف یافت نشد.');
+    flash('error', 'Discount code not found.');
     header('Location: discounts.php');
     exit;
   }
   if (strcasecmp((string) $old['codeDiscount'], $f['code']) !== 0
     && db_count($pdo, 'SELECT COUNT(*) FROM DiscountSell WHERE codeDiscount = ?', [$f['code']])) {
-    flash('error', 'کد دیگری با این نام وجود دارد.');
+    flash('error', 'Another code with this name already exists.');
     header('Location: discounts.php');
     exit;
   }
@@ -219,9 +219,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit'
       } catch (Exception $e) {
       }
     }
-    flash('success', 'کد تخفیف ویرایش شد.');
+    flash('success', 'Discount code updated.');
   } catch (Exception $e) {
-    flash('error', 'خطا: ' . $e->getMessage());
+    flash('error', 'Error: ' . $e->getMessage());
   }
   header('Location: discounts.php');
   exit;
@@ -239,9 +239,9 @@ if (isset($_GET['delete'])) {
     } catch (Exception $e) {
     }
     db_query($pdo, 'DELETE FROM DiscountSell WHERE id = ?', [$id]);
-    flash('success', 'کد تخفیف «' . $code . '» حذف شد.');
+    flash('success', 'Discount code “' . $code . '” was deleted.');
   } else {
-    flash('error', 'کد تخفیف یافت نشد.');
+    flash('error', 'Discount code not found.');
   }
   header('Location: discounts.php');
   exit;
@@ -270,31 +270,31 @@ function product_discount_collect_fields(): array
 function product_discount_validate_fields(array $f): ?string
 {
   if (!in_array($f['status'], ['active', 'inactive'], true)) {
-    return 'وضعیت نامعتبر است.';
+    return 'Invalid status.';
   }
   $hasValue = $f['valueRaw'] !== '';
   $hasPercent = $f['percentRaw'] !== '';
   if ($hasValue && $hasPercent) {
-    return 'فقط یکی از مبلغ یا درصد را وارد کنید.';
+    return 'Enter either an amount or a percent, not both.';
   }
   if (!$hasValue && !$hasPercent) {
-    return 'مبلغ یا درصد تخفیف را وارد کنید.';
+    return 'Enter a discount amount or percent.';
   }
   if ($hasValue) {
     if (!ctype_digit($f['valueRaw']) || (int) $f['valueRaw'] < 1) {
-      return 'مبلغ تخفیف باید عدد بزرگ‌تر از صفر باشد.';
+      return 'Discount amount must be greater than zero.';
     }
   } else {
     if (!ctype_digit($f['percentRaw']) || (int) $f['percentRaw'] < 1 || (int) $f['percentRaw'] > 100) {
-      return 'درصد تخفیف باید عددی بین ۱ تا ۱۰۰ باشد.';
+      return 'Discount percent must be a number from 1 to 100.';
     }
   }
   if ($f['products'] === []) {
-    return 'حداقل یک محصول را انتخاب کنید.';
+    return 'Select at least one product.';
   }
   if ($f['useLimitRaw'] !== '') {
     if (!ctype_digit($f['useLimitRaw']) || (int) $f['useLimitRaw'] < 1) {
-      return 'محدودیت تعداد استفاده باید عدد بزرگ‌تر از صفر باشد یا خالی بماند.';
+      return 'Usage limit must be greater than zero or left empty.';
     }
   }
   return null;
@@ -308,7 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array(($_POST['action'] ?? ''), 
   if ($action === 'product_edit') {
     $id = (int) ($_POST['pd_id'] ?? 0);
     if (!$id) {
-      flash('error', 'شناسه نامعتبر است.');
+      flash('error', 'Invalid ID.');
       product_discount_redirect();
     }
   }
@@ -327,12 +327,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array(($_POST['action'] ?? ''), 
         'INSERT INTO ProductDiscount (status, type, amount, products, use_limit, created_at) VALUES (?, ?, ?, ?, ?, ?)',
         [$f['status'], $type, $amount, $productsJson, $useLimit, time()]
       );
-      flash('success', 'تخفیف روی محصول ثبت شد.');
+      flash('success', 'Product discount saved.');
     } else {
       $id = (int) ($_POST['pd_id'] ?? 0);
       $old = db_fetch($pdo, 'SELECT id FROM ProductDiscount WHERE id = ?', [$id]);
       if (!$old) {
-        flash('error', 'تخفیف یافت نشد.');
+        flash('error', 'Discount not found.');
         product_discount_redirect();
       }
       db_query(
@@ -340,10 +340,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array(($_POST['action'] ?? ''), 
         'UPDATE ProductDiscount SET status = ?, type = ?, amount = ?, products = ?, use_limit = ? WHERE id = ?',
         [$f['status'], $type, $amount, $productsJson, $useLimit, $id]
       );
-      flash('success', 'تخفیف روی محصول ویرایش شد.');
+      flash('success', 'Product discount updated.');
     }
   } catch (Exception $e) {
-    flash('error', 'خطای پایگاه داده: ' . $e->getMessage());
+    flash('error', 'Database error: ' . $e->getMessage());
   }
   product_discount_redirect();
 }
@@ -354,9 +354,9 @@ if (isset($_GET['product_delete'])) {
   $row = db_fetch($pdo, 'SELECT id FROM ProductDiscount WHERE id = ?', [$id]);
   if ($row) {
     db_query($pdo, 'DELETE FROM ProductDiscount WHERE id = ?', [$id]);
-    flash('success', 'تخفیف روی محصول حذف شد.');
+    flash('success', 'Product discount deleted.');
   } else {
-    flash('error', 'تخفیف یافت نشد.');
+    flash('error', 'Discount not found.');
   }
   product_discount_redirect();
 }
@@ -368,9 +368,9 @@ if (isset($_GET['product_toggle'])) {
   if ($row) {
     $next = (($row['status'] ?? '') === 'active') ? 'inactive' : 'active';
     db_query($pdo, 'UPDATE ProductDiscount SET status = ? WHERE id = ?', [$next, $id]);
-    flash('success', $next === 'active' ? 'تخفیف فعال شد.' : 'تخفیف غیرفعال شد.');
+    flash('success', $next === 'active' ? 'Discount enabled.' : 'Discount disabled.');
   } else {
-    flash('error', 'تخفیف یافت نشد.');
+    flash('error', 'Discount not found.');
   }
   product_discount_redirect();
 }
@@ -426,7 +426,7 @@ if ($usageCode !== '') {
     );
     $productBreakdown = db_fetchAll(
       $pdo,
-      "SELECT COALESCE(NULLIF(name_product, ''), COALESCE(code_product, 'نامشخص')) AS product_label,
+      "SELECT COALESCE(NULLIF(name_product, ''), COALESCE(code_product, 'Unknown')) AS product_label,
               COUNT(*) AS cnt
        FROM DiscountSellUsage
        WHERE code = ?
@@ -516,40 +516,40 @@ foreach ($categories as $c) {
 if (!empty($productsByCategory[''])) {
   $productPickerSections[] = [
     'key' => '',
-    'label' => 'بدون دسته‌بندی',
+    'label' => 'Uncategorized',
     'products' => $productsByCategory[''],
   ];
 }
 
-$pageTitle = $discountTab === 'product' ? 'تخفیف روی محصول' : 'کدهای تخفیف';
+$pageTitle = $discountTab === 'product' ? 'Product discounts' : 'Discount codes';
 $pageLede = $discountTab === 'product'
-  ? 'تخفیف مبلغی یا درصدی روی محصولات انتخاب‌شده، بدون نیاز به کد.'
-  : 'ساخت و مدیریت کد تخفیف با فیلتر چندتایی روی محصول، دسته‌بندی و پنل.';
+  ? 'Fixed or percent discounts on selected products, no code required.'
+  : 'Create and manage discount codes with multi-select filters for product, category, and panel.';
 $activeNav = 'discounts';
 include __DIR__ . '/inc/layout_head.php';
 ?>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px" class="fade-up">
   <div style="display:flex;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:4px;flex-wrap:wrap">
-    <a href="discounts.php" class="btn btn-sm <?= $discountTab === 'codes' ? 'btn-primary' : 'btn-ghost' ?>">کدهای تخفیف</a>
-    <a href="discounts.php?tab=product" class="btn btn-sm <?= $discountTab === 'product' ? 'btn-primary' : 'btn-ghost' ?>">تخفیف روی محصول</a>
+    <a href="discounts.php" class="btn btn-sm <?= $discountTab === 'codes' ? 'btn-primary' : 'btn-ghost' ?>">Discount codes</a>
+    <a href="discounts.php?tab=product" class="btn btn-sm <?= $discountTab === 'product' ? 'btn-primary' : 'btn-ghost' ?>">Product discounts</a>
   </div>
 </div>
 
 <?php if ($discountTab === 'product'): ?>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px" class="fade-up">
-  <div style="font-size:.85rem;color:var(--mute)"><?= count($productDiscounts) ?> تخفیف محصول</div>
-  <button class="btn btn-primary" onclick="openProductDiscountModal()"><?= icon('plus', 14) ?> افزودن تخفیف</button>
+  <div style="font-size:.85rem;color:var(--mute)"><?= count($productDiscounts) ?> product discounts</div>
+  <button class="btn btn-primary" onclick="openProductDiscountModal()"><?= icon('plus', 14) ?> Add discount</button>
 </div>
 
 <div class="card fade-up d1">
   <div class="toolbar">
-    <div class="toolbar-title">تخفیف روی محصول <small>(<?= count($productDiscounts) ?>)</small></div>
+    <div class="toolbar-title">Product discounts <small>(<?= count($productDiscounts) ?>)</small></div>
   </div>
   <?php if (empty($productDiscounts)): ?>
     <div class="empty" style="padding:60px 20px">
-      <p>هنوز تخفیفی روی محصول ثبت نکرده‌اید</p>
-      <button class="btn btn-primary" style="margin-top:14px" onclick="openProductDiscountModal()"><?= icon('plus', 14) ?> ساخت اولین تخفیف</button>
+      <p>No product discounts yet</p>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="openProductDiscountModal()"><?= icon('plus', 14) ?> Create the first discount</button>
     </div>
   <?php else: ?>
     <div class="tbl-wrap">
@@ -557,12 +557,12 @@ include __DIR__ . '/inc/layout_head.php';
         <thead>
           <tr>
             <th>#</th>
-            <th>وضعیت</th>
-            <th>نوع</th>
-            <th>مقدار</th>
-            <th>باقی‌مانده</th>
-            <th>محصولات</th>
-            <th>عملیات</th>
+            <th>Status</th>
+            <th>Type</th>
+            <th>Value</th>
+            <th>Remaining</th>
+            <th>Products</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -572,7 +572,7 @@ include __DIR__ . '/inc/layout_head.php';
             $pdAmount = (int) ($pd['amount'] ?? 0);
             $pdStatus = (string) ($pd['status'] ?? 'inactive');
             $pdUseLimit = $pd['use_limit'] ?? null;
-            $pdUseLabel = ($pdUseLimit === null || $pdUseLimit === '') ? 'نامحدود' : (string) (int) $pdUseLimit;
+            $pdUseLabel = ($pdUseLimit === null || $pdUseLimit === '') ? 'Unlimited' : (string) (int) $pdUseLimit;
             $editPayload = [
               'id' => (int) ($pd['id'] ?? 0),
               'status' => $pdStatus,
@@ -585,28 +585,28 @@ include __DIR__ . '/inc/layout_head.php';
             <tr>
               <td class="cf"><?= $pi++ ?></td>
               <td>
-                <span class="tag <?= $pdStatus === 'active' ? 'tag-ok' : 'tag-warn' ?>"><?= $pdStatus === 'active' ? 'فعال' : 'غیرفعال' ?></span>
+                <span class="tag <?= $pdStatus === 'active' ? 'tag-ok' : 'tag-warn' ?>"><?= $pdStatus === 'active' ? 'Active' : 'Inactive' ?></span>
               </td>
-              <td class="cn"><?= $pdType === 'percent' ? 'درصد' : 'مبلغ' ?></td>
-              <td class="cn"><?= $pdType === 'percent' ? ($pdAmount . '٪') : (number_format($pdAmount) . ' ت') ?></td>
+              <td class="cn"><?= $pdType === 'percent' ? 'Percent' : 'Amount' ?></td>
+              <td class="cn"><?= $pdType === 'percent' ? ($pdAmount . '%') : (number_format($pdAmount) . ' USD') ?></td>
               <td class="cn"><?= htmlspecialchars($pdUseLabel) ?></td>
               <td class="cn" style="font-size:.78rem;max-width:280px;line-height:1.45">
                 <?= htmlspecialchars(discount_scope_label($pdProducts, $productNames, '—', 3)) ?>
-                <div style="color:var(--mute)"><?= count($pdProducts) ?> محصول</div>
+                <div style="color:var(--mute)"><?= count($pdProducts) ?> products</div>
               </td>
               <td>
                 <div style="display:flex;gap:5px;flex-wrap:wrap">
-                  <button class="btn btn-ghost btn-sm btn-icon" title="ویرایش"
+                  <button class="btn btn-ghost btn-sm btn-icon" title="Edit"
                     onclick="openProductDiscountModal(<?= htmlspecialchars(json_encode($editPayload, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>)">
                     <?= icon('edit', 13) ?>
                   </button>
                   <a href="discounts.php?tab=product&product_toggle=<?= (int) $pd['id'] ?>&_csrf=<?= csrf_token() ?>"
-                    class="btn btn-ghost btn-sm" title="تغییر وضعیت">
-                    <?= $pdStatus === 'active' ? 'غیرفعال' : 'فعال' ?>
+                    class="btn btn-ghost btn-sm" title="Change status">
+                    <?= $pdStatus === 'active' ? 'Disable' : 'Enable' ?>
                   </a>
                   <a href="discounts.php?tab=product&product_delete=<?= (int) $pd['id'] ?>&_csrf=<?= csrf_token() ?>"
-                    class="btn btn-no btn-sm btn-icon" title="حذف"
-                    data-confirm="حذف این تخفیف روی محصول؟">
+                    class="btn btn-no btn-sm btn-icon" title="Delete"
+                    data-confirm="Delete this product discount?">
                     <?= icon('trash', 13) ?>
                   </a>
                 </div>
@@ -636,7 +636,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="productDiscountModal">
   <div class="modal" style="max-width:760px">
     <div class="modal-head">
-      <h3 id="pd_modal_title">افزودن تخفیف روی محصول</h3>
+      <h3 id="pd_modal_title">Add product discount</h3>
       <button class="modal-x" onclick="closeModal('productDiscountModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST" id="pdForm">
@@ -645,33 +645,33 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="action" id="pd_action" value="product_add">
         <input type="hidden" name="pd_id" id="pd_id" value="">
         <div class="field" style="margin-bottom:12px">
-          <label>وضعیت</label>
+          <label>Status</label>
           <select name="pd_status" id="pd_status" class="select">
-            <option value="active">فعال</option>
-            <option value="inactive">غیرفعال</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
           </select>
         </div>
         <div class="pd-xor-row" style="margin-bottom:14px">
           <div class="field">
-            <label>مبلغ تخفیف (تومان)</label>
-            <input type="number" name="pd_value" id="pd_value" class="input" min="1" placeholder="مثلاً ۲۰۰۰۰">
+            <label>Discount amount (USD)</label>
+            <input type="number" name="pd_value" id="pd_value" class="input" min="1" placeholder="e.g. 20000">
           </div>
-          <div class="pd-xor-or">یا</div>
+          <div class="pd-xor-or">or</div>
           <div class="field">
-            <label>درصد تخفیف</label>
-            <input type="number" name="pd_percent" id="pd_percent" class="input" min="1" max="100" placeholder="مثلاً ۲۰">
+            <label>Discount percent</label>
+            <input type="number" name="pd_percent" id="pd_percent" class="input" min="1" max="100" placeholder="e.g. 20">
           </div>
         </div>
         <div class="field" style="margin-bottom:14px">
-          <label>محدودیت تعداد استفاده</label>
-          <input type="number" name="pd_use_limit" id="pd_use_limit" class="input" min="1" placeholder="خالی = نامحدود">
-          <small class="cf" style="display:block;margin-top:6px">با هر خرید موفق یک واحد کم می‌شود و در صفر تخفیف غیرفعال می‌گردد.</small>
+          <label>Usage limit</label>
+          <input type="number" name="pd_use_limit" id="pd_use_limit" class="input" min="1" placeholder="Empty = unlimited">
+          <small class="cf" style="display:block;margin-top:6px">Each successful purchase decreases the remaining uses by one; the discount turns off at zero.</small>
         </div>
         <div class="field">
-          <label>محصولات</label>
+          <label>Products</label>
           <div class="pd-picker" id="pd_picker">
             <?php if (empty($productPickerSections)): ?>
-              <div class="empty" style="padding:24px 12px">دسته‌بندی فعالی با محصول وجود ندارد.</div>
+              <div class="empty" style="padding:24px 12px">No active category with products.</div>
             <?php else: ?>
               <?php foreach ($productPickerSections as $section): ?>
                 <details class="product-order-group" data-cat="<?= htmlspecialchars($section['key'], ENT_QUOTES) ?>">
@@ -700,12 +700,12 @@ include __DIR__ . '/inc/layout_head.php';
               <?php endforeach; ?>
             <?php endif; ?>
           </div>
-          <small class="cf" style="display:block;margin-top:6px">چک‌باکس دسته همه محصولات را انتخاب می‌کند. برای انتخاب تکی، عنوان دسته را باز کنید.</small>
+          <small class="cf" style="display:block;margin-top:6px">The category checkbox selects all products. Open the category to pick individually.</small>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary" id="pd_submit"><?= icon('plus', 13) ?> ذخیره</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('productDiscountModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary" id="pd_submit"><?= icon('plus', 13) ?> Save</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('productDiscountModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -793,7 +793,7 @@ include __DIR__ . '/inc/layout_head.php';
     });
     document.querySelectorAll('#pd_picker .product-order-group').forEach(function (g) { g.open = false; });
     if (row && row.id) {
-      title.textContent = 'ویرایش تخفیف روی محصول';
+      title.textContent = 'Edit product discount';
       action.value = 'product_edit';
       idInput.value = row.id;
       document.getElementById('pd_status').value = row.status || 'active';
@@ -815,13 +815,13 @@ include __DIR__ . '/inc/layout_head.php';
         if (cb) cb.checked = true;
       });
       updateAllCatBoxes();
-      submit.innerHTML = <?= json_encode(icon('check', 13) . ' ذخیره تغییرات', JSON_UNESCAPED_UNICODE) ?>;
+      submit.innerHTML = <?= json_encode(icon('check', 13) . ' Save changes', JSON_UNESCAPED_UNICODE) ?>;
     } else {
-      title.textContent = 'افزودن تخفیف روی محصول';
+      title.textContent = 'Add product discount';
       action.value = 'product_add';
       idInput.value = '';
       document.getElementById('pd_status').value = 'active';
-      submit.innerHTML = <?= json_encode(icon('plus', 13) . ' ذخیره', JSON_UNESCAPED_UNICODE) ?>;
+      submit.innerHTML = <?= json_encode(icon('plus', 13) . ' Save', JSON_UNESCAPED_UNICODE) ?>;
     }
     openModal('productDiscountModal');
   };
@@ -838,33 +838,33 @@ return;
 endif; ?>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px" class="fade-up">
-  <div style="font-size:.85rem;color:var(--mute)"><?= count($discounts) ?> کد تخفیف</div>
-  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> افزودن کد تخفیف</button>
+  <div style="font-size:.85rem;color:var(--mute)"><?= count($discounts) ?> discount codes</div>
+  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> Add discount code</button>
 </div>
 
 <?php if ($usageCode !== ''): ?>
 <div class="card fade-up" style="margin-bottom:16px">
   <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
     <div>
-      <div class="card-title">آمار استفاده از کد <code><?= htmlspecialchars($usageCode) ?></code></div>
-      <div class="card-subtitle">خرید و تمدیدهایی که با این کد انجام شده‌اند</div>
+      <div class="card-title">Usage stats for code <code><?= htmlspecialchars($usageCode) ?></code></div>
+      <div class="card-subtitle">Purchases and renewals made with this code</div>
     </div>
-    <a href="discounts.php<?= $search !== '' ? '?q=' . urlencode($search) : '' ?>" class="btn btn-ghost btn-sm"><?= icon('arrow-left', 14) ?> بازگشت</a>
+    <a href="discounts.php<?= $search !== '' ? '?q=' . urlencode($search) : '' ?>" class="btn btn-ghost btn-sm"><?= icon('arrow-left', 14) ?> Back</a>
   </div>
   <?php
     $st = $usageStats[$usageCode] ?? ['total' => 0, 'buys' => 0, 'extends' => 0, 'users' => 0];
     $counterUsed = (int) ($usageDetail['usedDiscount'] ?? $st['total']);
   ?>
   <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
-    <div><div class="cf" style="font-size:.75rem">کل استفاده</div><div class="cs" style="font-size:1.2rem"><?= $counterUsed ?></div></div>
-    <div><div class="cf" style="font-size:.75rem">خرید ثبت‌شده</div><div class="cs" style="font-size:1.2rem"><?= $st['buys'] ?></div></div>
-    <div><div class="cf" style="font-size:.75rem">تمدید ثبت‌شده</div><div class="cs" style="font-size:1.2rem"><?= $st['extends'] ?></div></div>
-    <div><div class="cf" style="font-size:.75rem">کاربر یکتا</div><div class="cs" style="font-size:1.2rem"><?= $st['users'] ?></div></div>
+    <div><div class="cf" style="font-size:.75rem">Total uses</div><div class="cs" style="font-size:1.2rem"><?= $counterUsed ?></div></div>
+    <div><div class="cf" style="font-size:.75rem">Recorded purchases</div><div class="cs" style="font-size:1.2rem"><?= $st['buys'] ?></div></div>
+    <div><div class="cf" style="font-size:.75rem">Recorded renewals</div><div class="cs" style="font-size:1.2rem"><?= $st['extends'] ?></div></div>
+    <div><div class="cf" style="font-size:.75rem">Unique users</div><div class="cs" style="font-size:1.2rem"><?= $st['users'] ?></div></div>
   </div>
   <?php if (!empty($productBreakdown)): ?>
     <div class="tbl-wrap" style="margin-top:8px">
       <table class="tbl">
-        <thead><tr><th>محصول</th><th>تعداد</th></tr></thead>
+        <thead><tr><th>Product</th><th>Count</th></tr></thead>
         <tbody>
           <?php foreach ($productBreakdown as $pb): ?>
             <tr>
@@ -879,20 +879,20 @@ endif; ?>
   <div class="tbl-wrap" style="margin-top:12px">
     <?php if (empty($usageRows)): ?>
       <div class="empty" style="padding:28px 16px">
-        <p>هنوز جزئیات خریدی برای این کد ثبت نشده است.</p>
-        <p style="color:var(--mute);font-size:.8rem;margin-top:6px">شمارنده کلی: <?= $counterUsed ?> — جزئیات از این به‌بعد برای استفاده‌های جدید ذخیره می‌شود.</p>
+        <p>No purchase details have been recorded for this code yet.</p>
+        <p style="color:var(--mute);font-size:.8rem;margin-top:6px">Overall counter: <?= $counterUsed ?> — details will be stored for new uses from now on.</p>
       </div>
     <?php else: ?>
       <table class="tbl-lg">
         <thead>
           <tr>
             <th>#</th>
-            <th>کاربر</th>
-            <th>نوع</th>
-            <th>محصول</th>
-            <th>پنل</th>
-            <th>مبلغ</th>
-            <th>زمان</th>
+            <th>User</th>
+            <th>Type</th>
+            <th>Product</th>
+            <th>Panel</th>
+            <th>Amount</th>
+            <th>Time</th>
           </tr>
         </thead>
         <tbody>
@@ -900,12 +900,12 @@ endif; ?>
             <tr>
               <td class="cf"><?= $ui++ ?></td>
               <td class="cm"><a href="user.php?id=<?= urlencode((string) $u['id_user']) ?>"><?= htmlspecialchars((string) $u['id_user']) ?></a></td>
-              <td class="cn"><?= ($u['type'] ?? '') === 'extend' ? 'تمدید' : 'خرید' ?></td>
+              <td class="cn"><?= ($u['type'] ?? '') === 'extend' ? 'Renewal' : 'Purchase' ?></td>
               <td class="cs"><?= htmlspecialchars((string) ($u['name_product'] ?: ($u['code_product'] ?: '—'))) ?></td>
               <td class="cn" style="font-size:.78rem"><?= htmlspecialchars((string) ($u['name_panel'] ?: ($u['code_panel'] ?: '—'))) ?></td>
               <td class="cn" style="font-size:.78rem">
                 <?php if ($u['price_final'] !== null && $u['price_final'] !== ''): ?>
-                  <?= number_format((int) $u['price_final']) ?> ت
+                  <?= number_format((int) $u['price_final']) ?> USD
                   <?php if ($u['price_original'] !== null && $u['price_original'] !== '' && (int) $u['price_original'] !== (int) $u['price_final']): ?>
                     <span class="cf">(<del><?= number_format((int) $u['price_original']) ?></del>)</span>
                   <?php endif; ?>
@@ -925,22 +925,22 @@ endif; ?>
 
 <div class="card fade-up d1">
   <div class="toolbar">
-    <div class="toolbar-title">فهرست کدهای تخفیف <small>(<?= count($discounts) ?>)</small></div>
+    <div class="toolbar-title">Discount code list <small>(<?= count($discounts) ?>)</small></div>
     <form method="GET" class="toolbar-end">
       <div class="search-box" style="min-width:220px">
         <?= icon('search', 14) ?>
-        <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="جستجوی کد...">
+        <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Search code...">
         <button type="button" class="search-clear">✕</button>
       </div>
-      <button type="submit" class="btn btn-ghost btn-sm">فیلتر</button>
+      <button type="submit" class="btn btn-ghost btn-sm">Filter</button>
     </form>
   </div>
 
   <?php if (empty($discounts)): ?>
     <div class="empty" style="padding:60px 20px">
-      <p><?= $search !== '' ? 'کدی یافت نشد' : 'هنوز کد تخفیفی ثبت نکرده‌اید' ?></p>
+      <p><?= $search !== '' ? 'No codes found' : 'No discount codes yet' ?></p>
       <?php if ($search === ''): ?>
-        <button class="btn btn-primary" style="margin-top:14px" onclick="openModal('addModal')"><?= icon('plus', 14) ?> ساخت اولین کد</button>
+        <button class="btn btn-primary" style="margin-top:14px" onclick="openModal('addModal')"><?= icon('plus', 14) ?> Create the first code</button>
       <?php endif; ?>
     </div>
   <?php else: ?>
@@ -949,14 +949,14 @@ endif; ?>
         <thead>
           <tr>
             <th>#</th>
-            <th>کد</th>
-            <th>درصد</th>
-            <th>استفاده</th>
-            <th>خرید / تمدید</th>
-            <th>گروه</th>
-            <th>محدوده</th>
-            <th>انقضا</th>
-            <th>عملیات</th>
+            <th>Code</th>
+            <th>Percent</th>
+            <th>Usage</th>
+            <th>Purchase / renewals</th>
+            <th>Group</th>
+            <th>Scope</th>
+            <th>Expiry</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -989,35 +989,35 @@ endif; ?>
             <tr>
               <td class="cf"><?= $i++ ?></td>
               <td class="cs"><code><?= htmlspecialchars($codeKey) ?></code></td>
-              <td class="cn"><?= htmlspecialchars((string) ($d['price'] ?? '0')) ?>٪</td>
+              <td class="cn"><?= htmlspecialchars((string) ($d['price'] ?? '0')) ?>%</td>
               <td class="cn"><?= $used ?> / <?= $limit ?></td>
               <td class="cn" style="font-size:.78rem">
-                <?= $st['buys'] ?> خرید · <?= $st['extends'] ?> تمدید
-                <div style="color:var(--mute)"><?= $st['users'] ?> کاربر</div>
+                <?= $st['buys'] ?> purchases · <?= $st['extends'] ?> renewals
+                <div style="color:var(--mute)"><?= $st['users'] ?> users</div>
               </td>
               <td><span class="tag tag-plain"><?= htmlspecialchars(discount_agent_label((string) ($d['agent'] ?? ''))) ?></span></td>
               <td class="cn" style="font-size:.75rem;max-width:220px;line-height:1.45">
-                <div><span style="color:var(--mute)">محصول:</span> <?= htmlspecialchars(discount_scope_label($productVals, $productNames, 'همه')) ?></div>
-                <div><span style="color:var(--mute)">دسته:</span> <?= htmlspecialchars(discount_scope_label($categoryVals, $categoryNames, 'همه')) ?></div>
-                <div><span style="color:var(--mute)">پنل:</span> <?= htmlspecialchars(discount_scope_label($panelVals, $panelNames, 'همه')) ?></div>
+                <div><span style="color:var(--mute)">Product:</span> <?= htmlspecialchars(discount_scope_label($productVals, $productNames, 'All')) ?></div>
+                <div><span style="color:var(--mute)">Category:</span> <?= htmlspecialchars(discount_scope_label($categoryVals, $categoryNames, 'All')) ?></div>
+                <div><span style="color:var(--mute)">Panel:</span> <?= htmlspecialchars(discount_scope_label($panelVals, $panelNames, 'All')) ?></div>
                 <div style="color:var(--mute)">
                   <?= htmlspecialchars(discount_type_label((string) ($d['type'] ?? 'all'))) ?>
-                  <?= ($d['usefirst'] ?? '0') === '1' ? ' · خرید اول' : '' ?>
+                  <?= ($d['usefirst'] ?? '0') === '1' ? ' · first purchase' : '' ?>
                 </div>
               </td>
               <td class="cn" style="font-size:.78rem"><?= htmlspecialchars(discount_expiry_label($d['time'] ?? '0')) ?></td>
               <td>
                 <div style="display:flex;gap:5px">
-                  <a href="discounts.php?usage=<?= urlencode($codeKey) ?>" class="btn btn-ghost btn-sm btn-icon" title="آمار استفاده">
+                  <a href="discounts.php?usage=<?= urlencode($codeKey) ?>" class="btn btn-ghost btn-sm btn-icon" title="Usage stats">
                     <?= icon('chart', 13) ?>
                   </a>
-                  <button class="btn btn-ghost btn-sm btn-icon" title="ویرایش"
+                  <button class="btn btn-ghost btn-sm btn-icon" title="Edit"
                     onclick="openEditModal(<?= htmlspecialchars(json_encode($editPayload, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>)">
                     <?= icon('edit', 13) ?>
                   </button>
                   <a href="discounts.php?delete=<?= (int) $d['id'] ?>&_csrf=<?= csrf_token() ?>"
-                    class="btn btn-no btn-sm btn-icon" title="حذف"
-                    data-confirm="حذف کد تخفیف «<?= htmlspecialchars($codeKey) ?>»؟">
+                    class="btn btn-no btn-sm btn-icon" title="Delete"
+                    data-confirm="Delete discount code “<?= htmlspecialchars($codeKey) ?>”?">
                     <?= icon('trash', 13) ?>
                   </a>
                 </div>
@@ -1036,11 +1036,11 @@ function discount_scope_checklist(string $name, string $prefix, array $items, st
   $pid = $prefix !== '' ? $prefix . '_' : '';
   ?>
   <div class="field full">
-    <label><?= htmlspecialchars($sectionLabel) ?> (چند انتخابی)</label>
+    <label><?= htmlspecialchars($sectionLabel) ?> (multi-select)</label>
     <div class="discount-scope-box" id="<?= $pid ?>scope_<?= htmlspecialchars($name) ?>">
       <label class="discount-scope-item discount-scope-all">
         <input type="checkbox" class="discount-scope-all-cb" data-group="<?= htmlspecialchars($name) ?>" data-prefix="<?= htmlspecialchars($prefix) ?>" value="<?= htmlspecialchars($allValue) ?>" checked>
-        همه
+        All
       </label>
       <?php foreach ($items as $item):
         $val = (string) ($item[$valueKey] ?? '');
@@ -1053,7 +1053,7 @@ function discount_scope_checklist(string $name, string $prefix, array $items, st
         </label>
       <?php endforeach; ?>
     </div>
-    <small class="cf" style="display:block;margin-top:4px">اگر «همه» انتخاب باشد، محدودیتی روی این بخش اعمال نمی‌شود. می‌توانید چند مورد را هم‌زمان انتخاب کنید.</small>
+    <small class="cf" style="display:block;margin-top:4px">If All is selected, this section is not limited. You can select multiple items at once.</small>
   </div>
   <?php
 }
@@ -1067,55 +1067,55 @@ function discount_form_fields(string $prefix = ''): void
   ?>
   <div class="form-grid">
     <div class="field">
-      <label>کد تخفیف *</label>
-      <input type="text" name="code" id="<?= $id('code') ?>" class="input" placeholder="مثلاً summer20" pattern="[A-Za-z0-9]+" required>
-      <small class="cf" style="display:block;margin-top:4px">فقط حروف انگلیسی و عدد</small>
+      <label>Discount code *</label>
+      <input type="text" name="code" id="<?= $id('code') ?>" class="input" placeholder="e.g. summer20" pattern="[A-Za-z0-9]+" required>
+      <small class="cf" style="display:block;margin-top:4px">English letters and numbers only</small>
     </div>
     <div class="field">
-      <label>درصد تخفیف *</label>
-      <input type="number" name="percent" id="<?= $id('percent') ?>" class="input" min="1" max="100" placeholder="۲۰" required>
+      <label>Discount percent *</label>
+      <input type="number" name="percent" id="<?= $id('percent') ?>" class="input" min="1" max="100" placeholder="20" required>
     </div>
     <div class="field">
-      <label>محدودیت کل استفاده *</label>
-      <input type="number" name="limit_use" id="<?= $id('limit_use') ?>" class="input" min="1" placeholder="۱۰۰" required>
+      <label>Total usage limit *</label>
+      <input type="number" name="limit_use" id="<?= $id('limit_use') ?>" class="input" min="1" placeholder="100" required>
     </div>
     <div class="field">
-      <label>محدودیت هر کاربر *</label>
-      <input type="number" name="useuser" id="<?= $id('useuser') ?>" class="input" min="1" placeholder="۱" required>
+      <label>Per-user limit *</label>
+      <input type="number" name="useuser" id="<?= $id('useuser') ?>" class="input" min="1" placeholder="1" required>
     </div>
     <div class="field">
-      <label>گروه کاربری</label>
+      <label>User group</label>
       <select name="agent" id="<?= $id('agent') ?>" class="select">
-        <option value="allusers">همه کاربران</option>
-        <option value="f">کاربر عادی</option>
-        <option value="n">نماینده</option>
-        <option value="n2">نماینده پیشرفته</option>
+        <option value="allusers">All users</option>
+        <option value="f">Regular user</option>
+        <option value="n">Agent</option>
+        <option value="n2">Advanced agent</option>
       </select>
     </div>
     <div class="field">
-      <label>محدودیت خرید</label>
+      <label>Purchase limit</label>
       <select name="usefirst" id="<?= $id('usefirst') ?>" class="select" onchange="discountToggleType('<?= htmlspecialchars($prefix, ENT_QUOTES) ?>')">
-        <option value="0">تمام خریدها</option>
-        <option value="1">فقط خرید اول</option>
+        <option value="0">All purchases</option>
+        <option value="1">First purchase only</option>
       </select>
     </div>
     <div class="field" id="<?= $id('type_wrap') ?>">
-      <label>کاربرد کد</label>
+      <label>Code applies to</label>
       <select name="type" id="<?= $id('type') ?>" class="select">
-        <option value="all">خرید و تمدید</option>
-        <option value="buy">فقط خرید</option>
-        <option value="extend">فقط تمدید</option>
+        <option value="all">Purchase and renewal</option>
+        <option value="buy">Purchase only</option>
+        <option value="extend">Renewal only</option>
       </select>
     </div>
     <div class="field">
-      <label>مدت اعتبار (ساعت)</label>
-      <input type="number" name="time_hours" id="<?= $id('time_hours') ?>" class="input" min="0" value="0" placeholder="۰ = نامحدود">
-      <small class="cf" style="display:block;margin-top:4px">۰ یعنی بدون انقضا</small>
+      <label>Validity (hours)</label>
+      <input type="number" name="time_hours" id="<?= $id('time_hours') ?>" class="input" min="0" value="0" placeholder="0 = unlimited">
+      <small class="cf" style="display:block;margin-top:4px">0 means no expiry</small>
     </div>
     <?php
-    discount_scope_checklist('code_panel', $prefix, $panels, 'code_panel', 'name_panel', '/all', 'پنل');
-    discount_scope_checklist('code_category', $prefix, $categories, 'remark', 'remark', 'all', 'دسته‌بندی');
-    discount_scope_checklist('code_product', $prefix, $products, 'code_product', 'name_product', 'all', 'محصول');
+    discount_scope_checklist('code_panel', $prefix, $panels, 'code_panel', 'name_panel', '/all', 'Panel');
+    discount_scope_checklist('code_category', $prefix, $categories, 'remark', 'remark', 'all', 'Category');
+    discount_scope_checklist('code_product', $prefix, $products, 'code_product', 'name_product', 'all', 'Product');
     ?>
   </div>
   <?php
@@ -1134,7 +1134,7 @@ function discount_form_fields(string $prefix = ''): void
 <div class="modal-veil" id="addModal">
   <div class="modal" style="max-width:760px">
     <div class="modal-head">
-      <h3>افزودن کد تخفیف</h3>
+      <h3>Add discount code</h3>
       <button class="modal-x" onclick="closeModal('addModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST">
@@ -1144,8 +1144,8 @@ function discount_form_fields(string $prefix = ''): void
         <?php discount_form_fields('add'); ?>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary"><?= icon('plus', 13) ?> ذخیره</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary"><?= icon('plus', 13) ?> Save</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -1154,7 +1154,7 @@ function discount_form_fields(string $prefix = ''): void
 <div class="modal-veil" id="editModal">
   <div class="modal" style="max-width:760px">
     <div class="modal-head">
-      <h3>ویرایش کد تخفیف</h3>
+      <h3>Edit discount code</h3>
       <button class="modal-x" onclick="closeModal('editModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST">
@@ -1163,21 +1163,21 @@ function discount_form_fields(string $prefix = ''): void
         <input type="hidden" name="action" value="edit">
         <input type="hidden" name="edit_id" id="edit_id">
         <div class="field" style="margin-bottom:12px">
-          <label>تعداد استفاده فعلی</label>
+          <label>Current usage count</label>
           <input type="text" id="edit_used" class="input" disabled>
         </div>
         <?php discount_form_fields('edit'); ?>
         <div class="field" style="margin-top:12px">
           <label style="display:flex;align-items:center;gap:8px;font-size:.85rem">
             <input type="checkbox" name="update_time" id="edit_update_time" value="1" onchange="document.getElementById('edit_time_hours').disabled=!this.checked">
-            تغییر مدت اعتبار
+            Change validity period
           </label>
           <small class="cf" id="edit_expiry_hint" style="display:block;margin-top:4px"></small>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary"><?= icon('check', 13) ?> ذخیره تغییرات</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary"><?= icon('check', 13) ?> Save changes</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -1260,7 +1260,7 @@ window.openEditModal = function (d) {
   document.getElementById('edit_percent').value = d.percent || '';
   document.getElementById('edit_limit_use').value = d.limit_use || '';
   document.getElementById('edit_useuser').value = d.useuser || '';
-  document.getElementById('edit_used').value = (d.used || '0') + ' بار';
+  document.getElementById('edit_used').value = (d.used || '0') + ' times';
   document.getElementById('edit_agent').value = d.agent || 'allusers';
   document.getElementById('edit_usefirst').value = d.usefirst || '0';
   document.getElementById('edit_type').value = d.type || 'all';
@@ -1270,7 +1270,7 @@ window.openEditModal = function (d) {
   document.getElementById('edit_update_time').checked = false;
   document.getElementById('edit_time_hours').value = '0';
   document.getElementById('edit_time_hours').disabled = true;
-  document.getElementById('edit_expiry_hint').textContent = 'انقضای فعلی: ' + (d.expiry_label || 'نامحدود');
+  document.getElementById('edit_expiry_hint').textContent = 'Current expiry: ' + (d.expiry_label || 'Unlimited');
   discountToggleType('edit');
   openModal('editModal');
 };

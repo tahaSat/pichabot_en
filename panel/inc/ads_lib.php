@@ -68,7 +68,7 @@ function ads_lib_sync_payment(PDO $pdo, array $advertiser): ?string
 
     $amount = (int) ($advertiser['amount'] ?? 0);
     $orderId = trim((string) ($advertiser['payment_order_id'] ?? ''));
-    $note = 'هزینه تبلیغ — ' . (string) ($advertiser['name'] ?? '');
+    $note = 'Ad expense — ' . (string) ($advertiser['name'] ?? '');
     $time = ads_lib_date_input_value((string) ($advertiser['started_at'] ?? '')) . 'T00:00';
 
     if ($amount < 1) {
@@ -101,7 +101,7 @@ function ads_lib_sync_payment(PDO $pdo, array $advertiser): ?string
         'time' => $time,
     ]);
     if (empty($result['ok'])) {
-        throw new RuntimeException($result['msg'] ?? 'ثبت هزینه تبلیغ ناموفق بود.');
+        throw new RuntimeException($result['msg'] ?? 'Could not record the ad expense.');
     }
     $newOrder = (string) ($result['id_order'] ?? '');
     db_query($pdo, 'UPDATE ad_advertiser SET payment_order_id = ? WHERE id = ?', [$newOrder, (int) $advertiser['id']]);
@@ -113,17 +113,17 @@ function ads_lib_save(PDO $pdo, array $data, ?int $id = null): array
     ads_ensure_schema();
     $name = trim((string) ($data['name'] ?? ''));
     if ($name === '') {
-        throw new InvalidArgumentException('نام تبلیغ‌کننده الزامی است.');
+        throw new InvalidArgumentException('Advertiser name is required.');
     }
 
     $joinCount = trim((string) ($data['join_count'] ?? '0'));
     if ($joinCount === '' || !ctype_digit($joinCount)) {
-        throw new InvalidArgumentException('تعداد جوین باید عدد باشد.');
+        throw new InvalidArgumentException('Join count must be a number.');
     }
 
     $amount = trim((string) ($data['amount'] ?? '0'));
     if ($amount === '' || !ctype_digit($amount)) {
-        throw new InvalidArgumentException('مبلغ تبلیغ باید عدد باشد.');
+        throw new InvalidArgumentException('Ad amount must be a number.');
     }
 
     $startedAt = ads_lib_normalize_date((string) ($data['started_at'] ?? ''));
@@ -132,7 +132,7 @@ function ads_lib_save(PDO $pdo, array $data, ?int $id = null): array
     if ($id) {
         $row = ads_lib_get($pdo, $id);
         if (!$row) {
-            throw new InvalidArgumentException('تبلیغ یافت نشد.');
+            throw new InvalidArgumentException('Ad not found.');
         }
         db_query(
             $pdo,

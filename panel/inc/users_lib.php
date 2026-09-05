@@ -48,9 +48,9 @@ function panel_user_test_filter_values(): array
 function panel_user_test_filter_label(string $test): string
 {
     return [
-        'yes' => 'دارای اکانت تست',
-        'no' => 'بدون اکانت تست',
-        'only' => 'فقط اکانت تست',
+        'yes' => 'Has test account',
+        'no' => 'No test account',
+        'only' => 'Test account only',
     ][$test] ?? '';
 }
 
@@ -186,19 +186,19 @@ function panel_user_segment_query_parts(array $filters, bool $alwaysJoin = false
 function panel_invoice_status_map(): array
 {
     return [
-        'active' => ['tag-ok', 'فعال'],
-        'end_of_time' => ['tag-warn', 'نزدیک به پایان زمان'],
-        'end_of_volume' => ['tag-no', 'نزدیک به پایان حجم'],
-        'sendedwarn' => ['tag-warn', 'اعلان همگی ارسال شده'],
-        'send_on_hold' => ['tag-plain', 'در انتظار'],
-        'unpaid' => ['tag-plain', 'پرداخت نشده'],
-        'Unpaid' => ['tag-plain', 'پرداخت نشده'],
-        'unpiad' => ['tag-plain', 'پرداخت نشده'],
-        'removebyadmin' => ['tag-no', 'حذف توسط ادمین'],
-        'removedbyadmin' => ['tag-no', 'حذف با تایید ادمین'],
-        'disablebyadmin' => ['tag-no', 'غیرفعال توسط ادمین'],
-        'disabledn' => ['tag-no', 'غیرفعال در پنل'],
-        'Unsuccessful' => ['tag-plain', 'خطا دریافت اطلاعات'],
+        'active' => ['tag-ok', 'Active'],
+        'end_of_time' => ['tag-warn', 'Expired'],
+        'end_of_volume' => ['tag-no', 'Data exhausted'],
+        'sendedwarn' => ['tag-warn', 'Warning sent'],
+        'send_on_hold' => ['tag-plain', 'Pending'],
+        'unpaid' => ['tag-plain', 'Unpaid'],
+        'Unpaid' => ['tag-plain', 'Unpaid'],
+        'unpiad' => ['tag-plain', 'Unpaid'],
+        'removebyadmin' => ['tag-no', 'Removed by admin'],
+        'removedbyadmin' => ['tag-no', 'Removed with admin approval'],
+        'disablebyadmin' => ['tag-no', 'Disabled by admin'],
+        'disabledn' => ['tag-no', 'Disabled on panel'],
+        'Unsuccessful' => ['tag-plain', 'Failed to fetch info'],
     ];
 }
 
@@ -257,7 +257,7 @@ function panel_user_display_name(array $user): string
     if ($uname !== '') {
         return '@' . $uname;
     }
-    return 'کاربر #' . ($user['id'] ?? '');
+    return 'User #' . ($user['id'] ?? '');
 }
 
 function panel_service_button_label(array $invoice): string
@@ -312,22 +312,22 @@ function panel_format_traffic_gb($bytes, int $precision = 2): string
 function panel_format_remaining_time($expireTs): string
 {
     if ($expireTs === null || $expireTs === '' || !is_numeric($expireTs) || (int) $expireTs <= 0) {
-        return 'نامحدود';
+        return 'Unlimited';
     }
     $diff = (int) $expireTs - time();
     if ($diff <= 0) {
-        return 'منقضی';
+        return 'Expired';
     }
     $days = intdiv($diff, 86400);
     $hours = intdiv($diff % 86400, 3600);
     $mins = intdiv($diff % 3600, 60);
     if ($days > 0) {
-        return $days . ' روز' . ($hours > 0 ? ' و ' . $hours . ' ساعت' : '');
+        return $days . ' days' . ($hours > 0 ? ' and ' . $hours . ' hours' : '');
     }
     if ($hours > 0) {
-        return $hours . ' ساعت' . ($mins > 0 ? ' و ' . $mins . ' دقیقه' : '');
+        return $hours . ' hours' . ($mins > 0 ? ' and ' . $mins . ' minutes' : '');
     }
-    return max(1, $mins) . ' دقیقه';
+    return max(1, $mins) . ' minutes';
 }
 
 /**
@@ -351,9 +351,9 @@ function panel_format_live_usage(?array $live): array
         : 0.0;
     $usedGb = panel_format_traffic_gb($usedBytes);
     if ($limitBytes > 0) {
-        $out['usage_volume'] = $usedGb . ' / ' . panel_format_traffic_gb($limitBytes) . ' گیگ';
+        $out['usage_volume'] = $usedGb . ' / ' . panel_format_traffic_gb($limitBytes) . ' GB';
     } else {
-        $out['usage_volume'] = $usedGb . ' گیگ / نامحدود';
+        $out['usage_volume'] = $usedGb . ' GB / Unlimited';
     }
     $out['usage_time'] = panel_format_remaining_time($live['expire'] ?? null);
     return $out;
@@ -497,7 +497,7 @@ function panel_disable_invoice_service(PDO $pdo, array $invoice): array
 
     if ($username === '' || $location === '') {
         $panelOk = false;
-        $notes[] = 'نام کاربری یا پنل سرویس مشخص نیست.';
+        $notes[] = 'Service username or panel is missing.';
     } else {
         try {
             $live = $ManagePanel->DataUser($location, $username);
@@ -505,35 +505,35 @@ function panel_disable_invoice_service(PDO $pdo, array $invoice): array
             if ($liveStatus === 'Unsuccessful') {
                 $panelOk = false;
                 $detail = trim((string) ($live['msg'] ?? $live['detail'] ?? ''));
-                $notes[] = 'غیرفعال‌سازی پنل ساب‌لینک ناموفق بود' . ($detail !== '' ? ': ' . $detail : '.');
+                $notes[] = 'Could not disable the service on the sub-link panel' . ($detail !== '' ? ': ' . $detail : '.');
             } elseif ($liveStatus === 'disabled') {
-                $notes[] = 'سرویس از قبل در پنل ساب‌لینک غیرفعال بود.';
+                $notes[] = 'Service was already disabled on the sub-link panel.';
             } elseif ($liveStatus === 'active') {
                 $result = $ManagePanel->Change_status($username, $location);
                 $ok = is_array($result) && ($result['status'] ?? '') === 'successful';
                 $panelOk = $ok;
                 $notes[] = $ok
-                    ? 'سرویس در پنل ساب‌لینک غیرفعال شد.'
-                    : ('غیرفعال‌سازی پنل ساب‌لینک: ' . trim((string) ($result['msg'] ?? 'ناموفق')));
+                    ? 'Service was disabled on the sub-link panel.'
+                    : ('Sub-link panel disable: ' . trim((string) ($result['msg'] ?? 'failed')));
             } else {
                 $result = $ManagePanel->Modifyuser($username, $location, ['status' => 'disabled']);
                 if (is_array($result) && array_key_exists('status', $result) && $result['status'] === false) {
                     $panelOk = false;
-                    $notes[] = 'غیرفعال‌سازی پنل ساب‌لینک: ' . trim((string) ($result['msg'] ?? 'ناموفق'));
+                    $notes[] = 'Sub-link panel disable: ' . trim((string) ($result['msg'] ?? 'failed'));
                 } else {
-                    $notes[] = 'سرویس در پنل ساب‌لینک غیرفعال شد.';
+                    $notes[] = 'Service was disabled on the sub-link panel.';
                 }
             }
         } catch (Throwable $e) {
             error_log('panel_disable_invoice_service: ' . $e->getMessage());
             $panelOk = false;
-            $notes[] = 'غیرفعال‌سازی در پنل ساب‌لینک ناموفق بود.';
+            $notes[] = 'Could not disable the service on the sub-link panel.';
         }
     }
 
     if ($idInvoice !== '') {
         panel_mark_invoice_disabled_by_admin($pdo, $idInvoice);
-        $notes[] = 'وضعیت سرویس در ربات به غیرفعال توسط ادمین تغییر کرد.';
+        $notes[] = 'Bot service status was set to disabled by admin.';
     }
 
     return ['ok' => $panelOk, 'msg' => implode(' ', $notes)];
@@ -548,11 +548,11 @@ function panel_invoice_apply_refund(PDO $pdo, string $idInvoice, bool $disablePr
 {
     $invoice = db_fetch($pdo, 'SELECT * FROM invoice WHERE id_invoice = ?', [$idInvoice]);
     if (!$invoice) {
-        return ['ok' => false, 'msg' => 'فاکتور یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Invoice not found.'];
     }
 
     if (!$disableProduct && !$creditWallet) {
-        return ['ok' => false, 'msg' => 'یکی از گزینه‌های بازگشت مبلغ به کیف پول یا غیرفعال‌سازی سرویس را انتخاب کنید.'];
+        return ['ok' => false, 'msg' => 'Choose refund to wallet and/or disable the service.'];
     }
 
     $notes = [];
@@ -561,7 +561,7 @@ function panel_invoice_apply_refund(PDO $pdo, string $idInvoice, bool $disablePr
     if ($creditWallet) {
         $price = (int) ($invoice['price_product'] ?? 0);
         if ($price <= 0) {
-            $notes[] = 'مبلغ سرویس صفر است و به کیف پول اضافه نشد.';
+            $notes[] = 'Service amount is zero, so nothing was added to the wallet.';
         } else {
             $already = db_count(
                 $pdo,
@@ -570,7 +570,7 @@ function panel_invoice_apply_refund(PDO $pdo, string $idInvoice, bool $disablePr
                 [(string) $userId, $idInvoice]
             );
             if ($already) {
-                $notes[] = 'مبلغ این سرویس قبلاً به کیف پول کاربر بازگردانده شده است.';
+                $notes[] = 'This service amount was already refunded to the user wallet.';
             } else {
                 db_query($pdo, 'UPDATE user SET Balance = Balance + ? WHERE id = ?', [$price, $userId]);
                 $dateacc = date('Y/m/d H:i:s');
@@ -581,7 +581,7 @@ function panel_invoice_apply_refund(PDO $pdo, string $idInvoice, bool $disablePr
                     [$userId, $orderId, $dateacc, $price, 'paid', 'refund to wallet', $idInvoice]
                 );
                 panel_notify_user($userId, '💎 ' . number_format($price) . ' USD was refunded to your wallet for the returned service.');
-                $notes[] = 'مبلغ ' . number_format($price) . ' تومان به کیف پول کاربر بازگردانده شد.';
+                $notes[] = number_format($price) . ' USD was refunded to the user wallet.';
             }
         }
     }
@@ -589,7 +589,7 @@ function panel_invoice_apply_refund(PDO $pdo, string $idInvoice, bool $disablePr
     if ($disableProduct) {
         $status = panel_invoice_get_status($invoice);
         if (in_array($status, ['disablebyadmin', 'removebyadmin'], true)) {
-            $notes[] = 'این سرویس از قبل در ربات غیرفعال است.';
+            $notes[] = 'This service is already disabled in the bot.';
         } else {
             $disabled = panel_disable_invoice_service($pdo, $invoice);
             $notes[] = $disabled['msg'];
@@ -635,26 +635,26 @@ function panel_extend_user_service(PDO $pdo, $userId, string $idInvoice, string 
     $userId = (string) $userId;
     $idInvoice = trim($idInvoice);
     if ($idInvoice === '') {
-        return ['ok' => false, 'msg' => 'شناسه سرویس نامعتبر است.'];
+        return ['ok' => false, 'msg' => 'Invalid service ID.'];
     }
 
     $invoice = db_fetch($pdo, 'SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ?', [$idInvoice, $userId]);
     if (!$invoice) {
-        return ['ok' => false, 'msg' => 'سرویس یافت نشد یا متعلق به این کاربر نیست.'];
+        return ['ok' => false, 'msg' => 'Service not found or does not belong to this user.'];
     }
     if (!in_array(panel_invoice_get_status($invoice), panel_invoice_active_statuses(), true)) {
-        return ['ok' => false, 'msg' => 'این سرویس قابل تمدید نیست.'];
+        return ['ok' => false, 'msg' => 'This service cannot be renewed.'];
     }
 
     $panelName = trim((string) ($invoice['Service_location'] ?? ''));
     $panel = db_fetch($pdo, 'SELECT * FROM marzban_panel WHERE name_panel = ?', [$panelName]);
     if (!$panel) {
-        return ['ok' => false, 'msg' => 'پنل سرویس یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Service panel not found.'];
     }
 
     $user = db_fetch($pdo, 'SELECT * FROM user WHERE id = ?', [$userId]);
     if (!$user) {
-        return ['ok' => false, 'msg' => 'کاربر یافت نشد.'];
+        return ['ok' => false, 'msg' => 'User not found.'];
     }
 
     $productName = trim($productName);
@@ -665,20 +665,20 @@ function panel_extend_user_service(PDO $pdo, $userId, string $idInvoice, string 
 
     if ($isCustom) {
         if (($panel['type'] ?? '') === 'Manualsale') {
-            return ['ok' => false, 'msg' => 'سرویس دلخواه برای فروش دستی در دسترس نیست.'];
+            return ['ok' => false, 'msg' => 'Custom service is not available for manual sale.'];
         }
         $minVol = (int) panel_agent_field($panel, 'mainvolume', (string) ($user['agent'] ?? 'f'), '1');
         $maxVol = (int) panel_agent_field($panel, 'maxvolume', (string) ($user['agent'] ?? 'f'), '1000');
         if ($gb < $minVol || $gb > $maxVol) {
-            return ['ok' => false, 'msg' => "حجم باید بین {$minVol} تا {$maxVol} گیگابایت باشد."];
+            return ['ok' => false, 'msg' => "Volume must be between {$minVol} and {$maxVol} GB."];
         }
         if (!panel_custom_month_option($panel, $months)) {
-            return ['ok' => false, 'msg' => 'مدت انتخاب‌شده نامعتبر است.'];
+            return ['ok' => false, 'msg' => 'The selected duration is invalid.'];
         }
         $days = panel_custom_months_to_days($months);
         $price = panel_custom_service_price_for_user($panel, $user, $gb, $days);
         if ($price === null) {
-            return ['ok' => false, 'msg' => 'قیمت سرویس دلخواه قابل محاسبه نیست.'];
+            return ['ok' => false, 'msg' => 'Custom service price could not be calculated.'];
         }
         $infoProduct = [
             'Volume_constraint' => $gb,
@@ -689,13 +689,13 @@ function panel_extend_user_service(PDO $pdo, $userId, string $idInvoice, string 
         ];
     } else {
         if ($productName === '') {
-            return ['ok' => false, 'msg' => 'محصول را انتخاب کنید.'];
+            return ['ok' => false, 'msg' => 'Select a product.'];
         }
         $stmt = $pdo->prepare("SELECT * FROM product WHERE name_product = ? AND (Location = ? OR Location = '/all') LIMIT 1");
         $stmt->execute([$productName, $panelName]);
         $infoProduct = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$infoProduct) {
-            return ['ok' => false, 'msg' => 'محصول انتخاب‌شده برای این پنل یافت نشد.'];
+            return ['ok' => false, 'msg' => 'The selected product was not found for this panel.'];
         }
     }
 
@@ -729,7 +729,7 @@ function panel_extend_user_service(PDO $pdo, $userId, string $idInvoice, string 
         if (!is_string($err)) {
             $err = json_encode($err);
         }
-        return ['ok' => false, 'msg' => 'خطا در تمدید سرویس: ' . $err];
+        return ['ok' => false, 'msg' => 'Service renewal failed: ' . $err];
     }
 
     if (($invoice['name_product'] ?? '') === 'سرویس تست') {
@@ -781,7 +781,7 @@ function panel_extend_user_service(PDO $pdo, $userId, string $idInvoice, string 
         "✅ Your service was renewed by an admin.\n\n▫️Service : {$username}\n▫️Product : {$infoProduct['name_product']}\n▫️Renewal amount {$priceFmt} USD"
     );
 
-    return ['ok' => true, 'msg' => 'سرویس «' . $username . '» با موفقیت تمدید شد.'];
+    return ['ok' => true, 'msg' => 'Service “' . $username . '” was renewed.'];
 }
 
 /**
@@ -794,11 +794,11 @@ function panel_remove_user_service(PDO $pdo, string $idInvoice, $userId, bool $r
 
     $invoice = db_fetch($pdo, 'SELECT * FROM invoice WHERE id_invoice = ? AND id_user = ?', [$idInvoice, (string) $userId]);
     if (!$invoice) {
-        return ['ok' => false, 'msg' => 'سرویس یافت نشد یا متعلق به این کاربر نیست.'];
+        return ['ok' => false, 'msg' => 'Service not found or does not belong to this user.'];
     }
 
     if (panel_invoice_get_status($invoice) === 'removebyadmin') {
-        return ['ok' => false, 'msg' => 'این سرویس از قبل حذف شده است.'];
+        return ['ok' => false, 'msg' => 'This service was already removed.'];
     }
 
     try {
@@ -817,7 +817,7 @@ function panel_remove_user_service(PDO $pdo, string $idInvoice, $userId, bool $r
         }
     }
 
-    $msg = $refund ? 'سرویس حذف و مبلغ به کیف پول کاربر بازگردانده شد.' : 'سرویس از پنل حذف و در ربات غیرفعال شد.';
+    $msg = $refund ? 'Service was removed and the amount was refunded to the user wallet.' : 'Service was removed from the panel and disabled in the bot.';
     return ['ok' => true, 'msg' => $msg];
 }
 
@@ -828,7 +828,7 @@ function panel_update_invoice_record(PDO $pdo, string $idInvoice, array $fields)
 {
     $invoice = db_fetch($pdo, 'SELECT * FROM invoice WHERE id_invoice = ?', [$idInvoice]);
     if (!$invoice) {
-        return ['ok' => false, 'msg' => 'فاکتور یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Invoice not found.'];
     }
 
     $allowed = [
@@ -851,11 +851,11 @@ function panel_update_invoice_record(PDO $pdo, string $idInvoice, array $fields)
         $params[] = trim((string) $fields[$key]);
     }
     if (!$sets) {
-        return ['ok' => false, 'msg' => 'فیلدی برای به‌روزرسانی ارسال نشد.'];
+        return ['ok' => false, 'msg' => 'No fields were sent to update.'];
     }
     $params[] = $idInvoice;
     db_query($pdo, 'UPDATE invoice SET ' . implode(', ', $sets) . ' WHERE id_invoice = ?', $params);
-    return ['ok' => true, 'msg' => 'فاکتور به‌روز شد.'];
+    return ['ok' => true, 'msg' => 'Invoice was updated.'];
 }
 
 /**
@@ -865,7 +865,7 @@ function panel_update_service_other_record(PDO $pdo, int $id, array $fields): ar
 {
     $row = db_fetch($pdo, 'SELECT * FROM service_other WHERE id = ?', [$id]);
     if (!$row) {
-        return ['ok' => false, 'msg' => 'سفارش یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Order not found.'];
     }
 
     $allowed = [
@@ -884,9 +884,9 @@ function panel_update_service_other_record(PDO $pdo, int $id, array $fields): ar
         $params[] = trim((string) $fields[$key]);
     }
     if (!$sets) {
-        return ['ok' => false, 'msg' => 'فیلدی برای به‌روزرسانی ارسال نشد.'];
+        return ['ok' => false, 'msg' => 'No fields were sent to update.'];
     }
     $params[] = $id;
     db_query($pdo, 'UPDATE service_other SET ' . implode(', ', $sets) . ' WHERE id = ?', $params);
-    return ['ok' => true, 'msg' => 'سفارش به‌روز شد.'];
+    return ['ok' => true, 'msg' => 'Order was updated.'];
 }

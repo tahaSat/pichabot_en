@@ -96,14 +96,14 @@ $params = [
 
 $stmt = executeQuery($pdo, $sqlTopAgents, $params);
 $listagentuser = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$textagent = "لیست نمایندگانی که بیشترین خرید در امروز داشتند :\n";
+$textagent = "Agents with the highest purchases today :\n";
 foreach ($listagentuser as $agent) {
-    $textagent .= "\nایدی عددی کاربر : {$agent['id']}\nنام کاربری کاربر : {$agent['username']}\nجمع کل خرید امروز : {$agent['total_spent']}\n---------------\n";
+    $textagent .= "\nUser ID : {$agent['id']}\nUsername : {$agent['username']}\nToday's purchase total : {$agent['total_spent']}\n---------------\n";
 }
 
 // Fetch panel reports
 $panels = select("marzban_panel", "*", null, null, "fetchAll");
-$textpanel = "گزارش پنل ها :\n";
+$textpanel = "Panel report :\n";
 foreach ($panels as $panel) {
     $sqlPanel = "SELECT COUNT(*) AS orders, SUM(price_product) AS total_price, SUM(Volume) AS total_volume 
                  FROM invoice 
@@ -119,7 +119,7 @@ foreach ($panels as $panel) {
     $total_price = $result['total_price'] ?? 0;
     $total_volume = $result['total_volume'] ?? 0;
 
-    $textpanel .= "\nنام پنل : {$panel['name_panel']}\n🛍 تعداد سفارشات امروز : $orders عدد\n🛍 جمع مبلغ سفارشات امروز : $total_price تومان\n🔋 جمع حجم های فروخته شده : $total_volume گیگابایت\n---------------\n";
+    $textpanel .= "\nPanel : {$panel['name_panel']}\n🛍 Today's orders : $orders\n🛍 Today's order total : $total_price USD\n🔋 Sold volume : $total_volume GB\n---------------\n";
 }
 
 // n2 advanced agent purchases (no credit billing)
@@ -129,7 +129,7 @@ $endTs = strtotime($dateend);
 $sqlN2 = "SELECT agent_id,
                  COUNT(*) AS buy_count,
                  SUM(CAST(volume AS DECIMAL(12,2))) AS total_volume,
-                 GROUP_CONCAT(DISTINCT name_product SEPARATOR '، ') AS products
+                 GROUP_CONCAT(DISTINCT name_product SEPARATOR ', ') AS products
           FROM agent_n2_purchase
           WHERE created_at BETWEEN :startTs AND :endTs
           GROUP BY agent_id
@@ -143,20 +143,20 @@ $stmt = executeQuery($pdo, $sqlN2Total, [':startTs' => $startTs, ':endTs' => $en
 $n2Total = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 $n2BuyCount = (int) ($n2Total['buy_count'] ?? 0);
 $n2VolTotal = $n2Total['total_volume'] ?? 0;
-$textn2 = "🛒 گزارش خرید نمایندگان پیشرفته (n2) امروز:\n";
-$textn2 .= "تعداد کل خرید: {$n2BuyCount} | جمع حجم: {$n2VolTotal} گیگابایت\n";
+$textn2 = "🛒 Advanced agent (n2) purchases today:\n";
+$textn2 .= "Total purchases: {$n2BuyCount} | Total volume: {$n2VolTotal} GB\n";
 if (empty($n2Rows)) {
-    $textn2 .= "\nامروز خریدی ثبت نشده است.\n";
+    $textn2 .= "\nNo purchases were recorded today.\n";
 } else {
     foreach ($n2Rows as $row) {
         $agentUser = select('user', '*', 'id', $row['agent_id'], 'select');
         $agentUsername = $agentUser['username'] ?? '-';
-        $textn2 .= "\nآیدی: {$row['agent_id']}\nنام کاربری: @{$agentUsername}\nتعداد خرید: {$row['buy_count']}\nجمع حجم: {$row['total_volume']} GB\nمحصولات: {$row['products']}\n---------------\n";
+        $textn2 .= "\nID: {$row['agent_id']}\nUsername: @{$agentUsername}\nPurchases: {$row['buy_count']}\nTotal volume: {$row['total_volume']} GB\nProducts: {$row['products']}\n---------------\n";
     }
 }
 
 // Daily report text
-$textreport = "📌 گزارش روزانه کارکرد ربات :\n\n🧲 تعداد تمدید امروز : $countextendday عدد\n💰 جمع تمدید امروز : $sumcountextend تومان\n🛍 تعداد سفارشات امروز : $dayListSell عدد\n🛍 جمع مبلغ سفارشات امروز : $suminvoiceday تومان\n🔑 اکانت های تست امروز : $dayListSelltest عدد\n🔋 جمع حجم های فروخته شده : $sumvolume گیگابایت\n🛒 خرید n2 امروز : $n2BuyCount عدد ({$n2VolTotal} GB)\nتعداد کاربرانی که امروز به ربات پیوستند : $usernew نفر\n";
+$textreport = "📌 Daily bot activity report :\n\n🧲 Renewals today : $countextendday\n💰 Renewal total today : $sumcountextend USD\n🛍 Orders today : $dayListSell\n🛍 Order total today : $suminvoiceday USD\n🔑 Test accounts today : $dayListSelltest\n🔋 Sold volume : $sumvolume GB\n🛒 n2 purchases today : $n2BuyCount ({$n2VolTotal} GB)\nUsers who joined today : $usernew\n";
 
 // Send reports to Telegram
 if (!empty($setting['Channel_Report'])) {

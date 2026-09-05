@@ -21,7 +21,7 @@ foreach($marzbanlist as $location){
     $port = empty($parsed_url['port']) ? 443 : $parsed_url['port'];
     if (!checkConnection($address, $port)) {
        foreach ($admin_ids as $admin) {
-            $textnode = "🚨 ادمین عزیز پنل با اسم <code>{$location['name_panel']}</code> متصل نیست.";
+            $textnode = "🚨 Dear admin, the panel <code>{$location['name_panel']}</code> is not connected.";
         sendmessage($admin, $textnode, null, 'html');
     }
     }

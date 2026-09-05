@@ -72,14 +72,14 @@ while ($row = mysqli_fetch_assoc($list_service)) {
         $text_report = "🎁 $result USD was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
-    $text_reportpayment = "💵 پرداخت جدید
-- 👤 نام کاربری کاربر : @{$Balance_id['username']}
-- ‏🆔آیدی عددی کاربر : {$Balance_id['id']}
-- 💸 مبلغ تراکنش {$Payment_report['price']}
-- 🔗 <a href = \"{$StatusPayment['tx_url'][0]}\">لینک پرداخت </a>
-- 🔗 <a href = \"{$StatusPayment['invoice_url']}\">لینک پرداخت plisio </a>
-- 📥 مبلغ واریز شده ترون. : {$StatusPayment['invoice_total_sum']}
-- 💳 روش پرداخت :  plisio";
+    $text_reportpayment = "💵 New payment
+- 👤 Username : @{$Balance_id['username']}
+- 🆔 User ID : {$Balance_id['id']}
+- 💸 Transaction amount : {$Payment_report['price']}
+- 🔗 <a href = \"{$StatusPayment['tx_url'][0]}\">Payment link</a>
+- 🔗 <a href = \"{$StatusPayment['invoice_url']}\">Plisio invoice</a>
+- 📥 Amount deposited : {$StatusPayment['invoice_total_sum']}
+- 💳 Payment method : plisio";
          if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage',[
         'chat_id' => $setting['Channel_Report'],

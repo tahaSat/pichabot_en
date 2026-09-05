@@ -15,10 +15,10 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 const PANEL_FINANCIAL_EXPORT_SHEETS = [
-    'داشبورد',
-    'فروش روزانه',
-    'هزینه‌ها',
-    'سود و زیان ماهانه',
+    'Dashboard',
+    'Daily sales',
+    'Expenses',
+    'Monthly P&L',
 ];
 
 /** Return every paid Payment_report row plus recorded expenses. */
@@ -197,7 +197,7 @@ function panel_financial_export_prepare(array $rows, array $categoryLabels = [])
                 'vendor' => trim((string) ($row['id_user'] ?? '')),
                 'amount' => $amount,
                 'method' => (string) ($row['Payment_Method'] ?? '') === 'cost'
-                    ? 'هزینه ثبت‌شده'
+                    ? 'Recorded expense'
                     : panel_payment_method_label((string) ($row['Payment_Method'] ?? '')),
                 'paid_by' => trim((string) ($row['id_user'] ?? '')),
                 'order_id' => trim((string) ($row['id_order'] ?? '')),
@@ -209,7 +209,7 @@ function panel_financial_export_prepare(array $rows, array $categoryLabels = [])
         $sale['buyers_count'] = count($sale['buyers']);
         unset($sale['buyers']);
         $sale['method_label'] = $sale['method'] === 'unknown'
-            ? 'نامشخص'
+            ? 'Unknown'
             : panel_payment_method_label($sale['method']);
     }
     unset($sale);
@@ -249,7 +249,7 @@ function panel_financial_export_set_row(Worksheet $sheet, int $row, array $value
 
 function panel_financial_export_base_sheet(Worksheet $sheet, string $title, string $lastColumn): void
 {
-    $sheet->setRightToLeft(true);
+    $sheet->setRightToLeft(false);
     $sheet->setShowGridlines(false);
     $sheet->mergeCells("A1:{$lastColumn}1");
     $sheet->setCellValue('A1', $title);
@@ -307,8 +307,8 @@ function panel_financial_export_build_workbook(array $report, array $filters = [
     $book = new Spreadsheet();
     $book->getProperties()
         ->setCreator('Pichabot')
-        ->setTitle('گزارش مدیریت مالی')
-        ->setSubject('گزارش درآمد و هزینه بر مبنای پرداخت‌ها');
+        ->setTitle('Financial management report')
+        ->setSubject('Income and expense report based on payments');
     $book->removeSheetByIndex(0);
     foreach (PANEL_FINANCIAL_EXPORT_SHEETS as $title) {
         $book->addSheet(new Worksheet($book, $title));
@@ -317,12 +317,12 @@ function panel_financial_export_build_workbook(array $report, array $filters = [
 
     $money = panel_financial_export_money_format();
 
-    // فروش روزانه
-    $sales = $book->getSheetByName('فروش روزانه');
-    panel_financial_export_base_sheet($sales, 'فروش روزانه', 'I');
+    // Daily sales
+    $sales = $book->getSheetByName('Daily sales');
+    panel_financial_export_base_sheet($sales, 'Daily sales', 'I');
     panel_financial_export_header($sales, 2, [
-        'تاریخ', 'کانال / روش پرداخت', 'تراکنش / خریدار', 'فروش ناخالص (USD)', 'نرخ کمیسیون',
-        'کمیسیون (USD)', 'درآمد خالص (USD)', 'میانگین درآمد هر خریدار', 'یادداشت',
+        'Date', 'Channel / payment method', 'Orders / buyers', 'Gross sales (USD)', 'Commission rate',
+        'Commission (USD)', 'Net income (USD)', 'Average income per buyer', 'Note',
     ]);
     $salesRow = 3;
     foreach ($report['sales'] as $item) {
@@ -340,7 +340,7 @@ function panel_financial_export_build_workbook(array $report, array $filters = [
         $salesRow++;
     }
     if ($salesRow === 3) {
-        $sales->setCellValue('A3', 'در بازه انتخاب‌شده درآمد قطعی ثبت نشده است.');
+        $sales->setCellValue('A3', 'No confirmed income in the selected range.');
     }
     $salesLast = max(3, $salesRow - 1);
     $sales->getStyle("A3:A{$salesLast}")->getNumberFormat()->setFormatCode('@');
@@ -354,12 +354,12 @@ function panel_financial_export_build_workbook(array $report, array $filters = [
         $sales->getColumnDimension($column)->setWidth($width);
     }
 
-    // هزینه‌ها
-    $expenses = $book->getSheetByName('هزینه‌ها');
-    panel_financial_export_base_sheet($expenses, 'هزینه‌ها', 'K');
+    // Expenses
+    $expenses = $book->getSheetByName('Expenses');
+    panel_financial_export_base_sheet($expenses, 'Expenses', 'K');
     panel_financial_export_header($expenses, 2, [
-        'تاریخ', 'دسته هزینه', 'شرح', 'فروشنده / شخص', 'مبلغ اصلی', 'ارز',
-        'نرخ تبدیل', 'مبلغ (USD)', 'روش پرداخت', 'پرداخت‌کننده', 'شناسه تراکنش',
+        'Date', 'Expense category', 'Description', 'Vendor / person', 'Original amount', 'Currency',
+        'Exchange rate', 'Amount (USD)', 'Payment method', 'Paid by', 'Transaction ID',
     ]);
     $expenseRow = 3;
     foreach ($report['expenses'] as $item) {
@@ -379,7 +379,7 @@ function panel_financial_export_build_workbook(array $report, array $filters = [
         $expenseRow++;
     }
     if ($expenseRow === 3) {
-        $expenses->setCellValue('A3', 'در بازه انتخاب‌شده هزینه‌ای ثبت نشده است.');
+        $expenses->setCellValue('A3', 'No expenses in the selected range.');
     }
     $expenseLast = max(3, $expenseRow - 1);
     $expenses->getStyle("A3:A{$expenseLast}")->getNumberFormat()->setFormatCode('@');
@@ -393,13 +393,13 @@ function panel_financial_export_build_workbook(array $report, array $filters = [
         $expenses->getColumnDimension($column)->setWidth($width);
     }
 
-    // سود و زیان ماهانه
-    $pnl = $book->getSheetByName('سود و زیان ماهانه');
-    panel_financial_export_base_sheet($pnl, 'گزارش سود و زیان ماهانه', 'N');
+    // Monthly P&L
+    $pnl = $book->getSheetByName('Monthly P&L');
+    panel_financial_export_base_sheet($pnl, 'Monthly profit and loss report', 'N');
     panel_financial_export_header($pnl, 2, [
-        'ماه', 'فروش ناخالص', 'کمیسیون همکاری', 'درآمد خالص', 'سرور', 'تبلیغات',
-        'حقوق', 'تلگرام / ربات', 'نرم‌افزار', 'بازپرداخت', 'دفتر / اداری', 'سایر هزینه‌ها',
-        'مجموع هزینه‌ها', 'سود خالص',
+        'Month', 'Gross sales', 'Affiliate commission', 'Net income', 'Server', 'Advertising',
+        'Salary', 'Telegram / bot', 'Software', 'Refunds', 'Office / admin', 'Other expenses',
+        'Total expenses', 'Net profit',
     ]);
     $pnlRow = 3;
     foreach ($report['months'] as $month => $item) {
@@ -439,16 +439,16 @@ function panel_financial_export_build_workbook(array $report, array $filters = [
         $pnl->getColumnDimension($column)->setWidth($column === 'A' ? 15 : 17);
     }
 
-    // داشبورد
-    $dashboard = $book->getSheetByName('داشبورد');
-    panel_financial_export_base_sheet($dashboard, 'داشبورد مدیریت مالی', 'H');
-    panel_financial_export_header($dashboard, 3, ['شاخص', 'مقدار']);
-    panel_financial_export_set_row($dashboard, 4, ['فروش ناخالص', "=SUM('فروش روزانه'!D3:D{$salesLast})"]);
-    panel_financial_export_set_row($dashboard, 5, ['مجموع هزینه‌ها', "=SUM('هزینه‌ها'!H3:H{$expenseLast})"]);
-    panel_financial_export_set_row($dashboard, 6, ['سود خالص', '=B4-B5']);
-    panel_financial_export_set_row($dashboard, 7, ['تعداد تراکنش‌های موفق', $report['totals']['payments']]);
-    panel_financial_export_set_row($dashboard, 8, ['تعداد خریداران یکتا', $report['totals']['buyers']]);
-    panel_financial_export_set_row($dashboard, 9, ['ردیف‌های دارای تاریخ نامعتبر', $report['skipped']]);
+    // Dashboard
+    $dashboard = $book->getSheetByName('Dashboard');
+    panel_financial_export_base_sheet($dashboard, 'Finance dashboard', 'H');
+    panel_financial_export_header($dashboard, 3, ['Metric', 'Value']);
+    panel_financial_export_set_row($dashboard, 4, ['Gross sales', "=SUM('Daily sales'!D3:D{$salesLast})"]);
+    panel_financial_export_set_row($dashboard, 5, ['Total expenses', "=SUM('Expenses'!H3:H{$expenseLast})"]);
+    panel_financial_export_set_row($dashboard, 6, ['Net profit', '=B4-B5']);
+    panel_financial_export_set_row($dashboard, 7, ['Successful transactions', $report['totals']['payments']]);
+    panel_financial_export_set_row($dashboard, 8, ['Unique buyers', $report['totals']['buyers']]);
+    panel_financial_export_set_row($dashboard, 9, ['Rows with invalid dates', $report['skipped']]);
     $dashboard->getStyle('B4:B6')->getNumberFormat()->setFormatCode($money);
     panel_financial_export_table_style($dashboard, 'A3:B9');
     panel_financial_export_add_profit_condition($dashboard, 'B6');
@@ -457,11 +457,11 @@ function panel_financial_export_build_workbook(array $report, array $filters = [
     foreach (range('C', 'H') as $column) {
         $dashboard->getColumnDimension($column)->setWidth(15);
     }
-    $labels = [new DataSeriesValues('String', "'سود و زیان ماهانه'!\$N\$2", null, 1)];
-    $categories = [new DataSeriesValues('String', "'سود و زیان ماهانه'!\$A\$3:\$A\${$pnlLast}", null, $pnlLast - 2)];
-    $values = [new DataSeriesValues('Number', "'سود و زیان ماهانه'!\$N\$3:\$N\${$pnlLast}", null, $pnlLast - 2)];
+    $labels = [new DataSeriesValues('String', "'Monthly P&L'!\$N\$2", null, 1)];
+    $categories = [new DataSeriesValues('String', "'Monthly P&L'!\$A\$3:\$A\${$pnlLast}", null, $pnlLast - 2)];
+    $values = [new DataSeriesValues('Number', "'Monthly P&L'!\$N\$3:\$N\${$pnlLast}", null, $pnlLast - 2)];
     $series = new DataSeries(DataSeries::TYPE_LINECHART, null, range(0, count($values) - 1), $labels, $categories, $values);
-    $chart = new Chart('monthly_performance', new Title('روند سود خالص ماهانه'), new Legend(Legend::POSITION_BOTTOM), new PlotArea(null, [$series]));
+    $chart = new Chart('monthly_performance', new Title('Monthly net profit trend'), new Legend(Legend::POSITION_BOTTOM), new PlotArea(null, [$series]));
     $chart->setTopLeftPosition('D3');
     $chart->setBottomRightPosition('H18');
     $dashboard->addChart($chart);
@@ -471,7 +471,7 @@ function panel_financial_export_build_workbook(array $report, array $filters = [
         $sheet->getStyle($sheet->calculateWorksheetDimension())
             ->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
     }
-    $book->setActiveSheetIndexByName('داشبورد');
+    $book->setActiveSheetIndexByName('Dashboard');
     return $book;
 }
 

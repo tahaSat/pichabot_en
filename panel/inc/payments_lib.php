@@ -1,39 +1,39 @@
 <?php
 
-/** Payment gateways & PaySetting helpers — mirrors Telegram admin «💎 مالی». */
+/** Payment gateways & PaySetting helpers — mirrors Telegram admin «💎 Finance». */
 
 const PAYMENT_GATEWAYS = [
     'cart' => [
-        'label' => 'کارت به کارت',
+        'label' => 'Card to card',
         'status_key' => 'Cartstatus',
         'on' => 'oncard',
         'off' => 'offcard',
         'textbot_key' => 'carttocart',
         'help_key' => 'helpcart',
         'fields' => [
-            ['key' => 'CartDirect', 'label' => 'آیدی تلگرام دریافت کارت (بدون @)', 'type' => 'text'],
-            ['key' => 'Cartstatuspv', 'label' => 'درگاه آفلاین در پیوی', 'type' => 'toggle', 'on' => 'oncardpv', 'off' => 'offcardpv'],
-            ['key' => 'minbalancecart', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalancecart', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'chashbackcart', 'label' => 'کش‌بک (درصد، ۰ = غیرفعال)', 'type' => 'number'],
-            ['key' => 'checkpaycartfirst', 'label' => 'نمایش کارت پس از اولین پرداخت', 'type' => 'toggle', 'on' => 'onpayverify', 'off' => 'offpayverify'],
-            ['key' => 'autoconfirmcart', 'label' => 'تایید خودکار رسید', 'type' => 'toggle', 'on' => 'onauto', 'off' => 'offauto'],
-            ['key' => 'statuscardautoconfirm', 'label' => 'تایید رسید بدون بررسی', 'type' => 'toggle', 'on' => 'onautoconfirm', 'off' => 'offautoconfirm'],
+            ['key' => 'CartDirect', 'label' => 'Telegram ID that receives cards (without @)', 'type' => 'text'],
+            ['key' => 'Cartstatuspv', 'label' => 'Offline gateway in private chat', 'type' => 'toggle', 'on' => 'oncardpv', 'off' => 'offcardpv'],
+            ['key' => 'minbalancecart', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalancecart', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
+            ['key' => 'chashbackcart', 'label' => 'Cashback (percent, 0 = off)', 'type' => 'number'],
+            ['key' => 'checkpaycartfirst', 'label' => 'Show card after the first payment', 'type' => 'toggle', 'on' => 'onpayverify', 'off' => 'offpayverify'],
+            ['key' => 'autoconfirmcart', 'label' => 'Auto-confirm receipts', 'type' => 'toggle', 'on' => 'onauto', 'off' => 'offauto'],
+            ['key' => 'statuscardautoconfirm', 'label' => 'Confirm receipts without review', 'type' => 'toggle', 'on' => 'onautoconfirm', 'off' => 'offautoconfirm'],
         ],
         'has_cards' => true,
     ],
     'zarinpal' => [
-        'label' => 'زرین‌پال',
+        'label' => 'ZarinPal',
         'status_key' => 'zarinpalstatus',
         'on' => 'onzarinpal',
         'off' => 'offzarinpal',
         'textbot_key' => 'textzarinpal',
         'help_key' => 'helpzarinpal',
         'fields' => [
-            ['key' => 'merchant_zarinpal', 'label' => 'مرچنت زرین‌پال', 'type' => 'text'],
-            ['key' => 'minbalancezarinpal', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalancezarinpal', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'chashbackzarinpal', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
+            ['key' => 'merchant_zarinpal', 'label' => 'ZarinPal merchant', 'type' => 'text'],
+            ['key' => 'minbalancezarinpal', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalancezarinpal', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
+            ['key' => 'chashbackzarinpal', 'label' => 'Cashback (percent)', 'type' => 'number'],
         ],
     ],
     'tetraminator' => [
@@ -43,23 +43,23 @@ const PAYMENT_GATEWAYS = [
         'off' => 'offtetraminator',
         'textbot_key' => 'tetraminator',
         'fields' => [
-            ['key' => 'minbalancetetraminator', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalancetetraminator', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'chashbacktetraminator', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
+            ['key' => 'minbalancetetraminator', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalancetetraminator', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
+            ['key' => 'chashbacktetraminator', 'label' => 'Cashback (percent)', 'type' => 'number'],
         ],
     ],
     'aqayepardakht' => [
-        'label' => 'آقای پرداخت',
+        'label' => 'Aghaye Pardakht',
         'status_key' => 'statusaqayepardakht',
         'on' => 'onaqayepardakht',
         'off' => 'offaqayepardakht',
         'textbot_key' => 'textaqayepardakht',
         'help_key' => 'helpaqayepardakht',
         'fields' => [
-            ['key' => 'merchant_id_aqayepardakht', 'label' => 'مرچنت آقای پرداخت', 'type' => 'text'],
-            ['key' => 'minbalanceaqayepardakht', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalanceaqayepardakht', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'chashbackaqaypardokht', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
+            ['key' => 'merchant_id_aqayepardakht', 'label' => 'Aghaye Pardakht merchant', 'type' => 'text'],
+            ['key' => 'minbalanceaqayepardakht', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalanceaqayepardakht', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
+            ['key' => 'chashbackaqaypardokht', 'label' => 'Cashback (percent)', 'type' => 'number'],
         ],
     ],
     'plisio' => [
@@ -71,9 +71,9 @@ const PAYMENT_GATEWAYS = [
         'help_key' => 'helpplisio',
         'fields' => [
             ['key' => 'apinowpayment', 'label' => 'API Plisio', 'type' => 'text'],
-            ['key' => 'minbalanceplisio', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalanceplisio', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'chashbackplisio', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
+            ['key' => 'minbalanceplisio', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalanceplisio', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
+            ['key' => 'chashbackplisio', 'label' => 'Cashback (percent)', 'type' => 'number'],
         ],
     ],
     'nowpayment' => [
@@ -85,9 +85,9 @@ const PAYMENT_GATEWAYS = [
         'textbot_key' => 'textsnowpayment',
         'help_key' => 'helpnowpayment',
         'fields' => [
-            ['key' => 'cashbacknowpayment', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
-            ['key' => 'minbalancenowpayment', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalancenowpayment', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
+            ['key' => 'cashbacknowpayment', 'label' => 'Cashback (percent)', 'type' => 'number'],
+            ['key' => 'minbalancenowpayment', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalancenowpayment', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
         ],
     ],
     'cryptomus' => [
@@ -100,27 +100,27 @@ const PAYMENT_GATEWAYS = [
         'fields' => [
             ['key' => 'merchant_cryptomus', 'label' => 'Merchant UUID', 'type' => 'text'],
             ['key' => 'apicryptomus', 'label' => 'Payment API Key', 'type' => 'password'],
-            ['key' => 'minbalancecryptomus', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalancecryptomus', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'chashbackcryptomus', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
+            ['key' => 'minbalancecryptomus', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalancecryptomus', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
+            ['key' => 'chashbackcryptomus', 'label' => 'Cashback (percent)', 'type' => 'number'],
         ],
     ],
     'arzireyali1' => [
-        'label' => 'ارزی ریالی اول',
+        'label' => 'Rial gateway 1',
         'status_key' => 'statusSwapWallet',
         'on' => 'onSwapinoBot',
         'off' => 'offSwapinoBot',
         'textbot_key' => 'textiranpay1',
         'help_key' => 'helpiranpay1',
         'fields' => [
-            ['key' => 'apiiranpay', 'label' => 'API / توکن', 'type' => 'text'],
-            ['key' => 'minbalanceiranpay1', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalanceiranpay1', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'chashbackiranpay1', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
+            ['key' => 'apiiranpay', 'label' => 'API / token', 'type' => 'text'],
+            ['key' => 'minbalanceiranpay1', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalanceiranpay1', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
+            ['key' => 'chashbackiranpay1', 'label' => 'Cashback (percent)', 'type' => 'number'],
         ],
     ],
     'arzireyali2' => [
-        'label' => 'ارزی ریالی دوم (Tronado)',
+        'label' => 'Rial gateway 2 (Tronado)',
         'status_key' => 'statustarnado',
         'on' => 'onternado',
         'off' => 'offternado',
@@ -128,14 +128,14 @@ const PAYMENT_GATEWAYS = [
         'help_key' => 'helpiranpay2',
         'fields' => [
             ['key' => 'apiternado', 'label' => 'API Tronado', 'type' => 'text'],
-            ['key' => 'urlpaymenttron', 'label' => 'آدرس API', 'type' => 'text'],
-            ['key' => 'minbalanceiranpay2', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalanceiranpay2', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'chashbackiranpay2', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
+            ['key' => 'urlpaymenttron', 'label' => 'API URL', 'type' => 'text'],
+            ['key' => 'minbalanceiranpay2', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalanceiranpay2', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
+            ['key' => 'chashbackiranpay2', 'label' => 'Cashback (percent)', 'type' => 'number'],
         ],
     ],
     'arzireyali3' => [
-        'label' => 'ارزی ریالی سوم',
+        'label' => 'Rial gateway 3',
         'status_key' => 'statusiranpay3',
         'on' => 'oniranpay3',
         'off' => 'offiranpay3',
@@ -143,23 +143,23 @@ const PAYMENT_GATEWAYS = [
         'help_key' => 'helpiranpay3',
         'fields' => [
             ['key' => 'marchent_floypay', 'label' => 'API Key', 'type' => 'text'],
-            ['key' => 'minbalanceiranpay', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalanceiranpay', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'chashbackiranpay3', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
+            ['key' => 'minbalanceiranpay', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalanceiranpay', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
+            ['key' => 'chashbackiranpay3', 'label' => 'Cashback (percent)', 'type' => 'number'],
         ],
     ],
     'affilnecurrency' => [
-        'label' => 'ارز دیجیتال آفلاین',
+        'label' => 'Offline crypto',
         'status_key' => 'digistatus',
         'on' => 'ondigi',
         'off' => 'offdigi',
         'textbot_key' => 'textperfectmoney',
         'help_key' => 'helpofflinearze',
         'fields' => [
-            ['key' => 'marchent_tronseller', 'label' => 'API NowPayment / Tron', 'type' => 'text'],
-            ['key' => 'walletaddress', 'label' => 'آدرس ولت', 'type' => 'text'],
-            ['key' => 'minbalancedigitaltron', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalancedigitaltron', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
+            ['key' => 'marchent_tronseller', 'label' => 'NowPayment / Tron API', 'type' => 'text'],
+            ['key' => 'walletaddress', 'label' => 'Wallet address', 'type' => 'text'],
+            ['key' => 'minbalancedigitaltron', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalancedigitaltron', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
         ],
     ],
     'startelegram' => [
@@ -171,9 +171,9 @@ const PAYMENT_GATEWAYS = [
         'textbot_key' => 'text_star_telegram',
         'help_key' => 'helpstar',
         'fields' => [
-            ['key' => 'chashbackstar', 'label' => 'کش‌بک (درصد)', 'type' => 'number'],
-            ['key' => 'minbalancestar', 'label' => 'حداقل مبلغ (USD)', 'type' => 'number'],
-            ['key' => 'maxbalancestar', 'label' => 'حداکثر مبلغ (USD)', 'type' => 'number'],
+            ['key' => 'chashbackstar', 'label' => 'Cashback (percent)', 'type' => 'number'],
+            ['key' => 'minbalancestar', 'label' => 'Minimum amount (USD)', 'type' => 'number'],
+            ['key' => 'maxbalancestar', 'label' => 'Maximum amount (USD)', 'type' => 'number'],
         ],
     ],
 ];
@@ -233,7 +233,7 @@ function pay_textbot_set(PDO $pdo, string $idText, string $text): void
 }
 
 /**
- * Pre-payment help message (آموزش) for a gateway.
+ * Pre-payment help message for a gateway.
  * @return array{enabled: bool, type: string, text: string, photoid: string, videoid: string}
  */
 function pay_help_get(PDO $pdo, string $key): array
@@ -300,17 +300,17 @@ function pay_add_card(PDO $pdo, string $number, string $holder): array
 {
     $number = preg_replace('/\D/', '', $number);
     if ($number === '') {
-        return ['ok' => false, 'msg' => 'شماره کارت باید عدد باشد.'];
+        return ['ok' => false, 'msg' => 'Card number must be numeric.'];
     }
     $exists = db_fetch($pdo, "SELECT cardnumber FROM card_number WHERE cardnumber = ?", [$number]);
     if ($exists) {
-        return ['ok' => false, 'msg' => 'این شماره کارت قبلاً ثبت شده است.'];
+        return ['ok' => false, 'msg' => 'This card number is already saved.'];
     }
     if (function_exists('ensureCardNumberTableSupportsUnicode')) {
         ensureCardNumberTableSupportsUnicode();
     }
     db_query($pdo, "INSERT INTO card_number (cardnumber, namecard) VALUES (?, ?)", [$number, $holder]);
-    return ['ok' => true, 'msg' => 'شماره کارت ثبت شد.'];
+    return ['ok' => true, 'msg' => 'Card number saved.'];
 }
 
 function pay_delete_card(PDO $pdo, string $number): void
@@ -390,13 +390,13 @@ function panel_payment_confirm(PDO $pdo, string $orderId): array
 {
     $payment = db_fetch($pdo, "SELECT * FROM Payment_report WHERE id_order = ?", [$orderId]);
     if (!$payment) {
-        return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Transaction not found.'];
     }
     if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
-        return ['ok' => false, 'msg' => 'تأیید عمومی Cryptomus مجاز نیست؛ تحویل فقط پس از تأیید درگاه انجام می‌شود.'];
+        return ['ok' => false, 'msg' => 'Generic Cryptomus approval is not allowed; delivery happens only after gateway confirmation.'];
     }
     if (in_array($payment['payment_Status'], ['paid', 'reject'], true)) {
-        return ['ok' => false, 'msg' => 'این پرداخت قبلاً بررسی شده است.'];
+        return ['ok' => false, 'msg' => 'This payment has already been reviewed.'];
     }
 
     $pendingService = db_count(
@@ -408,7 +408,7 @@ function panel_payment_confirm(PDO $pdo, string $orderId): array
     );
     $typepay = explode('|', (string) $payment['id_invoice']);
     if ($pendingService > 0 && !in_array($typepay[0] ?? '', ['getconfigafterpay', 'getextenduser', 'getextravolumeuser', 'getextratimeuser'], true)) {
-        return ['ok' => false, 'msg' => 'ابتدا رسیدهای خرید/تمدید سرویس این کاربر را تأیید کنید، سپس شارژ کیف پول.'];
+        return ['ok' => false, 'msg' => 'Confirm this user’s purchase/renewal receipts first, then wallet top-ups.'];
     }
 
     try {
@@ -443,10 +443,10 @@ function panel_payment_confirm(PDO $pdo, string $orderId): array
             markAdminReceiptsAdminConfirmed($orderId);
         }
 
-        return ['ok' => true, 'msg' => 'پرداخت تأیید شد.'];
+        return ['ok' => true, 'msg' => 'Payment confirmed.'];
     } catch (Throwable $e) {
         error_log('panel_payment_confirm: ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
-        return ['ok' => false, 'msg' => 'خطا در تأیید پرداخت: ' . $e->getMessage()];
+        return ['ok' => false, 'msg' => 'Error confirming payment: ' . $e->getMessage()];
     }
 }
 
@@ -454,37 +454,37 @@ function panel_payment_reject(PDO $pdo, string $orderId, string $reason = ''): a
 {
     $payment = db_fetch($pdo, "SELECT * FROM Payment_report WHERE id_order = ?", [$orderId]);
     if (!$payment) {
-        return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Transaction not found.'];
     }
     if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
-        return ['ok' => false, 'msg' => 'رد عمومی Cryptomus مجاز نیست؛ فقط عملیات اختصاصی کسری مبلغ قابل استفاده است.'];
+        return ['ok' => false, 'msg' => 'Generic Cryptomus rejection is not allowed; use the dedicated underpayment actions.'];
     }
     if (in_array($payment['payment_Status'], ['paid', 'reject'], true)) {
-        return ['ok' => false, 'msg' => 'این پرداخت قبلاً بررسی شده است.'];
+        return ['ok' => false, 'msg' => 'This payment has already been reviewed.'];
     }
-    $reason = trim($reason) ?: 'رد شده توسط ادمین پنل';
+    $reason = trim($reason) ?: 'Rejected by panel admin';
     db_query($pdo, "UPDATE Payment_report SET payment_Status = 'reject', dec_not_confirmed = ? WHERE id_order = ?", [$reason, $orderId]);
 
     panel_payment_bootstrap();
     if (function_exists('sendmessage')) {
-        $text = "❌ کاربر گرامی پرداخت شما رد شد.\n✍️ {$reason}\n🛒 کد پیگیری: {$orderId}";
+        $text = "❌ Your payment was rejected.\n✍️ {$reason}\n🛒 Tracking code: {$orderId}";
         @sendmessage($payment['id_user'], $text, null, 'HTML');
     }
 
-    return ['ok' => true, 'msg' => 'پرداخت رد شد.'];
+    return ['ok' => true, 'msg' => 'Payment rejected.'];
 }
 
 function panel_payment_dismiss(PDO $pdo, string $orderId): array
 {
     $payment = db_fetch($pdo, "SELECT * FROM Payment_report WHERE id_order = ?", [$orderId]);
     if (!$payment || $payment['payment_Status'] !== 'waiting') {
-        return ['ok' => false, 'msg' => 'رسید در انتظار یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Pending receipt not found.'];
     }
     if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
-        return ['ok' => false, 'msg' => 'حذف عمومی تراکنش Cryptomus مجاز نیست.'];
+        return ['ok' => false, 'msg' => 'Generic deletion of Cryptomus transactions is not allowed.'];
     }
     db_query($pdo, "UPDATE Payment_report SET payment_Status = 'reject', dec_not_confirmed = 'remove_panel' WHERE id_order = ?", [$orderId]);
-    return ['ok' => true, 'msg' => 'رسید حذف شد (بدون اطلاع کاربر).'];
+    return ['ok' => true, 'msg' => 'Receipt deleted (user was not notified).'];
 }
 
 function panel_payment_ensure_note_column(PDO $pdo): void
@@ -537,15 +537,15 @@ function panel_payment_ensure_schema(PDO $pdo): void
         );
         $count = (int) $pdo->query('SELECT COUNT(*) FROM expense_category')->fetchColumn();
         if ($count === 0) {
-            $pdo->exec("INSERT INTO expense_category (slug, label, sort_order) VALUES ('other', 'سایر', 0)");
+            $pdo->exec("INSERT INTO expense_category (slug, label, sort_order) VALUES ('other', 'Other', 0)");
         } elseif (!db_fetch($pdo, "SELECT id FROM expense_category WHERE slug = 'other'")) {
-            $pdo->exec("INSERT INTO expense_category (slug, label, sort_order) VALUES ('other', 'سایر', 0)");
+            $pdo->exec("INSERT INTO expense_category (slug, label, sort_order) VALUES ('other', 'Other', 0)");
         }
         if (!db_fetch($pdo, "SELECT id FROM expense_category WHERE slug = 'wallet_withdraw'")) {
-            $pdo->exec("INSERT INTO expense_category (slug, label, sort_order) VALUES ('wallet_withdraw', 'برداشت از کیف پول', 10)");
+            $pdo->exec("INSERT INTO expense_category (slug, label, sort_order) VALUES ('wallet_withdraw', 'Wallet withdrawals', 10)");
         }
         if (!db_fetch($pdo, "SELECT id FROM expense_category WHERE slug = 'ads'")) {
-            $pdo->exec("INSERT INTO expense_category (slug, label, sort_order) VALUES ('ads', 'هزینه تبلیغ', 20)");
+            $pdo->exec("INSERT INTO expense_category (slug, label, sort_order) VALUES ('ads', 'Advertising', 20)");
         }
     } catch (Throwable $e) {
         error_log('panel_payment_ensure_schema expense_category: ' . $e->getMessage());
@@ -563,8 +563,8 @@ function panel_payment_ensure_schema(PDO $pdo): void
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
         );
         $seeds = [
-            ['manual invoice', 'فاکتور دستی', 0],
-            ['capital_injection', 'ورود سرمایه', 10],
+            ['manual invoice', 'Manual invoice', 0],
+            ['capital_injection', 'Capital injection', 10],
         ];
         foreach ($seeds as [$slug, $label, $sort]) {
             if (!db_fetch($pdo, 'SELECT id FROM income_category WHERE slug = ?', [$slug])) {
@@ -643,7 +643,7 @@ function panel_expense_category_map(PDO $pdo, bool $refresh = false): array
         error_log('panel_expense_category_map: ' . $e->getMessage());
     }
     if (!isset($map[panel_expense_default_slug()])) {
-        $map[panel_expense_default_slug()] = 'سایر';
+        $map[panel_expense_default_slug()] = 'Other';
     }
     return $map;
 }
@@ -666,7 +666,7 @@ function panel_expense_category_label(PDO $pdo, string $slug): string
     if ($slug !== '' && isset($map[$slug])) {
         return $map[$slug];
     }
-    return $map[panel_expense_default_slug()] ?? 'سایر';
+    return $map[panel_expense_default_slug()] ?? 'Other';
 }
 
 function panel_expense_resolve_slug(PDO $pdo, string $slug): string
@@ -732,13 +732,13 @@ function panel_expense_add(PDO $pdo, string $label, int $sortOrder = 0): array
     panel_payment_ensure_schema($pdo);
     $label = trim($label);
     if ($label === '') {
-        return ['ok' => false, 'msg' => 'نام دسته الزامی است.'];
+        return ['ok' => false, 'msg' => 'Category name is required.'];
     }
     if (mb_strlen($label) > 64) {
-        return ['ok' => false, 'msg' => 'نام دسته خیلی طولانی است.'];
+        return ['ok' => false, 'msg' => 'Category name is too long.'];
     }
     if (db_fetch($pdo, 'SELECT id FROM expense_category WHERE label = ?', [$label])) {
-        return ['ok' => false, 'msg' => 'دسته‌ای با این نام قبلاً ثبت شده.'];
+        return ['ok' => false, 'msg' => 'A category with this name already exists.'];
     }
     $slug = panel_expense_make_slug($pdo, $label);
     db_query(
@@ -747,7 +747,7 @@ function panel_expense_add(PDO $pdo, string $label, int $sortOrder = 0): array
         [$slug, $label, $sortOrder]
     );
     panel_expense_category_map($pdo, true);
-    return ['ok' => true, 'msg' => 'دسته «' . $label . '» اضافه شد.'];
+    return ['ok' => true, 'msg' => 'Category “' . $label . '” was added.'];
 }
 
 /**
@@ -758,18 +758,18 @@ function panel_expense_rename(PDO $pdo, int $id, string $label, ?int $sortOrder 
     panel_payment_ensure_schema($pdo);
     $label = trim($label);
     if ($id < 1 || $label === '') {
-        return ['ok' => false, 'msg' => 'نام دسته الزامی است.'];
+        return ['ok' => false, 'msg' => 'Category name is required.'];
     }
     if (mb_strlen($label) > 64) {
-        return ['ok' => false, 'msg' => 'نام دسته خیلی طولانی است.'];
+        return ['ok' => false, 'msg' => 'Category name is too long.'];
     }
     $row = db_fetch($pdo, 'SELECT * FROM expense_category WHERE id = ?', [$id]);
     if (!$row) {
-        return ['ok' => false, 'msg' => 'دسته یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Category not found.'];
     }
     $dup = db_fetch($pdo, 'SELECT id FROM expense_category WHERE label = ? AND id != ?', [$label, $id]);
     if ($dup) {
-        return ['ok' => false, 'msg' => 'دسته‌ای با این نام قبلاً ثبت شده.'];
+        return ['ok' => false, 'msg' => 'A category with this name already exists.'];
     }
     if ($sortOrder === null) {
         db_query($pdo, 'UPDATE expense_category SET label = ? WHERE id = ?', [$label, $id]);
@@ -777,7 +777,7 @@ function panel_expense_rename(PDO $pdo, int $id, string $label, ?int $sortOrder 
         db_query($pdo, 'UPDATE expense_category SET label = ?, sort_order = ? WHERE id = ?', [$label, $sortOrder, $id]);
     }
     panel_expense_category_map($pdo, true);
-    return ['ok' => true, 'msg' => 'دسته ویرایش شد.'];
+    return ['ok' => true, 'msg' => 'Category updated.'];
 }
 
 /**
@@ -788,11 +788,11 @@ function panel_expense_delete(PDO $pdo, int $id): array
     panel_payment_ensure_schema($pdo);
     $row = db_fetch($pdo, 'SELECT * FROM expense_category WHERE id = ?', [$id]);
     if (!$row) {
-        return ['ok' => false, 'msg' => 'دسته یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Category not found.'];
     }
     $slug = (string) ($row['slug'] ?? '');
     if ($slug === panel_expense_default_slug()) {
-        return ['ok' => false, 'msg' => 'دسته پیش‌فرض «سایر» قابل حذف نیست.'];
+        return ['ok' => false, 'msg' => 'The default Other category cannot be deleted.'];
     }
     $used = (int) db_query(
         $pdo,
@@ -802,11 +802,11 @@ function panel_expense_delete(PDO $pdo, int $id): array
         [$slug]
     )->fetchColumn();
     if ($used > 0) {
-        return ['ok' => false, 'msg' => 'این دسته روی ' . number_format($used) . ' هزینه استفاده شده و قابل حذف نیست.'];
+        return ['ok' => false, 'msg' => 'This category is used on ' . number_format($used) . ' expense(s) and cannot be deleted.'];
     }
     db_query($pdo, 'DELETE FROM expense_category WHERE id = ?', [$id]);
     panel_expense_category_map($pdo, true);
-    return ['ok' => true, 'msg' => 'دسته حذف شد.'];
+    return ['ok' => true, 'msg' => 'Category deleted.'];
 }
 
 function panel_income_category_map(PDO $pdo, bool $refresh = false): array
@@ -832,8 +832,8 @@ function panel_income_category_map(PDO $pdo, bool $refresh = false): array
     foreach (panel_income_protected_slugs() as $slug) {
         if (!isset($map[$slug])) {
             $fallback = [
-                'manual invoice' => 'فاکتور دستی',
-                'capital_injection' => 'ورود سرمایه',
+                'manual invoice' => 'Manual invoice',
+                'capital_injection' => 'Capital injection',
             ];
             $map[$slug] = $fallback[$slug] ?? $slug;
         }
@@ -938,17 +938,17 @@ function panel_income_add(PDO $pdo, string $label, int $sortOrder = 0): array
     panel_payment_ensure_schema($pdo);
     $label = trim($label);
     if ($label === '') {
-        return ['ok' => false, 'msg' => 'نام دسته الزامی است.'];
+        return ['ok' => false, 'msg' => 'Category name is required.'];
     }
     if (mb_strlen($label) > 64) {
-        return ['ok' => false, 'msg' => 'نام دسته خیلی طولانی است.'];
+        return ['ok' => false, 'msg' => 'Category name is too long.'];
     }
     if (db_fetch($pdo, 'SELECT id FROM income_category WHERE label = ?', [$label])) {
-        return ['ok' => false, 'msg' => 'دسته‌ای با این نام قبلاً ثبت شده.'];
+        return ['ok' => false, 'msg' => 'A category with this name already exists.'];
     }
     foreach (panel_payment_system_method_map() as $sysLabel) {
         if ($sysLabel === $label) {
-            return ['ok' => false, 'msg' => 'این نام متعلق به متد/درگاه سیستمی است.'];
+            return ['ok' => false, 'msg' => 'This name belongs to a system method/gateway.'];
         }
     }
     $slug = panel_income_make_slug($pdo, $label);
@@ -958,7 +958,7 @@ function panel_income_add(PDO $pdo, string $label, int $sortOrder = 0): array
         [$slug, $label, $sortOrder]
     );
     panel_income_category_map($pdo, true);
-    return ['ok' => true, 'msg' => 'دسته «' . $label . '» اضافه شد.'];
+    return ['ok' => true, 'msg' => 'Category “' . $label . '” was added.'];
 }
 
 /**
@@ -969,26 +969,26 @@ function panel_income_rename(PDO $pdo, int $id, string $label, ?int $sortOrder =
     panel_payment_ensure_schema($pdo);
     $label = trim($label);
     if ($id < 1 || $label === '') {
-        return ['ok' => false, 'msg' => 'نام دسته الزامی است.'];
+        return ['ok' => false, 'msg' => 'Category name is required.'];
     }
     if (mb_strlen($label) > 64) {
-        return ['ok' => false, 'msg' => 'نام دسته خیلی طولانی است.'];
+        return ['ok' => false, 'msg' => 'Category name is too long.'];
     }
     $row = db_fetch($pdo, 'SELECT * FROM income_category WHERE id = ?', [$id]);
     if (!$row) {
-        return ['ok' => false, 'msg' => 'دسته یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Category not found.'];
     }
     $slug = (string) ($row['slug'] ?? '');
     if (in_array($slug, panel_income_protected_slugs(), true)) {
-        return ['ok' => false, 'msg' => 'دسته سیستمی «' . ($row['label'] ?? $slug) . '» قابل ویرایش نیست.'];
+        return ['ok' => false, 'msg' => 'System category “' . ($row['label'] ?? $slug) . '” cannot be edited.'];
     }
     $dup = db_fetch($pdo, 'SELECT id FROM income_category WHERE label = ? AND id != ?', [$label, $id]);
     if ($dup) {
-        return ['ok' => false, 'msg' => 'دسته‌ای با این نام قبلاً ثبت شده.'];
+        return ['ok' => false, 'msg' => 'A category with this name already exists.'];
     }
     foreach (panel_payment_system_method_map() as $sysLabel) {
         if ($sysLabel === $label) {
-            return ['ok' => false, 'msg' => 'این نام متعلق به متد/درگاه سیستمی است.'];
+            return ['ok' => false, 'msg' => 'This name belongs to a system method/gateway.'];
         }
     }
     if ($sortOrder === null) {
@@ -997,7 +997,7 @@ function panel_income_rename(PDO $pdo, int $id, string $label, ?int $sortOrder =
         db_query($pdo, 'UPDATE income_category SET label = ?, sort_order = ? WHERE id = ?', [$label, $sortOrder, $id]);
     }
     panel_income_category_map($pdo, true);
-    return ['ok' => true, 'msg' => 'دسته ویرایش شد.'];
+    return ['ok' => true, 'msg' => 'Category updated.'];
 }
 
 /**
@@ -1008,11 +1008,11 @@ function panel_income_delete(PDO $pdo, int $id): array
     panel_payment_ensure_schema($pdo);
     $row = db_fetch($pdo, 'SELECT * FROM income_category WHERE id = ?', [$id]);
     if (!$row) {
-        return ['ok' => false, 'msg' => 'دسته یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Category not found.'];
     }
     $slug = (string) ($row['slug'] ?? '');
     if (in_array($slug, panel_income_protected_slugs(), true)) {
-        return ['ok' => false, 'msg' => 'دسته سیستمی «' . ($row['label'] ?? $slug) . '» قابل حذف نیست.'];
+        return ['ok' => false, 'msg' => 'System category “' . ($row['label'] ?? $slug) . '” cannot be deleted.'];
     }
     $used = (int) db_query(
         $pdo,
@@ -1023,11 +1023,11 @@ function panel_income_delete(PDO $pdo, int $id): array
         [$slug]
     )->fetchColumn();
     if ($used > 0) {
-        return ['ok' => false, 'msg' => 'این دسته روی ' . number_format($used) . ' درآمد استفاده شده و قابل حذف نیست.'];
+        return ['ok' => false, 'msg' => 'This category is used on ' . number_format($used) . ' income row(s) and cannot be deleted.'];
     }
     db_query($pdo, 'DELETE FROM income_category WHERE id = ?', [$id]);
     panel_income_category_map($pdo, true);
-    return ['ok' => true, 'msg' => 'دسته حذف شد.'];
+    return ['ok' => true, 'msg' => 'Category deleted.'];
 }
 
 function panel_payment_parse_time($raw): int
@@ -1092,17 +1092,17 @@ function panel_payment_new_order_id(PDO $pdo): string
 function panel_payment_status_meta(): array
 {
     return [
-        'paid' => ['tag-ok', 'پرداخت شده'],
-        'Unpaid' => ['tag-no', 'پرداخت نشده'],
-        'expire' => ['tag-plain', 'منقضی'],
-        'reject' => ['tag-no', 'رد شده'],
-        'waiting' => ['tag-warn', 'در انتظار'],
-        'processing' => ['tag-info', 'در حال تحویل'],
-        'underpaid_waiting' => ['tag-warn', 'کسری مبلغ (در انتظار)'],
-        'underpaid' => ['tag-no', 'کسری مبلغ'],
-        'review' => ['tag-warn', 'نیازمند بررسی'],
-        'creation_failed' => ['tag-no', 'ساخت پرداخت ناموفق'],
-        'cost' => ['tag-plain', 'هزینه شده'],
+        'paid' => ['tag-ok', 'Paid'],
+        'Unpaid' => ['tag-no', 'Unpaid'],
+        'expire' => ['tag-plain', 'Expired'],
+        'reject' => ['tag-no', 'Rejected'],
+        'waiting' => ['tag-warn', 'Pending'],
+        'processing' => ['tag-info', 'Fulfilling'],
+        'underpaid_waiting' => ['tag-warn', 'Underpaid (waiting)'],
+        'underpaid' => ['tag-no', 'Underpaid'],
+        'review' => ['tag-warn', 'Needs review'],
+        'creation_failed' => ['tag-no', 'Payment creation failed'],
+        'cost' => ['tag-plain', 'Expensed'],
     ];
 }
 
@@ -1110,23 +1110,23 @@ function panel_payment_status_meta(): array
 function panel_payment_system_method_map(): array
 {
     return [
-        'cart to cart' => 'کارت به کارت',
-        'low balance by admin' => 'کسر موجودی ادمین',
-        'add balance by admin' => 'افزایش توسط ادمین',
-        'Currency Rial 1' => 'درگاه ریالی ۱',
-        'Currency Rial tow' => 'درگاه ریالی ۲',
-        'Currency Rial 3' => 'درگاه ریالی ۳',
-        'aqayepardakht' => 'آقای پرداخت',
-        'zarinpal' => 'زرین‌پال',
+        'cart to cart' => 'Card to card',
+        'low balance by admin' => 'Admin balance deduction',
+        'add balance by admin' => 'Added by admin',
+        'Currency Rial 1' => 'Rial gateway 1',
+        'Currency Rial tow' => 'Rial gateway 2',
+        'Currency Rial 3' => 'Rial gateway 3',
+        'aqayepardakht' => 'Aghaye Pardakht',
+        'zarinpal' => 'ZarinPal',
         'plisio' => 'Plisio',
-        'arze digital offline' => 'ارز دیجیتال آفلاین',
-        'Star Telegram' => 'استار تلگرام',
+        'arze digital offline' => 'Offline crypto',
+        'Star Telegram' => 'Telegram Stars',
         'nowpayment' => 'NowPayment',
         'cryptomus' => 'Cryptomus',
         'tetraminator' => 'Tetraminator',
-        'add order by admin' => 'سفارش توسط ادمین',
-        'extend by admin' => 'تمدید توسط ادمین',
-        'refund to wallet' => 'مرجوعی به کیف پول',
+        'add order by admin' => 'Order by admin',
+        'extend by admin' => 'Renewed by admin',
+        'refund to wallet' => 'Refund to wallet',
     ];
 }
 
@@ -1142,8 +1142,8 @@ function panel_payment_method_map(?PDO $pdo = null): array
             $map[$slug] = $label;
         }
     } else {
-        $map['manual invoice'] = 'فاکتور دستی';
-        $map['capital_injection'] = 'ورود سرمایه';
+        $map['manual invoice'] = 'Manual invoice';
+        $map['capital_injection'] = 'Capital injection';
     }
     return $map;
 }
@@ -1183,7 +1183,7 @@ function panel_payment_serialize_sheet_row(array $p, array $knownUsers = []): ar
             $category = panel_expense_resolve_slug($pdo, $category);
             $categoryLabel = panel_expense_category_label($pdo, $category);
         } else {
-            $categoryLabel = $category !== '' ? $category : 'سایر';
+            $categoryLabel = $category !== '' ? $category : 'Other';
         }
     }
     return [
@@ -1300,7 +1300,7 @@ function panel_payment_add_manual(PDO $pdo, array $input): array
     panel_payment_ensure_note_column($pdo);
     $amount = (int) ($input['amount'] ?? 0);
     if ($amount < 1) {
-        return ['ok' => false, 'msg' => 'مبلغ باید عدد مثبت باشد.'];
+        return ['ok' => false, 'msg' => 'Amount must be a positive number.'];
     }
 
     $userId = trim((string) ($input['id_user'] ?? ''));
@@ -1327,7 +1327,7 @@ function panel_payment_add_manual(PDO $pdo, array $input): array
         ? db_fetch($pdo, 'SELECT id FROM user WHERE id = ?', [$userId])
         : null;
     if ($creditWallet && !$realUser) {
-        return ['ok' => false, 'msg' => 'برای افزودن به کیف پول باید آیدی کاربر معتبر وارد شود.'];
+        return ['ok' => false, 'msg' => 'A valid user ID is required to credit the wallet.'];
     }
     $status = trim((string) ($input['status'] ?? 'paid'));
     if (!in_array($status, panel_payment_status_values(), true)) {
@@ -1354,7 +1354,7 @@ function panel_payment_add_manual(PDO $pdo, array $input): array
 
     return [
         'ok' => true,
-        'msg' => $isCapital ? 'ورود سرمایه ثبت شد.' : 'فاکتور دستی ثبت شد.',
+        'msg' => $isCapital ? 'Capital injection saved.' : 'Manual invoice saved.',
         'id_order' => $orderId,
     ];
 }
@@ -1367,7 +1367,7 @@ function panel_payment_add_cost(PDO $pdo, array $input): array
     panel_payment_ensure_schema($pdo);
     $amount = (int) ($input['amount'] ?? 0);
     if ($amount < 1) {
-        return ['ok' => false, 'msg' => 'مبلغ باید عدد مثبت باشد.'];
+        return ['ok' => false, 'msg' => 'Amount must be a positive number.'];
     }
 
     $note = trim((string) ($input['note'] ?? ''));
@@ -1388,7 +1388,7 @@ function panel_payment_add_cost(PDO $pdo, array $input): array
         [$userId, $orderId, $time, (string) $amount, 'cost', 'cost', 'cost', $note !== '' ? $note : null, 'expense', $category]
     );
 
-    return ['ok' => true, 'msg' => 'هزینه ثبت شد.', 'id_order' => $orderId];
+    return ['ok' => true, 'msg' => 'Expense saved.', 'id_order' => $orderId];
 }
 
 /**
@@ -1398,10 +1398,10 @@ function panel_payment_delete_cost(PDO $pdo, string $orderId): array
 {
     $row = db_fetch($pdo, "SELECT id FROM Payment_report WHERE id_order = ? AND payment_Status = 'cost'", [$orderId]);
     if (!$row) {
-        return ['ok' => false, 'msg' => 'هزینه یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Expense not found.'];
     }
     db_query($pdo, "DELETE FROM Payment_report WHERE id_order = ? AND payment_Status = 'cost'", [$orderId]);
-    return ['ok' => true, 'msg' => 'هزینه حذف شد.'];
+    return ['ok' => true, 'msg' => 'Expense deleted.'];
 }
 
 /** Allowed payment_Status values for admin updates. */
@@ -1437,7 +1437,7 @@ function panel_payment_is_wallet(array $payment): bool
 /**
  * Manually change a payment status (e.g. paid → reject).
  * When leaving paid for a purchase payment, optionally remove the created service
- * and/or mark the linked invoice/order as rejected (so Telegram سفارشات stats exclude it).
+ * and/or mark the linked invoice/order as rejected (so Telegram Orders stats exclude it).
  *
  * @return array{ok:bool,msg:string}
  */
@@ -1450,23 +1450,23 @@ function panel_payment_set_status(
 ): array {
     $newStatus = trim($newStatus);
     if (!in_array($newStatus, panel_payment_status_values(), true)) {
-        return ['ok' => false, 'msg' => 'وضعیت نامعتبر است.'];
+        return ['ok' => false, 'msg' => 'Invalid status.'];
     }
 
     $payment = db_fetch($pdo, 'SELECT * FROM Payment_report WHERE id_order = ?', [$orderId]);
     if (!$payment) {
-        return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Transaction not found.'];
     }
     if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
-        return ['ok' => false, 'msg' => 'وضعیت Cryptomus فقط از رویداد تأییدشده درگاه یا عملیات اختصاصی آن قابل تغییر است.'];
+        return ['ok' => false, 'msg' => 'Cryptomus status can only change from a confirmed gateway event or its dedicated actions.'];
     }
     if (panel_payment_is_cost($payment)) {
-        return ['ok' => false, 'msg' => 'تغییر وضعیت برای هزینه مجاز نیست.'];
+        return ['ok' => false, 'msg' => 'Status cannot be changed for an expense.'];
     }
 
     $oldStatus = (string) ($payment['payment_Status'] ?? '');
     if ($oldStatus === $newStatus) {
-        return ['ok' => true, 'msg' => 'وضعیت تغییری نکرد.'];
+        return ['ok' => true, 'msg' => 'Status was not changed.'];
     }
 
     db_query($pdo, 'UPDATE Payment_report SET payment_Status = ? WHERE id_order = ?', [$newStatus, $orderId]);
@@ -1485,7 +1485,7 @@ function panel_payment_set_status(
         $price = (int) ($payment['price'] ?? 0);
         if ($price > 0) {
             db_query($pdo, 'UPDATE user SET Balance = GREATEST(0, CAST(Balance AS SIGNED) - ?) WHERE id = ?', [$price, $payment['id_user']]);
-            $notes[] = 'مبلغ از کیف پول کاربر کسر شد.';
+            $notes[] = 'The amount was deducted from the user’s wallet.';
         }
     }
 
@@ -1495,10 +1495,10 @@ function panel_payment_set_status(
             require_once __DIR__ . '/users_lib.php';
             $removed = panel_remove_user_service($pdo, (string) $invoice['id_invoice'], $invoice['id_user'], false);
             $notes[] = $removed['ok']
-                ? 'سرویس مرتبط حذف شد.'
-                : ('حذف سرویس: ' . $removed['msg']);
+                ? 'Related service deleted.'
+                : ('Service removal: ' . $removed['msg']);
         } else {
-            $notes[] = 'سرویس مرتبطی برای حذف یافت نشد.';
+            $notes[] = 'No related service found to delete.';
         }
     } elseif ($leavingPaid && $rejectInvoice) {
         require_once __DIR__ . '/users_lib.php';
@@ -1506,13 +1506,13 @@ function panel_payment_set_status(
     }
 
     $statusLabels = [
-        'paid' => 'پرداخت شده',
-        'Unpaid' => 'پرداخت نشده',
-        'waiting' => 'در انتظار تأیید',
-        'reject' => 'رد شده',
-        'expire' => 'منقضی',
+        'paid' => 'Paid',
+        'Unpaid' => 'Unpaid',
+        'waiting' => 'Awaiting approval',
+        'reject' => 'Rejected',
+        'expire' => 'Expired',
     ];
-    $msg = 'وضعیت پرداخت به «' . ($statusLabels[$newStatus] ?? $newStatus) . '» تغییر کرد.';
+    $msg = 'Payment status changed to “' . ($statusLabels[$newStatus] ?? $newStatus) . '”.';
     if ($notes) {
         $msg .= ' ' . implode(' ', $notes);
     }
@@ -1531,10 +1531,10 @@ function panel_payment_reject_linked_order(PDO $pdo, array $payment): string
     if ($type === 'getconfigafterpay' && $payload !== '') {
         $before = db_fetch($pdo, 'SELECT id_invoice, Status FROM invoice WHERE username = ? LIMIT 1', [$payload]);
         if (!$before) {
-            return 'فاکتور مرتبط یافت نشد.';
+            return 'Related invoice not found.';
         }
         db_query($pdo, "UPDATE invoice SET Status = 'reject' WHERE username = ?", [$payload]);
-        return 'وضعیت فاکتور به رد شده تغییر کرد.';
+        return 'Invoice status set to rejected.';
     }
 
     $map = [
@@ -1557,12 +1557,12 @@ function panel_payment_reject_linked_order(PDO $pdo, array $payment): string
         );
         if ($row) {
             db_query($pdo, "UPDATE service_other SET status = 'reject' WHERE id = ?", [$row['id']]);
-            return 'وضعیت سفارش مرتبط به رد شده تغییر کرد.';
+            return 'Related order status set to rejected.';
         }
-        return 'سفارش مرتبطی یافت نشد.';
+        return 'Related order not found.';
     }
 
-    return 'سفارش/فاکتور مرتبطی برای رد وجود ندارد.';
+    return 'No related order/invoice to reject.';
 }
 
 /**
@@ -1573,22 +1573,22 @@ function panel_payment_update_row(PDO $pdo, string $orderId, array $input): arra
     panel_payment_ensure_note_column($pdo);
     $payment = db_fetch($pdo, 'SELECT * FROM Payment_report WHERE id_order = ?', [$orderId]);
     if (!$payment) {
-        return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Transaction not found.'];
     }
     if (($payment['Payment_Method'] ?? '') === 'cryptomus') {
-        return ['ok' => false, 'msg' => 'ویرایش عمومی تراکنش Cryptomus مجاز نیست؛ از نمای عملیاتی Cryptomus استفاده کنید.'];
+        return ['ok' => false, 'msg' => 'Generic editing of Cryptomus transactions is not allowed; use the Cryptomus operations view.'];
     }
 
     $amount = (int) ($input['amount'] ?? 0);
     if ($amount < 1) {
-        return ['ok' => false, 'msg' => 'مبلغ باید عدد مثبت باشد.'];
+        return ['ok' => false, 'msg' => 'Amount must be a positive number.'];
     }
 
     $userId = trim((string) ($input['id_user'] ?? ''));
     $note = trim((string) ($input['note'] ?? ''));
     $method = trim((string) ($input['method'] ?? ''));
     if ($method === 'cryptomus') {
-        return ['ok' => false, 'msg' => 'اختصاص روش Cryptomus از ویرایشگر عمومی مجاز نیست.'];
+        return ['ok' => false, 'msg' => 'Assigning the Cryptomus method from the generic editor is not allowed.'];
     }
     $isCost = panel_payment_is_cost($payment);
     $category = null;
@@ -1643,8 +1643,8 @@ function panel_payment_update_row(PDO $pdo, string $orderId, array $input): arra
         }
     }
 
-    $msg = 'تراکنش ذخیره شد.';
-    if (($statusResult['msg'] ?? '') !== '' && ($statusResult['msg'] ?? '') !== 'وضعیت تغییری نکرد.') {
+    $msg = 'Transaction saved.';
+    if (($statusResult['msg'] ?? '') !== '' && ($statusResult['msg'] ?? '') !== 'Status was not changed.') {
         $msg .= ' ' . $statusResult['msg'];
     }
     return ['ok' => true, 'msg' => $msg, 'id_order' => $orderId];
@@ -1657,13 +1657,13 @@ function panel_payment_delete_row(PDO $pdo, string $orderId): array
 {
     $row = db_fetch($pdo, 'SELECT id, Payment_Method FROM Payment_report WHERE id_order = ?', [$orderId]);
     if (!$row) {
-        return ['ok' => false, 'msg' => 'تراکنش یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Transaction not found.'];
     }
     if (($row['Payment_Method'] ?? '') === 'cryptomus') {
-        return ['ok' => false, 'msg' => 'حذف عمومی تراکنش Cryptomus مجاز نیست.'];
+        return ['ok' => false, 'msg' => 'Generic deletion of Cryptomus transactions is not allowed.'];
     }
     db_query($pdo, 'DELETE FROM Payment_report WHERE id_order = ?', [$orderId]);
-    return ['ok' => true, 'msg' => 'تراکنش حذف شد.'];
+    return ['ok' => true, 'msg' => 'Transaction deleted.'];
 }
 
 function panel_payment_method_label(string $method, ?PDO $db = null): string
@@ -1684,8 +1684,8 @@ function panel_payment_method_label(string $method, ?PDO $db = null): string
         }
     }
     $fallback = [
-        'manual invoice' => 'فاکتور دستی',
-        'capital_injection' => 'ورود سرمایه',
+        'manual invoice' => 'Manual invoice',
+        'capital_injection' => 'Capital injection',
     ];
     if ($method !== '' && isset($fallback[$method])) {
         return $fallback[$method];
@@ -1724,7 +1724,7 @@ function panel_cryptomus_service_rows(array $services): array
             foreach ($keys as $key) {
                 if (array_key_exists($key, $source) && is_scalar($source[$key])) {
                     if (is_bool($source[$key])) {
-                        return $source[$key] ? 'بله' : 'خیر';
+                        return $source[$key] ? 'Yes' : 'No';
                     }
                     return (string) $source[$key];
                 }

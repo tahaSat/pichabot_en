@@ -14,14 +14,14 @@ if (!$id) {
 
 $user = db_fetch($pdo, 'SELECT * FROM user WHERE id = ?', [$id]);
 if (!$user) {
-    flash('error', 'کاربر یافت نشد.');
+    flash('error', 'User not found.');
     header('Location: agents.php');
     exit;
 }
 
 $agent = $user['agent'] ?? 'f';
 if (!agent_is_reseller($agent)) {
-    flash('warning', 'این کاربر نماینده نیست. ابتدا نقش نمایندگی بدهید.');
+    flash('warning', 'This user is not an agent. Assign an agent role first.');
 }
 
 $bot = null;
@@ -52,7 +52,7 @@ $pricePerGb = (int) ($user['agent_price_per_gb'] ?? 0);
 $maxBuy = (int) ($user['maxbuyagent'] ?? 0);
 $username = ($user['username'] ?? '') === 'none' ? '' : ($user['username'] ?? '');
 $expire = $user['expire'] ?? null;
-$expireLabel = $expire ? date('Y/m/d H:i', (int) $expire) : 'بدون انقضا';
+$expireLabel = $expire ? date('Y-m-d H:i', (int) $expire) : 'No expiry';
 
 $isN2 = ($agent === 'n2');
 $usesCategoryWhitelist = function_exists('agent_uses_category_whitelist')
@@ -152,48 +152,48 @@ if ($bot && !empty($bot['bot_token'])) {
     $tokenMasked = strlen($tok) > 12 ? substr($tok, 0, 8) . '…' . substr($tok, -4) : '••••';
 }
 
-$pageTitle = 'نماینده #' . $id;
+$pageTitle = 'Agent #' . $id;
 $activeNav = 'agents';
 $showPageHead = false;
 include __DIR__ . '/inc/layout_head.php';
 ?>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px" class="fade-up">
-    <a href="agents.php" class="btn btn-ghost btn-sm"><?= icon('arrow-left', 14) ?> فهرست نمایندگان</a>
-    <a href="user.php?id=<?= $id ?>" class="btn btn-ghost btn-sm">پروفایل کاربر</a>
+    <a href="agents.php" class="btn btn-ghost btn-sm"><?= icon('arrow-left', 14) ?> Agents</a>
+    <a href="user.php?id=<?= $id ?>" class="btn btn-ghost btn-sm">User profile</a>
 </div>
 
 <div class="stats u-stats fade-up" style="margin-bottom:18px">
     <?php if (!$isN2): ?>
     <div class="stat">
-        <div class="stat-label">موجودی</div>
-        <div class="stat-num"><?= number_format($balance) ?><small>ت</small></div>
+        <div class="stat-label">Balance</div>
+        <div class="stat-num"><?= number_format($balance) ?><small>USD</small></div>
     </div>
     <div class="stat">
-        <div class="stat-label">قیمت فعلی هر گیگ</div>
-        <div class="stat-num"><?= number_format($currentPricePerGb) ?><small>ت</small></div>
+        <div class="stat-label">Current price per GB</div>
+        <div class="stat-num"><?= number_format($currentPricePerGb) ?><small>USD</small></div>
     </div>
     <div class="stat">
-        <div class="stat-label">مصرف تجمعی</div>
+        <div class="stat-label">Cumulative usage</div>
         <div class="stat-num"><?= number_format($consumedTb, 2) ?><small>TB</small></div>
     </div>
     <?php endif; ?>
     <div class="stat">
-        <div class="stat-label">دسته‌های فعال</div>
+        <div class="stat-label">Enabled categories</div>
         <div class="stat-num"><?= number_format(count($enabledCategories)) ?></div>
     </div>
     <?php if ($usesCategoryWhitelist): ?>
     <div class="stat">
-        <div class="stat-label">خریدها</div>
+        <div class="stat-label">Purchases</div>
         <div class="stat-num"><?= number_format($agentPurchaseTotal) ?></div>
     </div>
     <?php endif; ?>
     <div class="stat">
-        <div class="stat-label">حجم مصرفی ساخت سرویس</div>
+        <div class="stat-label">Volume used to create services</div>
         <div class="stat-num"><?= number_format($volumeConsumed) ?><small>GB</small></div>
     </div>
     <div class="stat">
-        <div class="stat-label">نقش</div>
+        <div class="stat-label">Role</div>
         <div class="stat-num" style="font-size:1rem">
             <span class="tag <?= user_role_tag($agent) ?>"><?= user_role_label($agent) ?></span>
         </div>
@@ -204,50 +204,50 @@ include __DIR__ . '/inc/layout_head.php';
 
     <div class="agent-top">
         <div class="card">
-            <div class="card-head"><strong>نقش و انقضا</strong></div>
+            <div class="card-head"><strong>Role and expiry</strong></div>
             <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
-                <div class="cf">آیدی: <span class="cm"><?= $id ?></span>
+                <div class="cf">ID: <span class="cm"><?= $id ?></span>
                     <?php if ($username): ?> · @<?= htmlspecialchars($username) ?><?php endif; ?>
                 </div>
-                <div class="cf">انقضا: <?= htmlspecialchars($expireLabel) ?></div>
+                <div class="cf">Expiry: <?= htmlspecialchars($expireLabel) ?></div>
                 <form method="POST" action="agent_action.php" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                     <input type="hidden" name="action" value="set_role">
                     <input type="hidden" name="id" value="<?= $id ?>">
                     <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                     <div class="field" style="flex:1;min-width:140px;margin:0">
-                        <label>نقش</label>
+                        <label>Role</label>
                         <select name="new_role" class="select">
-                            <option value="n" <?= $agent === 'n' ? 'selected' : '' ?>>نماینده (n)</option>
-                            <option value="n2" <?= $agent === 'n2' ? 'selected' : '' ?>>پیشرفته (n2)</option>
-                            <option value="f">حذف نمایندگی (f)</option>
+                            <option value="n" <?= $agent === 'n' ? 'selected' : '' ?>>Agent (n)</option>
+                            <option value="n2" <?= $agent === 'n2' ? 'selected' : '' ?>>Advanced (n2)</option>
+                            <option value="f">Remove agent role (f)</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm">ذخیره نقش</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save role</button>
                 </form>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('expireModal')">تنظیم انقضا</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('expireModal')">Set expiry</button>
             </div>
         </div>
 
         <?php if (!$isN2): ?>
         <div class="card">
-            <div class="card-head"><strong>موجودی کیف پول</strong></div>
+            <div class="card-head"><strong>Wallet balance</strong></div>
             <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
-                <div class="cf">موجودی فعلی: <strong><?= number_format($balance) ?></strong> تومان</div>
+                <div class="cf">Current balance: <strong><?= number_format($balance) ?></strong> USD</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
-                    <button type="button" class="btn btn-ok btn-sm" onclick="openModal('addBalModal')">افزایش موجودی</button>
-                    <button type="button" class="btn btn-no btn-sm" onclick="openModal('lowBalModal')">کسر موجودی</button>
+                    <button type="button" class="btn btn-ok btn-sm" onclick="openModal('addBalModal')">Add balance</button>
+                    <button type="button" class="btn btn-no btn-sm" onclick="openModal('lowBalModal')">Deduct balance</button>
                 </div>
             </div>
         </div>
         <?php else: ?>
         <div class="card">
-            <div class="card-head"><strong>موجودی و سقف خرید</strong></div>
+            <div class="card-head"><strong>Balance and purchase cap</strong></div>
             <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
-                <div class="cf">موجودی فعلی: <strong><?= number_format($balance) ?></strong> تومان</div>
+                <div class="cf">Current balance: <strong><?= number_format($balance) ?></strong> USD</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
-                    <button type="button" class="btn btn-ok btn-sm" onclick="openModal('addBalModal')">افزایش موجودی</button>
-                    <button type="button" class="btn btn-no btn-sm" onclick="openModal('lowBalModal')">کسر موجودی</button>
+                    <button type="button" class="btn btn-ok btn-sm" onclick="openModal('addBalModal')">Add balance</button>
+                    <button type="button" class="btn btn-no btn-sm" onclick="openModal('lowBalModal')">Deduct balance</button>
                 </div>
                 <form method="POST" action="agent_action.php" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
@@ -255,10 +255,10 @@ include __DIR__ . '/inc/layout_head.php';
                     <input type="hidden" name="id" value="<?= $id ?>">
                     <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                     <div class="field" style="flex:1;margin:0">
-                        <label>سقف خرید منفی (۰ = نامحدود)</label>
+                        <label>Negative purchase cap (0 = unlimited)</label>
                         <input type="number" name="max" class="input" min="0" value="<?= $maxBuy ?>" required>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm">ذخیره</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
                 </form>
             </div>
         </div>
@@ -267,15 +267,15 @@ include __DIR__ . '/inc/layout_head.php';
 
     <?php if (!$isN2): ?>
     <div class="card">
-        <div class="card-head"><strong>پله‌های قیمتی (پرداخت به‌ازای مصرف)</strong></div>
+        <div class="card-head"><strong>Price tiers (pay per usage)</strong></div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
             <p class="cf" style="margin:0">
-                هزینه بر اساس حجم تجمعی خریداری‌شده محاسبه می‌شود (۱ ترابایت = ۱۰۲۴ گیگ).
-                مثلاً تا ۱۰ TB یک قیمت، از ۱۰ تا ۳۰ TB قیمت دیگر، و بالاتر از ۳۰ TB قیمت نهایی.
-                اگر یک خرید از مرز پله رد شود، کل همان خرید با قیمت پلهٔ بعدی حساب می‌شود (نه به‌صورت ترکیبی).
-                سقف ترابایت هر پله قابل ویرایش است؛ آخرین پله را بدون سقف بگذارید (خالی = نامحدود).
+                Cost is based on cumulative purchased volume (1 TB = 1024 GB).
+                For example, one price up to 10 TB, another from 10 to 30 TB, and a final price above 30 TB.
+                If a purchase crosses a tier boundary, that whole purchase uses the next tier price (not a blend).
+                Each tier’s TB ceiling is editable; leave the last tier empty for unlimited.
             </p>
-            <p class="cf" style="margin:0">مصرف فعلی: <strong><?= number_format($volumeConsumed, 2) ?> GB</strong> (≈ <?= number_format($consumedTb, 3) ?> TB) · قیمت جاری هر گیگ: <strong><?= number_format($currentPricePerGb) ?></strong> تومان</p>
+            <p class="cf" style="margin:0">Current usage: <strong><?= number_format($volumeConsumed, 2) ?> GB</strong> (≈ <?= number_format($consumedTb, 3) ?> TB) · Current price per GB: <strong><?= number_format($currentPricePerGb) ?></strong> USD</p>
             <form method="POST" action="agent_action.php" id="tiersForm">
                 <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                 <input type="hidden" name="action" value="set_price_tiers">
@@ -285,10 +285,10 @@ include __DIR__ . '/inc/layout_head.php';
                     <table class="table" style="width:100%;border-collapse:collapse" id="tiersTable">
                         <thead>
                             <tr>
-                                <th style="text-align:right;padding:8px">از (تجمعی)</th>
-                                <th style="text-align:right;padding:8px">تا سقف (TB)</th>
-                                <th style="text-align:right;padding:8px">قیمت هر گیگ (تومان)</th>
-                                <th style="text-align:right;padding:8px"></th>
+                                <th style="text-align:left;padding:8px">From (cumulative)</th>
+                                <th style="text-align:left;padding:8px">Up to (TB)</th>
+                                <th style="text-align:left;padding:8px">Price per GB (USD)</th>
+                                <th style="text-align:left;padding:8px"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -301,7 +301,7 @@ include __DIR__ . '/inc/layout_head.php';
                                     ['upto_tb' => null, 'price_per_gb' => $pricePerGb ?: 0],
                                 ];
                             }
-                            $prevLabel = '۰';
+                            $prevLabel = '0';
                             foreach ($tierRows as $ti => $tier):
                                 $uptoVal = $tier['upto_tb'];
                                 $uptoAttr = $uptoVal === null ? '' : htmlspecialchars((string) $uptoVal);
@@ -309,13 +309,13 @@ include __DIR__ . '/inc/layout_head.php';
                                 <tr class="tier-row">
                                     <td style="padding:8px" class="tier-from cf"><?= htmlspecialchars($prevLabel) ?></td>
                                     <td style="padding:8px">
-                                        <input type="number" name="upto_tb[]" class="input tier-upto" min="0" step="0.01" value="<?= $uptoAttr ?>" placeholder="خالی = نامحدود" style="min-width:120px">
+                                        <input type="number" name="upto_tb[]" class="input tier-upto" min="0" step="0.01" value="<?= $uptoAttr ?>" placeholder="empty = unlimited" style="min-width:120px">
                                     </td>
                                     <td style="padding:8px">
                                         <input type="number" name="price_per_gb[]" class="input" min="0" step="1" value="<?= (int) ($tier['price_per_gb'] ?? 0) ?>" required style="min-width:140px">
                                     </td>
                                     <td style="padding:8px">
-                                        <button type="button" class="btn btn-ghost btn-sm" onclick="removeTierRow(this)">حذف</button>
+                                        <button type="button" class="btn btn-ghost btn-sm" onclick="removeTierRow(this)">Remove</button>
                                     </td>
                                 </tr>
                                 <?php
@@ -326,8 +326,8 @@ include __DIR__ . '/inc/layout_head.php';
                     </table>
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-                    <button type="button" class="btn btn-ghost btn-sm" onclick="addTierRow()">افزودن پله</button>
-                    <button type="submit" class="btn btn-primary btn-sm">ذخیره پله‌ها</button>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="addTierRow()">Add tier</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save tiers</button>
                 </div>
             </form>
         </div>
@@ -338,21 +338,21 @@ include __DIR__ . '/inc/layout_head.php';
     <div class="card">
         <div class="card-head">
             <div>
-                <div class="card-title">دسته‌بندی‌های مجاز<?= $isN2 ? ' — پیشرفته' : '' ?></div>
-                <div class="card-subtitle"><?= number_format(count($enabledCategories)) ?> از <?= number_format(count($allCategories)) ?> فعال</div>
+                <div class="card-title">Allowed categories<?= $isN2 ? ' — advanced' : '' ?></div>
+                <div class="card-subtitle"><?= number_format(count($enabledCategories)) ?> of <?= number_format(count($allCategories)) ?> enabled</div>
             </div>
         </div>
         <div class="card-body">
             <p class="cf" style="margin-bottom:14px"><?= $isN2
-                ? 'دسته‌هایی که این نماینده می‌تواند ببیند و از محصولات داخلشان (بدون اعتبار) بخرد را فعال کنید.'
-                : 'دسته‌هایی که این نماینده می‌تواند ببیند و از محصولات داخلشان بخرد را فعال کنید. هزینه هر خرید از کیف پول با پله‌های قیمتی محاسبه می‌شود.' ?></p>
+                ? 'Enable the categories this agent can see and buy from (no credit).'
+                : 'Enable the categories this agent can see and buy from. Each purchase is charged to the wallet using the price tiers.' ?></p>
             <form method="POST" action="agent_action.php">
                 <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                 <input type="hidden" name="action" value="set_n2_categories">
                 <input type="hidden" name="id" value="<?= $id ?>">
                 <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                 <?php if (empty($allCategories)): ?>
-                    <p class="cf">دسته‌بندی‌ای ثبت نشده است.</p>
+                    <p class="cf">No categories have been added.</p>
                 <?php else: ?>
                     <div class="agent-cat-grid">
                         <?php foreach ($allCategories as $c):
@@ -366,7 +366,7 @@ include __DIR__ . '/inc/layout_head.php';
                             </label>
                         <?php endforeach; ?>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:14px">ذخیره دسته‌های فعال</button>
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:14px">Save enabled categories</button>
                 <?php endif; ?>
             </form>
         </div>
@@ -375,26 +375,26 @@ include __DIR__ . '/inc/layout_head.php';
     <div class="card">
         <div class="card-head">
             <div>
-                <div class="card-title">لیست خریدهای نماینده</div>
-                <div class="card-subtitle"><?= number_format($agentPurchaseTotal) ?> خرید<?= $agentPurchaseTotal > count($agentPurchases) ? ' · نمایش ' . count($agentPurchases) . ' مورد اخیر' : '' ?></div>
+                <div class="card-title">Agent purchases</div>
+                <div class="card-subtitle"><?= number_format($agentPurchaseTotal) ?> purchases<?= $agentPurchaseTotal > count($agentPurchases) ? ' · showing ' . count($agentPurchases) . ' recent' : '' ?></div>
             </div>
         </div>
         <div class="card-body" style="padding-top:0;padding-bottom:0">
             <?php if (empty($agentPurchases)): ?>
-                <p class="cf" style="padding:16px 0">خریدی ثبت نشده است.</p>
+                <p class="cf" style="padding:16px 0">No purchases yet.</p>
             <?php else: ?>
                 <div class="tbl-wrap">
                     <table class="table tbl-lg" style="width:100%;border-collapse:collapse">
                         <thead>
                             <tr>
-                                <th style="text-align:right;padding:8px">تاریخ</th>
-                                <th style="text-align:right;padding:8px">محصول</th>
-                                <th style="text-align:right;padding:8px">حجم</th>
-                                <th style="text-align:right;padding:8px">زمان</th>
-                                <th style="text-align:right;padding:8px">پنل</th>
-                                <th style="text-align:right;padding:8px">یوزرنیم</th>
-                                <th style="text-align:right;padding:8px">فاکتور</th>
-                                <th style="text-align:right;padding:8px"><?= $isN2 ? 'قیمت کاتالوگ' : 'مبلغ' ?></th>
+                                <th style="text-align:left;padding:8px">Date</th>
+                                <th style="text-align:left;padding:8px">Product</th>
+                                <th style="text-align:left;padding:8px">Volume</th>
+                                <th style="text-align:left;padding:8px">Time</th>
+                                <th style="text-align:left;padding:8px">Panel</th>
+                                <th style="text-align:left;padding:8px">Username</th>
+                                <th style="text-align:left;padding:8px">Invoice</th>
+                                <th style="text-align:left;padding:8px"><?= $isN2 ? 'Catalog price' : 'Amount' ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -422,22 +422,22 @@ include __DIR__ . '/inc/layout_head.php';
     <?php endif; ?>
 
     <div class="card">
-        <div class="card-head"><strong>ربات فروش نماینده</strong></div>
+        <div class="card-head"><strong>Agent sales bot</strong></div>
         <div class="card-body">
             <?php if (!$bot): ?>
-                <p class="cf" style="margin-bottom:12px">ربات فروش فعال نیست. توکن ربات را از BotFather بگیرید و فعال کنید.</p>
+                <p class="cf" style="margin-bottom:12px">No sales bot is active. Get a bot token from BotFather and enable it.</p>
                     <form method="POST" action="agent_action.php" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;max-width:560px" id="createBotForm">
                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                     <input type="hidden" name="action" value="create_bot">
                     <input type="hidden" name="id" value="<?= $id ?>">
                     <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                     <div class="field" style="flex:1;margin:0">
-                        <label>توکن ربات</label>
+                        <label>Bot token</label>
                         <input type="text" name="token" class="input" required placeholder="123456:ABC-DEF...">
                     </div>
-                    <button type="submit" class="btn btn-primary" id="createBotBtn">فعالسازی ربات</button>
+                    <button type="submit" class="btn btn-primary" id="createBotBtn">Enable bot</button>
                 </form>
-                <p class="cf" style="margin-top:8px;font-size:.8rem">پس از ارسال، حداکثر حدود ۱۵ ثانیه صبر کنید تا ارتباط با تلگرام انجام شود.</p>
+                <p class="cf" style="margin-top:8px;font-size:.8rem">After submit, wait up to about 15 seconds while Telegram is contacted.</p>
                 <script>
                 (function () {
                     var f = document.getElementById('createBotForm');
@@ -445,24 +445,24 @@ include __DIR__ . '/inc/layout_head.php';
                     if (!f || !b) return;
                     f.addEventListener('submit', function () {
                         b.disabled = true;
-                        b.textContent = 'در حال ساخت…';
+                        b.textContent = 'Creating…';
                     });
                 })();
                 </script>
             <?php else: ?>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px">
                     <div>
-                        <div class="cf" style="font-size:.75rem">یوزرنیم</div>
+                        <div class="cf" style="font-size:.75rem">Username</div>
                         <div><a href="https://t.me/<?= htmlspecialchars($bot['username']) ?>" target="_blank" rel="noopener">@<?= htmlspecialchars($bot['username']) ?></a></div>
                     </div>
                     <div>
-                        <div class="cf" style="font-size:.75rem">توکن</div>
+                        <div class="cf" style="font-size:.75rem">Token</div>
                         <div class="cm" style="word-break:break-all" id="botTokenDisplay"><?= htmlspecialchars($tokenMasked) ?></div>
                         <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px"
-                            onclick="navigator.clipboard.writeText(<?= json_encode($bot['bot_token']) ?>).then(()=>this.textContent='کپی شد')">کپی توکن</button>
+                            onclick="navigator.clipboard.writeText(<?= json_encode($bot['bot_token']) ?>).then(()=>this.textContent='Copied')">Copy token</button>
                     </div>
                     <div>
-                        <div class="cf" style="font-size:.75rem">زمان ساخت</div>
+                        <div class="cf" style="font-size:.75rem">Created</div>
                         <div><?= htmlspecialchars($bot['time'] ?? '—') ?></div>
                     </div>
                 </div>
@@ -474,10 +474,10 @@ include __DIR__ . '/inc/layout_head.php';
                         <input type="hidden" name="id" value="<?= $id ?>">
                         <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                         <div class="field" style="margin:0">
-                            <label>حداقل قیمت حجم (خرده)</label>
+                            <label>Minimum volume price (retail)</label>
                             <input type="number" name="amount" class="input" min="0" value="<?= (int) ($botSetting['minpricevolume'] ?? 4000) ?>" required>
                         </div>
-                        <button type="submit" class="btn btn-ghost btn-sm">ذخیره</button>
+                        <button type="submit" class="btn btn-ghost btn-sm">Save</button>
                     </form>
                     <form method="POST" action="agent_action.php" style="display:flex;gap:8px;align-items:end">
                         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
@@ -485,10 +485,10 @@ include __DIR__ . '/inc/layout_head.php';
                         <input type="hidden" name="id" value="<?= $id ?>">
                         <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                         <div class="field" style="margin:0">
-                            <label>حداقل قیمت زمان (خرده)</label>
+                            <label>Minimum time price (retail)</label>
                             <input type="number" name="amount" class="input" min="0" value="<?= (int) ($botSetting['minpricetime'] ?? 4000) ?>" required>
                         </div>
-                        <button type="submit" class="btn btn-ghost btn-sm">ذخیره</button>
+                        <button type="submit" class="btn btn-ghost btn-sm">Save</button>
                     </form>
                 </div>
 
@@ -503,22 +503,22 @@ include __DIR__ . '/inc/layout_head.php';
                     <input type="hidden" name="action" value="set_bot_card_payment">
                     <input type="hidden" name="id" value="<?= $id ?>">
                     <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
-                    <div class="cf" style="margin-bottom:10px;font-weight:600">💳 پرداخت کارت به کارت (ربات نماینده)</div>
+                    <div class="cf" style="margin-bottom:10px;font-weight:600">💳 Card-to-card payment (agent bot)</div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
                         <div class="field" style="margin:0">
-                            <label>شماره کارت</label>
+                            <label>Card number</label>
                             <input type="text" name="card_number" class="input" inputmode="numeric" maxlength="19" value="<?= htmlspecialchars($cardNumber) ?>" placeholder="6037...">
                         </div>
                         <div class="field" style="margin:0">
-                            <label>نام صاحب کارت</label>
-                            <input type="text" name="card_holder" class="input" maxlength="80" value="<?= htmlspecialchars($cardHolder) ?>" placeholder="نام و نام خانوادگی">
+                            <label>Cardholder name</label>
+                            <input type="text" name="card_holder" class="input" maxlength="80" value="<?= htmlspecialchars($cardHolder) ?>" placeholder="Full name">
                         </div>
                     </div>
                     <div class="field" style="margin-top:12px">
-                        <label>متن راهنمای پرداخت</label>
-                        <textarea name="cart_info" class="input" rows="3" placeholder="پس از واریز رسید را ارسال کنید..."><?= htmlspecialchars($cartInfo) ?></textarea>
+                        <label>Payment instructions</label>
+                        <textarea name="cart_info" class="input" rows="3" placeholder="After paying, send the receipt..."><?= htmlspecialchars($cartInfo) ?></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:8px">ذخیره تنظیمات کارت</button>
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:8px">Save card settings</button>
                 </form>
 
                 <?php if (!empty($allPanels)): ?>
@@ -528,7 +528,7 @@ include __DIR__ . '/inc/layout_head.php';
                         <input type="hidden" name="id" value="<?= $id ?>">
                         <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                         <div class="field">
-                            <label>پنل‌های مخفی برای این ربات</label>
+                            <label>Hidden panels for this bot</label>
                             <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
                                 <?php foreach ($allPanels as $pl):
                                     $name = $pl['name_panel'] ?? '';
@@ -542,15 +542,15 @@ include __DIR__ . '/inc/layout_head.php';
                                 <?php endforeach; ?>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:8px">ذخیره پنل‌های مخفی</button>
+                        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:8px">Save hidden panels</button>
                     </form>
                 <?php endif; ?>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
                     <a href="agent_action.php?action=repair_bot&id=<?= $id ?>&_csrf=<?= csrf_token() ?>&back=agent.php?id=<?= $id ?>"
-                        class="btn btn-primary btn-sm" data-confirm="فایل‌های ربات از قالب دوباره ساخته و وبهوک تنظیم شود؟">تعمیر / بازسازی ربات</a>
+                        class="btn btn-primary btn-sm" data-confirm="Rebuild bot files from the template and set the webhook?">Repair / rebuild bot</a>
                     <a href="agent_action.php?action=remove_bot&id=<?= $id ?>&_csrf=<?= csrf_token() ?>&back=agent.php?id=<?= $id ?>"
-                        class="btn btn-no btn-sm" data-confirm="ربات فروش این نماینده حذف شود؟">حذف ربات فروش</a>
+                        class="btn btn-no btn-sm" data-confirm="Delete this agent’s sales bot?">Delete sales bot</a>
                 </div>
             <?php endif; ?>
         </div>
@@ -559,7 +559,7 @@ include __DIR__ . '/inc/layout_head.php';
 
 <div class="modal-veil" id="expireModal">
     <div class="modal">
-        <div class="modal-head"><h3>انقضای نمایندگی</h3><button class="modal-x" onclick="closeModal('expireModal')"><?= icon('close', 14) ?></button></div>
+        <div class="modal-head"><h3>Agent expiry</h3><button class="modal-x" onclick="closeModal('expireModal')"><?= icon('close', 14) ?></button></div>
         <form method="POST" action="agent_action.php">
             <div class="modal-body">
                 <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
@@ -567,13 +567,13 @@ include __DIR__ . '/inc/layout_head.php';
                 <input type="hidden" name="id" value="<?= $id ?>">
                 <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                 <div class="field">
-                    <label>تعداد روز از امروز (۰ = حذف انقضا)</label>
+                    <label>Days from today (0 = remove expiry)</label>
                     <input type="number" name="days" class="input" min="0" value="30" required>
                 </div>
             </div>
             <div class="modal-foot">
-                <button type="submit" class="btn btn-primary">تنظیم</button>
-                <button type="button" class="btn btn-ghost" onclick="closeModal('expireModal')">انصراف</button>
+                <button type="submit" class="btn btn-primary">Set</button>
+                <button type="button" class="btn btn-ghost" onclick="closeModal('expireModal')">Cancel</button>
             </div>
         </form>
     </div>
@@ -581,7 +581,7 @@ include __DIR__ . '/inc/layout_head.php';
 
 <div class="modal-veil" id="addBalModal">
     <div class="modal">
-        <div class="modal-head"><h3>افزایش موجودی</h3><button class="modal-x" onclick="closeModal('addBalModal')"><?= icon('close', 14) ?></button></div>
+        <div class="modal-head"><h3>Add balance</h3><button class="modal-x" onclick="closeModal('addBalModal')"><?= icon('close', 14) ?></button></div>
         <form method="POST" action="agent_action.php">
             <div class="modal-body">
                 <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
@@ -589,13 +589,13 @@ include __DIR__ . '/inc/layout_head.php';
                 <input type="hidden" name="id" value="<?= $id ?>">
                 <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                 <div class="field">
-                    <label>مبلغ (تومان)</label>
-                    <input type="number" name="amount" class="input" min="1000" required>
+                    <label>Amount (USD)</label>
+                    <input type="number" name="amount" class="input" min="1" required>
                 </div>
             </div>
             <div class="modal-foot">
-                <button type="submit" class="btn btn-ok">افزودن</button>
-                <button type="button" class="btn btn-ghost" onclick="closeModal('addBalModal')">انصراف</button>
+                <button type="submit" class="btn btn-ok">Add</button>
+                <button type="button" class="btn btn-ghost" onclick="closeModal('addBalModal')">Cancel</button>
             </div>
         </form>
     </div>
@@ -603,7 +603,7 @@ include __DIR__ . '/inc/layout_head.php';
 
 <div class="modal-veil" id="lowBalModal">
     <div class="modal">
-        <div class="modal-head"><h3>کسر موجودی</h3><button class="modal-x" onclick="closeModal('lowBalModal')"><?= icon('close', 14) ?></button></div>
+        <div class="modal-head"><h3>Deduct balance</h3><button class="modal-x" onclick="closeModal('lowBalModal')"><?= icon('close', 14) ?></button></div>
         <form method="POST" action="agent_action.php">
             <div class="modal-body">
                 <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
@@ -611,13 +611,13 @@ include __DIR__ . '/inc/layout_head.php';
                 <input type="hidden" name="id" value="<?= $id ?>">
                 <input type="hidden" name="back" value="agent.php?id=<?= $id ?>">
                 <div class="field">
-                    <label>مبلغ (تومان)</label>
+                    <label>Amount (USD)</label>
                     <input type="number" name="amount" class="input" min="1" required>
                 </div>
             </div>
             <div class="modal-foot">
-                <button type="submit" class="btn btn-no">کسر</button>
-                <button type="button" class="btn btn-ghost" onclick="closeModal('lowBalModal')">انصراف</button>
+                <button type="submit" class="btn btn-no">Deduct</button>
+                <button type="button" class="btn btn-ghost" onclick="closeModal('lowBalModal')">Cancel</button>
             </div>
         </form>
     </div>
@@ -627,7 +627,7 @@ include __DIR__ . '/inc/layout_head.php';
 <script>
 function refreshTierFromLabels() {
     const rows = document.querySelectorAll('#tiersTable tbody .tier-row');
-    let prev = '۰';
+    let prev = '0';
     rows.forEach((row) => {
         const fromCell = row.querySelector('.tier-from');
         if (fromCell) fromCell.textContent = prev;
@@ -644,13 +644,13 @@ function addTierRow() {
     tr.innerHTML = `
         <td style="padding:8px" class="tier-from cf">—</td>
         <td style="padding:8px">
-            <input type="number" name="upto_tb[]" class="input tier-upto" min="0" step="0.01" value="" placeholder="خالی = نامحدود" style="min-width:120px">
+            <input type="number" name="upto_tb[]" class="input tier-upto" min="0" step="0.01" value="" placeholder="empty = unlimited" style="min-width:120px">
         </td>
         <td style="padding:8px">
             <input type="number" name="price_per_gb[]" class="input" min="0" step="1" value="0" required style="min-width:140px">
         </td>
         <td style="padding:8px">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="removeTierRow(this)">حذف</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="removeTierRow(this)">Remove</button>
         </td>`;
     tbody.appendChild(tr);
     const upto = tr.querySelector('.tier-upto');

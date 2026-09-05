@@ -21,10 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
   if ($username === '' || $password === '') {
-    $error = 'نام کاربری و رمز عبور را وارد کنید.';
+    $error = 'Enter your username and password.';
   } elseif (!check_login_rate($ip)) {
 
-    $error = 'تعداد تلاش‌های ناموفق بیش از حد. لطفاً ۱۵ دقیقه صبر کنید.';
+    $error = 'Too many failed attempts. Please wait 15 minutes.';
     error_log("Login rate limit hit for IP: $ip username: $username");
   } else {
 
@@ -68,18 +68,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         setcookie(session_name(), session_id(), panel_cookie_options(0));
       }
 
-      flash('success', 'خوش آمدید، ' . $admin['username']);
+      flash('success', 'Welcome, ' . $admin['username']);
       header('Location: index.php');
       exit;
     } else {
-      $error = 'نام کاربری یا رمز عبور اشتباه است.';
+      $error = 'Incorrect username or password.';
       error_log("Failed login for username: $username from IP: $ip");
     }
   }
 }
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
   <meta charset="UTF-8">
@@ -90,8 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/panel/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/panel/icons/apple-touch-icon.png">
-  <title>ورود — پیچا</title>
-  <meta name="apple-mobile-web-app-title" content="پیچا">
+  <title>Sign in — Picha</title>
+  <meta name="apple-mobile-web-app-title" content="Picha">
   <link rel="icon" href="/panel/icons/icon-192.png" type="image/png">
   <link rel="stylesheet" href="<?= htmlspecialchars(panel_asset('css/style.css')) ?>">
   <link rel="stylesheet" href="<?= htmlspecialchars(panel_asset('css/login.css')) ?>">
@@ -102,10 +102,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="login-page">
     <div class="login-shell">
       <header class="login-brand">
-        <img class="login-logo" src="/panel/icons/logo.png" width="96" height="96" alt="پیچا">
-        <h1 class="login-name">پیچا</h1>
-        <p class="login-name-en">picha</p>
-        <p class="login-tagline">ورود به پنل مدیریت ربات</p>
+        <img class="login-logo" src="/panel/icons/logo.png" width="96" height="96" alt="Picha">
+        <h1 class="login-name">Picha</h1>
+        <p class="login-name-en">admin</p>
+        <p class="login-tagline">Sign in to the bot admin panel</p>
       </header>
 
       <div class="login-form-wrap">
@@ -115,29 +115,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form class="login-form auth-form" method="POST" autocomplete="on">
           <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
           <div class="login-field">
-            <label for="username">نام کاربری</label>
+            <label for="username">Username</label>
             <input type="text" id="username" name="username" class="input" placeholder="admin"
               value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" autocomplete="username" required autofocus
               maxlength="100">
           </div>
           <div class="login-field">
-            <label for="password">رمز عبور</label>
+            <label for="password">Password</label>
             <input type="password" id="password" name="password" class="input" placeholder="••••••••"
               autocomplete="current-password" required maxlength="200">
           </div>
           <label class="login-check" for="remember">
             <input type="checkbox" id="remember" name="remember" value="1"
               <?= (!isset($_POST['username']) || !empty($_POST['remember'])) ? 'checked' : '' ?>>
-            <span>مرا به خاطر بسپار (۳۰ روز)</span>
+            <span>Remember me (30 days)</span>
           </label>
           <button type="submit" class="login-submit" id="loginBtn">
-            <span id="loginText">ورود</span>
+            <span id="loginText">Sign in</span>
             <span class="login-spin" id="loginSpin"></span>
           </button>
         </form>
       </div>
 
-      <p class="login-foot">© <?= date('Y') ?> · پیچا</p>
+      <p class="login-foot">© <?= date('Y') ?> · Picha</p>
     </div>
   </div>
   <script src="<?= htmlspecialchars(panel_asset('js/login.js')) ?>"></script>

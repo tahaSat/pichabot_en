@@ -42,7 +42,7 @@ if (intval($setting['scorestatus']) == 1) {
         $stmt->execute();
 
         $count = 0;
-        $textlotterygroup = "📌 ادمین عزیز کاربران زیر برنده قرعه کشی و حسابشان شارژ گردید.\n";
+        $textlotterygroup = "📌 Dear admin, the users below won the lottery and their accounts were credited.\n";
 
         $textJson = json_decode(file_get_contents('../text.json'), true);
         if (!is_array($textJson)) {
@@ -72,7 +72,7 @@ if (intval($setting['scorestatus']) == 1) {
             $textlottery = "🎁 Lottery result \n\n😎 Congratulations! You placed #$rank and won $balanceFormatted USD. Your account was credited.";
             sendmessage($result['id'], $textlottery, null, 'html');
 
-            $textlotterygroup .= "\nنام کاربری : @{$result['username']}\nآیدی عددی : {$result['id']}\nمبلغ : $balanceFormatted\nنفر : $rank\n--------------";
+            $textlotterygroup .= "\nUsername : @{$result['username']}\nUser ID : {$result['id']}\nAmount : $balanceFormatted\nPlace : $rank\n--------------";
 
             $count++;
         }

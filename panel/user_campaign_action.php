@@ -18,7 +18,7 @@ $admin = db_fetch(
     [$_SESSION['admin_user'] ?? '']
 );
 if (!$admin) {
-    flash('error', 'نشست ادمین معتبر نیست.');
+    flash('error', 'Admin session is not valid.');
     header('Location: users.php');
     exit;
 }
@@ -43,7 +43,7 @@ $redirect = 'users.php' . ($redirectQs ? ('?' . http_build_query($redirectQs)) :
 if ($action === 'cancel') {
     $job = is_file($infoFile) ? json_decode((string) file_get_contents($infoFile), true) : null;
     if (!is_array($job) || ($job['type'] ?? '') !== 'sendmessage') {
-        flash('warning', 'ارسال پیام فعالی برای لغو وجود ندارد.');
+        flash('warning', 'There is no active message send to cancel.');
     } else {
         if (is_file($usersFile)) {
             unlink($usersFile);
@@ -51,7 +51,7 @@ if ($action === 'cancel') {
         if (is_file($infoFile)) {
             unlink($infoFile);
         }
-        flash('success', 'ارسال پیام همگانی لغو شد.');
+        flash('success', 'Broadcast message send was cancelled.');
     }
     header('Location: ' . $redirect);
     exit;
@@ -60,7 +60,7 @@ if ($action === 'cancel') {
 $message = trim((string) ($_POST['message'] ?? ''));
 $scope = ($_POST['scope'] ?? '') === 'filtered' ? 'filtered' : 'selected';
 if ($message === '' || mb_strlen($message, 'UTF-8') > 3500) {
-    flash('error', 'متن پیام باید بین ۱ تا ۳۵۰۰ کاراکتر باشد.');
+    flash('error', 'Message text must be between 1 and 3500 characters.');
     header('Location: ' . $redirect);
     exit;
 }
@@ -73,7 +73,7 @@ if (!$queueBusy && is_file($usersFile)) {
     $queueBusy = is_array($queuedItems) && count($queuedItems) > 0;
 }
 if ($queueBusy) {
-    flash('error', 'یک عملیات گروهی دیگر در حال اجرا است. پس از پایان آن دوباره تلاش کنید.');
+    flash('error', 'Another bulk operation is already running. Try again after it finishes.');
     header('Location: ' . $redirect);
     exit;
 }
@@ -101,7 +101,7 @@ if ($scope === 'filtered') {
         }
     } catch (Exception $e) {
         error_log('user_campaign_action filtered: ' . $e->getMessage());
-        flash('error', 'خواندن فهرست کاربران فیلترشده ناموفق بود.');
+        flash('error', 'Could not read the filtered user list.');
         header('Location: ' . $redirect);
         exit;
     }
@@ -120,7 +120,7 @@ if ($scope === 'filtered') {
 
 $userIds = array_values(array_unique($userIds));
 if ($userIds === []) {
-    flash('error', 'هیچ کاربری برای ارسال پیام انتخاب نشده است.');
+    flash('error', 'No users were selected for the message.');
     header('Location: ' . $redirect);
     exit;
 }
@@ -128,14 +128,14 @@ if ($userIds === []) {
 $userslist = json_encode(array_map(static fn($id) => ['id' => $id], $userIds), JSON_UNESCAPED_UNICODE);
 $cancelKeyboard = json_encode([
     'inline_keyboard' => [[
-        ['text' => 'لغو عملیات', 'callback_data' => 'cancel_sendmessage'],
+        ['text' => 'Cancel', 'callback_data' => 'cancel_sendmessage'],
     ]],
 ], JSON_UNESCAPED_UNICODE);
 
 require_once dirname(__DIR__) . '/botapi.php';
 $progress = sendmessage(
     $admin['id_admin'],
-    '✅ عملیات آغاز گردید پس از پایان اطلاع رسانی خواهد شد.',
+    'The operation has started. You will be notified when it finishes.',
     $cancelKeyboard,
     'HTML'
 );
@@ -157,11 +157,11 @@ $info = [
 ];
 
 if (file_put_contents($usersFile, $userslist) === false || file_put_contents($infoFile, json_encode($info, JSON_UNESCAPED_UNICODE)) === false) {
-    flash('error', 'ثبت صف ارسال پیام ناموفق بود.');
+    flash('error', 'Could not queue the message send.');
     header('Location: ' . $redirect);
     exit;
 }
 
-flash('success', 'ارسال پیام به ' . number_format(count($userIds)) . ' کاربر در صف کرون قرار گرفت. گفتگوی هر ارسال با وضعیت «کمپین» ثبت می‌شود.');
+flash('success', 'Message send to ' . number_format(count($userIds)) . ' users was queued for cron. Each send is logged as a support conversation with status “Campaign”.');
 header('Location: ' . $redirect);
 exit;

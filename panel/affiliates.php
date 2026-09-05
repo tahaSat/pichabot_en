@@ -17,12 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
             'price_discount' => $_POST['price_discount'] ?? '0',
             'porsant_one_buy' => !empty($_POST['porsant_one_buy']),
         ]);
-        flash('success', 'تنظیمات پورسانت ذخیره شد.');
+        flash('success', 'Commission settings saved.');
     } catch (InvalidArgumentException $e) {
         flash('error', $e->getMessage());
     } catch (Exception $e) {
         error_log('affiliates save_settings: ' . $e->getMessage());
-        flash('error', 'ذخیره تنظیمات ناموفق بود.');
+        flash('error', 'Could not save settings.');
     }
     header('Location: affiliates.php');
     exit;
@@ -81,8 +81,8 @@ $commissionOn = $settings['status_commission'] === 'oncommission';
 $giftOn = $settings['discount'] === 'onDiscountaffiliates';
 $firstBuyOnly = $settings['porsant_one_buy'] === 'on_buy_porsant';
 
-$pageTitle = 'پنل همکاری';
-$pageLede = 'درصد پورسانت، هدیه استارت، و لیست افرادی که از دعوت استفاده کرده‌اند.';
+$pageTitle = 'Affiliate panel';
+$pageLede = 'Commission percentage, start gift, and people who used an invite.';
 $activeNav = 'referral';
 $referralTab = 'commission';
 include __DIR__ . '/inc/layout_head.php';
@@ -92,11 +92,11 @@ include __DIR__ . '/inc/referral_nav.php';
 <div class="card fade-up" style="margin-bottom:16px">
   <div class="card-head">
     <div>
-      <div class="card-title">تنظیمات پورسانت</div>
-      <div class="card-subtitle">همان تنظیمات بخش زیرمجموعه‌گیری ربات</div>
+      <div class="card-title">Commission settings</div>
+      <div class="card-subtitle">Same settings as the bot referral section</div>
     </div>
     <span class="tag <?= $systemOn ? 'tag-ok' : 'tag-no' ?>">
-      <?= $systemOn ? 'سیستم فعال' : 'سیستم غیرفعال' ?>
+      <?= $systemOn ? 'System on' : 'System off' ?>
     </span>
   </div>
   <form method="POST" class="card-body">
@@ -105,38 +105,38 @@ include __DIR__ . '/inc/referral_nav.php';
     <div style="display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));margin-bottom:16px">
       <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;cursor:pointer">
         <input type="checkbox" name="status" value="1" <?= $systemOn ? 'checked' : '' ?> style="width:18px;height:18px;accent-color:var(--ac)">
-        <span style="font-size:.85rem">فعال بودن سیستم دعوت</span>
+        <span style="font-size:.85rem">Invite system enabled</span>
       </label>
       <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;cursor:pointer">
         <input type="checkbox" name="status_commission" value="1" <?= $commissionOn ? 'checked' : '' ?> style="width:18px;height:18px;accent-color:var(--ac)">
-        <span style="font-size:.85rem">پورسانت بعد از خرید</span>
+        <span style="font-size:.85rem">Commission after purchase</span>
       </label>
       <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;cursor:pointer">
         <input type="checkbox" name="porsant_one_buy" value="1" <?= $firstBuyOnly ? 'checked' : '' ?> style="width:18px;height:18px;accent-color:var(--ac)">
-        <span style="font-size:.85rem">پورسانت فقط برای خرید اول</span>
+        <span style="font-size:.85rem">Commission on first purchase only</span>
       </label>
       <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;cursor:pointer">
         <input type="checkbox" name="discount" value="1" <?= $giftOn ? 'checked' : '' ?> style="width:18px;height:18px;accent-color:var(--ac)">
-        <span style="font-size:.85rem">هدیه استارت</span>
+        <span style="font-size:.85rem">Start gift</span>
       </label>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;max-width:480px">
       <div class="field">
-        <label>درصد پورسانت</label>
+        <label>Commission percentage</label>
         <input type="number" name="percentage" class="input" min="0" max="100" value="<?= htmlspecialchars($settings['percentage']) ?>" required>
       </div>
       <div class="field">
-        <label>مبلغ هدیه استارت (تومان)</label>
+        <label>Start gift amount (USD)</label>
         <input type="number" name="price_discount" class="input" min="0" value="<?= htmlspecialchars($settings['price_discount'] === 'none' ? '0' : (string) $settings['price_discount']) ?>">
       </div>
     </div>
-    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:14px"><?= icon('check', 14) ?> ذخیره تنظیمات</button>
+    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:14px"><?= icon('check', 14) ?> Save settings</button>
   </form>
 </div>
 
 <div class="card fade-up d1" id="list" style="margin-bottom:16px">
   <div class="toolbar" style="flex-wrap:wrap;gap:10px">
-    <div class="toolbar-title">لیست دعوت‌کنندگان <small>(<?= number_format($listTotal) ?>)</small></div>
+    <div class="toolbar-title">Referrers <small>(<?= number_format($listTotal) ?>)</small></div>
     <form method="GET" class="toolbar-end">
       <?php if ($histSearch !== ''): ?><input type="hidden" name="hq" value="<?= htmlspecialchars($histSearch) ?>"><?php endif; ?>
       <?php if ($histPage > 1): ?><input type="hidden" name="hpage" value="<?= (int) $histPage ?>"><?php endif; ?>
@@ -144,26 +144,26 @@ include __DIR__ . '/inc/referral_nav.php';
       <input type="hidden" name="dir" value="<?= htmlspecialchars($listDir) ?>">
       <div class="search-box" style="min-width:240px">
         <?= icon('search', 15) ?>
-        <input type="text" name="q" value="<?= htmlspecialchars($listSearch) ?>" placeholder="آیدی، یوزرنیم یا نام..." autocomplete="off">
-        <button type="submit" class="search-btn">جستجو</button>
+        <input type="text" name="q" value="<?= htmlspecialchars($listSearch) ?>" placeholder="ID, username, or name..." autocomplete="off">
+        <button type="submit" class="search-btn">Search</button>
       </div>
       <?php if ($listSearch !== ''): ?>
-        <a href="affiliates.php?sort=<?= urlencode($listSort) ?>&dir=<?= urlencode($listDir) ?><?= $histSearch !== '' ? ('&hq=' . urlencode($histSearch) . ($histPage > 1 ? '&hpage=' . (int) $histPage : '')) : '' ?>#list" class="btn-link" style="font-size:.78rem">پاک کردن</a>
+        <a href="affiliates.php?sort=<?= urlencode($listSort) ?>&dir=<?= urlencode($listDir) ?><?= $histSearch !== '' ? ('&hq=' . urlencode($histSearch) . ($histPage > 1 ? '&hpage=' . (int) $histPage : '')) : '' ?>#list" class="btn-link" style="font-size:.78rem">Clear</a>
       <?php endif; ?>
     </form>
   </div>
   <?php if (empty($listResult['rows'])): ?>
     <div class="empty" style="padding:48px 20px">
-      <p><?= $listSearch !== '' ? 'نتیجه‌ای یافت نشد.' : 'هنوز کسی دعوت ثبت‌شده‌ای ندارد.' ?></p>
+      <p><?= $listSearch !== '' ? 'No results found.' : 'No one has a recorded invite yet.' ?></p>
     </div>
   <?php else: ?>
     <div class="tbl-wrap">
       <table class="tbl-lg">
         <thead>
           <tr>
-            <th>شناسه</th>
-            <th>یوزرنیم</th>
-            <th>نام</th>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Name</th>
             <?php
             $affSortQs = function (string $key, string $label) use ($listSort, $listDir, $listSearch, $histSearch, $histPage): string {
                 $nextDir = ($listSort === $key && $listDir === 'desc') ? 'asc' : 'desc';
@@ -180,11 +180,11 @@ include __DIR__ . '/inc/referral_nav.php';
                     : 'color:inherit;text-decoration:none;white-space:nowrap';
                 return '<th><a href="' . htmlspecialchars($href) . '" style="' . $style . '">' . htmlspecialchars($label) . $arrow . '</a></th>';
             };
-            echo $affSortQs('balance', 'موجودی کیف پول');
-            echo $affSortQs('affiliatescount', 'تعداد دعوت');
-            echo $affSortQs('buyer_count', 'خریدار سرویس');
+            echo $affSortQs('balance', 'Wallet balance');
+            echo $affSortQs('affiliatescount', 'Invites');
+            echo $affSortQs('buyer_count', 'Service buyers');
             ?>
-            <th>عملیات</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -193,11 +193,11 @@ include __DIR__ . '/inc/referral_nav.php';
               <td class="cm"><?= htmlspecialchars((string) $row['id']) ?></td>
               <td><?= !empty($row['username']) ? '@' . htmlspecialchars($row['username']) : '—' ?></td>
               <td><?= !empty($row['namecustom']) ? htmlspecialchars($row['namecustom']) : '—' ?></td>
-              <td class="cn"><?= number_format((int) ($row['Balance'] ?? 0)) ?> <span class="cf">ت</span></td>
+              <td class="cn"><?= number_format((int) ($row['Balance'] ?? 0)) ?> <span class="cf">USD</span></td>
               <td><?= number_format((int) $row['affiliatescount']) ?></td>
               <td><?= number_format((int) $row['buyer_count']) ?></td>
               <td>
-                <a href="user.php?id=<?= (int) $row['id'] ?>" class="btn btn-ghost btn-sm btn-icon" title="مشاهده کاربر"><?= icon('eye', 14) ?></a>
+                <a href="user.php?id=<?= (int) $row['id'] ?>" class="btn btn-ghost btn-sm btn-icon" title="View user"><?= icon('eye', 14) ?></a>
               </td>
             </tr>
           <?php endforeach; ?>
@@ -206,7 +206,7 @@ include __DIR__ . '/inc/referral_nav.php';
     </div>
     <?php if ($listPages > 1): ?>
       <div class="tbl-foot">
-        <span><?= number_format($listTotal) ?> نفر · صفحه <?= $listPage ?> از <?= $listPages ?></span>
+        <span><?= number_format($listTotal) ?> people · page <?= $listPage ?> of <?= $listPages ?></span>
         <div class="pager">
           <?php
           $listQs = fn($p) => 'affiliates.php?q=' . urlencode($listSearch)
@@ -230,7 +230,7 @@ include __DIR__ . '/inc/referral_nav.php';
 
 <div class="card fade-up d2" id="history">
   <div class="toolbar" style="flex-wrap:wrap;gap:10px">
-    <div class="toolbar-title">تاریخچه دعوت‌ها <small>(<?= number_format($histTotal) ?>)</small></div>
+    <div class="toolbar-title">Invite history <small>(<?= number_format($histTotal) ?>)</small></div>
     <form method="GET" class="toolbar-end">
       <?php if ($listSearch !== ''): ?><input type="hidden" name="q" value="<?= htmlspecialchars($listSearch) ?>"><?php endif; ?>
       <?php if ($listPage > 1): ?><input type="hidden" name="page" value="<?= (int) $listPage ?>"><?php endif; ?>
@@ -238,29 +238,29 @@ include __DIR__ . '/inc/referral_nav.php';
       <input type="hidden" name="dir" value="<?= htmlspecialchars($listDir) ?>">
       <div class="search-box" style="min-width:240px">
         <?= icon('search', 15) ?>
-        <input type="text" name="hq" value="<?= htmlspecialchars($histSearch) ?>" placeholder="آیدی یا یوزرنیم معرف/دعوت‌شده..." autocomplete="off">
-        <button type="submit" class="search-btn">جستجو</button>
+        <input type="text" name="hq" value="<?= htmlspecialchars($histSearch) ?>" placeholder="ID or username of referrer/invitee..." autocomplete="off">
+        <button type="submit" class="search-btn">Search</button>
       </div>
       <?php if ($histSearch !== ''): ?>
-        <a href="affiliates.php<?= $listSearch !== '' ? ('?q=' . urlencode($listSearch) . ($listPage > 1 ? '&page=' . (int) $listPage : '') . '#history') : '#history' ?>" class="btn-link" style="font-size:.78rem">پاک کردن</a>
+        <a href="affiliates.php<?= $listSearch !== '' ? ('?q=' . urlencode($listSearch) . ($listPage > 1 ? '&page=' . (int) $listPage : '') . '#history') : '#history' ?>" class="btn-link" style="font-size:.78rem">Clear</a>
       <?php endif; ?>
     </form>
   </div>
   <?php if (empty($histResult['rows'])): ?>
     <div class="empty" style="padding:48px 20px">
-      <p><?= $histSearch !== '' ? 'نتیجه‌ای یافت نشد.' : 'هنوز تاریخچه دعوتی ثبت نشده است.' ?></p>
+      <p><?= $histSearch !== '' ? 'No results found.' : 'No invite history yet.' ?></p>
     </div>
   <?php else: ?>
     <div class="tbl-wrap">
       <table class="tbl-lg">
         <thead>
           <tr>
-            <th>معرف</th>
-            <th>آیدی معرف</th>
-            <th>دعوت‌شده</th>
-            <th>آیدی دعوت‌شده</th>
-            <th>زمان</th>
-            <th>هدیه استارت</th>
+            <th>Referrer</th>
+            <th>Referrer ID</th>
+            <th>Invitee</th>
+            <th>Invitee ID</th>
+            <th>Time</th>
+            <th>Start gift</th>
           </tr>
         </thead>
         <tbody>
@@ -285,7 +285,7 @@ include __DIR__ . '/inc/referral_nav.php';
               <td class="cm"><?= htmlspecialchars((string) ($row['user_id'] ?? '')) ?></td>
               <td class="cf"><?= htmlspecialchars((string) ($row['time'] ?? '—')) ?></td>
               <td>
-                <span class="tag <?= $giftClaimed ? 'tag-ok' : '' ?>"><?= $giftClaimed ? 'دریافت شده' : 'دریافت نشده' ?></span>
+                <span class="tag <?= $giftClaimed ? 'tag-ok' : '' ?>"><?= $giftClaimed ? 'Claimed' : 'Not claimed' ?></span>
               </td>
             </tr>
           <?php endforeach; ?>
@@ -294,7 +294,7 @@ include __DIR__ . '/inc/referral_nav.php';
     </div>
     <?php if ($histPages > 1): ?>
       <div class="tbl-foot">
-        <span><?= number_format($histTotal) ?> رویداد · صفحه <?= $histPage ?> از <?= $histPages ?></span>
+        <span><?= number_format($histTotal) ?> events · page <?= $histPage ?> of <?= $histPages ?></span>
         <div class="pager">
           <?php
           $histQs = fn($p) => 'affiliates.php?q=' . urlencode($listSearch)

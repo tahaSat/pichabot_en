@@ -18,10 +18,10 @@ while ($user = $stmt->fetch(PDO::FETCH_ASSOC)) {
     sendmessage($user['id'],$textexpire, null, 'HTML');
     update("user","agent","f","id",$user['id']);
     update("user","expire",null,"id",$user['id']);
-    $textreport = "📌 گروه کاربری کاربر بدلیل انقضای زمان نمایندگی  به f تغییر پیدا کرد
+    $textreport = "📌 User group was changed to f because the agency period expired
 
-آیدی عددی کاربر :  {$user['id']}
-نام کاربری کاربر :‌ {$user['username']}";
+User ID : {$user['id']}
+Username : {$user['username']}";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage',[
             'chat_id' => $setting['Channel_Report'],

@@ -8,18 +8,18 @@ $pdo = panel_ensure_pdo();
 date_default_timezone_set('Asia/Tehran');
 
 $metricDefs = [
-    'sales' => 'درآمد روزانه',
-    'users' => 'کاربران جدید',
-    'status' => 'وضعیت سفارش',
-    'payments' => 'روش پرداخت',
+    'sales' => 'Daily revenue',
+    'users' => 'New users',
+    'status' => 'Order status',
+    'payments' => 'Payment method',
 ];
 
 $saleTypeDefs = [
-    'all' => 'همه درآمدها',
-    'buy' => 'فقط خرید',
-    'extend' => 'فقط تمدید',
-    'extra' => 'حجم و زمان اضافه',
-    'wallet' => 'شارژ کیف پول',
+    'all' => 'All revenue',
+    'buy' => 'Purchases only',
+    'extend' => 'Renewals only',
+    'extra' => 'Extra volume and time',
+    'wallet' => 'Wallet top-ups',
 ];
 $saleType = (string) ($_GET['sale_type'] ?? 'all');
 if (!isset($saleTypeDefs[$saleType])) {
@@ -118,7 +118,7 @@ $summary = [
     'users' => 0,
     'payments' => 0,
     'payment_sum' => 0,
-    'avg_join_buy' => 'داده کافی نیست',
+    'avg_join_buy' => 'Not enough data',
     'avg_join_buyers' => 0,
     'paying_users' => 0,
     'avg_per_user' => 0,
@@ -322,13 +322,13 @@ if (in_array('sales', $selected, true)) {
     }
 
     $purposeChart = [
-        'buy' => ['label' => 'تعداد خرید', 'color' => 'rgba(6,182,212,0.75)'],
-        'extend' => ['label' => 'تعداد تمدید', 'color' => 'rgba(251,146,60,0.8)'],
-        'extra' => ['label' => 'حجم و زمان اضافه', 'color' => 'rgba(163,230,53,0.8)'],
-        'wallet' => ['label' => 'شارژ کیف پول', 'color' => 'rgba(167,139,250,0.8)'],
+        'buy' => ['label' => 'Purchases', 'color' => 'rgba(6,182,212,0.75)'],
+        'extend' => ['label' => 'Renewals', 'color' => 'rgba(251,146,60,0.8)'],
+        'extra' => ['label' => 'Extra volume and time', 'color' => 'rgba(163,230,53,0.8)'],
+        'wallet' => ['label' => 'Wallet top-ups', 'color' => 'rgba(167,139,250,0.8)'],
     ];
     if ($saleType !== 'all' && isset($purposeChart[$saleType])) {
-        $purposeChart[$saleType]['label'] = 'تعداد پرداخت';
+        $purposeChart[$saleType]['label'] = 'Payments';
         $purposeChart = [$saleType => $purposeChart[$saleType]];
     }
 
@@ -354,13 +354,13 @@ if (in_array('sales', $selected, true)) {
         $averages[] = $dayAvg;
         if ($dayCount > 0 || $dayRevenue > 0) {
             if ($saleType === 'all') {
-                $extra = $byPurposeDay['buy'][$key]['count'] . ' خرید · '
-                    . $byPurposeDay['extend'][$key]['count'] . ' تمدید · '
-                    . $byPurposeDay['extra'][$key]['count'] . ' اضافه · '
-                    . $byPurposeDay['wallet'][$key]['count'] . ' کیف پول · '
-                    . number_format($dayRevenue) . ' ت';
+                $extra = $byPurposeDay['buy'][$key]['count'] . ' buy · '
+                    . $byPurposeDay['extend'][$key]['count'] . ' renew · '
+                    . $byPurposeDay['extra'][$key]['count'] . ' extra · '
+                    . $byPurposeDay['wallet'][$key]['count'] . ' wallet · '
+                    . number_format($dayRevenue) . ' USD';
             } else {
-                $extra = number_format($dayRevenue) . ' ت';
+                $extra = number_format($dayRevenue) . ' USD';
             }
             $tableRows[] = [
                 'group' => $metricDefs['sales'],
@@ -385,7 +385,7 @@ if (in_array('sales', $selected, true)) {
         ];
     }
     $chartPayload['datasets'][] = [
-        'label' => 'مبلغ (تومان)',
+        'label' => 'Amount (USD)',
         'data' => $revenues,
         'type' => 'line',
         'borderColor' => 'rgba(34,197,94,0.95)',
@@ -396,7 +396,7 @@ if (in_array('sales', $selected, true)) {
         'order' => 1,
     ];
     $chartPayload['datasets'][] = [
-        'label' => 'میانگین هر کاربر (تومان)',
+        'label' => 'Average per user (USD)',
         'data' => $averages,
         'type' => 'line',
         'borderColor' => 'rgba(167,139,250,0.95)',
@@ -443,13 +443,13 @@ if (in_array('users', $selected, true)) {
                 'group' => $metricDefs['users'],
                 'label' => str_replace('-', '/', $key),
                 'count' => $byDay[$key],
-                'extra' => 'کاربر',
+                'extra' => 'users',
             ];
         }
     }
 
     $chartPayload['datasets'][] = [
-        'label' => 'کاربران جدید',
+        'label' => 'New users',
         'data' => $counts,
         'backgroundColor' => 'rgba(167,139,250,0.8)',
         'borderRadius' => 6,
@@ -495,9 +495,9 @@ if (in_array('status', $selected, true)) {
     foreach ($statusKeys as $i => $st) {
         [$tag, $label] = panel_invoice_status_label($st === '—' ? '' : $st);
         if ($st === '—') {
-            $label = 'نامشخص';
+            $label = 'Unknown';
         }
-        $prefix = $multi ? 'وضعیت · ' : '';
+        $prefix = $multi ? 'Status · ' : '';
         $data = [];
         $total = 0;
         foreach ($dayKeys as $key) {
@@ -519,7 +519,7 @@ if (in_array('status', $selected, true)) {
                 'group' => $metricDefs['status'],
                 'label' => $label,
                 'count' => $total,
-                'extra' => 'در ماه',
+                'extra' => 'this month',
             ];
         }
     }
@@ -589,7 +589,7 @@ if (in_array('payments', $selected, true)) {
     $payRows = [];
     foreach ($methods as $i => $method) {
         $label = panel_payment_method_label($method === '—' ? '' : $method);
-        $prefix = $multi ? 'پرداخت · ' : '';
+        $prefix = $multi ? 'Payment · ' : '';
         $data = [];
         foreach ($dayKeys as $key) {
             $data[] = $byMethod[$method]['days'][$key] ?? 0;
@@ -607,7 +607,7 @@ if (in_array('payments', $selected, true)) {
             'group' => $metricDefs['payments'],
             'label' => $label,
             'count' => $byMethod[$method]['count'],
-            'extra' => number_format($byMethod[$method]['sum']) . ' ت',
+            'extra' => number_format($byMethod[$method]['sum']) . ' USD',
         ];
     }
 
@@ -692,8 +692,8 @@ $statsUrl = static function (array $overrides = []) use ($selected, $monthParam,
     return 'stats.php?' . http_build_query($q);
 };
 
-$pageTitle = 'آمار';
-$pageLede = 'درآمد از پرداخت‌های موفق (خرید، تمدید، حجم و زمان اضافه، شارژ کیف پول) بر اساس ماه شمسی و ساعت تهران.';
+$pageTitle = 'Statistics';
+$pageLede = 'Revenue from successful payments (purchases, renewals, extra volume and time, wallet top-ups) by month and Tehran time.';
 $activeNav = 'stats';
 include __DIR__ . '/inc/layout_head.php';
 
@@ -718,18 +718,18 @@ $toggleMetricUrl = static function (string $key) use ($selected, $metricDefs, $s
     return $statsUrl(['views' => implode(',', $next), 'user_page' => 1]);
 };
 
-$saleMeta = number_format($summary['buys']) . ' خرید · '
-    . number_format($summary['extends']) . ' تمدید · '
-    . number_format($summary['extras']) . ' اضافه · '
-    . number_format($summary['wallets']) . ' کیف پول';
+$saleMeta = number_format($summary['buys']) . ' purchases · '
+    . number_format($summary['extends']) . ' renewals · '
+    . number_format($summary['extras']) . ' extras · '
+    . number_format($summary['wallets']) . ' wallet';
 if ($saleType === 'buy') {
-    $saleMeta = 'پرداخت خرید سرویس (شامل فاکتور دستی)';
+    $saleMeta = 'Service purchase payments (including manual invoices)';
 } elseif ($saleType === 'extend') {
-    $saleMeta = 'پرداخت تمدید';
+    $saleMeta = 'Renewal payments';
 } elseif ($saleType === 'extra') {
-    $saleMeta = 'پرداخت حجم و زمان اضافه';
+    $saleMeta = 'Extra volume and time payments';
 } elseif ($saleType === 'wallet') {
-    $saleMeta = 'شارژ کیف پول کاربر';
+    $saleMeta = 'User wallet top-ups';
 }
 
 $userFilterLabels = [];
@@ -738,10 +738,10 @@ if ($testFilterLabel !== '') {
     $userFilterLabels[] = $testFilterLabel;
 }
 if ($userFilters['min_buys'] !== null) {
-    $userFilterLabels[] = 'حداقل ' . number_format($userFilters['min_buys']) . ' خرید';
+    $userFilterLabels[] = 'At least ' . number_format($userFilters['min_buys']) . ' purchases';
 }
 if ($userFilters['min_extends'] !== null) {
-    $userFilterLabels[] = 'حداقل ' . number_format($userFilters['min_extends']) . ' تمدید';
+    $userFilterLabels[] = 'At least ' . number_format($userFilters['min_extends']) . ' renewals';
 }
 ?>
 
@@ -759,42 +759,42 @@ if ($userFilters['min_extends'] !== null) {
 
 <div class="stats fade-up" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:18px">
   <div class="stat ok">
-    <div class="stat-label">درآمد ماه</div>
+    <div class="stat-label">Month revenue</div>
     <div class="stat-num">
       <?= $summary['revenue'] >= 1_000_000
-          ? number_format($summary['revenue'] / 1_000_000, 1) . '<small>M ت</small>'
-          : number_format($summary['revenue']) . '<small>ت</small>' ?>
+          ? number_format($summary['revenue'] / 1_000_000, 1) . '<small>M USD</small>'
+          : number_format($summary['revenue']) . '<small>USD</small>' ?>
     </div>
     <div class="stat-meta"><?= htmlspecialchars($saleMeta) ?></div>
   </div>
   <div class="stat">
-    <div class="stat-label">تعداد پرداخت</div>
+    <div class="stat-label">Payments</div>
     <div class="stat-num"><?= number_format($summary['orders']) ?></div>
-    <div class="stat-meta">پرداخت موفق در ماه</div>
+    <div class="stat-meta">Successful payments this month</div>
   </div>
   <div class="stat">
-    <div class="stat-label">میانگین خرید هر کاربر</div>
-    <div class="stat-num"><?= number_format($summary['avg_per_user']) ?><small>ت</small></div>
+    <div class="stat-label">Average per paying user</div>
+    <div class="stat-num"><?= number_format($summary['avg_per_user']) ?><small>USD</small></div>
     <div class="stat-meta"><?= $summary['paying_users'] > 0
-        ? number_format($summary['paying_users']) . ' پرداخت‌کننده در ماه'
-        : 'درآمد ماه ÷ کاربران پرداخت‌کننده' ?></div>
+        ? number_format($summary['paying_users']) . ' paying users this month'
+        : 'Month revenue ÷ paying users' ?></div>
   </div>
   <div class="stat">
-    <div class="stat-label">کاربران جدید</div>
+    <div class="stat-label">New users</div>
     <div class="stat-num"><?= number_format($summary['users']) ?></div>
-    <div class="stat-meta">ثبت‌نام در ماه</div>
+    <div class="stat-meta">Sign-ups this month</div>
   </div>
   <div class="stat">
-    <div class="stat-label">میانگین تا خرید اول</div>
+    <div class="stat-label">Avg. time to first purchase</div>
     <div class="stat-num" style="font-size:1rem"><?= htmlspecialchars($summary['avg_join_buy']) ?></div>
     <div class="stat-meta"><?= $summary['avg_join_buyers'] > 0
-        ? number_format($summary['avg_join_buyers']) . ' خریدار از اعضای این ماه'
-        : 'عضویت در ماه انتخابی · حداقل یک خرید غیرتست' ?></div>
+        ? number_format($summary['avg_join_buyers']) . ' buyers among this month’s members'
+        : 'Joined in the selected month · at least one non-test purchase' ?></div>
   </div>
   <div class="stat warn">
-    <div class="stat-label">پرداخت موفق</div>
+    <div class="stat-label">Successful payments</div>
     <div class="stat-num"><?= number_format($summary['payments']) ?></div>
-    <div class="stat-meta"><?= number_format($summary['payment_sum']) ?> ت · همه درآمدها</div>
+    <div class="stat-meta"><?= number_format($summary['payment_sum']) ?> USD · all revenue</div>
   </div>
 </div>
 
@@ -805,7 +805,7 @@ if ($userFilters['min_extends'] !== null) {
         <?php $active = in_array($key, $selected, true); ?>
         <a href="<?= htmlspecialchars($toggleMetricUrl($key)) ?>"
            class="btn btn-sm <?= $active ? 'btn-primary' : 'btn-ghost' ?>"
-           title="<?= $active ? 'حذف از نمودار' : (count($selected) >= 2 ? 'جایگزین معیار اول' : 'افزودن به نمودار') ?>">
+           title="<?= $active ? 'Remove from chart' : (count($selected) >= 2 ? 'Replace first metric' : 'Add to chart') ?>">
           <?= htmlspecialchars($label) ?>
         </a>
       <?php endforeach; ?>
@@ -818,7 +818,7 @@ if ($userFilters['min_extends'] !== null) {
         </a>
       <?php endforeach; ?>
     </div>
-    <div class="stats-hint">یک یا دو معیار را انتخاب کنید. مبلغ‌ها از پرداخت‌های موفق هستند؛ فاکتور دستی، تمدید، حجم/زمان اضافه و شارژ کیف پول همه داخل درآمدند.</div>
+    <div class="stats-hint">Select one or two metrics. Amounts come from successful payments; manual invoices, renewals, extra volume/time, and wallet top-ups are all included in revenue.</div>
   </div>
   <form method="GET" class="toolbar-end" style="display:flex;gap:8px;align-items:center">
     <input type="hidden" name="views" value="<?= htmlspecialchars($viewsQuery) ?>">
@@ -840,11 +840,11 @@ if ($userFilters['min_extends'] !== null) {
   <div class="card-head">
     <div>
       <div class="card-title"><?= htmlspecialchars($chartTitle) ?></div>
-      <div class="card-subtitle">ماه <?= htmlspecialchars($monthLabel) ?> — به تفکیک روز شمسی (تهران)</div>
+      <div class="card-subtitle"><?= htmlspecialchars($monthLabel) ?> — by day (Tehran)</div>
     </div>
   </div>
   <?php if (empty($chartPayload['datasets'])): ?>
-    <div class="stats-empty">داده‌ای برای این بازه ثبت نشده است.</div>
+    <div class="stats-empty">No data recorded for this range.</div>
   <?php else: ?>
     <div class="stats-chart-wrap">
       <canvas id="statsChart"></canvas>
@@ -855,17 +855,17 @@ if ($userFilters['min_extends'] !== null) {
 <?php if (!empty($tableRows)): ?>
 <div class="card fade-up" style="margin-top:16px">
   <div class="card-head">
-    <div class="card-title">جزئیات</div>
+    <div class="card-title">Details</div>
   </div>
   <div class="tbl-wrap">
     <table class="tbl-md">
       <thead>
         <tr>
-          <?php if ($showGroupCol): ?><th>معیار</th><?php endif; ?>
-          <th>عنوان</th>
-          <th>تعداد</th>
-          <th><?= $showAmountCol ? 'مبلغ / توضیح' : 'توضیح' ?></th>
-          <?php if ($showAvgCol): ?><th>میانگین / کاربر</th><?php endif; ?>
+          <?php if ($showGroupCol): ?><th>Metric</th><?php endif; ?>
+          <th>Label</th>
+          <th>Count</th>
+          <th><?= $showAmountCol ? 'Amount / note' : 'Note' ?></th>
+          <?php if ($showAvgCol): ?><th>Avg / user</th><?php endif; ?>
         </tr>
       </thead>
       <tbody>
@@ -880,8 +880,8 @@ if ($userFilters['min_extends'] !== null) {
             <?php if ($showAvgCol): ?>
               <td><?= isset($row['avg'])
                   ? htmlspecialchars(
-                      number_format((int) $row['avg']) . ' ت'
-                      . (((int) ($row['buyers'] ?? 0) > 0) ? ' · ' . number_format((int) $row['buyers']) . ' کاربر' : '')
+                      number_format((int) $row['avg']) . ' USD'
+                      . (((int) ($row['buyers'] ?? 0) > 0) ? ' · ' . number_format((int) $row['buyers']) . ' users' : '')
                   )
                   : '—' ?></td>
             <?php endif; ?>
@@ -896,8 +896,8 @@ if ($userFilters['min_extends'] !== null) {
 <div class="card fade-up" style="margin-top:16px">
   <div class="card-head">
     <div>
-      <div class="card-title">فیلتر کاربران</div>
-      <div class="card-subtitle">اکانت تست، تعداد خرید غیرتست و تعداد تمدید را می‌توان با هم ترکیب کرد. شمارش‌ها بر اساس کل سابقه است.</div>
+      <div class="card-title">User filters</div>
+      <div class="card-subtitle">Test accounts, non-test purchase count, and renewal count can be combined. Counts use the full history.</div>
     </div>
   </div>
   <form method="GET" class="card-body">
@@ -906,43 +906,43 @@ if ($userFilters['min_extends'] !== null) {
     <input type="hidden" name="sale_type" value="<?= htmlspecialchars($saleType) ?>">
     <div class="stats-user-filters">
       <div class="field">
-        <label>اکانت تست</label>
+        <label>Test account</label>
         <select name="test" class="select">
-          <option value="" <?= $userFilters['test'] === '' ? 'selected' : '' ?>>همه</option>
-          <option value="yes" <?= $userFilters['test'] === 'yes' ? 'selected' : '' ?>>دارای اکانت تست</option>
-          <option value="no" <?= $userFilters['test'] === 'no' ? 'selected' : '' ?>>بدون اکانت تست</option>
-          <option value="only" <?= $userFilters['test'] === 'only' ? 'selected' : '' ?>>فقط اکانت تست</option>
+          <option value="" <?= $userFilters['test'] === '' ? 'selected' : '' ?>>All</option>
+          <option value="yes" <?= $userFilters['test'] === 'yes' ? 'selected' : '' ?>>Has a test account</option>
+          <option value="no" <?= $userFilters['test'] === 'no' ? 'selected' : '' ?>>No test account</option>
+          <option value="only" <?= $userFilters['test'] === 'only' ? 'selected' : '' ?>>Test account only</option>
         </select>
       </div>
       <div class="field">
-        <label>حداقل خرید غیرتست</label>
+        <label>Min. non-test purchases</label>
         <input class="input" type="number" name="min_buys" min="0" step="1" inputmode="numeric"
-               placeholder="مثلاً ۲"
+               placeholder="e.g. 2"
                value="<?= $userFilters['min_buys'] !== null ? (int) $userFilters['min_buys'] : '' ?>">
       </div>
       <div class="field">
-        <label>حداقل تمدید</label>
+        <label>Min. renewals</label>
         <input class="input" type="number" name="min_extends" min="0" step="1" inputmode="numeric"
-               placeholder="مثلاً ۱"
+               placeholder="e.g. 1"
                value="<?= $userFilters['min_extends'] !== null ? (int) $userFilters['min_extends'] : '' ?>">
       </div>
       <div class="field" style="display:flex;gap:8px;flex-wrap:wrap">
-        <button type="submit" class="btn btn-primary" style="flex:1">اعمال فیلتر</button>
+        <button type="submit" class="btn btn-primary" style="flex:1">Apply filter</button>
         <?php if ($userFiltersActive): ?>
-          <a href="<?= htmlspecialchars($statsUrl(['test' => '', 'min_buys' => '', 'min_extends' => '', 'user_page' => 1])) ?>" class="btn btn-ghost">پاک کردن</a>
+          <a href="<?= htmlspecialchars($statsUrl(['test' => '', 'min_buys' => '', 'min_extends' => '', 'user_page' => 1])) ?>" class="btn btn-ghost">Clear</a>
         <?php endif; ?>
       </div>
     </div>
   </form>
 
   <?php if (!$userFiltersActive): ?>
-    <div class="stats-empty" style="padding-top:0">برای دیدن فهرست، حداقل یک فیلتر را انتخاب کنید.</div>
+    <div class="stats-empty" style="padding-top:0">Select at least one filter to see the list.</div>
   <?php elseif ($filteredUserTotal === 0): ?>
-    <div class="empty"><p>کاربری با این ترکیب فیلتر پیدا نشد.</p></div>
+    <div class="empty"><p>No users match this filter combination.</p></div>
   <?php else: ?>
     <div class="toolbar" style="border-top:1px solid var(--bd)">
       <div class="toolbar-title">
-        فهرست کاربران
+        User list
         <small>(<?= number_format($filteredUserTotal) ?>)</small>
       </div>
       <div class="toolbar-end">
@@ -974,50 +974,50 @@ if ($userFilters['min_extends'] !== null) {
                 <a href="user.php?id=<?= htmlspecialchars((string) $u['id']) ?>"><?= htmlspecialchars($displayName) ?></a>
               </div>
               <?php if ($isBlocked): ?>
-                <span class="tag tag-no">مسدود</span>
+                <span class="tag tag-no">Blocked</span>
               <?php else: ?>
                 <span class="tag <?= user_role_tag($agent) ?>"><?= user_role_label($agent) ?></span>
               <?php endif; ?>
             </div>
             <div class="data-row-fields">
               <div class="data-field">
-                <span class="data-field-label">آیدی</span>
+                <span class="data-field-label">ID</span>
                 <span class="data-field-val cm"><?= htmlspecialchars((string) $u['id']) ?></span>
               </div>
               <?php if ($uname): ?>
                 <div class="data-field">
-                  <span class="data-field-label">یوزرنیم</span>
+                  <span class="data-field-label">Username</span>
                   <span class="data-field-val cm" style="color:var(--ac)">@<?= htmlspecialchars($uname) ?></span>
                 </div>
               <?php endif; ?>
               <div class="data-field">
-                <span class="data-field-label">خرید</span>
+                <span class="data-field-label">Purchases</span>
                 <span class="data-field-val cn"><?= number_format((int) ($u['buy_count'] ?? 0)) ?></span>
               </div>
               <div class="data-field">
-                <span class="data-field-label">تمدید</span>
+                <span class="data-field-label">Renewals</span>
                 <span class="data-field-val cn"><?= number_format((int) ($u['extend_count'] ?? 0)) ?></span>
               </div>
               <div class="data-field">
-                <span class="data-field-label">اکانت تست</span>
-                <span class="data-field-val"><?= ((int) ($u['test_count'] ?? 0)) > 0 ? 'دارد (' . number_format((int) $u['test_count']) . ')' : 'ندارد' ?></span>
+                <span class="data-field-label">Test account</span>
+                <span class="data-field-val"><?= ((int) ($u['test_count'] ?? 0)) > 0 ? 'Yes (' . number_format((int) $u['test_count']) . ')' : 'No' ?></span>
               </div>
               <div class="data-field">
-                <span class="data-field-label">ثبت‌نام</span>
+                <span class="data-field-label">Joined</span>
                 <span class="data-field-val"><?= is_numeric($u['register'] ?? null)
-                    ? jalali_tehran_format((int) $u['register'], 'Y/m/d', 'fa')
+                    ? jalali_tehran_format((int) $u['register'], 'Y/m/d', 'en')
                     : safe_date($u['register'] ?? null) ?></span>
               </div>
             </div>
           </div>
           <div class="data-row-actions">
-            <a href="user.php?id=<?= htmlspecialchars((string) $u['id']) ?>" class="btn btn-ghost btn-sm btn-icon" title="مدیریت کاربر"><?= icon('eye', 14) ?></a>
+            <a href="user.php?id=<?= htmlspecialchars((string) $u['id']) ?>" class="btn btn-ghost btn-sm btn-icon" title="Manage user"><?= icon('eye', 14) ?></a>
           </div>
         </div>
       <?php endforeach; ?>
     </div>
     <div class="tbl-foot">
-      <span><?= number_format($filteredUserTotal) ?> کاربر · صفحه <?= $userPage ?> از <?= $filteredUserPages ?></span>
+      <span><?= number_format($filteredUserTotal) ?> users · page <?= $userPage ?> of <?= $filteredUserPages ?></span>
       <div class="pager">
         <a class="<?= $userPage <= 1 ? 'dis' : '' ?>" href="<?= htmlspecialchars($statsUrl(['user_page' => max(1, $userPage - 1)])) ?>">‹</a>
         <?php for ($p = max(1, $userPage - 2); $p <= min($filteredUserPages, $userPage + 2); $p++): ?>
@@ -1058,17 +1058,17 @@ if ($userFilters['min_extends'] !== null) {
         legend: {
           position: 'top',
           align: 'end',
-          labels: { color: textColor, boxWidth: 12, font: { family: 'Vazirmatn', size: 11 } },
+          labels: { color: textColor, boxWidth: 12, font: { family: 'Inter', size: 11 } },
         },
         tooltip: {
-          titleFont: { family: 'Vazirmatn' },
-          bodyFont: { family: 'Vazirmatn' },
+          titleFont: { family: 'Inter' },
+          bodyFont: { family: 'Inter' },
           callbacks: {
             label(ctx) {
               const v = ctx.parsed.y ?? 0;
               const name = ctx.dataset.label || '';
-              if (ctx.dataset.yAxisID === 'y1' || ctx.dataset.yAxisID === 'yAvg' || /تومان|مبلغ|میانگین/.test(name)) {
-                return name + ': ' + Number(v).toLocaleString('en-US') + ' ت';
+              if (ctx.dataset.yAxisID === 'y1' || ctx.dataset.yAxisID === 'yAvg' || /USD|Amount|Average/.test(name)) {
+                return name + ': ' + Number(v).toLocaleString('en-US') + ' USD';
               }
               return name + ': ' + Number(v).toLocaleString('en-US');
             }
@@ -1078,13 +1078,13 @@ if ($userFilters['min_extends'] !== null) {
       scales: {
         x: {
           stacked,
-          ticks: { color: textColor, font: { family: 'Vazirmatn', size: 10 }, maxRotation: 0 },
+          ticks: { color: textColor, font: { family: 'Inter', size: 10 }, maxRotation: 0 },
           grid: { color: 'transparent' },
         },
         y: {
           stacked,
           beginAtZero: true,
-          ticks: { color: textColor, font: { family: 'Vazirmatn', size: 10 }, precision: 0 },
+          ticks: { color: textColor, font: { family: 'Inter', size: 10 }, precision: 0 },
           grid: { color: gridColor },
         },
         ...(hasDual ? {
@@ -1093,7 +1093,7 @@ if ($userFilters['min_extends'] !== null) {
             beginAtZero: true,
             ticks: {
               color: textColor,
-              font: { family: 'Vazirmatn', size: 10 },
+              font: { family: 'Inter', size: 10 },
               callback: (v) => Number(v).toLocaleString('en-US'),
             },
             grid: { drawOnChartArea: false },

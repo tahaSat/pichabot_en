@@ -62,17 +62,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
   $description = trim($_POST['description'] ?? '');
   $emoji_id = parse_posted_custom_emoji_id($_POST['emoji_id'] ?? '');
   if ($remark === '') {
-    flash('error', 'نام دسته‌بندی الزامی است.');
+    flash('error', 'Category name is required.');
     header('Location: categories.php');
     exit;
   }
   if ($emoji_id === null) {
-    flash('error', 'شناسه ایموجی پرمیوم باید فقط عدد باشد.');
+    flash('error', 'Premium emoji ID must be numeric.');
     header('Location: categories.php');
     exit;
   }
   if (db_count($pdo, "SELECT COUNT(*) FROM category WHERE remark = ?", [$remark])) {
-    flash('error', 'دسته‌بندی با این نام قبلاً ثبت شده.');
+    flash('error', 'A category with this name already exists.');
     header('Location: categories.php');
     exit;
   }
@@ -93,9 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
     }
     $placeholders = implode(',', array_fill(0, count($cols), '?'));
     db_query($pdo, 'INSERT INTO category (' . implode(',', $cols) . ") VALUES ($placeholders)", $vals);
-    flash('success', 'دسته‌بندی «' . $remark . '» اضافه شد.');
+    flash('success', 'Category “' . $remark . '” was added.');
   } catch (Exception $e) {
-    flash('error', 'خطای پایگاه داده: ' . $e->getMessage());
+    flash('error', 'Database error: ' . $e->getMessage());
   }
   header('Location: categories.php');
   exit;
@@ -109,18 +109,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit'
   $emoji_id = parse_posted_custom_emoji_id($_POST['emoji_id'] ?? '');
   if ($id && $remark !== '') {
     if ($emoji_id === null) {
-      flash('error', 'شناسه ایموجی پرمیوم باید فقط عدد باشد.');
+      flash('error', 'Premium emoji ID must be numeric.');
       header('Location: categories.php');
       exit;
     }
     $old = db_fetch($pdo, "SELECT * FROM category WHERE id = ?", [$id]);
     if (!$old) {
-      flash('error', 'دسته‌بندی یافت نشد.');
+      flash('error', 'Category not found.');
       header('Location: categories.php');
       exit;
     }
     if ($old['remark'] !== $remark && db_count($pdo, "SELECT COUNT(*) FROM category WHERE remark = ?", [$remark])) {
-      flash('error', 'دسته‌بندی با این نام قبلاً ثبت شده.');
+      flash('error', 'A category with this name already exists.');
       header('Location: categories.php');
       exit;
     }
@@ -140,9 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit'
       if ($old['remark'] !== $remark) {
         db_query($pdo, "UPDATE product SET category = ? WHERE category = ?", [$remark, $old['remark']]);
       }
-      flash('success', 'دسته‌بندی ویرایش شد.');
+      flash('success', 'Category updated.');
     } catch (Exception $e) {
-      flash('error', 'خطا: ' . $e->getMessage());
+      flash('error', 'Error: ' . $e->getMessage());
     }
   }
   header('Location: categories.php');
@@ -158,8 +158,8 @@ if (isset($_GET['toggle']) && $hasStatusCol) {
     $new = $current === 'active' ? 'inactive' : 'active';
     db_query($pdo, "UPDATE category SET status = ? WHERE id = ?", [$new, $id]);
     flash('success', $new === 'active'
-      ? 'دسته‌بندی «' . $row['remark'] . '» فعال شد.'
-      : 'دسته‌بندی «' . $row['remark'] . '» غیرفعال شد.');
+      ? 'Category “' . $row['remark'] . '” was enabled.'
+      : 'Category “' . $row['remark'] . '” was disabled.');
   }
   header('Location: categories.php');
   exit;
@@ -172,9 +172,9 @@ if (isset($_GET['delete'])) {
   if ($row) {
     $used = db_count($pdo, "SELECT COUNT(*) FROM product WHERE category = ?", [$row['remark']]);
     if ($used > 0) {
-      flash('warning', 'دسته‌بندی حذف شد. ' . $used . ' محصول هنوز به این دسته ارجاع دارند.');
+      flash('warning', 'Category deleted. ' . $used . ' product(s) still reference this category.');
     } else {
-      flash('success', 'دسته‌بندی حذف شد.');
+      flash('success', 'Category deleted.');
     }
     db_query($pdo, "DELETE FROM category WHERE id = ?", [$id]);
   }
@@ -205,8 +205,8 @@ try {
 } catch (Exception $e) {
 }
 
-$pageTitle = 'دسته‌بندی‌ها';
-$pageLede = 'مدیریت دسته‌بندی محصولات. سرویس دلخواه از تنظیمات هر پنل فعال می‌شود.';
+$pageTitle = 'Categories';
+$pageLede = 'Manage product categories. Custom service is enabled in each panel’s settings.';
 $activeNav = 'categories';
 include __DIR__ . '/inc/layout_head.php';
 
@@ -219,37 +219,37 @@ function category_row_is_active(array $c): bool
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px" class="fade-up">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <div style="font-size:.85rem;color:var(--mute)"><?= count($categories) ?> دسته‌بندی</div>
-    <a href="product.php" class="btn btn-ghost btn-sm"><?= icon('package', 14) ?> محصولات</a>
-    <a href="panels.php" class="btn btn-ghost btn-sm"><?= icon('server', 14) ?> سرویس دلخواه در پنل</a>
+    <div style="font-size:.85rem;color:var(--mute)"><?= count($categories) ?> categories</div>
+    <a href="product.php" class="btn btn-ghost btn-sm"><?= icon('package', 14) ?> Products</a>
+    <a href="panels.php" class="btn btn-ghost btn-sm"><?= icon('server', 14) ?> Custom service on panel</a>
   </div>
-  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> افزودن دسته‌بندی</button>
+  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> Add category</button>
 </div>
 
 <?php if (!$hasStatusCol): ?>
 <div class="card fade-up" style="margin-bottom:14px;border-color:#f0ad4e">
-  <p style="margin:0;color:var(--mute);font-size:.9rem">ستون وضعیت روی <code>category</code> هنوز ساخته نشد. صفحه را رفرش کنید، یا <code>/table.php</code> را در مرورگر باز کنید (اجرای ربات به‌تنهایی این ستون را نمی‌سازد).</p>
+  <p style="margin:0;color:var(--mute);font-size:.9rem">The status column on <code>category</code> has not been created yet. Refresh this page, or open <code>/table.php</code> in the browser (running the bot alone does not create this column).</p>
 </div>
 <?php endif; ?>
 
 <div class="card fade-up d1">
   <div class="toolbar">
-    <div class="toolbar-title">فهرست دسته‌بندی‌ها <small>(<?= count($categories) ?>)</small></div>
+    <div class="toolbar-title">Category list <small>(<?= count($categories) ?>)</small></div>
     <form method="GET" class="toolbar-end">
       <div class="search-box" style="min-width:220px">
         <?= icon('search', 14) ?>
-        <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="جستجو...">
+        <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Search...">
         <button type="button" class="search-clear">✕</button>
       </div>
-      <button type="submit" class="btn btn-ghost btn-sm">فیلتر</button>
+      <button type="submit" class="btn btn-ghost btn-sm">Filter</button>
     </form>
   </div>
 
   <?php if (empty($categories)): ?>
     <div class="empty" style="padding:60px 20px">
-      <p><?= $search !== '' ? 'دسته‌بندی‌ای یافت نشد' : 'هنوز دسته‌بندی ثبت نکرده‌اید' ?></p>
+      <p><?= $search !== '' ? 'No categories found' : 'No categories yet' ?></p>
       <?php if ($search === ''): ?>
-        <button class="btn btn-primary" style="margin-top:14px" onclick="openModal('addModal')"><?= icon('plus', 14) ?> اضافه کردن اولین دسته</button>
+        <button class="btn btn-primary" style="margin-top:14px" onclick="openModal('addModal')"><?= icon('plus', 14) ?> Add the first category</button>
       <?php endif; ?>
     </div>
   <?php else: ?>
@@ -258,11 +258,11 @@ function category_row_is_active(array $c): bool
         <thead>
           <tr>
             <th>#</th>
-            <th>نام دسته</th>
-            <th>توضیحات</th>
-            <th>تعداد محصول</th>
-            <?php if ($hasStatusCol): ?><th>وضعیت</th><?php endif; ?>
-            <th>عملیات</th>
+            <th>Category name</th>
+            <th>Description</th>
+            <th>Products</th>
+            <?php if ($hasStatusCol): ?><th>Status</th><?php endif; ?>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -284,7 +284,7 @@ function category_row_is_active(array $c): bool
               <?php if ($hasStatusCol): ?>
               <td>
                 <span class="tag <?= $isActive ? 'tag-ok' : 'tag-warn' ?>">
-                  <?= $isActive ? 'فعال' : 'غیرفعال' ?>
+                  <?= $isActive ? 'Active' : 'Inactive' ?>
                 </span>
               </td>
               <?php endif; ?>
@@ -292,17 +292,17 @@ function category_row_is_active(array $c): bool
                 <div style="display:flex;gap:5px;flex-wrap:wrap">
                   <?php if ($hasStatusCol): ?>
                   <a href="categories.php?toggle=<?= (int) $c['id'] ?>&_csrf=<?= csrf_token() ?>"
-                    class="btn btn-ghost btn-sm" title="<?= $isActive ? 'غیرفعال کردن' : 'فعال کردن' ?>">
-                    <?= $isActive ? icon('block', 13) . ' غیرفعال' : icon('check', 13) . ' فعال' ?>
+                    class="btn btn-ghost btn-sm" title="<?= $isActive ? 'Deactivate' : 'Activate' ?>">
+                    <?= $isActive ? icon('block', 13) . ' Inactive' : icon('check', 13) . ' Active' ?>
                   </a>
                   <?php endif; ?>
-                  <button class="btn btn-ghost btn-sm btn-icon" title="ویرایش"
+                  <button class="btn btn-ghost btn-sm btn-icon" title="Edit"
                     onclick="openEditModal(<?= htmlspecialchars(json_encode($editPayload, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>)">
                     <?= icon('edit', 13) ?>
                   </button>
                   <a href="categories.php?delete=<?= (int) $c['id'] ?>&_csrf=<?= csrf_token() ?>"
-                    class="btn btn-no btn-sm btn-icon" title="حذف"
-                    data-confirm="حذف دسته‌بندی «<?= htmlspecialchars($c['remark']) ?>»؟">
+                    class="btn btn-no btn-sm btn-icon" title="Delete"
+                    data-confirm="Delete category “<?= htmlspecialchars($c['remark']) ?>”?">
                     <?= icon('trash', 13) ?>
                   </a>
                 </div>
@@ -318,7 +318,7 @@ function category_row_is_active(array $c): bool
 <div class="modal-veil" id="addModal">
   <div class="modal" style="max-width:520px">
     <div class="modal-head">
-      <h3>افزودن دسته‌بندی</h3>
+      <h3>Add category</h3>
       <button class="modal-x" onclick="closeModal('addModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST">
@@ -326,24 +326,24 @@ function category_row_is_active(array $c): bool
         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
         <input type="hidden" name="action" value="add">
         <div class="field">
-          <label>نام دسته‌بندی *</label>
-          <input type="text" name="remark" class="input" placeholder="مثلاً: VPN، پکیج ماهانه، ..." required>
+          <label>Category name *</label>
+          <input type="text" name="remark" class="input" placeholder="e.g. VPN, monthly pack, ..." required>
         </div>
         <div class="field">
-          <label>توضیحات (اختیاری)</label>
-          <textarea name="description" class="input" rows="3" placeholder="پیام بعد از انتخاب دسته در ربات"></textarea>
+          <label>Description (optional)</label>
+          <textarea name="description" class="input" rows="3" placeholder="Message after the category is selected in the bot"></textarea>
         </div>
         <?php if ($hasEmojiCol): ?>
         <div class="field">
-          <label>شناسه ایموجی پرمیوم (اختیاری)</label>
-          <input type="text" name="emoji_id" class="input" placeholder="مثلاً 5368324170671202286" inputmode="numeric" dir="ltr">
-          <small class="cf" style="display:block;margin-top:4px">از ربات تلگرام با ارسال ایموجی پرمیوم هم می‌توانید تنظیم کنید.</small>
+          <label>Premium emoji ID (optional)</label>
+          <input type="text" name="emoji_id" class="input" placeholder="e.g. 5368324170671202286" inputmode="numeric" dir="ltr">
+          <small class="cf" style="display:block;margin-top:4px">You can also set this from the Telegram bot by sending a premium emoji.</small>
         </div>
         <?php endif; ?>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary"><?= icon('plus', 13) ?> ذخیره</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary"><?= icon('plus', 13) ?> Save</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -352,7 +352,7 @@ function category_row_is_active(array $c): bool
 <div class="modal-veil" id="editModal">
   <div class="modal" style="max-width:520px">
     <div class="modal-head">
-      <h3>ویرایش دسته‌بندی</h3>
+      <h3>Edit category</h3>
       <button class="modal-x" onclick="closeModal('editModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST">
@@ -361,23 +361,23 @@ function category_row_is_active(array $c): bool
         <input type="hidden" name="action" value="edit">
         <input type="hidden" name="edit_id" id="edit_id">
         <div class="field">
-          <label>نام دسته‌بندی *</label>
+          <label>Category name *</label>
           <input type="text" name="remark" id="edit_remark" class="input" required>
         </div>
         <div class="field">
-          <label>توضیحات (اختیاری)</label>
+          <label>Description (optional)</label>
           <textarea name="description" id="edit_description" class="input" rows="3"></textarea>
         </div>
         <?php if ($hasEmojiCol): ?>
         <div class="field">
-          <label>شناسه ایموجی پرمیوم (اختیاری)</label>
-          <input type="text" name="emoji_id" id="edit_emoji_id" class="input" placeholder="مثلاً 5368324170671202286" inputmode="numeric" dir="ltr">
+          <label>Premium emoji ID (optional)</label>
+          <input type="text" name="emoji_id" id="edit_emoji_id" class="input" placeholder="e.g. 5368324170671202286" inputmode="numeric" dir="ltr">
         </div>
         <?php endif; ?>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary"><?= icon('check', 13) ?> ذخیره تغییرات</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary"><?= icon('check', 13) ?> Save changes</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">Cancel</button>
       </div>
     </form>
   </div>

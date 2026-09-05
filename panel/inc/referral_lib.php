@@ -84,10 +84,10 @@ function referral_lib_save_campaign(PDO $pdo, array $data, ?int $id = null): voi
     referral_ensure_schema();
     $product = db_fetch($pdo, "SELECT * FROM product WHERE code_product = ?", [$data['code_product'] ?? '']);
     if (!$product) {
-        throw new InvalidArgumentException('محصول انتخاب‌شده یافت نشد.');
+        throw new InvalidArgumentException('Selected product was not found.');
     }
     if (($product['Location'] ?? '') === '' || ($product['Location'] ?? '') === '/all') {
-        throw new InvalidArgumentException('محصول باید به یک پنل مشخص متصل باشد (نه /all).');
+        throw new InvalidArgumentException('The product must be linked to a specific panel (not /all).');
     }
 
     $required = max(1, (int) ($data['required_invites'] ?? 1));
@@ -100,11 +100,11 @@ function referral_lib_save_campaign(PDO $pdo, array $data, ?int $id = null): voi
     if ($id) {
         $existing = referral_lib_get_campaign($pdo, $id);
         if (!$existing) {
-            throw new InvalidArgumentException('کمپین یافت نشد.');
+            throw new InvalidArgumentException('Campaign not found.');
         }
         $code = $existing['code'] ?? referral_auto_campaign_code($id);
         if ($title === '') {
-            $title = $existing['title'] ?? ('کمپین #' . $id);
+            $title = $existing['title'] ?? ('Campaign #' . $id);
         }
         db_query(
             $pdo,
@@ -119,12 +119,12 @@ function referral_lib_save_campaign(PDO $pdo, array $data, ?int $id = null): voi
         $pdo,
         "INSERT INTO referral_campaign (code, title, description, code_product, panel_name, required_invites, status, new_users_only, created_at)
          VALUES (?,?,?,?,?,?,?,?,?)",
-        [$placeholder, $title !== '' ? $title : 'کمپین جدید', $description, $product['code_product'], $panel_name, $required, $status, $new_users_only, date('Y/m/d H:i:s')]
+        [$placeholder, $title !== '' ? $title : 'New campaign', $description, $product['code_product'], $panel_name, $required, $status, $new_users_only, date('Y/m/d H:i:s')]
     );
     $new_id = (int) $pdo->lastInsertId();
     $auto_code = referral_auto_campaign_code($new_id);
     if ($title === '') {
-        $title = 'کمپین #' . $new_id;
+        $title = 'Campaign #' . $new_id;
         db_query($pdo, "UPDATE referral_campaign SET code = ?, title = ? WHERE id = ?", [$auto_code, $title, $new_id]);
     } else {
         db_query($pdo, "UPDATE referral_campaign SET code = ? WHERE id = ?", [$auto_code, $new_id]);
@@ -135,7 +135,7 @@ function referral_lib_toggle_status(PDO $pdo, int $id): void
 {
     $row = referral_lib_get_campaign($pdo, $id);
     if (!$row) {
-        throw new InvalidArgumentException('کمپین یافت نشد.');
+        throw new InvalidArgumentException('Campaign not found.');
     }
     $new = ($row['status'] ?? '') === 'active' ? 'inactive' : 'active';
     db_query($pdo, "UPDATE referral_campaign SET status = ? WHERE id = ?", [$new, $id]);
@@ -208,40 +208,40 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
 
         $campaign = referral_lib_get_campaign($pdo, $campaign_id);
         if (!$campaign) {
-            return ['ok' => false, 'msg' => 'کمپین یافت نشد.'];
+            return ['ok' => false, 'msg' => 'Campaign not found.'];
         }
 
         $user_id = (string) $user_id;
         if ($user_id === '' || !ctype_digit($user_id)) {
-            return ['ok' => false, 'msg' => 'آیدی کاربر نامعتبر است.'];
+            return ['ok' => false, 'msg' => 'Invalid user ID.'];
         }
 
         if (referral_has_reward($campaign_id, $user_id)) {
-            return ['ok' => false, 'msg' => 'این کاربر قبلاً جایزه این کمپین را دریافت کرده است.'];
+            return ['ok' => false, 'msg' => 'This user has already received this campaign reward.'];
         }
 
         $invite_count = referral_count_invites($campaign_id, $user_id);
         $required = max(1, (int) ($campaign['required_invites'] ?? 1));
         if ($invite_count < $required) {
-            return ['ok' => false, 'msg' => "تعداد دعوت کافی نیست ({$invite_count} / {$required})."];
+            return ['ok' => false, 'msg' => "Not enough invites ({$invite_count} / {$required})."];
         }
 
         $product = db_fetch($pdo, 'SELECT * FROM product WHERE code_product = ? LIMIT 1', [$campaign['code_product']]);
         $panel = db_fetch($pdo, 'SELECT * FROM marzban_panel WHERE name_panel = ? LIMIT 1', [$campaign['panel_name']]);
         if (!$product || !$panel) {
-            return ['ok' => false, 'msg' => 'محصول یا پنل جایزه یافت نشد.'];
+            return ['ok' => false, 'msg' => 'Reward product or panel was not found.'];
         }
 
         $user = db_fetch($pdo, 'SELECT * FROM user WHERE id = ?', [$user_id]);
         if (!$user) {
-            return ['ok' => false, 'msg' => 'کاربر در دیتابیس ربات یافت نشد.'];
+            return ['ok' => false, 'msg' => 'User was not found in the bot database.'];
         }
 
         if (!isset($ManagePanel)) {
             $ManagePanel = new ManagePanel();
         }
 
-        $lastError = 'ساخت سرویس ناموفق بود.';
+        $lastError = 'Could not create the service.';
         $created = null;
         $username = '';
         $idInvoice = '';
@@ -255,13 +255,13 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
             }
 
             if (db_count($pdo, 'SELECT COUNT(*) FROM invoice WHERE username = ?', [$username]) > 0) {
-                $lastError = 'نام کاربری تکراری در فاکتورها.';
+                $lastError = 'Username already exists in invoices.';
                 continue;
             }
 
             $DataUserOut = $ManagePanel->DataUser($panel['name_panel'], $username);
             if (($DataUserOut['status'] ?? '') !== 'Unsuccessful' && !empty($DataUserOut['username'])) {
-                $lastError = 'نام کاربری روی پنل از قبل وجود دارد.';
+                $lastError = 'Username already exists on the panel.';
                 continue;
             }
 
@@ -324,7 +324,7 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
         }
 
         if ($created === null) {
-            return ['ok' => false, 'msg' => 'خطا در ساخت ساب/سرویس: ' . $lastError];
+            return ['ok' => false, 'msg' => 'Error creating subscription/service: ' . $lastError];
         }
 
         try {
@@ -336,7 +336,7 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
         } catch (Throwable $e) {
             return [
                 'ok' => false,
-                'msg' => 'سرویس ساخته شد (' . $username . ') ولی ثبت جایزه ناموفق بود: ' . $e->getMessage(),
+                'msg' => 'Service created (' . $username . ') but recording the reward failed: ' . $e->getMessage(),
             ];
         }
 
@@ -351,7 +351,7 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
                 }
             }
 
-            $textTemplate = $datatextbot['textafterpay'] ?? '✅ سرویس {name_service} برای {username} ایجاد شد.';
+            $textTemplate = $datatextbot['textafterpay'] ?? '✅ Service {name_service} was created for {username}.';
             if (($panel['type'] ?? '') === 'Manualsale') {
                 $textTemplate = $datatextbot['textmanual'] ?? $textTemplate;
             } elseif (in_array($panel['type'] ?? '', ['ibsng', 'mikrotik'], true)) {
@@ -359,10 +359,10 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
             }
 
             $dayLabel = (int) ($product['Service_time'] ?? 0) === 0
-                ? ($textbotlang['users']['stateus']['Unlimited'] ?? 'نامحدود')
+                ? ($textbotlang['users']['stateus']['Unlimited'] ?? 'Unlimited')
                 : $product['Service_time'];
             $volumeLabel = (int) ($product['Volume_constraint'] ?? 0) === 0
-                ? ($textbotlang['users']['stateus']['Unlimited'] ?? 'نامحدود')
+                ? ($textbotlang['users']['stateus']['Unlimited'] ?? 'Unlimited')
                 : $product['Volume_constraint'];
 
             $textcreatuser = str_replace(
@@ -380,10 +380,10 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
                 $textTemplate
             );
 
-            $reward_text = "<b>🎉 تبریک! هدیه دعوت دریافت شد</b>\n\n";
-            $reward_text .= "کمپین: <b>{$campaign['title']}</b>\n";
-            $reward_text .= "سرویس: <b>{$product['name_product']}</b>\n";
-            $reward_text .= "نام کاربری: <code>{$username}</code>";
+            $reward_text = "<b>🎉 Congratulations! Your invite gift was received</b>\n\n";
+            $reward_text .= "Campaign: <b>{$campaign['title']}</b>\n";
+            $reward_text .= "Service: <b>{$product['name_product']}</b>\n";
+            $reward_text .= "Username: <code>{$username}</code>";
 
             if (function_exists('sendmessage')) {
                 sendmessage($user_id, $reward_text, null, 'HTML');
@@ -392,7 +392,7 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
             if (function_exists('sendMessageService')) {
                 $Shoppinginfo = json_encode([
                     'inline_keyboard' => [[
-                        ['text' => $textbotlang['users']['help']['btninlinebuy'] ?? 'راهنما', 'callback_data' => 'helpbtn'],
+                        ['text' => $textbotlang['users']['help']['btninlinebuy'] ?? 'Help', 'callback_data' => 'helpbtn'],
                     ]],
                 ]);
                 sendMessageService(
@@ -413,7 +413,7 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
                 telegram('sendmessage', [
                     'chat_id' => $setting['Channel_Report'],
                     'message_thread_id' => $buyreport ?? 0,
-                    'text' => "🎁 هدیه دعوت (پنل)\nکمپین: {$campaign['title']}\nکاربر: {$user_id}\nسرویس: {$product['name_product']}\nیوزرنیم: {$username}",
+                    'text' => "🎁 Invite gift (panel)\nCampaign: {$campaign['title']}\nUser: {$user_id}\nService: {$product['name_product']}\nUsername: {$username}",
                     'parse_mode' => 'HTML',
                 ]);
             }
@@ -422,15 +422,15 @@ function referral_lib_manual_grant(PDO $pdo, int $campaign_id, $user_id): array
             error_log('referral_lib_manual_grant notify: ' . $notifyError);
         }
 
-        $msg = 'جایزه برای ' . $user_id . ' ثبت و سرویس «' . $username . '» ساخته شد.';
+        $msg = 'Reward recorded for ' . $user_id . ' and service “' . $username . '” was created.';
         if ($notifyError !== '') {
-            $msg .= ' (سرویس ساخته شد؛ ارسال تلگرام خطا داد: ' . $notifyError . ')';
+            $msg .= ' (Service created; Telegram delivery failed: ' . $notifyError . ')';
         }
 
         return ['ok' => true, 'msg' => $msg];
     } catch (Throwable $e) {
         error_log('referral_lib_manual_grant: ' . $e->getMessage());
-        return ['ok' => false, 'msg' => 'خطای سیستمی: ' . $e->getMessage()];
+        return ['ok' => false, 'msg' => 'System error: ' . $e->getMessage()];
     }
 }
 
@@ -449,22 +449,22 @@ function referral_lib_grant_last_product(PDO $pdo, int $campaign_id, $user_id): 
 
         $campaign = referral_lib_get_campaign($pdo, $campaign_id);
         if (!$campaign) {
-            return ['ok' => false, 'msg' => 'کمپین یافت نشد.'];
+            return ['ok' => false, 'msg' => 'Campaign not found.'];
         }
 
         $user_id = (string) $user_id;
         if ($user_id === '' || !ctype_digit($user_id)) {
-            return ['ok' => false, 'msg' => 'آیدی کاربر نامعتبر است.'];
+            return ['ok' => false, 'msg' => 'Invalid user ID.'];
         }
 
         if (referral_has_reward($campaign_id, $user_id)) {
-            return ['ok' => false, 'msg' => 'این کاربر قبلاً جایزه این کمپین را دریافت کرده است.'];
+            return ['ok' => false, 'msg' => 'This user has already received this campaign reward.'];
         }
 
         $invite_count = referral_count_invites($campaign_id, $user_id);
         $required = max(1, (int) ($campaign['required_invites'] ?? 1));
         if ($invite_count < $required) {
-            return ['ok' => false, 'msg' => "تعداد دعوت کافی نیست ({$invite_count} / {$required})."];
+            return ['ok' => false, 'msg' => "Not enough invites ({$invite_count} / {$required})."];
         }
 
         $last = db_fetch(
@@ -479,7 +479,7 @@ function referral_lib_grant_last_product(PDO $pdo, int $campaign_id, $user_id): 
         );
 
         if (!$last || empty($last['id_invoice'])) {
-            return ['ok' => false, 'msg' => 'آخرین محصولی برای این کاربر یافت نشد.'];
+            return ['ok' => false, 'msg' => 'No latest product was found for this user.'];
         }
 
         $idInvoice = (string) $last['id_invoice'];
@@ -494,7 +494,7 @@ function referral_lib_grant_last_product(PDO $pdo, int $campaign_id, $user_id): 
                 [$campaign_id, $user_id, $idInvoice, date('Y/m/d H:i:s')]
             );
         } catch (Throwable $e) {
-            return ['ok' => false, 'msg' => 'ثبت جایزه ناموفق بود: ' . $e->getMessage()];
+            return ['ok' => false, 'msg' => 'Could not record the reward: ' . $e->getMessage()];
         }
 
         try {
@@ -505,10 +505,10 @@ function referral_lib_grant_last_product(PDO $pdo, int $campaign_id, $user_id): 
 
         try {
             if (function_exists('sendmessage')) {
-                $text = "<b>🎉 تبریک! هدیه دعوت ثبت شد</b>\n\n";
-                $text .= "کمپین: <b>{$campaign['title']}</b>\n";
-                $text .= "جایزه (آخرین سرویس شما): <b>{$serviceName}</b>\n";
-                $text .= "نام کاربری: <code>{$serviceUser}</code>";
+                $text = "<b>🎉 Congratulations! Your invite gift was recorded</b>\n\n";
+                $text .= "Campaign: <b>{$campaign['title']}</b>\n";
+                $text .= "Reward (your latest service): <b>{$serviceName}</b>\n";
+                $text .= "Username: <code>{$serviceUser}</code>";
                 sendmessage($user_id, $text, null, 'HTML');
             }
         } catch (Throwable $e) {
@@ -517,10 +517,10 @@ function referral_lib_grant_last_product(PDO $pdo, int $campaign_id, $user_id): 
 
         return [
             'ok' => true,
-            'msg' => "آخرین محصول «{$serviceName}» ({$serviceUser}) به‌عنوان جایزه ثبت شد و از لیست حذف گردید.",
+            'msg' => "Latest product “{$serviceName}” ({$serviceUser}) was recorded as the reward and removed from the list.",
         ];
     } catch (Throwable $e) {
         error_log('referral_lib_grant_last_product: ' . $e->getMessage());
-        return ['ok' => false, 'msg' => 'خطای سیستمی: ' . $e->getMessage()];
+        return ['ok' => false, 'msg' => 'System error: ' . $e->getMessage()];
     }
 }

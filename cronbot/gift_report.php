@@ -18,7 +18,7 @@ function gift_append_unfinished(array &$job, string $username, string $panel, st
     ];
 }
 
-function gift_merge_remaining_unfinished(array $job, array $remaining, string $reason = 'در صف / لغو'): array
+function gift_merge_remaining_unfinished(array $job, array $remaining, string $reason = 'Queued / cancelled'): array
 {
     $list = gift_unfinished_list($job);
     $seen = [];
@@ -114,21 +114,21 @@ function gift_build_unfinished_text(array $job, array $unfinished, bool $cancell
             $queuedCount++;
         }
     }
-    $title = $cancelled ? '⏹ شارژ همگانی لغو شد.' : '📌 شارژ همگانی به پایان رسید.';
+    $title = $cancelled ? '⏹ Bulk charge was cancelled.' : '📌 Bulk charge finished.';
     $lines = [
         $title,
         '',
-        '✅ موفق: ' . number_format($success),
-        '❌ ناموفق: ' . number_format($failed),
-        '⏭ ردشده: ' . number_format($skipped),
+        '✅ Succeeded: ' . number_format($success),
+        '❌ Failed: ' . number_format($failed),
+        '⏭ Skipped: ' . number_format($skipped),
         '⏱ Timeout: ' . number_format($timeoutCount),
-        '📋 انجام‌نشده: ' . number_format(count($unfinished)),
+        '📋 Unfinished: ' . number_format(count($unfinished)),
     ];
     if ($queuedCount > 0) {
-        $lines[] = '⏹ باقی‌مانده در صف: ' . number_format($queuedCount);
+        $lines[] = '⏹ Remaining in queue: ' . number_format($queuedCount);
     }
     $lines[] = '';
-    $lines[] = 'سرویس‌های انجام‌نشده:';
+    $lines[] = 'Unfinished services:';
     foreach ($unfinished as $row) {
         if (!is_array($row) || empty($row['username'])) {
             continue;
@@ -144,7 +144,7 @@ function gift_build_unfinished_text(array $job, array $unfinished, bool $cancell
 
 function gift_send_unfinished_report(array $job, array $remaining = [], bool $cancelled = false): void
 {
-    $unfinished = gift_merge_remaining_unfinished($job, $remaining, 'در صف / لغو');
+    $unfinished = gift_merge_remaining_unfinished($job, $remaining, 'Queued / cancelled');
     if ($unfinished === []) {
         if (!$cancelled) {
             return;
@@ -153,11 +153,11 @@ function gift_send_unfinished_report(array $job, array $remaining = [], bool $ca
     }
     $text = gift_build_unfinished_text($job, $unfinished, $cancelled);
     if ($unfinished === [] && $cancelled) {
-        $text = "⏹ شارژ همگانی لغو شد.\n\n"
-            . '✅ موفق: ' . number_format(intval($job['success_count'] ?? 0)) . "\n"
-            . '❌ ناموفق: ' . number_format(intval($job['failed_count'] ?? 0)) . "\n"
-            . '⏭ ردشده: ' . number_format(intval($job['skipped_count'] ?? 0)) . "\n"
-            . 'سرویس انجام‌نشده‌ای باقی نماند.';
+        $text = "⏹ Bulk charge was cancelled.\n\n"
+            . '✅ Succeeded: ' . number_format(intval($job['success_count'] ?? 0)) . "\n"
+            . '❌ Failed: ' . number_format(intval($job['failed_count'] ?? 0)) . "\n"
+            . '⏭ Skipped: ' . number_format(intval($job['skipped_count'] ?? 0)) . "\n"
+            . 'No unfinished services remain.';
     }
 
     if (!empty($job['id_admin'])) {

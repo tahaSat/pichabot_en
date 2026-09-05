@@ -66,11 +66,11 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $text_report = "🎁 $result USD was added to your account as a deposit bonus.";
         sendmessage($Balance_id['id'], $text_report, null, 'HTML');
     }
-        $text_reportpayment = "💵 پرداخت جدید
-        
-آیدی عددی کاربر : {$Balance_id['id']}
-مبلغ تراکنش {$Payment_report['price']}
-روش پرداخت :  تایید خودکار بدون بررسی
+        $text_reportpayment = "💵 New payment
+
+User ID : {$Balance_id['id']}
+Transaction amount : {$Payment_report['price']}
+Payment method : auto-confirm without review
 {$Payment_report['Payment_Method']}";
          if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage',[

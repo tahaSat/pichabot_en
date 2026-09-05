@@ -51,7 +51,7 @@
       navigator: { scroll: { enabled: false } },
       toolbox: {
         calendarSwitch: { enabled: false },
-        todayButton: { enabled: true, text: { fa: 'اکنون', en: 'Now' } },
+        todayButton: { enabled: true, text: { fa: 'Now', en: 'Now' } },
         submitButton: { enabled: true }
       },
       timePicker: {
@@ -62,7 +62,7 @@
       onShow: function () {
         setTimeout(function () {
           document.querySelectorAll('.pwt-btn-today, .toolbox-today-button').forEach(function (btn) {
-            if (btn.textContent) btn.textContent = 'اکنون';
+            if (btn.textContent) btn.textContent = 'Now';
           });
         }, 0);
       }
@@ -116,7 +116,7 @@
 
   function userViewHtml(uid, known) {
     if (!uid || uid === '0') {
-      return '<span style="color:var(--text-dim)">بدون کاربر</span>';
+      return '<span style="color:var(--text-dim)">No user</span>';
     }
     if (known) {
       return '<a href="user.php?id=' + encodeURIComponent(uid) + '" class="cell-mono" style="color:var(--accent)">'
@@ -131,7 +131,7 @@
   }
 
   function statusMeta(status) {
-    if (status === 'cost') return cfg.costStatus || { cls: 'tag-plain', lbl: 'هزینه شده' };
+    if (status === 'cost') return cfg.costStatus || { cls: 'tag-plain', lbl: 'Expensed' };
     return (cfg.statusOptions && cfg.statusOptions[status]) || { cls: 'tag-plain', lbl: status || '—' };
   }
 
@@ -217,7 +217,7 @@
     }).then(function (res) {
       return res.json().then(function (data) {
         if (!res.ok || !data.ok) {
-          throw new Error(data.msg || data.error || 'خطا در ذخیره');
+          throw new Error(data.msg || data.error || 'Could not save');
         }
         return data;
       });
@@ -305,7 +305,7 @@
     if (body.querySelector('.pay-sheet-row')) return;
     body.insertAdjacentHTML('afterbegin',
       '<tr class="pay-empty-row"><td colspan="9"><div class="empty"><div class="empty-mark">—</div><p>'
-      + escapeHtml(cfg.emptyText || 'تراکنشی یافت نشد') + '</p></div></td></tr>'
+      + escapeHtml(cfg.emptyText || 'No transactions found') + '</p></div></td></tr>'
     );
   }
 
@@ -352,10 +352,10 @@
       remove_product: !!removeProduct
     }).then(function (data) {
       applyRowData(row, data.row);
-      toast(data.msg || 'وضعیت ذخیره شد.', 'ok');
+      toast(data.msg || 'Status saved.', 'ok');
     }).catch(function (err) {
       revertStatus(row, row.dataset.status);
-      toast(err.message || 'خطا در تغییر وضعیت', 'error');
+      toast(err.message || 'Could not change status', 'error');
     });
   }
 
@@ -372,7 +372,7 @@
       new_status: fields.status
     }).then(function (data) {
       applyRowData(row, data.row);
-      toast(data.msg || (isCostTab ? 'دسته هزینه ذخیره شد.' : 'روش پرداخت ذخیره شد.'), 'ok');
+      toast(data.msg || (isCostTab ? 'Expense category saved.' : 'Payment method saved.'), 'ok');
     }).catch(function (err) {
       var val = row.querySelector('.pay-method-value');
       var prev = isCostTab ? (row.dataset.category || '') : (row.dataset.method || '');
@@ -383,14 +383,14 @@
         label.textContent = opts[prev] || prev || '—';
       }
       closePickers();
-      toast(err.message || (isCostTab ? 'خطا در ذخیره دسته هزینه' : 'خطا در ذخیره روش پرداخت'), 'error');
+      toast(err.message || (isCostTab ? 'Could not save expense category' : 'Could not save payment method'), 'error');
     });
   }
 
   function saveRow(row) {
     var fields = collectRow(row);
     if (!fields.amount || Number(fields.amount) < 1) {
-      toast('مبلغ باید عدد مثبت باشد.', 'error');
+      toast('Amount must be a positive number.', 'error');
       return;
     }
     var send = function (rejectInvoice, removeProduct) {
@@ -407,9 +407,9 @@
         remove_product: !!removeProduct
       }).then(function (data) {
         applyRowData(row, data.row);
-        toast(data.msg || 'ذخیره شد.', 'ok');
+        toast(data.msg || 'Saved.', 'ok');
       }).catch(function (err) {
-        toast(err.message || 'خطا در ذخیره', 'error');
+        toast(err.message || 'Could not save', 'error');
       });
     };
 
@@ -430,16 +430,16 @@
       postForm('delete_row', { order_id: row.dataset.orderId }).then(function (data) {
         row.remove();
         showEmptyIfNeeded();
-        toast(data.msg || 'حذف شد.', 'ok');
+        toast(data.msg || 'Deleted.', 'ok');
       }).catch(function (err) {
-        toast(err.message || 'خطا در حذف', 'error');
+        toast(err.message || 'Could not delete', 'error');
       });
     };
     if (typeof window.showConfirm === 'function') {
       window.showConfirm(
-        isCostTab ? 'این هزینه حذف شود؟' : 'این تراکنش حذف شود؟',
+        isCostTab ? 'Delete this expense?' : 'Delete this transaction?',
         run,
-        'تأیید حذف'
+        'Confirm delete'
       );
       return;
     }
@@ -453,10 +453,10 @@
     var defaultMethod = cfg.defaultMethod || 'manual invoice';
     var defaultStatus = 'paid';
     var defaultCategory = cfg.defaultCategory || Object.keys(cfg.categoryOptions || {})[0] || 'other';
-    var methodLabel = (cfg.methodOptions && cfg.methodOptions[defaultMethod]) || 'فاکتور دستی';
-    var categoryLabel = (cfg.categoryOptions && cfg.categoryOptions[defaultCategory]) || 'سایر';
+    var methodLabel = (cfg.methodOptions && cfg.methodOptions[defaultMethod]) || 'Manual invoice';
+    var categoryLabel = (cfg.categoryOptions && cfg.categoryOptions[defaultCategory]) || 'Other';
     var meta = statusMeta(defaultStatus);
-    var costMeta = cfg.costStatus || { cls: 'tag-plain', lbl: 'هزینه شده' };
+    var costMeta = cfg.costStatus || { cls: 'tag-plain', lbl: 'Expensed' };
 
     var methodCell = isCostTab
       ? '<button type="button" class="pay-dd-trigger" data-pay-menu="category"><span class="pay-method-label">'
@@ -481,23 +481,23 @@
     tr.dataset.hasProduct = '0';
     tr.innerHTML =
       '<td class="pay-idx" style="color:var(--text-dim)">—</td>'
-      + '<td><span class="pay-view pay-user-view"><span style="color:var(--text-dim)">بدون کاربر</span></span>'
-      + '<input class="input pay-edit pay-cell-input pay-user-input" type="text" value="" placeholder="آیدی یا یوزرنیم" autocomplete="off"></td>'
+      + '<td><span class="pay-view pay-user-view"><span style="color:var(--text-dim)">No user</span></span>'
+      + '<input class="input pay-edit pay-cell-input pay-user-input" type="text" value="" placeholder="ID or username" autocomplete="off"></td>'
       + '<td class="cell-mono pay-oid">' + escapeHtml(oid) + '</td>'
       + '<td><span class="pay-view cell-strong cell-num pay-price-view">0 <span style="color:var(--text-dim);font-weight:400;font-size:.72rem">USD</span></span>'
       + '<input class="input pay-edit pay-cell-input pay-price-input" type="text" inputmode="numeric" dir="ltr" autocomplete="off" placeholder="0" value=""></td>'
       + '<td class="pay-method-view">' + methodCell + '</td>'
       + '<td><span class="pay-view pay-note-view"><span style="color:var(--text-dim)">—</span></span>'
-      + '<input class="input pay-edit pay-cell-input pay-note-input" type="text" value="" placeholder="یادداشت"></td>'
+      + '<input class="input pay-edit pay-cell-input pay-note-input" type="text" value="" placeholder="Note"></td>'
       + '<td><span class="pay-view pay-time-view">' + escapeHtml(now) + '</span>'
       + '<div class="pay-edit pay-time-edit"><input class="input pay-cell-input jalali-datetime-picker pay-time-input" type="text" value="'
-      + escapeHtml(now) + '" placeholder="تاریخ و ساعت" autocomplete="off">'
-      + '<button type="button" class="btn btn-ghost btn-sm pay-time-now" title="تاریخ و ساعت الان">اکنون</button></div></td>'
+      + escapeHtml(now) + '" placeholder="Date and time" autocomplete="off">'
+      + '<button type="button" class="btn btn-ghost btn-sm pay-time-now" title="Use current date and time">Now</button></div></td>'
       + '<td>' + statusCell + '</td>'
       + '<td><div class="pay-actions">'
-      + '<button type="button" class="btn btn-ghost btn-sm btn-icon pay-btn-edit" title="ویرایش">' + (cfg.icons.edit || '') + '</button>'
-      + '<button type="button" class="btn btn-primary btn-sm btn-icon pay-btn-save" title="ذخیره">' + (cfg.icons.save || '') + '</button>'
-      + '<button type="button" class="btn btn-no btn-sm btn-icon pay-btn-delete" title="حذف">' + (cfg.icons.trash || '') + '</button>'
+      + '<button type="button" class="btn btn-ghost btn-sm btn-icon pay-btn-edit" title="Edit">' + (cfg.icons.edit || '') + '</button>'
+      + '<button type="button" class="btn btn-primary btn-sm btn-icon pay-btn-save" title="Save">' + (cfg.icons.save || '') + '</button>'
+      + '<button type="button" class="btn btn-no btn-sm btn-icon pay-btn-delete" title="Delete">' + (cfg.icons.trash || '') + '</button>'
       + '</div></td>';
 
     body.insertBefore(tr, body.firstChild);
@@ -633,12 +633,12 @@
 
   function userResultsHtml(users) {
     if (!users.length) {
-      return '<div class="pay-sheet-menu-empty">کاربری یافت نشد</div>';
+      return '<div class="pay-sheet-menu-empty">No users found</div>';
     }
     return users.map(function (u, i) {
       var username = u.username || '';
       var name = u.name || '';
-      var title = username ? '@' + username : (name || ('کاربر #' + u.id));
+      var title = username ? '@' + username : (name || ('User #' + u.id));
       var meta = [];
       if (username && name) meta.push(name);
       meta.push(u.id);

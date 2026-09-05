@@ -126,12 +126,12 @@ if ($adminrulecheck['rule'] == "administrator") {
         'keyboard' => [
             [['text' => $textbotlang['Admin']['Status']['btn']]],
             [['text' => $textbotlang['Admin']['btnkeyboardadmin']['managementpanel']], ['text' => $textbotlang['Admin']['btnkeyboardadmin']['addpanel']]],
-            [['text' => "⏳ تنظیم سریع قیمت زمان"], ['text' => "🔋 تنظیم سریع قیمت حجم"]],
-            [['text' => $textbotlang['Admin']['btnkeyboardadmin']['managruser']], ['text' => "🏬 تنظیمات فروشگاه"]],
-            [['text' => "💎 مالی"]],
-            [['text' => "🤙 بخش پشتیبانی"], ['text' => "📚 بخش آموزش"]],
-            [['text' => "📬 گزارش ربات"], ['text' => "🛠 قابلیت های پنل"]],
-            [['text' => "⚙️ تنظیمات عمومی"], ['text' => "💵 رسید های تایید نشده"]],
+            [['text' => "⏳ Quick time-price setup"], ['text' => "🔋 Quick volume-price setup"]],
+            [['text' => $textbotlang['Admin']['btnkeyboardadmin']['managruser']], ['text' => "🏬 Shop settings"]],
+            [['text' => "💎 Finance"]],
+            [['text' => "🤙 Support section"], ['text' => "📚 Guides section"]],
+            [['text' => "📬 Bot reports"], ['text' => "🛠 Panel features"]],
+            [['text' => "⚙️ General settings"], ['text' => "💵 Unverified receipts"]],
             [['text' => $textbotlang['users']['backbtn']]]
         ],
         'resize_keyboard' => true
@@ -141,7 +141,7 @@ if ($adminrulecheck['rule'] == "Seller") {
     $keyboardadmin = json_encode([
         'keyboard' => [
             [['text' => $textbotlang['Admin']['Status']['btn']]],
-            [['text' => "👤 مدیریت کاربر"]],
+            [['text' => $textbotlang['Admin']['btnkeyboardadmin']['managruser']]],
             [['text' => $textbotlang['users']['backbtn']]]
         ],
         'resize_keyboard' => true
@@ -150,7 +150,7 @@ if ($adminrulecheck['rule'] == "Seller") {
 if ($adminrulecheck['rule'] == "support") {
     $keyboardadmin = json_encode([
         'keyboard' => [
-            [['text' => "👤 مدیریت کاربر"], ['text' => "👁‍🗨 جستجو کاربر"]],
+            [['text' => $textbotlang['Admin']['btnkeyboardadmin']['managruser']], ['text' => "👁‍🗨 Search user"]],
             [['text' => $textbotlang['users']['backbtn']]]
         ],
         'resize_keyboard' => true
@@ -158,95 +158,95 @@ if ($adminrulecheck['rule'] == "support") {
 }
 $CartManage = json_encode([
     'keyboard' => [
-        [['text' => "🗂 نام درگاه کارت به کارت"]],
-        [['text' => "💳 تنظیم شماره کارت"], ['text' => "❌ حذف شماره کارت"]],
-        [['text' => "👤 آیدی پشتیبانی",], ['text' => "💳 درگاه آفلاین در پیوی"]],
-        [['text' => "💰  غیرفعالسازی  نمایش شماره کارت"], ['text' => "💰 فعالسازی نمایش شماره کارت"]],
-        [['text' => "♻️ نمایش گروهی شماره کارت"]],
-        [['text' => "📄 خروجی افراد شماره کارت فعال"]],
-        [['text' => "♻️ تایید خودکار رسید"], ['text' => "💰 کش بک کارت به کارت"]],
-        [['text' => "🔒 نمایش کارت به کارت پس از اولین پرداخت"]],
-        [['text' => "⬇️ حداقل مبلغ کارت به کارت"], ['text' => "⬆️ حداکثر مبلغ کارت به کارت"]],
-        [['text' => "📚 تنظیم آموزش کارت به کارت"]],
-        [['text' => "🤖 تایید رسید  بدون بررسی"]],
-        [['text' => "💳 استثناء کردن کاربر از تایید خودکار"]],
-        [['text' => "⏳ زمان تایید خودکار بدون بررسی"]],
+        [['text' => "🗂 Card-to-card gateway name"]],
+        [['text' => "💳 Set card number"], ['text' => "❌ Remove card number"]],
+        [['text' => "👤 Support username",], ['text' => "💳 Offline gateway in private chat"]],
+        [['text' => "💰 Disable card-number display"], ['text' => "💰 Enable card-number display"]],
+        [['text' => "♻️ Group card-number display"]],
+        [['text' => "📄 Export users with card display on"]],
+        [['text' => "♻️ Auto-confirm receipts"], ['text' => "💰 Card-to-card cashback"]],
+        [['text' => "🔒 Show card-to-card after first payment"]],
+        [['text' => "⬇️ Card-to-card minimum"], ['text' => "⬆️ Card-to-card maximum"]],
+        [['text' => "📚 Set card-to-card guide"]],
+        [['text' => "🤖 Confirm receipts without review"]],
+        [['text' => "💳 Exclude user from auto-confirm"]],
+        [['text' => "⏳ Auto-confirm without review delay"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $trnado = json_encode([
     'keyboard' => [
-        [['text' => "🗂 نام درگاه ارزی ریالی دوم"]],
+        [['text' => "🗂 IRR gateway 2 name"]],
         [['text' => "API T"]],
-        [['text' => "تنظیم آدرس api"]],
-        [['text' => "💰 کش بک ارزی ریالی دوم"]],
-        [['text' => "⬇️ حداقل مبلغ ارزی ریالی دوم"], ['text' => "⬆️ حداکثر مبلغ ارزی ریالی دوم"]],
-        [['text' => "📚 تنظیم آموزش ارزی ریالی  دوم"]],
+        [['text' => "Set API URL"]],
+        [['text' => "💰 IRR gateway 2 cashback"]],
+        [['text' => "⬇️ IRR gateway 2 minimum"], ['text' => "⬆️ IRR gateway 2 maximum"]],
+        [['text' => "📚 Set IRR gateway 2 guide"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $keyboardzarinpal = json_encode([
     'keyboard' => [
-        [['text' => "🗂 نام درگاه زرین پال"], ['text' => "مرچنت زرین پال"]],
-        [['text' => "💰 کش بک زرین پال"]],
-        [['text' => "⬇️ حداقل مبلغ زرین پال"], ['text' => "⬆️ حداکثر مبلغ زرین پال"]],
-        [['text' => "📚 تنظیم آموزش زرین پال"]],
+        [['text' => "🗂 Zarinpal gateway name"], ['text' => "Zarinpal merchant"]],
+        [['text' => "💰 Zarinpal cashback"]],
+        [['text' => "⬇️ Zarinpal minimum"], ['text' => "⬆️ Zarinpal maximum"]],
+        [['text' => "📚 Set Zarinpal guide"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $keyboardtetraminator = json_encode([
     'keyboard' => [
-        [['text' => "🗂 نام درگاه Tetraminator"]],
-        [['text' => "💰 کش بک Tetraminator"]],
-        [['text' => "⬇️ حداقل مبلغ Tetraminator"], ['text' => "⬆️ حداکثر مبلغ Tetraminator"]],
+        [['text' => "🗂 Tetraminator gateway name"]],
+        [['text' => "💰 Tetraminator cashback"]],
+        [['text' => "⬇️ Tetraminator minimum"], ['text' => "⬆️ Tetraminator maximum"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $aqayepardakht = json_encode([
     'keyboard' => [
-        [['text' => "🗂 نام درگاه آقای پرداخت"]],
-        [['text' => "تنظیم مرچنت آقای پرداخت"], ['text' => "💰 کش بک آقای پرداخت"]],
-        [['text' => "⬇️ حداقل مبلغ آقای پرداخت"], ['text' => "⬆️ حداکثر مبلغ آقای پرداخت"]],
-        [['text' => "📚 تنظیم آموزش درگاه اقای پرداخت"]],
+        [['text' => "🗂 Aghaye Pardakht gateway name"]],
+        [['text' => "Set Aghaye Pardakht merchant"], ['text' => "💰 Aghaye Pardakht cashback"]],
+        [['text' => "⬇️ Aghaye Pardakht minimum"], ['text' => "⬆️ Aghaye Pardakht maximum"]],
+        [['text' => "📚 Set Aghaye Pardakht guide"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $NowPaymentsManage = json_encode([
     'keyboard' => [
-        [['text' => "🗂 نام درگاه   plisio"]],
-        [['text' => "🧩 api plisio"], ['text' => "💰 کش بک plisio"]],
-        [['text' => "⬇️ حداقل مبلغ plisio"], ['text' => "⬆️ حداکثر مبلغ plisio"]],
-        [['text' => "📚 تنظیم آموزش plisio"]],
+        [['text' => "🗂 Plisio gateway name"]],
+        [['text' => "🧩 api plisio"], ['text' => "💰 Plisio cashback"]],
+        [['text' => "⬇️ Plisio minimum"], ['text' => "⬆️ Plisio maximum"]],
+        [['text' => "📚 Set Plisio guide"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $CryptomusManage = json_encode([
     'keyboard' => [
-        [['text' => "🪪 Merchant UUID کریپتوموس"], ['text' => "🔐 Payment API Key کریپتوموس"]],
-        [['text' => "⬇️ حداقل USD کریپتوموس"], ['text' => "⬆️ حداکثر USD کریپتوموس"]],
-        [['text' => "💰 کش بک کریپتوموس"], ['text' => "🗂 متن دکمه کریپتوموس"]],
-        [['text' => "📚 تنظیم آموزش کریپتوموس"]],
+        [['text' => "🪪 Cryptomus Merchant UUID"], ['text' => "🔐 Cryptomus Payment API Key"]],
+        [['text' => "⬇️ Cryptomus minimum USD"], ['text' => "⬆️ Cryptomus maximum USD"]],
+        [['text' => "💰 Cryptomus cashback"], ['text' => "🗂 Cryptomus button text"]],
+        [['text' => "📚 Set Cryptomus guide"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $setting_panel = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها"]],
-        [['text' => "📣 گزارشات ربات"], ['text' => "📯 تنظیمات کانال"]],
-        [['text' => "✅ فعالسازی پنل تحت وب"]],
-        [['text' => "🗑 بهینه سازی ربات "]],
-        [['text' => "📝 تنظیم متن ربات"], ['text' => "⌨️ تنظیم دکمه‌های منو"]],
-        [['text' => "👨‍🔧 بخش ادمین"]],
-        [['text' => "➕ محدودیت ساخت اکانت تست برای همه"]],
-        [['text' => "💰 مبلغ عضویت نمایندگی"], ['text' => "🖼 پس زمینه کیوآرکد"]],
-        [['text' => "🔗 وبهوک مجدد ربات های نماینده"]],
+        [['text' => "⚙️ Feature status"]],
+        [['text' => "📣 Bot reports"], ['text' => "📯 Channel settings"]],
+        [['text' => "✅ Enable web panel"]],
+        [['text' => "🗑 Optimize bot"]],
+        [['text' => "📝 Bot text settings"], ['text' => "⌨️ Menu button settings"]],
+        [['text' => "👨‍🔧 Admin section"]],
+        [['text' => $textbotlang['Admin']['getlimitusertest']['setlimitbtn']]],
+        [['text' => "💰 Agency membership fee"], ['text' => "🖼 QR code background"]],
+        [['text' => "🔗 Re-webhook agent bots"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
@@ -356,38 +356,38 @@ $step_payment['inline_keyboard'][] = [
 $step_payment = json_encode($step_payment);
 $keyboardhelpadmin = json_encode([
     'keyboard' => [
-        [['text' => "📚 اضافه کردن آموزش"], ['text' => "❌ حذف آموزش"]],
-        [['text' => "✏️ ویرایش آموزش"]],
+        [['text' => "📚 Add guide"], ['text' => "❌ Remove guide"]],
+        [['text' => "✏️ Edit guide"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $shopkeyboard = json_encode([
     'keyboard' => [
-        [['text' => "🛒 وضعیت قابلیت های فروشگاه"]],
-        [['text' => "🗂 مدیریت دسته بندی"], ['text' => "🛍 مدیریت محصولات"]],
-        [['text' => "🎁 ساخت کد هدیه"], ['text' => "❌ حذف کد هدیه"]],
-        [['text' => "🎁 ساخت کد تخفیف"], ['text' => "❌ حذف کد تخفیف"]],
-        [['text' => "🎁 کمپین‌های دعوت"]],
-        [['text' => "⬇️ حداقل موجودی خرید عمده"], ['text' => "🎁 کش بک تمدید"]],
+        [['text' => "🛒 Shop feature status"]],
+        [['text' => "🗂 Category management"], ['text' => "🛍 Product management"]],
+        [['text' => "🎁 Create gift code"], ['text' => "❌ Remove gift code"]],
+        [['text' => "🎁 Create discount code"], ['text' => "❌ Remove discount code"]],
+        [['text' => "🎁 Invite campaigns"]],
+        [['text' => "⬇️ Wholesale minimum balance"], ['text' => "🎁 Renewal cashback"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $keyboard_Category_manage = json_encode([
     'keyboard' => [
-        [['text' => "🛒 اضافه کردن دسته بندی"], ['text' => "❌ حذف دسته بندی"]],
-        [['text' => "✏️ ویرایش دسته بندی"]],
-        [['text' => "⬅️ بازگشت به منوی فروشگاه"]]
+        [['text' => "🛒 Add category"], ['text' => "❌ Remove category"]],
+        [['text' => "✏️ Edit category"]],
+        [['text' => "⬅️ Back to shop menu"]]
     ],
     'resize_keyboard' => true
 ]);
 $keyboard_shop_manage = json_encode([
     'keyboard' => [
-        [['text' => "🛍 اضافه کردن محصول"], ['text' => "❌ حذف محصول"]],
-        [['text' => "✏️ ویرایش محصول"]],
-        [['text' => "⬆️ افزایش گروهی قیمت"], ['text' => "⬇️ کاهش  گروهی قیمت"]],
-        [['text' => "⬅️ بازگشت به منوی فروشگاه"]]
+        [['text' => "🛍 Add product"], ['text' => "❌ Remove product"]],
+        [['text' => "✏️ Edit product"]],
+        [['text' => "⬆️ Bulk price increase"], ['text' => "⬇️ Bulk price decrease"]],
+        [['text' => "⬅️ Back to shop menu"]]
     ],
     'resize_keyboard' => true
 ]);
@@ -416,15 +416,15 @@ $request_contact = json_encode([
 ]);
 $Feature_status = json_encode([
     'keyboard' => [
-        [['text' => "قابلیت مشاهده اطلاعات اکانت"]],
-        [['text' => "قابلیت اکانت تست"], ['text' => "قابلیت آموزش"]],
+        [['text' => "Account info feature"]],
+        [['text' => "Test account feature"], ['text' => "Guides feature"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $channelkeyboard = json_encode([
     'keyboard' => [
-        [['text' => "اضافه کردن کانال"], ['text' => "حذف کانال"]],
+        [['text' => $textbotlang['Admin']['channel']['title']], ['text' => $textbotlang['Admin']['channel']['removechannelbtn']]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
@@ -485,8 +485,8 @@ if ($table_exists) {
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $list_marzban_panel_edit_product['inline_keyboard'][] = [['text' => $row['name_panel'], 'callback_data' => 'locationedit_' . $row['code_panel']]];
     }
-    $list_marzban_panel_edit_product['inline_keyboard'][] = [['text' => "همه پنل ها", 'callback_data' => 'locationedit_all']];
-    $list_marzban_panel_edit_product['inline_keyboard'][] = [['text' => "▶️ بازگشت به منوی قبل", 'callback_data' => 'backproductadmin']];
+    $list_marzban_panel_edit_product['inline_keyboard'][] = [['text' => "All panels", 'callback_data' => 'locationedit_all']];
+    $list_marzban_panel_edit_product['inline_keyboard'][] = [['text' => "▶️ Previous menu", 'callback_data' => 'backproductadmin']];
     $list_marzban_panel_edit_product = json_encode($list_marzban_panel_edit_product);
 }
 //------------------  [ list channel ]----------------//
@@ -555,26 +555,26 @@ if ($table_exists) {
 }
 $textbot = json_encode([
     'keyboard' => [
-        [['text' => "تنظیم متن شروع"], ['text' => "دکمه سرویس خریداری شده"]],
-        [['text' => "دکمه اکانت تست"], ['text' => "دکمه سوالات متداول"]],
-        [['text' => "متن دکمه 📚 آموزش"], ['text' => "متن دکمه ☎️ پشتیبانی"]],
-        [['text' => "دکمه افزایش موجودی"], ['text' => "متن دکمه زیرمجموعه گیری"]],
-        [['text' => "متن دکمه خرید اشتراک"], ['text' => "متن دکمه لیست تعرفه"]],
-        [['text' => "متن توضیحات لیست تعرفه"]],
-        [['text' => "🛒 متن‌های فرآیند خرید"]],
-        [['text' => "متن دکمه کیف پول"], ['text' => "متن پیش فاکتور"]],
-        [['text' => "📝 تنظیم متن توضیحات عضویت اجباری"]],
-        [['text' => "📝 تنظیم متن توضیحات سوالات متداول"]],
-        [['text' => "⚖️ متن قانون"], ['text' => "متن بعد خرید"]],
-        [['text' => "متن بعد خرید ibsng"], ['text' => "دکمه تمدید"]],
-        [['text' => "متن بعد گرفتن اکانت تست"], ['text' => "متن کرون تست"]],
-        [['text' => "متن بعد گرفتن اکانت دستی"]],
-        [['text' => "متن بعد گرفتن اکانت WGDashboard"]],
-        [['text' => "متن انتخاب لوکیشن"], ['text' => "متن دکمه کد هدیه"]],
-        [['text' => "متن درخواست نمایندگی"], ['text' => "متن دکمه  نمایندگی"]],
-        [['text' => "متن دکمه گردونه شانس"], ['text' => "متن کارت به کارت"]],
-        [['text' => "تنظیم متن کارت به کارت خودکار"]],
-        [['text' => "متن توضیحات درخواست نمایندگی"]],
+        [['text' => "Start text"], ['text' => "Purchased services button"]],
+        [['text' => "Test account button"], ['text' => "FAQ button"]],
+        [['text' => "📚 Guides button text"], ['text' => "☎️ Support button text"]],
+        [['text' => "Add balance button"], ['text' => "Referral button text"]],
+        [['text' => "Buy subscription button text"], ['text' => "Tariff list button text"]],
+        [['text' => "Tariff list description"]],
+        [['text' => "🛒 Purchase flow texts"]],
+        [['text' => "Wallet button text"], ['text' => "Invoice preview text"]],
+        [['text' => "📝 Required-join description"]],
+        [['text' => "📝 FAQ description"]],
+        [['text' => "⚖️ Rules text"], ['text' => "After-purchase text"]],
+        [['text' => "After-purchase text (ibsng)"], ['text' => "Renew button"]],
+        [['text' => "After test-account text"], ['text' => "Test cron text"]],
+        [['text' => "After manual-account text"]],
+        [['text' => "After WGDashboard account text"]],
+        [['text' => "Location selection text"], ['text' => "Gift code button text"]],
+        [['text' => "Agency request text"], ['text' => "Agency button text"]],
+        [['text' => "Lucky wheel button text"], ['text' => "Card-to-card text"]],
+        [['text' => "Auto card-to-card text"]],
+        [['text' => "Agency request description"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
@@ -582,17 +582,17 @@ $textbot = json_encode([
 
 $textbot_purchase = json_encode([
     'keyboard' => [
-        [['text' => "متن انتخاب لوکیشن"], ['text' => "متن انتخاب دسته‌بندی"]],
-        [['text' => "متن انتخاب سرویس"], ['text' => "متن انتخاب سرویس (اول)"]],
-        [['text' => "متن انتخاب مدت"], ['text' => "متن یادداشت خرید"]],
-        [['text' => "متن درخواست حجم سرویس دلخواه"]],
-        [['text' => "متن انتخاب مدت سرویس دلخواه"]],
-        [['text' => "متن حجم نامعتبر"], ['text' => "متن پیش فاکتور"]],
-        [['text' => "متن انتخاب نام کاربری"]],
-        [['text' => "توضیحات پنل (پس از انتخاب)"]],
-        [['text' => "متن دکمه سرویس دلخواه"]],
-        [['text' => "توضیحات داخل دسته‌بندی"]],
-        [['text' => "🔙 بازگشت به تنظیم متن"], ['text' => $textbotlang['Admin']['backmenu']]]
+        [['text' => "Location selection text"], ['text' => "Category selection text"]],
+        [['text' => "Service selection text"], ['text' => "Service selection text (first)"]],
+        [['text' => "Duration selection text"], ['text' => "Purchase note text"]],
+        [['text' => "Custom volume request text"]],
+        [['text' => "Custom duration selection text"]],
+        [['text' => "Invalid volume text"], ['text' => "Invoice preview text"]],
+        [['text' => "Username selection text"]],
+        [['text' => "Panel description (after select)"]],
+        [['text' => "Custom service button text"]],
+        [['text' => "Inside-category description"]],
+        [['text' => "🔙 Back to text settings"], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
@@ -647,7 +647,7 @@ function keyboard_admin_addorder_products(string $panelName, string $agent = 'f'
         'resize_keyboard' => true,
     ];
     $list_product['keyboard'][] = [
-        ['text' => $textbotlang['Admin']['backadmin'] ?? 'بازگشت'],
+        ['text' => $textbotlang['Admin']['backadmin'] ?? 'Back'],
     ];
     $panel = select("marzban_panel", "*", "name_panel", $panelName, "select");
     if (is_array($panel) && ($panel['type'] ?? '') !== 'Manualsale') {
@@ -752,10 +752,10 @@ function KeyboardPayment(string $backCallback = 'backuser', bool $withDiscount =
 {
     global $textbotlang;
     $rows = [
-        [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => $confirmCallback]],
+        [['text' => "💰 Pay and get service", 'callback_data' => $confirmCallback]],
     ];
     if ($withDiscount) {
-        $rows[] = [['text' => "🎁 ثبت کد تخفیف", 'callback_data' => "aptdc"]];
+        $rows[] = [['text' => "🎁 Apply discount code", 'callback_data' => "aptdc"]];
     }
     $rows[] = [['text' => $textbotlang['users']['backbtn'], 'callback_data' => $backCallback]];
     return json_encode(['inline_keyboard' => $rows]);
@@ -774,19 +774,19 @@ function purchase_inline_back_keyboard(string $callback): string
 $payment = KeyboardPayment();
 $paymentom = json_encode([
     'inline_keyboard' => [
-        [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => "confirmandgetservice"]],
+        [['text' => "💰 Pay and get service", 'callback_data' => "confirmandgetservice"]],
         [['text' => $textbotlang['users']['backbtn'], 'callback_data' => "backuser"]]
     ]
 ]);
 $change_product = json_encode([
     'keyboard' => [
-        [['text' => "قیمت"], ['text' => "حجم"], ['text' => "زمان"]],
-        [['text' => "نام محصول"], ['text' => "نوع کاربری"]],
-        [['text' => "نوع ریست حجم"], ['text' => "یادداشت"]],
-        [['text' => "موقعیت محصول"], ['text' => "دسته بندی"]],
-        [['text' => "محدودیت دستگاه (HWID)"]],
-        [['text' => "🎛 تنظیم اینباند"], ['text' => "نمایش برای خرید اول"]],
-        [['text' => "مخفی کردن پنل"], ['text' => "حذف کلی پنل های مخفی"]],
+        [['text' => "Price"], ['text' => "Volume"], ['text' => "Time"]],
+        [['text' => "Product name"], ['text' => "User type"]],
+        [['text' => "Volume reset type"], ['text' => "Note"]],
+        [['text' => "Product location"], ['text' => "Category"]],
+        [['text' => "Device limit (HWID)"]],
+        [['text' => "🎛 Inbound settings"], ['text' => "Show for first purchase"]],
+        [['text' => "Hide panel"], ['text' => "Clear all hidden panels"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
@@ -816,198 +816,198 @@ $MethodUsername = json_encode([
 ]);
 $optionMarzban = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "🔐 ویرایش رمز عبور"], ['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔗 ویرایش آدرس پنل"], ['text' => "⚙️ تنظیم پروتکل و اینباند"]],
-        [['text' => "🔋 روش تمدید سرویس"], ['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🚨 محدودیت ساخت اکانت"], ['text' => "📍 تغییر گروه کاربری"]],
-        [['text' => "⏳ زمان سرویس تست"], ['text' => "💾 حجم اکانت تست"]],
-        [['text' => "⚙️ قیمت حجم سرویس دلخواه"], ['text' => "➕ قیمت حجم اضافه"]],
-        [['text' => "⏳ قیمت زمان اضافه"], ['text' => "⏳ قیمت زمان دلخواه"]],
-        [['text' => "🌍 قیمت تغییر لوکیشن"]],
-        [['text' => "📍 حداقل حجم دلخواه"], ['text' => "📍 حداکثر حجم دلخواه"]],
-        [['text' => "📍 حداقل زمان دلخواه"], ['text' => "📍 حداکثر زمان دلخواه"]],
-        [['text' => "⚙️  اینباند اکانت غیرفعال"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "🔐 Edit password"], ['text' => "👤 Edit username"]],
+        [['text' => "🔗 Edit panel URL"], ['text' => "⚙️ Protocol and inbound settings"]],
+        [['text' => "🔋 Renewal method"], ['text' => "💡 Username generation method"]],
+        [['text' => "🚨 Account creation limit"], ['text' => "📍 Change user group"]],
+        [['text' => "⏳ Test service duration"], ['text' => "💾 Test account volume"]],
+        [['text' => "⚙️ Custom volume price"], ['text' => "➕ Extra volume price"]],
+        [['text' => "⏳ Extra time price"], ['text' => "⏳ Custom time price"]],
+        [['text' => "🌍 Location-change price"]],
+        [['text' => "📍 Custom volume minimum"], ['text' => "📍 Custom volume maximum"]],
+        [['text' => "📍 Custom time minimum"], ['text' => "📍 Custom time maximum"]],
+        [['text' => "⚙️ Disabled-account inbound"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionibsng = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "🔐 ویرایش رمز عبور"], ['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔗 ویرایش آدرس پنل"], ['text' => '🎛 تنظیم نام گروه']],
-        [['text' => "🔋 روش تمدید سرویس"], ['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🚨 محدودیت ساخت اکانت"], ['text' => "📍 تغییر گروه کاربری"]],
-        [['text' => "⚙️ قیمت حجم سرویس دلخواه"], ['text' => "➕ قیمت حجم اضافه"]],
-        [['text' => "⏳ قیمت زمان اضافه"], ['text' => "⏳ قیمت زمان دلخواه"]],
-        [['text' => "📍 حداقل حجم دلخواه"], ['text' => "📍 حداکثر حجم دلخواه"]],
-        [['text' => "📍 حداقل زمان دلخواه"], ['text' => "📍 حداکثر زمان دلخواه"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "🔐 Edit password"], ['text' => "👤 Edit username"]],
+        [['text' => "🔗 Edit panel URL"], ['text' => '🎛 Set group name']],
+        [['text' => "🔋 Renewal method"], ['text' => "💡 Username generation method"]],
+        [['text' => "🚨 Account creation limit"], ['text' => "📍 Change user group"]],
+        [['text' => "⚙️ Custom volume price"], ['text' => "➕ Extra volume price"]],
+        [['text' => "⏳ Extra time price"], ['text' => "⏳ Custom time price"]],
+        [['text' => "📍 Custom volume minimum"], ['text' => "📍 Custom volume maximum"]],
+        [['text' => "📍 Custom time minimum"], ['text' => "📍 Custom time maximum"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $option_mikrotik = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "🔐 ویرایش رمز عبور"], ['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔗 ویرایش آدرس پنل"], ['text' => '🎛 تنظیم نام گروه']],
-        [['text' => "🔋 روش تمدید سرویس"], ['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🚨 محدودیت ساخت اکانت"], ['text' => "📍 تغییر گروه کاربری"]],
-        [['text' => "⚙️ قیمت حجم سرویس دلخواه"], ['text' => "➕ قیمت حجم اضافه"]],
-        [['text' => "⏳ قیمت زمان اضافه"], ['text' => "⏳ قیمت زمان دلخواه"]],
-        [['text' => "📍 حداقل حجم دلخواه"], ['text' => "📍 حداکثر حجم دلخواه"]],
-        [['text' => "📍 حداقل زمان دلخواه"], ['text' => "📍 حداکثر زمان دلخواه"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "🔐 Edit password"], ['text' => "👤 Edit username"]],
+        [['text' => "🔗 Edit panel URL"], ['text' => '🎛 Set group name']],
+        [['text' => "🔋 Renewal method"], ['text' => "💡 Username generation method"]],
+        [['text' => "🚨 Account creation limit"], ['text' => "📍 Change user group"]],
+        [['text' => "⚙️ Custom volume price"], ['text' => "➕ Extra volume price"]],
+        [['text' => "⏳ Extra time price"], ['text' => "⏳ Custom time price"]],
+        [['text' => "📍 Custom volume minimum"], ['text' => "📍 Custom volume maximum"]],
+        [['text' => "📍 Custom time minimum"], ['text' => "📍 Custom time maximum"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $options_ui = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "🔐 ویرایش رمز عبور"], ['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔗 ویرایش آدرس پنل"], ['text' => "⚙️ تنظیم پروتکل و اینباند"]],
-        [['text' => "🔋 روش تمدید سرویس"], ['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🚨 محدودیت ساخت اکانت"], ['text' => "📍 تغییر گروه کاربری"]],
-        [['text' => "⏳ زمان سرویس تست"], ['text' => "💾 حجم اکانت تست"]],
-        [['text' => "⚙️ قیمت حجم سرویس دلخواه"], ['text' => "➕ قیمت حجم اضافه"]],
-        [['text' => "⏳ قیمت زمان اضافه"], ['text' => "⏳ قیمت زمان دلخواه"]],
-        [['text' => "🌍 قیمت تغییر لوکیشن"]],
-        [['text' => "📍 حداقل حجم دلخواه"], ['text' => "📍 حداکثر حجم دلخواه"]],
-        [['text' => "📍 حداقل زمان دلخواه"], ['text' => "📍 حداکثر زمان دلخواه"]],
-        [['text' => "⚙️  اینباند اکانت غیرفعال"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "🔐 Edit password"], ['text' => "👤 Edit username"]],
+        [['text' => "🔗 Edit panel URL"], ['text' => "⚙️ Protocol and inbound settings"]],
+        [['text' => "🔋 Renewal method"], ['text' => "💡 Username generation method"]],
+        [['text' => "🚨 Account creation limit"], ['text' => "📍 Change user group"]],
+        [['text' => "⏳ Test service duration"], ['text' => "💾 Test account volume"]],
+        [['text' => "⚙️ Custom volume price"], ['text' => "➕ Extra volume price"]],
+        [['text' => "⏳ Extra time price"], ['text' => "⏳ Custom time price"]],
+        [['text' => "🌍 Location-change price"]],
+        [['text' => "📍 Custom volume minimum"], ['text' => "📍 Custom volume maximum"]],
+        [['text' => "📍 Custom time minimum"], ['text' => "📍 Custom time maximum"]],
+        [['text' => "⚙️ Disabled-account inbound"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionwg = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "🔐 ویرایش رمز عبور"]],
-        [['text' => "🔗 ویرایش آدرس پنل"], ['text' => "💎 تنظیم شناسه اینباند"]],
-        [['text' => "🔋 روش تمدید سرویس"], ['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🚨 محدودیت ساخت اکانت"], ['text' => "📍 تغییر گروه کاربری"]],
-        [['text' => "⏳ زمان سرویس تست"], ['text' => "💾 حجم اکانت تست"]],
-        [['text' => "⚙️ قیمت حجم سرویس دلخواه"], ['text' => "➕ قیمت حجم اضافه"]],
-        [['text' => "⏳ قیمت زمان اضافه"], ['text' => "⏳ قیمت زمان دلخواه"]],
-        [['text' => "🌍 قیمت تغییر لوکیشن"]],
-        [['text' => "📍 حداقل حجم دلخواه"], ['text' => "📍 حداکثر حجم دلخواه"]],
-        [['text' => "📍 حداقل زمان دلخواه"], ['text' => "📍 حداکثر زمان دلخواه"]],
-        [['text' => "⚙️  اینباند اکانت غیرفعال"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "🔐 Edit password"]],
+        [['text' => "🔗 Edit panel URL"], ['text' => "💎 Set inbound ID"]],
+        [['text' => "🔋 Renewal method"], ['text' => "💡 Username generation method"]],
+        [['text' => "🚨 Account creation limit"], ['text' => "📍 Change user group"]],
+        [['text' => "⏳ Test service duration"], ['text' => "💾 Test account volume"]],
+        [['text' => "⚙️ Custom volume price"], ['text' => "➕ Extra volume price"]],
+        [['text' => "⏳ Extra time price"], ['text' => "⏳ Custom time price"]],
+        [['text' => "🌍 Location-change price"]],
+        [['text' => "📍 Custom volume minimum"], ['text' => "📍 Custom volume maximum"]],
+        [['text' => "📍 Custom time minimum"], ['text' => "📍 Custom time maximum"]],
+        [['text' => "⚙️ Disabled-account inbound"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionmarzneshin = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "🔐 ویرایش رمز عبور"], ['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔗 ویرایش آدرس پنل"], ['text' => "🔋 روش تمدید سرویس"]],
-        [['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "⚙️ تنظیمات سرویس"], ['text' => "🚨 محدودیت ساخت اکانت"]],
-        [['text' => "📍 تغییر گروه کاربری"]],
-        [['text' => "⏳ زمان سرویس تست"], ['text' => "💾 حجم اکانت تست"]],
-        [['text' => "🌍 قیمت تغییر لوکیشن"], ['text' => "➕ قیمت حجم اضافه"]],
-        [['text' => "⏳ قیمت زمان اضافه"], ['text' => "⚙️ قیمت حجم سرویس دلخواه"]],
-        [['text' => "⏳ قیمت زمان دلخواه"]],
-        [['text' => "📍 حداقل حجم دلخواه"], ['text' => "📍 حداکثر حجم دلخواه"]],
-        [['text' => "📍 حداقل زمان دلخواه"], ['text' => "📍 حداکثر زمان دلخواه"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "🔐 Edit password"], ['text' => "👤 Edit username"]],
+        [['text' => "🔗 Edit panel URL"], ['text' => "🔋 Renewal method"]],
+        [['text' => "💡 Username generation method"]],
+        [['text' => "⚙️ Service settings"], ['text' => "🚨 Account creation limit"]],
+        [['text' => "📍 Change user group"]],
+        [['text' => "⏳ Test service duration"], ['text' => "💾 Test account volume"]],
+        [['text' => "🌍 Location-change price"], ['text' => "➕ Extra volume price"]],
+        [['text' => "⏳ Extra time price"], ['text' => "⚙️ Custom volume price"]],
+        [['text' => "⏳ Custom time price"]],
+        [['text' => "📍 Custom volume minimum"], ['text' => "📍 Custom volume maximum"]],
+        [['text' => "📍 Custom time minimum"], ['text' => "📍 Custom time maximum"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionManualsale = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🚨 محدودیت ساخت اکانت"], ['text' => "📍 تغییر گروه کاربری"]],
-        [['text' => "➕ اضافه کردن کانفیگ"], ['text' => "❌ حذف کانفیگ "]],
-        [['text' => "✏️ ویرایش کانفیگ"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "💡 Username generation method"]],
+        [['text' => "🚨 Account creation limit"], ['text' => "📍 Change user group"]],
+        [['text' => "➕ Add config"], ['text' => "❌ Remove config"]],
+        [['text' => "✏️ Edit config"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionX_ui_single = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "🔐 ویرایش رمز عبور"], ['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔗 ویرایش آدرس پنل"], ['text' => "🔋 روش تمدید سرویس"]],
-        [['text' => "💎 تنظیم شناسه اینباند"]],
-        [['text' => "💡 روش ساخت نام کاربری"], ['text' => '🔗 دامنه لینک ساب']],
-        [['text' => "📍 تغییر گروه کاربری"], ['text' => "🚨 محدودیت ساخت اکانت"]],
-        [['text' => "⏳ زمان سرویس تست"], ['text' => "💾 حجم اکانت تست"]],
-        [['text' => "🌍 قیمت تغییر لوکیشن"], ['text' => "➕ قیمت حجم اضافه"]],
-        [['text' => "⏳ قیمت زمان اضافه"], ['text' => "⚙️ قیمت حجم سرویس دلخواه"]],
-        [['text' => "⏳ قیمت زمان دلخواه"]],
-        [['text' => "📍 حداقل حجم دلخواه"], ['text' => "📍 حداکثر حجم دلخواه"]],
-        [['text' => "📍 حداقل زمان دلخواه"], ['text' => "📍 حداکثر زمان دلخواه"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "🔐 Edit password"], ['text' => "👤 Edit username"]],
+        [['text' => "🔗 Edit panel URL"], ['text' => "🔋 Renewal method"]],
+        [['text' => "💎 Set inbound ID"]],
+        [['text' => "💡 Username generation method"], ['text' => '🔗 Subscription domain']],
+        [['text' => "📍 Change user group"], ['text' => "🚨 Account creation limit"]],
+        [['text' => "⏳ Test service duration"], ['text' => "💾 Test account volume"]],
+        [['text' => "🌍 Location-change price"], ['text' => "➕ Extra volume price"]],
+        [['text' => "⏳ Extra time price"], ['text' => "⚙️ Custom volume price"]],
+        [['text' => "⏳ Custom time price"]],
+        [['text' => "📍 Custom volume minimum"], ['text' => "📍 Custom volume maximum"]],
+        [['text' => "📍 Custom time minimum"], ['text' => "📍 Custom time maximum"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionalireza_single = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "🔐 ویرایش رمز عبور"], ['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔗 ویرایش آدرس پنل"], ['text' => "🔋 روش تمدید سرویس"]],
-        [['text' => "💎 تنظیم شناسه اینباند"]],
-        [['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => '🔗 دامنه لینک ساب']],
-        [['text' => "📍 تغییر گروه کاربری"], ['text' => "🚨 محدودیت ساخت اکانت"]],
-        [['text' => "⏳ زمان سرویس تست"], ['text' => "💾 حجم اکانت تست"]],
-        [['text' => "🌍 قیمت تغییر لوکیشن"], ['text' => "➕ قیمت حجم اضافه"]],
-        [['text' => "⏳ قیمت زمان اضافه"], ['text' => "⚙️ قیمت حجم سرویس دلخواه"]],
-        [['text' => "⏳ قیمت زمان دلخواه"]],
-        [['text' => "📍 حداقل حجم دلخواه"], ['text' => "📍 حداکثر حجم دلخواه"]],
-        [['text' => "📍 حداقل زمان دلخواه"], ['text' => "📍 حداکثر زمان دلخواه"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "🔐 Edit password"], ['text' => "👤 Edit username"]],
+        [['text' => "🔗 Edit panel URL"], ['text' => "🔋 Renewal method"]],
+        [['text' => "💎 Set inbound ID"]],
+        [['text' => "💡 Username generation method"]],
+        [['text' => '🔗 Subscription domain']],
+        [['text' => "📍 Change user group"], ['text' => "🚨 Account creation limit"]],
+        [['text' => "⏳ Test service duration"], ['text' => "💾 Test account volume"]],
+        [['text' => "🌍 Location-change price"], ['text' => "➕ Extra volume price"]],
+        [['text' => "⏳ Extra time price"], ['text' => "⚙️ Custom volume price"]],
+        [['text' => "⏳ Custom time price"]],
+        [['text' => "📍 Custom volume minimum"], ['text' => "📍 Custom volume maximum"]],
+        [['text' => "📍 Custom time minimum"], ['text' => "📍 Custom time maximum"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionhiddfy = json_encode([
     'keyboard' => [
-        [['text' => "⚙️ وضعیت قابلیت ها پنل"]],
-        [['text' => "✍️ نام پنل"], ['text' => "❌ حذف پنل"]],
-        [['text' => "🔗 ویرایش آدرس پنل"], ['text' => "🔋 روش تمدید سرویس"]],
-        [['text' => "📍 تغییر گروه کاربری"]],
-        [['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => '🔗 دامنه لینک ساب']],
-        [['text' => "🚨 محدودیت ساخت اکانت"], ['text' => "🔗 uuid admin"]],
-        [['text' => "⏳ زمان سرویس تست"], ['text' => "💾 حجم اکانت تست"]],
-        [['text' => "🌍 قیمت تغییر لوکیشن"], ['text' => "➕ قیمت حجم اضافه"]],
-        [['text' => "⏳ قیمت زمان اضافه"], ['text' => "⚙️ قیمت حجم سرویس دلخواه"]],
-        [['text' => "⏳ قیمت زمان دلخواه"]],
-        [['text' => "📍 حداقل حجم دلخواه"], ['text' => "📍 حداکثر حجم دلخواه"]],
-        [['text' => "📍 حداقل زمان دلخواه"], ['text' => "📍 حداکثر زمان دلخواه"]],
-        [['text' => "🫣 مخفی کردن پنل برای یک کاربر"]],
-        [['text' => "❌  حذف کاربر از لیست مخفی شدگان"]],
+        [['text' => "⚙️ Panel feature status"]],
+        [['text' => "✍️ Panel name"], ['text' => "❌ Remove panel"]],
+        [['text' => "🔗 Edit panel URL"], ['text' => "🔋 Renewal method"]],
+        [['text' => "📍 Change user group"]],
+        [['text' => "💡 Username generation method"]],
+        [['text' => '🔗 Subscription domain']],
+        [['text' => "🚨 Account creation limit"], ['text' => "🔗 uuid admin"]],
+        [['text' => "⏳ Test service duration"], ['text' => "💾 Test account volume"]],
+        [['text' => "🌍 Location-change price"], ['text' => "➕ Extra volume price"]],
+        [['text' => "⏳ Extra time price"], ['text' => "⚙️ Custom volume price"]],
+        [['text' => "⏳ Custom time price"]],
+        [['text' => "📍 Custom volume minimum"], ['text' => "📍 Custom volume maximum"]],
+        [['text' => "📍 Custom time minimum"], ['text' => "📍 Custom time maximum"]],
+        [['text' => "🫣 Hide panel for a user"]],
+        [['text' => "❌ Remove user from hidden list"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
@@ -1048,27 +1048,27 @@ $adminrule = json_encode([
 ]);
 $affiliates = json_encode([
     'keyboard' => [
-        [['text' => "🧮 تنظیم درصد زیرمجموعه"]],
-        [['text' => "🏞 تنظیم بنر زیرمجموعه گیری"]],
-        [['text' => "🎁 پورسانت بعد از خرید"], ['text' => "🎁 هدیه استارت"]],
-        [['text' => "🎉 پورسانت فقط برای خرید اول"]],
-        [['text' => "🌟 مبلغ هدیه استارت"]],
+        [['text' => "🧮 Set referral percent"]],
+        [['text' => "🏞 Set referral banner"]],
+        [['text' => "🎁 Commission after purchase"], ['text' => "🎁 Start gift"]],
+        [['text' => "🎉 First-purchase commission only"]],
+        [['text' => "🌟 Start gift amount"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $keyboardexportdata = json_encode([
     'keyboard' => [
-        [['text' => "خروجی کاربران"], ['text' => "خروجی سفارشات"]],
-        [['text' => "خروجی گرفتن پرداخت ها"]],
+        [['text' => "Export users"], ['text' => "Export orders"]],
+        [['text' => "Export payments"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $helpedit = json_encode([
     'keyboard' => [
-        [['text' => "ویرایش نام"], ['text' => "ویرایش توضیحات"]],
-        [['text' => "ویرایش رسانه"], ['text' => "ویرایش دسته بندی"]],
+        [['text' => "Edit name"], ['text' => "Edit description"]],
+        [['text' => "Edit media"], ['text' => "Edit category"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
@@ -1095,16 +1095,16 @@ $keyboardtimereset = json_encode([
 $keyboardtypepanel = json_encode([
     'inline_keyboard' => [
         [
-            ['text' => "مرزبان", 'callback_data' => "typepanel#marzban"],
-            ['text' => "مرزنشین", 'callback_data' => "typepanel#marzneshin"]
+            ['text' => "Marzban", 'callback_data' => "typepanel#marzban"],
+            ['text' => "Marzneshin", 'callback_data' => "typepanel#marzneshin"]
         ],
         [
-            ['text' => 'ثنایی تک پورت', 'callback_data' => 'typepanel#x-ui_single'],
-            ['text' => 'علیرضا تک پورت', 'callback_data' => 'typepanel#alireza_single']
+            ['text' => 'Sanaei single-port', 'callback_data' => 'typepanel#x-ui_single'],
+            ['text' => 'Alireza single-port', 'callback_data' => 'typepanel#alireza_single']
         ],
         [
-            ['text' => "فروش دستی", 'callback_data' => 'typepanel#Manualsale'],
-            ['text' => "هیدیفای", 'callback_data' => 'typepanel#hiddify'],
+            ['text' => "Manual sale", 'callback_data' => 'typepanel#Manualsale'],
+            ['text' => "Hiddify", 'callback_data' => 'typepanel#hiddify'],
         ],
         [
             ['text' => "WGDashboard", 'callback_data' => 'typepanel#WGDashboard'],
@@ -1112,7 +1112,7 @@ $keyboardtypepanel = json_encode([
         ],
         [
             ['text' => "ibsng", 'callback_data' => 'typepanel#ibsng'],
-            ['text' => "میکروتیک", 'callback_data' => 'typepanel#mikrotik']
+            ['text' => "MikroTik", 'callback_data' => 'typepanel#mikrotik']
         ],
         [
             ['text' => $textbotlang['Admin']['backadmin'], 'callback_data' => 'admin']
@@ -1126,7 +1126,7 @@ if ($setting['inlinebtnmain'] == "oninline") {
         'inline_keyboard' => [
             [
                 ['text' => "🗂 Bulk buy", 'callback_data' => "kharidanbuh"],
-                ['text' => "👤 انتخاب نام دلخواه", 'callback_data' => "selectname"]
+                ['text' => "👤 Choose a custom name", 'callback_data' => "selectname"]
             ],
             [
                 ['text' => $textbotlang['users']['backbtn'], 'callback_data' => "backuser"]
@@ -1140,7 +1140,7 @@ if ($setting['inlinebtnmain'] == "oninline") {
 } else {
     $keyboardagent = [
         'keyboard' => [
-            [['text' => "🗂 Bulk buy"], ['text' => "👤 انتخاب نام دلخواه"]],
+            [['text' => "🗂 Bulk buy"], ['text' => "👤 Choose a custom name"]],
             [['text' => $textbotlang['users']['backbtn']]]
         ],
         'resize_keyboard' => true
@@ -1152,10 +1152,10 @@ if ($setting['inlinebtnmain'] == "oninline") {
 $keyboardagent = json_encode($keyboardagent);
 $Swapinokey = json_encode([
     'keyboard' => [
-        [['text' => "تنظیم api"]],
-        [['text' => "🗂 نام درگاه ارزی ریالی"]],
-        [['text' => "💰 کش بک ارزی ریالی"], ['text' => "📚 تنظیم آموزش ارزی ریالی اول"]],
-        [['text' => "⬇️ حداقل مبلغ ارزی ریالی"], ['text' => "⬆️ حداکثر مبلغ ارزی ریالی"]],
+        [['text' => "Set API"]],
+        [['text' => "🗂 IRR gateway name"]],
+        [['text' => "💰 IRR cashback"], ['text' => "📚 Set IRR gateway 1 guide"]],
+        [['text' => "⬇️ IRR minimum"], ['text' => "⬆️ IRR maximum"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
@@ -1163,78 +1163,78 @@ $Swapinokey = json_encode([
 
 $tronnowpayments = json_encode([
     'keyboard' => [
-        [['text' => "🗂 نام درگاه رمز ارز آفلاین"]],
-        [['text' => "⬇️ حداقل مبلغ رمزارز آفلاین"], ['text' => "⬆️ حداکثر مبلغ رمزارز آفلاین"]],
-        [['text' => "📚 تنظیم آموزش  ارزی افلاین"]],
+        [['text' => "🗂 Offline crypto gateway name"]],
+        [['text' => "⬇️ Offline crypto minimum"], ['text' => "⬆️ Offline crypto maximum"]],
+        [['text' => "📚 Set offline crypto guide"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionathmarzban = json_encode([
     'keyboard' => [
-        [['text' => "🔧 ساخت کانفیگ دستی"], ['text' => "🖥 مدیریت نود ها"]],
+        [['text' => "🔧 Create manual config"], ['text' => "🖥 Node management"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionathx_ui = json_encode([
     'keyboard' => [
-        [['text' => "🔧 ساخت کانفیگ دستی"]],
+        [['text' => "🔧 Create manual config"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $configedit = json_encode([
     'keyboard' => [
-        [['text' => "مخشصات کانفیگ"]],
+        [['text' => "Config details"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $iranpaykeyboard = json_encode([
     'keyboard' => [
-        [['text' => "api  درگاه ارزی ریالی"]],
-        [['text' => "🗂 نام درگاه ارزی ریالی سوم"]],
-        [['text' => "⬇️ حداقل مبلغ ارزی ریالی سوم"], ['text' => "⬆️ حداکثر مبلغ ارزی ریالی سوم"]],
-        [['text' => "💰 کش بک ارزی ریالی سوم"]],
-        [['text' => "📚 تنظیم آموزش ارزی ریالی سوم"]],
+        [['text' => "IRR gateway API"]],
+        [['text' => "🗂 IRR gateway 3 name"]],
+        [['text' => "⬇️ IRR gateway 3 minimum"], ['text' => "⬆️ IRR gateway 3 maximum"]],
+        [['text' => "💰 IRR gateway 3 cashback"]],
+        [['text' => "📚 Set IRR gateway 3 guide"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $supportcenter = json_encode([
     'keyboard' => [
-        [['text' => "👤 تنظیم آیدی پشتیبانی"]],
-        [['text' => "🔼 اضافه کردن دپارتمان"], ['text' => "🔽 حذف کردن دپارتمان"]],
+        [['text' => "👤 Set support ID"]],
+        [['text' => "🔼 Add department"], ['text' => "🔽 Remove department"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $active_panell = json_encode([
     'keyboard' => [
-        [['text' => "📣 گزارشات ربات"]],
+        [['text' => "📣 Bot reports"]],
     ],
     'resize_keyboard' => true
 ]);
 $lottery = json_encode([
     'keyboard' => [
-        [['text' => "1️⃣ تنظیم جایزه نفر اول"], ['text' => "2️⃣ تنظیم جایزه نفر دوم"]],
-        [['text' => "3️⃣ تنظیم جایزه نفر سوم"]],
+        [['text' => "1️⃣ Set 1st-place prize"], ['text' => "2️⃣ Set 2nd-place prize"]],
+        [['text' => "3️⃣ Set 3rd-place prize"]],
         [['text' => $textbotlang['Admin']['backadmin']]]
     ],
     'resize_keyboard' => true
 ]);
 $wheelkeyboard = json_encode([
     'keyboard' => [
-        [['text' => "🎲 مبلغ برنده شدن کاربر"]],
+        [['text' => "🎲 User win amount"]],
         [['text' => $textbotlang['Admin']['backadmin']]]
     ],
     'resize_keyboard' => true
 ]);
 $keyboardlinkapp = json_encode([
     'keyboard' => [
-        [['text' => "🔗 اضافه کردن برنامه"], ['text' => "❌ حذف برنامه"]],
-        [['text' => "✏️ ویرایش برنامه"]],
+        [['text' => "🔗 Add app"], ['text' => "❌ Remove app"]],
+        [['text' => "✏️ Edit app"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
@@ -1764,7 +1764,7 @@ function keyboardTimeCategory($name_panel, $agent, $callback_data = "producttime
         ];
     }
     if ($statusbtnextend)
-        $monthkeyboard['inline_keyboard'][] = [['text' => "♻️ تمدید پلن فعلی", 'callback_data' => "exntedagei"]];
+        $monthkeyboard['inline_keyboard'][] = [['text' => "♻️ Renew current plan", 'callback_data' => "exntedagei"]];
     if ($statuscustomvolume == true) {
         $panelForCustom = select('marzban_panel', '*', 'name_panel', $name_panel, 'select');
         $monthkeyboard['inline_keyboard'][] = [
@@ -1778,17 +1778,17 @@ function keyboardTimeCategory($name_panel, $agent, $callback_data = "producttime
 }
 $Startelegram = json_encode([
     'keyboard' => [
-        [['text' => "🗂 نام درگاه استار"]],
-        [['text' => "💰 کش بک استار"], ['text' => "📚 تنظیم آموزش استار"]],
-        [['text' => "⬇️ حداقل مبلغ استار"], ['text' => "⬆️ حداکثر مبلغ استار"]],
+        [['text' => "🗂 Stars gateway name"]],
+        [['text' => "💰 Stars cashback"], ['text' => "📚 Set Stars guide"]],
+        [['text' => "⬇️ Stars minimum"], ['text' => "⬆️ Stars maximum"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $keyboardchangelimit = json_encode([
     'keyboard' => [
-        [['text' => "🆓 محدودیت رایگان"], ['text' => "↙️ محدودیت کلی"]],
-        [['text' => "🔄 ریست محدودیت کل کاربران"]],
+        [['text' => "🆓 Free limit"], ['text' => "↙️ Overall limit"]],
+        [['text' => "🔄 Reset all-user limits"]],
         [['text' => $textbotlang['Admin']['backadmin']]]
     ],
     'resize_keyboard' => true
@@ -1815,18 +1815,18 @@ function KeyboardCategoryadmin()
 }
 $nowpayment_setting_keyboard = json_encode([
     'keyboard' => [
-        [['text' => "API NOWPAYMENT"], ['text' => "🗂 نام درگاه nowpayment"]],
-        [['text' => "💰 کش بک nowpayment"], ['text' => "📚 تنظیم آموزش nowpayment"]],
-        [['text' => "⬇️ حداقل مبلغ nowpayment"], ['text' => "⬆️ حداکثر مبلغ nowpayment"]],
+        [['text' => "API NOWPAYMENT"], ['text' => "🗂 NowPayments gateway name"]],
+        [['text' => "💰 NowPayments cashback"], ['text' => "📚 Set NowPayments guide"]],
+        [['text' => "⬇️ NowPayments minimum"], ['text' => "⬆️ NowPayments maximum"]],
         [['text' => $textbotlang['Admin']['backadmin']], ['text' => $textbotlang['Admin']['backmenu']]]
     ],
     'resize_keyboard' => true
 ]);
 $Exception_auto_cart_keyboard = json_encode([
     'keyboard' => [
-        [['text' => "➕ استثناء کردن کاربر"], ['text' => "❌ حذف کاربر از لیست"]],
-        [['text' => "👁 نمایش لیست افراد"]],
-        [['text' => "▶️ بازگشت به منوی تظنیمات کارت"]]
+        [['text' => "➕ Exclude user"], ['text' => "❌ Remove user from list"]],
+        [['text' => "👁 Show user list"]],
+        [['text' => "▶️ Back to card settings"]]
     ],
     'resize_keyboard' => true
 ]);
@@ -1835,8 +1835,8 @@ function keyboard_config($config_split, $id_invoice, $back_active = true)
     global $textbotlang;
     $keyboard_config = ['inline_keyboard' => []];
     $keyboard_config['inline_keyboard'][] = [
-        ['text' => "⚙️ کانفیگ", 'callback_data' => "none"],
-        ['text' => "✏️نام کانفیگ", 'callback_data' => "none"],
+        ['text' => "⚙️ Config", 'callback_data' => "none"],
+        ['text' => "✏️ Config name", 'callback_data' => "none"],
     ];
     for ($i = 0; $i < count($config_split); $i++) {
         $config = $config_split[$i];
@@ -1855,12 +1855,12 @@ function keyboard_config($config_split, $id_invoice, $back_active = true)
             $split_config = explode("#", $split_config)[1];
         }
         $keyboard_config['inline_keyboard'][] = [
-            ['text' => "دریافت کانفیگ", 'callback_data' => "configget_{$id_invoice}_$i"],
+            ['text' => "Get config", 'callback_data' => "configget_{$id_invoice}_$i"],
             ['text' => urldecode($split_config), 'callback_data' => "none"],
         ];
 
     }
-    $keyboard_config['inline_keyboard'][] = [['text' => "⚙️ دریافت همه کانفیگ ها", 'callback_data' => "configget_$id_invoice" . "_1520"]];
+    $keyboard_config['inline_keyboard'][] = [['text' => "⚙️ Get all configs", 'callback_data' => "configget_$id_invoice" . "_1520"]];
     if ($back_active) {
         $keyboard_config['inline_keyboard'][] = [['text' => $textbotlang['users']['stateus']['backinfo'], 'callback_data' => "product_$id_invoice"]];
     }
@@ -1876,21 +1876,21 @@ $keyboard_buy = json_encode([
 $keyboard_stat = json_encode([
     'inline_keyboard' => [
         [
-            ['text' => "⏱️ آمار کل", 'callback_data' => 'stat_all_bot'],
+            ['text' => "⏱️ All-time stats", 'callback_data' => 'stat_all_bot'],
         ],
         [
-            ['text' => "⏱️ یک ساعت اخیر", 'callback_data' => 'hoursago_stat'],
+            ['text' => "⏱️ Last hour", 'callback_data' => 'hoursago_stat'],
         ],
         [
-            ['text' => "⛅️ امروز", 'callback_data' => 'today_stat'],
-            ['text' => "☀️ دیروز", 'callback_data' => 'yesterday_stat'],
+            ['text' => "⛅️ Today", 'callback_data' => 'today_stat'],
+            ['text' => "☀️ Yesterday", 'callback_data' => 'yesterday_stat'],
         ],
         [
-            ['text' => "☀️ ماه فعلی ", 'callback_data' => 'month_current_stat'],
-            ['text' => "⛅️ ماه قبل", 'callback_data' => 'month_old_stat'],
+            ['text' => "☀️ Current month", 'callback_data' => 'month_current_stat'],
+            ['text' => "⛅️ Previous month", 'callback_data' => 'month_old_stat'],
         ],
         [
-            ['text' => "🗓 مشاهده آمار در تاریخ مشخص", 'callback_data' => 'view_stat_time'],
+            ['text' => "🗓 Stats for a specific date", 'callback_data' => 'view_stat_time'],
         ]
     ]
 ]);

@@ -27,12 +27,12 @@ function affiliates_lib_save_settings(PDO $pdo, array $data): void
 {
     $percentage = trim((string) ($data['percentage'] ?? '0'));
     if ($percentage === '' || !ctype_digit($percentage) || (int) $percentage > 100) {
-        throw new InvalidArgumentException('درصد پورسانت باید عددی بین ۰ تا ۱۰۰ باشد.');
+        throw new InvalidArgumentException('Commission percentage must be a number between 0 and 100.');
     }
 
     $price = trim((string) ($data['price_discount'] ?? '0'));
     if ($price === '' || !ctype_digit($price)) {
-        throw new InvalidArgumentException('مبلغ هدیه استارت باید عدد باشد.');
+        throw new InvalidArgumentException('Start gift amount must be a number.');
     }
 
     $status = !empty($data['status']) ? 'onaffiliates' : 'offaffiliates';

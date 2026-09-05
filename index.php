@@ -2092,7 +2092,7 @@ $textconnect
         $extend['msg'] = json_encode($extend['msg']);
         $textreports = "خطای تمدید سرویس
 نام پنل : {$marzban_list_get['name_panel']}
-نام کاربری سرویس : {$nameloc['username']}
+Service username: {$nameloc['username']}
 دلیل خطا : {$extend['msg']}";
         sendmessage($from_id, "❌ A renewal error occurred. Please contact support.", null, 'HTML');
         if (strlen($setting['Channel_Report']) > 0) {
@@ -2168,20 +2168,20 @@ $textconnect
             ],
         ]
     ]);
-    $text_report = "📣 جزئیات تمدید اکانت در ربات شما ثبت شد .
+    $text_report = "📣 Account renewal details were recorded in your bot.
     
-▫️آیدی عددی کاربر : <code>$from_id</code>
-▫️نام کاربری کاربر :@$username
-▫️نام کاربری کانفیگ :{$nameloc['username']}
-▫️نام کاربر : $first_name
-▫️موقعیت سرویس سرویس : {$nameloc['Service_location']}
-▫️نام محصول : {$prodcut['name_product']}
-▫️حجم محصول : {$prodcut['Volume_constraint']}
-▫️زمان محصول : {$prodcut['Service_time']}
-▫️مبلغ تمدید : {$prodcut['price_product']} تومان
-▫️موجودی قبل از خرید : $balanceformatsellbefore تومان
-▫️موجودی بعد از خرید : $balanceformatsell تومان
-▫️زمان خرید : $timejalali";
+▫️User ID: <code>$from_id</code>
+▫️Username:@$username
+▫️Config username:{$nameloc['username']}
+▫️Name: $first_name
+▫️Service location: {$nameloc['Service_location']}
+▫️Product: {$prodcut['name_product']}
+▫️Volume: {$prodcut['Volume_constraint']}
+▫️Duration: {$prodcut['Service_time']}
+▫️Renewal amount: {$prodcut['price_product']} USD
+▫️Balance before purchase: $balanceformatsellbefore USD
+▫️Balance after purchase: $balanceformatsell USD
+▫️Purchase time: $timejalali";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
             'chat_id' => $setting['Channel_Report'],
@@ -2243,12 +2243,12 @@ $textconnect
     }
     $timejalali = jdate('Y/m/d H:i:s');
     $text_report = "📣 جزئیات تغییر لینک در ربات شما ثبت شد .
-▫️آیدی عددی کاربر : <code>$from_id</code>
-▫️نام کاربری کاربر :@$username
-▫️نام کاربری کانفیگ :{$nameloc['username']}
-▫️نام کاربر : $first_name
-▫️موقعیت سرویس : {$marzban_list_get['name_panel']}
-▫️نوع کاربر : {$user['agent']}
+▫️User ID: <code>$from_id</code>
+▫️Username:@$username
+▫️Config username:{$nameloc['username']}
+▫️Name: $first_name
+▫️Service location: {$marzban_list_get['name_panel']}
+▫️User type: {$user['agent']}
 ▫️زمان تغییر لینک : $timejalali";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
@@ -2399,7 +2399,7 @@ $textconnect
         $extra_volume['msg'] = json_encode($extra_volume['msg']);
         $textreports = "خطای خرید حجم اضافه
 نام پنل : {$marzban_list_get['name_panel']}
-نام کاربری سرویس : {$nameloc['username']}
+Service username: {$nameloc['username']}
 دلیل خطا : {$extra_volume['msg']}";
         sendmessage($from_id, "❌ Extra-data purchase failed. Please contact support.", null, 'HTML');
         if (strlen($setting['Channel_Report']) > 0) {
@@ -3003,7 +3003,7 @@ User subscription link :
         $extra_time['msg'] = json_encode($extra_time['msg']);
         $textreports = "خطای خرید حجم اضافه
 نام پنل : {$marzban_list_get['name_panel']}
-نام کاربری سرویس : {$nameloc['username']}
+Service username: {$nameloc['username']}
 دلیل خطا : {$extra_time['msg']}";
         sendmessage($from_id, "❌ Extra-data purchase failed. Please contact support.", null, 'HTML');
         if (strlen($setting['Channel_Report']) > 0) {
@@ -3184,7 +3184,7 @@ User details :
         
         
 📊 اطلاعات سرویس کاربر :
-آیدی عددی کاربر : $from_id
+آیدی pcsی کاربر : $from_id
 نام کاربری کاربر : @$username
 نام کاربری کانفیگ : {$nameloc['username']}
 وضعیت سرویس : $status_var
@@ -3346,7 +3346,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         }
     }
     $marzban_list_get = select("marzban_panel", "*", "code_panel", $location, "select");
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
         if ($user['step'] != "createusertest") {
             step('createusertest', $from_id);
             update("user", "Processing_value_one", $location, "id", $from_id);
@@ -3479,10 +3479,10 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
     sendMessageService($marzban_list_get, $dataoutput['configs'], $output_config_link, $dataoutput['username'], $usertestinfo, $textcreatuser, $randomString);
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
     step('home', $from_id);
-    if ($marzban_list_get['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "نام کاربری + عدد به ترتیب" || $marzban_list_get['MethodUsername'] == "آیدی عددی+عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
+    if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "نام کاربری + pcs به ترتیب" || $marzban_list_get['MethodUsername'] == "آیدی pcsی+عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
         $value = intval($user['number_username']) + 1;
         update("user", "number_username", $value, "id", $from_id);
-        if ($marzban_list_get['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
+        if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
             $value = intval($setting['numbercount']) + 1;
             update("setting", "numbercount", $value);
         }
@@ -3496,17 +3496,17 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
     ]);
     $timejalali = jdate('Y/m/d H:i:s');
     $text_report = "📣 جزئیات ساخت اکانت تست در ربات شما ثبت شد .
-▫️آیدی عددی کاربر : <code>$from_id</code>
-▫️نام کاربری کاربر :@$username
-▫️نام کاربری کانفیگ :$username_ac
-▫️نام کاربر : $first_name
-▫️موقعیت سرویس : {$marzban_list_get['name_panel']}
-▫️زمان خریداری شده : {$marzban_list_get['time_usertest']} ساعت
-▫️حجم خریداری شده : {$marzban_list_get['val_usertest']} MB
-▫️کد پیگیری: $randomString
-▫️نوع کاربر : {$user['agent']}
-▫️شماره تلفن کاربر : {$user['number']}
-▫️زمان خرید : $timejalali";
+▫️User ID: <code>$from_id</code>
+▫️Username:@$username
+▫️Config username:$username_ac
+▫️Name: $first_name
+▫️Service location: {$marzban_list_get['name_panel']}
+▫️Duration purchased: {$marzban_list_get['time_usertest']} ساعت
+▫️Volume purchased: {$marzban_list_get['val_usertest']} MB
+▫️Tracking code: $randomString
+▫️User type: {$user['agent']}
+▫️Phone number: {$user['number']}
+▫️Purchase time: $timejalali";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
             'chat_id' => $setting['Channel_Report'],
@@ -3688,7 +3688,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         $textsuppoer = "
     📣 پشتیبان عزیز یک پیام از سمت کاربر برای شما ارسال گردید.
 
-آیدی عددی کاربر : <a href = \"tg://user?id=$from_id\">$from_id</a>
+آیدی pcsی کاربر : <a href = \"tg://user?id=$from_id\">$from_id</a>
 زمان ارسال : $timejalali
 وضعیت پیام : پاسخ داده نشده
 نام کاربری کاربر : @$username    
@@ -3838,7 +3838,7 @@ $text";
         $textsuppoer = "
     📣 پشتیبان عزیز یک پیام از سمت کاربر برای شما ارسال گردید.
 
-آیدی عددی کاربر : <a href = \"tg://user?id=$from_id\">$from_id</a>
+آیدی pcsی کاربر : <a href = \"tg://user?id=$from_id\">$from_id</a>
 زمان ارسال : $timejalali
 وضعیت پیام : پاسخ مشتری
 نام کاربری کاربر : @$username    
@@ -4238,7 +4238,7 @@ $textinvite
             } else {
                 $query = "SELECT * FROM product WHERE (Location = '$location' OR Location = '/all')AND " . agent_product_access_sql($user['agent'], $from_id) . "";
                 $marzban_list_get = select("marzban_panel", "*", "name_panel", $location, "select");
-                if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+                if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
                     $datakeyboard = "prodcutservices_";
                 } else {
                     $datakeyboard = "prodcutservice_";
@@ -4322,7 +4322,7 @@ $textinvite
         } else {
             $query = "SELECT * FROM product WHERE (Location = '$location' OR Location = '/all')AND " . agent_product_access_sql($user['agent'], $from_id) . "";
             $statuscustomvolume = json_decode($marzban_list_get['customvolume'], true)[$user['agent']];
-            if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+            if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
                 $datakeyboard = "prodcutservices_";
             } else {
                 $datakeyboard = "prodcutservice_";
@@ -4376,7 +4376,7 @@ $textinvite
         step("home", $from_id);
         return;
     }
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
         $datakeyboard = "prodcutservices_";
     } else {
         $datakeyboard = "prodcutservice_";
@@ -4405,7 +4405,7 @@ $textinvite
     } else {
         $query = "SELECT * FROM product WHERE (Location = '{$userdate['name_panel']}' OR Location = '/all') AND " . agent_product_access_sql($user['agent'], $from_id) . " AND Service_time = '$monthenumber'";
         $marzban_list_get = select("marzban_panel", "*", "name_panel", $userdate['name_panel'], "select");
-        if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+        if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
             $datakeyboard = "prodcutservices_";
         } else {
             $datakeyboard = "prodcutservice_";
@@ -4479,7 +4479,7 @@ $textinvite
     $customvalue = "customvolume_" . $days . "_" . $gb;
     update("user", "Processing_value_one", $customvalue, "id", $from_id);
     deletemessage($from_id, $message_id);
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
         step('endstepusers', $from_id);
         $invoiceBack = purchase_invoice_back_callback(is_array($userdate) ? $userdate : [], (string) $user['agent']);
         sendmessage($from_id, textbot_get('text_select_username', $textbotlang['users']['selectusername']), purchase_inline_back_keyboard($invoiceBack), 'html');
@@ -4598,7 +4598,7 @@ $textinvite
         step("home", $from_id);
         return;
     }
-    if ($clickedProduct === '' && ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم")) {
+    if ($clickedProduct === '' && ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم")) {
         if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', (string) $text)) {
             $invoiceBack = purchase_invoice_back_callback($userdate, (string) $user['agent']);
             sendmessage($from_id, $textbotlang['users']['invalidusername'], purchase_inline_back_keyboard($invoiceBack), 'HTML');
@@ -4689,7 +4689,7 @@ $textinvite
     }
     $edited = null;
     $invoiceKeyboard = KeyboardPayment(purchase_invoice_back_callback($userdate, (string) $user['agent']));
-    if ($clickedProduct !== '' || ($user['step'] != "getvolumecustomuser" && !in_array($marzban_list_get['MethodUsername'], ["نام کاربری دلخواه", "نام کاربری دلخواه + عدد رندوم"], true))) {
+    if ($clickedProduct !== '' || ($user['step'] != "getvolumecustomuser" && !in_array($marzban_list_get['MethodUsername'], ["نام کاربری دلخواه", "نام کاربری دلخواه + pcs رندوم"], true))) {
         $edited = Editmessagetext($from_id, $message_id, $textin, $invoiceKeyboard, 'HTML');
     }
     if (!is_array($edited) || empty($edited['ok'])) {
@@ -4994,10 +4994,10 @@ $textinvite
         $Balance_prim = $user['Balance'] - $priceproduct;
         update("user", "Balance", $Balance_prim, "id", $from_id);
     }
-    if ($marzban_list_get['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "نام کاربری + عدد به ترتیب" || $marzban_list_get['MethodUsername'] == "آیدی عددی+عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
+    if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "نام کاربری + pcs به ترتیب" || $marzban_list_get['MethodUsername'] == "آیدی pcsی+عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
         $value = intval($user['number_username']) + 1;
         update("user", "number_username", $value, "id", $from_id);
-        if ($marzban_list_get['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
+        if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
             $value = intval($setting['numbercount']) + 1;
             update("setting", "numbercount", $value);
         }
@@ -5087,23 +5087,23 @@ $textinvite
     $text_report = "📣 جزئیات ساخت اکانت در ربات شما ثبت شد .
 
 $textonebuy
-▫️آیدی عددی کاربر : <code>$from_id</code>
-▫️نام کاربری کاربر :@$username
-▫️نام کاربری کانفیگ :$username_ac
-▫️نام کاربر : $first_name
-▫️موقعیت سرویس سرویس : {$userdate['name_panel']}
-▫️نام محصول :{$info_product['name_product']}
-▫️زمان خریداری شده :{$info_product['Service_time']} روز
-▫️حجم خریداری شده : {$info_product['Volume_constraint']} GB
-▫️موجودی قبل خرید : $balanceformatsellbefore تومان
-▫️موجودی بعد خرید : $balanceformatsell تومان
-▫️کد پیگیری: $randomString
-▫️نوع کاربر : {$user['agent']}
-▫️شماره تلفن کاربر : {$user['number']}
-▫️دسته بندی محصول : {$info_product['category']}
-▫️قیمت محصول : {$info_product['price_product']} تومان
-▫️قیمت نهایی : $priceproduct تومان
-▫️زمان خرید : $timejalali";
+▫️User ID: <code>$from_id</code>
+▫️Username:@$username
+▫️Config username:$username_ac
+▫️Name: $first_name
+▫️Service location: {$userdate['name_panel']}
+▫️Product:{$info_product['name_product']}
+▫️Duration purchased:{$info_product['Service_time']} days
+▫️Volume purchased: {$info_product['Volume_constraint']} GB
+▫️Balance before purchase: $balanceformatsellbefore USD
+▫️Balance after purchase: $balanceformatsell USD
+▫️Tracking code: $randomString
+▫️User type: {$user['agent']}
+▫️Phone number: {$user['number']}
+▫️Product category: {$info_product['category']}
+▫️Product price: {$info_product['price_product']} USD
+▫️Final price: $priceproduct USD
+▫️Purchase time: $timejalali";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
             'chat_id' => $setting['Channel_Report'],
@@ -5279,7 +5279,7 @@ $textonebuy
     }
     update("user", "Processing_value", $location, "id", $from_id);
     $statuscustomvolume = json_decode($marzban_list_get['customvolume'], true)[$user['agent']];
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
         $datakeyboard = "prodcutservicesom_";
     } else {
         $datakeyboard = "prodcutserviceom_";
@@ -5331,7 +5331,7 @@ $textonebuy
     $customvalue = "customvolume_" . $days . "_" . $gb;
     update("user", "Processing_value_one", $customvalue, "id", $from_id);
     deletemessage($from_id, $message_id);
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
         step('endstepusersom', $from_id);
         sendmessage($from_id, textbot_get('text_select_username', $textbotlang['users']['selectusername']), $backuser, 'html');
         return;
@@ -5393,7 +5393,7 @@ $textonebuy
         $prodcut = $dataget[1];
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
         if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
             sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser, 'HTML');
             return;
@@ -5540,10 +5540,10 @@ $textonebuy
         }
     }
     $datep = strtotime("+" . $info_product['Service_time'] . "days");
-    if ($marzban_list_get['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "نام کاربری + عدد به ترتیب" || $marzban_list_get['MethodUsername'] == "آیدی عددی+عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
+    if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "نام کاربری + pcs به ترتیب" || $marzban_list_get['MethodUsername'] == "آیدی pcsی+عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
         $value = intval($user['number_username']) + $user['Processing_value_four'];
         update("user", "number_username", $value, "id", $from_id);
-        if ($marzban_list_get['MethodUsername'] == "متن دلخواه + عدد ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + عدد ترتیبی") {
+        if ($marzban_list_get['MethodUsername'] == "متن دلخواه + pcs ترتیبی" || $marzban_list_get['MethodUsername'] == "متن دلخواه نماینده + pcs ترتیبی") {
             $value = intval($setting['numbercount']) + $user['Processing_value_four'];
             update("setting", "numbercount", $value);
         }
@@ -5687,24 +5687,24 @@ Name پنل : {$marzban_list_get['name_panel']}";
     $pricebulk = $info_product['price_product'] * intval($user['Processing_value_four']);
     $count_service = $user['Processing_value_four'];
     $timejalali = jdate('Y/m/d H:i:s');
-    $text_report = "📣 جزئیات ساخت اکانت انبوه در ربات شما ثبت شد .
-▫️آیدی عددی کاربر : <code>$from_id</code>
-▫️نام کاربری کاربر :@$username
-▫️نام کاربری کانفیگ :{$username_ac}_0-$count_service
-▫️نام کاربر : $first_name
-▫️موقعیت سرویس سرویس : {$user['Processing_value']}
-▫️نام محصول :{$info_product['name_product']}
-▫️زمان خریداری شده :{$info_product['Service_time']} روز
-▫️حجم خریداری شده : {$info_product['Volume_constraint']} GB
-▫️موجودی قبل خرید : $balanceformatsellbefore تومان
-▫️موجودی بعد خرید : $balanceformatsell تومان
-▫️کد پیگیری: $randomString
-▫️نوع کاربر : {$user['agent']}
-▫️شماره تلفن کاربر : {$user['number']}
-▫️قیمت محصول : {$info_product['price_product']} تومان
-▫️قیمت نهایی : {$info_product['price_product']} تومان
-▫️تعداد کانفیگ : {$user['Processing_value_four']} عدد
-▫️زمان خرید : $timejalali";
+    $text_report = "📣 Bulk account creation details were recorded in your bot.
+▫️User ID: <code>$from_id</code>
+▫️Username:@$username
+▫️Config username:{$username_ac}_0-$count_service
+▫️Name: $first_name
+▫️Service location: {$user['Processing_value']}
+▫️Product:{$info_product['name_product']}
+▫️Duration purchased:{$info_product['Service_time']} days
+▫️Volume purchased: {$info_product['Volume_constraint']} GB
+▫️Balance before purchase: $balanceformatsellbefore USD
+▫️Balance after purchase: $balanceformatsell USD
+▫️Tracking code: $randomString
+▫️User type: {$user['agent']}
+▫️Phone number: {$user['number']}
+▫️Product price: {$info_product['price_product']} USD
+▫️Final price: {$info_product['price_product']} USD
+▫️Config count: {$user['Processing_value_four']} pcs
+▫️Purchase time: $timejalali";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
             'chat_id' => $setting['Channel_Report'],
@@ -7082,23 +7082,23 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
 ⭕️ یک پرداخت جدید انجام شده است .
 
 ⭕️⭕️⭕️⭕️⭕️
-خرید سرویس جدید
+New service purchase
 
-نام کاربری سرویس : {$get_invoice['username']}
-نام محصول : {$get_invoice['name_product']}
-حجم محصول : {$get_invoice['Volume']} گیگ 
-زمان محصول : {$get_invoice['Service_time']} روز
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💵 تعداد کل پرداختی های کاربر : $Paymentusercount عدد
-💸 مبلغ پرداختی: $format_price_cart تومان
+Service username: {$get_invoice['username']}
+Product: {$get_invoice['name_product']}
+Volume: {$get_invoice['Volume']} GB 
+Duration: {$get_invoice['Service_time']} days
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💵 Total user payments: $Paymentusercount pcs
+💸 Amount paid: $format_price_cart USD
 
                 
-توضیحات: $caption $text
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+Notes: $caption $text
+✍️ If the receipt is valid, confirm the payment.";
     } elseif ($user['Processing_value_tow'] == "getextenduser") {
         $partsdic = explode("%", $user['Processing_value_one']);
         $usernamepanel = $partsdic[0];
@@ -7151,18 +7151,18 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
 
 ⭕️⭕️⭕️⭕️⭕️
 تمدید
-نام کاربری سرویس : $usernamepanel
-نام محصول : {$prodcut['name_product']}
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💵 تعداد کل پرداختی های کاربر : $Paymentusercount عدد
-💸 مبلغ پرداختی: $format_price_cart تومان
+Service username: $usernamepanel
+Product: {$prodcut['name_product']}
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💵 Total user payments: $Paymentusercount pcs
+💸 Amount paid: $format_price_cart USD
                 
-توضیحات: $caption $text
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+Notes: $caption $text
+✍️ If the receipt is valid, confirm the payment.";
     } elseif ($user['Processing_value_tow'] == "getextravolumeuser") {
         $partsdic = explode("%", $user['Processing_value_one']);
         $usernamepanel = $partsdic[0];
@@ -7172,18 +7172,18 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
 
 ⭕️⭕️⭕️⭕️⭕️
 خرید حجم اضافه
-نام کاربری سرویس : $usernamepanel
+Service username: $usernamepanel
 حجم خریداری شده  : $volumes
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💵 تعداد کل پرداختی های کاربر : $Paymentusercount عدد
-💸 مبلغ پرداختی: $format_price_cart تومان
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💵 Total user payments: $Paymentusercount pcs
+💸 Amount paid: $format_price_cart USD
                 
-توضیحات: $caption $text
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+Notes: $caption $text
+✍️ If the receipt is valid, confirm the payment.";
     } elseif ($user['Processing_value_tow'] == "getextratimeuser") {
         $partsdic = explode("%", $user['Processing_value_one']);
         $usernamepanel = $partsdic[0];
@@ -7193,33 +7193,33 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
 
 ⭕️⭕️⭕️⭕️⭕️
 خرید زمان اضافه
-نام کاربری سرویس : $usernamepanel
-تعداد روز خریداری شده  : $time
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💵 تعداد کل پرداختی های کاربر : $Paymentusercount عدد
-💸 مبلغ پرداختی: $format_price_cart تومان
+Service username: $usernamepanel
+تعداد days خریداری شده  : $time
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💵 Total user payments: $Paymentusercount pcs
+💸 Amount paid: $format_price_cart USD
                 
-توضیحات: $caption $text
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+Notes: $caption $text
+✍️ If the receipt is valid, confirm the payment.";
     } else {
 
         $textsendrasid = "
 ⭕️ یک پرداخت جدید انجام شده است .
 افزایش موجودی            
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💵 تعداد کل پرداختی های کاربر : $Paymentusercount عدد
-💸 مبلغ پرداختی: $format_price_cart تومان
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💵 Total user payments: $Paymentusercount pcs
+💸 Amount paid: $format_price_cart USD
                 
-توضیحات: $caption $text
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+Notes: $caption $text
+✍️ If the receipt is valid, confirm the payment.";
     }
     $paymentAlreadyPaid = paymentReportIsPaid($PaymentReport['id_order']);
     if ($paymentAlreadyPaid) {
@@ -7288,19 +7288,19 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
 ⭕️ یک پرداخت جدید انجام شده است .
 
 ⭕️⭕️⭕️⭕️⭕️
-خرید سرویس جدید
+New service purchase
 نام کاربری سرویس  : {$get_invoice['username']}
-نام محصول : {$get_invoice['name_product']}
-حجم محصول : {$get_invoice['Volume']} گیگ
-زمان محصول : {$get_invoice['Service_time']} روز
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💸 مبلغ پرداختی: $format_price_cart تومان
+Product: {$get_invoice['name_product']}
+Volume: {$get_invoice['Volume']} گیگ
+Duration: {$get_invoice['Service_time']} days
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💸 Amount paid: $format_price_cart USD
                 
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = $textbotlang['users']['Balance']['Send-receiptadnsendconfig'];
     } elseif ($split_data[0] == "getextenduser") {
         $partsdic = explode("%", $split_data[1]);
@@ -7353,16 +7353,16 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
 
 ⭕️⭕️⭕️⭕️⭕️
 تمدید
-نام کاربری سرویس : $usernamepanel
-نام محصول : {$prodcut['name_product']}
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💸 مبلغ پرداختی: $format_price_cart تومان
+Service username: $usernamepanel
+Product: {$prodcut['name_product']}
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💸 Amount paid: $format_price_cart USD
                 
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = "🚀 Your receipt was sent. After review, the service will be renewed";
     } elseif ($split_data[0] == "getextravolumeuser") {
         $partsdic = explode("%", $split_data[1]);
@@ -7373,16 +7373,16 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
 
 ⭕️⭕️⭕️⭕️⭕️
 خرید حجم اضافه
-نام کاربری سرویس : $usernamepanel
+Service username: $usernamepanel
 حجم خریداری شده  : $volumes
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💸 مبلغ پرداختی: $format_price_cart تومان
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💸 Amount paid: $format_price_cart USD
                 
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = "🚀 Your receipt was sent. After review, extra data will be added.";
     } elseif ($split_data[0] == "getextratimeuser") {
         $partsdic = explode("%", $split_data[1]);
@@ -7393,30 +7393,30 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
 
 ⭕️⭕️⭕️⭕️⭕️
 خرید زمان اضافه
-نام کاربری سرویس : $usernamepanel
-تعداد روز خریداری شده  : $time
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💸 مبلغ پرداختی: $format_price_cart تومان
+Service username: $usernamepanel
+تعداد days خریداری شده  : $time
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💸 Amount paid: $format_price_cart USD
                 
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = "🚀 Your receipt was sent. After review, extra time will be added";
     } else {
 
         $textsendrasid = "
 ⭕️ یک پرداخت جدید انجام شده است .
 افزایش موجودی            
-👤 نام اکانت کاربر : $first_name
-👤 شناسه کاربر:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 موجودی فعلی کاربر : $format_balance تومان
-🛒 کد پیگیری پرداخت: {$PaymentReport['id_order']}
-⚜️ نام کاربری: @$username
-💸 مبلغ پرداختی: $format_price_cart تومان
+👤 Account name: $first_name
+👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
+💸 Current balance: $format_balance USD
+🛒 Payment tracking code: {$PaymentReport['id_order']}
+⚜️ Username: @$username
+💸 Amount paid: $format_price_cart USD
                 
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = $textbotlang['users']['Balance']['Send-receipt'];
     }
     $paymentAlreadyPaid = paymentReportIsPaid($PaymentReport['id_order']);
@@ -7744,7 +7744,7 @@ This bonus can be activated <b>once</b> only.", $keyboard, 'HTML');
         $extra_volume['msg'] = json_encode($extra_volume['msg']);
         $textreports = "خطای خرید حجم اضافه
 نام پنل : {$user['Processing_value_one']}
-نام کاربری سرویس : {$user['Processing_value']}
+Service username: {$user['Processing_value']}
 دلیل خطا : {$extra_volume['msg']}";
         sendmessage($from_id, "❌ Extra-data purchase failed. Please contact support.", null, 'HTML');
         if (strlen($setting['Channel_Report']) > 0) {
@@ -8333,7 +8333,7 @@ if (isset($update['message']['successful_payment'])) {
     $query = "SELECT * FROM product WHERE (Location = '$location' OR Location = '/all') AND " . agent_product_access_sql($user['agent'], $from_id) . "";
     $marzban_list_get = select("marzban_panel", "*", "code_panel", $location, "select");
     $statuscustomvolume = json_decode($marzban_list_get['customvolume'], true)[$user['agent']];
-    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + عدد رندوم") {
+    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername'] || $marzban_list_get['MethodUsername'] == "نام کاربری دلخواه + pcs رندوم") {
         $datakeyboard = "prodcutservicesom_";
     } else {
         $datakeyboard = "prodcutserviceom_";
@@ -8453,7 +8453,7 @@ if (isset($update['message']['successful_payment'])) {
         $extend['msg'] = json_encode($extend['msg']);
         $textreports = "خطای تمدید سرویس
         نام پنل : {$marzban_list_get['name_panel']}
-        نام کاربری سرویس : $usernamePanelExtends
+        Service username: $usernamePanelExtends
         دلیل خطا : {$extend['msg']}";
         sendmessage($from_id, "❌ A renewal error occurred. Please contact support.", null, 'HTML');
         if (strlen($setting['Channel_Report']) > 0) {

@@ -419,7 +419,7 @@ function csrf_check_post(): void
     $token = $_POST['_csrf'] ?? '';
     if (!hash_equals($_SESSION['csrf'] ?? '', $token)) {
         http_response_code(403);
-        die('درخواست نامعتبر.');
+        die('Invalid request.');
     }
 }
 
@@ -428,7 +428,7 @@ function csrf_check_get(): void
     $token = $_GET['_csrf'] ?? '';
     if (!hash_equals($_SESSION['csrf'] ?? '', $token)) {
         http_response_code(403);
-        die('درخواست نامعتبر.');
+        die('Invalid request.');
     }
 }
 
@@ -482,10 +482,10 @@ function clear_login_rate(string $ip): void
 function user_role_label(string $agent): string
 {
     return match ($agent) {
-        'n' => 'نماینده',
-        'n2' => 'نماینده پیشرفته',
-        'all' => 'دسترسی کامل',
-        default => 'کاربر عادی',
+        'n' => 'Agent',
+        'n2' => 'Advanced agent',
+        'all' => 'Full access',
+        default => 'Regular user',
     };
 }
 
@@ -503,10 +503,10 @@ function user_role_tag(string $agent): string
 function panel_agent_label(string $agent): string
 {
     return match ($agent) {
-        'f' => 'کاربر عادی',
-        'n' => 'نماینده',
-        'n2' => 'نماینده پیشرفته',
-        'all' => 'همه گروه‌ها',
+        'f' => 'Regular user',
+        'n' => 'Agent',
+        'n2' => 'Advanced agent',
+        'all' => 'All groups',
         default => $agent,
     };
 }

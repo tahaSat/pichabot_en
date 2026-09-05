@@ -17,12 +17,12 @@ $toFilter = $toRaw !== '' ? panel_payment_parse_filter_datetime($toRaw, true) : 
 if (($fromRaw !== '' && $fromFilter === null) || ($toRaw !== '' && $toFilter === null)) {
     http_response_code(422);
     header('Content-Type: text/plain; charset=UTF-8');
-    exit('بازه تاریخ معتبر نیست.');
+    exit('Date range is not valid.');
 }
 if ($fromFilter && $toFilter && $fromFilter['ts'] > $toFilter['ts']) {
     http_response_code(422);
     header('Content-Type: text/plain; charset=UTF-8');
-    exit('زمان شروع باید قبل از زمان پایان باشد.');
+    exit('Start time must be before end time.');
 }
 
 try {
@@ -41,7 +41,7 @@ try {
     $jalaliTimestamp = function_exists('jalali_tehran_format')
         ? jalali_tehran_format(time(), 'Y-m-d_H-i', 'en')
         : date('Y-m-d_H-i');
-    $filename = 'گزارش_مالی_' . $jalaliTimestamp . '.xlsx';
+    $filename = 'financial_report_' . $jalaliTimestamp . '.xlsx';
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header(
         "Content-Disposition: attachment; filename=\"financial_report.xlsx\"; filename*=UTF-8''"
@@ -59,5 +59,5 @@ try {
         http_response_code(500);
         header('Content-Type: text/plain; charset=UTF-8');
     }
-    exit('ساخت فایل اکسل ناموفق بود. جزئیات در گزارش خطا ثبت شد.');
+    exit('Failed to build the Excel file. Details were written to the error log.');
 }

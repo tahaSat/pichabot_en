@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'reord
     $category = (string) ($_POST['category'] ?? '');
     $order = $_POST['order'] ?? [];
     if (!is_array($order)) {
-      echo json_encode(['ok' => false, 'error' => 'داده نامعتبر است.'], JSON_UNESCAPED_UNICODE);
+      echo json_encode(['ok' => false, 'error' => 'Invalid data.'], JSON_UNESCAPED_UNICODE);
       exit;
     }
     product_apply_category_sort_order($pdo, $category, $order);
@@ -44,12 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
   csrf_check_post();
   $name = trim($_POST['name_product'] ?? '');
   if ($name === '') {
-    flash('error', 'نام محصول الزامی است.');
+    flash('error', 'Product name is required.');
     header('Location: product.php');
     exit;
   }
   if (db_count($pdo, "SELECT COUNT(*) FROM product WHERE name_product = ?", [$name])) {
-    flash('error', 'محصولی با این نام قبلاً ثبت شده.');
+    flash('error', 'A product with this name already exists.');
     header('Location: product.php');
     exit;
   }
@@ -57,14 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
   $hwid_limit = trim($_POST['hwid_limit'] ?? '');
   $hwid_limit = ($hwid_limit === '' || $hwid_limit === '-') ? null : (int) $hwid_limit;
   if ($hwid_limit !== null && $hwid_limit <= 0) {
-    flash('error', 'محدودیت دستگاه باید عدد مثبت باشد یا خالی بماند.');
+    flash('error', 'Device limit must be a positive number or left empty.');
     header('Location: product.php');
     exit;
   }
   $sort_order = product_next_sort_order((string) ($_POST['cetegory_product'] ?? ''));
   $emoji_id = parse_posted_custom_emoji_id($_POST['emoji_id'] ?? '');
   if ($emoji_id === null) {
-    flash('error', 'شناسه ایموجی پرمیوم باید فقط عدد باشد.');
+    flash('error', 'Premium emoji ID must be numeric.');
     header('Location: product.php');
     exit;
   }
@@ -82,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
         [$name, $code, (int) ($_POST['price_product'] ?? 0), (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order]
       );
     }
-    flash('success', 'محصول «' . $name . '» اضافه شد.');
+    flash('success', 'Product “' . $name . '” was added.');
   } catch (Exception $e) {
-    flash('error', 'خطای پایگاه داده: ' . $e->getMessage());
+    flash('error', 'Database error: ' . $e->getMessage());
   }
   header('Location: product.php');
   exit;
@@ -98,14 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit'
     $hwid_limit = trim($_POST['hwid_limit'] ?? '');
     $hwid_limit = ($hwid_limit === '' || $hwid_limit === '-') ? null : (int) $hwid_limit;
     if ($hwid_limit !== null && $hwid_limit <= 0) {
-      flash('error', 'محدودیت دستگاه باید عدد مثبت باشد یا خالی بماند.');
+      flash('error', 'Device limit must be a positive number or left empty.');
       header('Location: product.php');
       exit;
     }
     $category = (string) ($_POST['cetegory_product'] ?? '');
     $emoji_id = parse_posted_custom_emoji_id($_POST['emoji_id'] ?? '');
     if ($emoji_id === null) {
-      flash('error', 'شناسه ایموجی پرمیوم باید فقط عدد باشد.');
+      flash('error', 'Premium emoji ID must be numeric.');
       header('Location: product.php');
       exit;
     }
@@ -130,12 +130,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit'
           [$name, (int) ($_POST['price_product'] ?? 0), (int) ($_POST['volume_product'] ?? 0), (int) ($_POST['time_product'] ?? 0), $_POST['namepanel'] ?? '', $_POST['agent_product'] ?? '', $_POST['note_product'] ?? '', $_POST['cetegory_product'] ?? '', $hwid_limit, $sort_order, $pid]
         );
       }
-      flash('success', 'محصول ویرایش شد.');
+      flash('success', 'Product updated.');
       if ($oldCategory !== $category) {
         product_renormalize_category_sort_orders($pdo, $oldCategory);
       }
     } catch (Exception $e) {
-      flash('error', 'خطا: ' . $e->getMessage());
+      flash('error', 'Error: ' . $e->getMessage());
     }
   }
   header('Location: product.php');
@@ -150,7 +150,7 @@ if (isset($_GET['delete'])) {
   if ($deleted) {
     product_renormalize_category_sort_orders($pdo, (string) ($deleted['category'] ?? ''));
   }
-  flash('success', 'محصول حذف شد.');
+  flash('success', 'Product deleted.');
   header('Location: product.php');
   exit;
 }
@@ -233,7 +233,7 @@ foreach ($productsByCategory as $catKey => $categoryProducts) {
   }
   $categorySections[] = [
     'key' => $catKey,
-    'label' => $catKey === '' ? 'بدون دسته‌بندی' : $catKey,
+    'label' => $catKey === '' ? 'Uncategorized' : $catKey,
     'active' => $productCatIsActive($catKey),
     'products' => $categoryProducts,
   ];
@@ -254,18 +254,18 @@ foreach ($panels as $pl) {
   }
 }
 
-$pageTitle = 'محصولات';
-$pageLede = 'فهرست محصولات قابل فروش؛ ترتیب نمایش در هر دسته‌بندی با کشیدن و رها کردن تنظیم می‌شود.';
+$pageTitle = 'Products';
+$pageLede = 'Catalog of sellable products; drag and drop to reorder within each category.';
 $activeNav = 'product';
 include __DIR__ . '/inc/layout_head.php';
 ?>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px" class="fade-up">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <div style="font-size:.85rem;color:var(--mute)"><?= count($products) ?> محصول ثبت‌شده</div>
-    <a href="categories.php" class="btn btn-ghost btn-sm"><?= icon('package', 14) ?> دسته‌بندی‌ها</a>
+    <div style="font-size:.85rem;color:var(--mute)"><?= count($products) ?> products</div>
+    <a href="categories.php" class="btn btn-ghost btn-sm"><?= icon('package', 14) ?> Categories</a>
   </div>
-  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> افزودن محصول</button>
+  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> Add product</button>
 </div>
 
 <div class="card fade-up d1">
@@ -280,17 +280,16 @@ include __DIR__ . '/inc/layout_head.php';
         <circle cx="155" cy="125" r="22" fill="var(--accent-s)" stroke="var(--accent)" stroke-width="2" />
         <path d="M147 125h16M155 117v16" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" />
       </svg>
-      <p>هنوز محصولی ثبت نکرده‌اید</p>
+      <p>No products yet</p>
       <button class="btn btn-primary" style="margin-top:14px" onclick="openModal('addModal')"><?= icon('plus', 14) ?>
-        اضافه
-        کردن اولین محصول</button>
+        Add the first product</button>
     </div>
   <?php else: ?>
     <div class="toolbar">
-      <div class="toolbar-title">فهرست محصولات <small>(<?= count($products) ?>)</small></div>
+      <div class="toolbar-title">Product list <small>(<?= count($products) ?>)</small></div>
       <div class="search-box" style="min-width:220px">
         <?= icon('search', 14) ?>
-        <input type="text" placeholder="جستجو..." data-filter="prodOrder">
+        <input type="text" placeholder="Search..." data-filter="prodOrder">
         <button type="button" class="search-clear">✕</button>
       </div>
     </div>
@@ -305,7 +304,7 @@ include __DIR__ . '/inc/layout_head.php';
               <div class="product-order-group-title"><?= htmlspecialchars($section['label']) ?></div>
             </div>
             <div class="product-order-group-head-end">
-              <span class="tag <?= $isActive ? 'tag-ok' : 'tag-warn' ?>"><?= $isActive ? 'فعال' : 'غیرفعال' ?></span>
+              <span class="tag <?= $isActive ? 'tag-ok' : 'tag-warn' ?>"><?= $isActive ? 'Active' : 'Inactive' ?></span>
               <span class="tag tag-info"><?= count($section['products']) ?></span>
             </div>
           </summary>
@@ -314,26 +313,26 @@ include __DIR__ . '/inc/layout_head.php';
               <thead>
                 <tr>
                   <th style="width:42px"></th>
-                  <th>ترتیب</th>
-                  <th>نام محصول</th>
-                  <th>قیمت</th>
-                  <th>حجم</th>
-                  <th>مدت</th>
-                  <th>پنل</th>
+                  <th>Order</th>
+                  <th>Product name</th>
+                  <th>Price</th>
+                  <th>Volume</th>
+                  <th>Duration</th>
+                  <th>Panel</th>
                   <th>HWID</th>
-                  <th>کد</th>
-                  <th>عملیات</th>
+                  <th>Code</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody class="product-sortable" data-category="<?= htmlspecialchars($section['key'], ENT_QUOTES) ?>">
                 <?php foreach ($section['products'] as $index => $p): ?>
                   <tr class="product-sort-row" data-id="<?= (int) $p['id'] ?>">
-                    <td class="product-sort-handle" title="کشیدن برای تغییر ترتیب"><?= icon('menu', 14) ?></td>
+                    <td class="product-sort-handle" title="Drag to reorder"><?= icon('menu', 14) ?></td>
                     <td class="cn product-sort-index"><?= $index + 1 ?></td>
                     <td class="cs"><?= htmlspecialchars($p['name_product'] ?? '') ?></td>
-                    <td class="cn cs"><?= number_format((int) ($p['price_product'] ?? 0)) ?> <span class="cf">ت</span></td>
+                    <td class="cn cs"><?= number_format((int) ($p['price_product'] ?? 0)) ?> <span class="cf">USD</span></td>
                     <td class="cn"><?= htmlspecialchars($p['Volume_constraint'] ?? '—') ?> <span class="cf">GB</span></td>
-                    <td class="cn"><?= htmlspecialchars($p['Service_time'] ?? '—') ?> <span class="cf">روز</span></td>
+                    <td class="cn"><?= htmlspecialchars($p['Service_time'] ?? '—') ?> <span class="cf">days</span></td>
                     <td class="cf"><?= htmlspecialchars(trunc($p['Location'] ?? '—', 16)) ?></td>
                     <td class="cn"><?php
                       $loc = $p['Location'] ?? '';
@@ -346,13 +345,13 @@ include __DIR__ . '/inc/layout_head.php';
                     <td class="cm" style="font-size:.72rem"><?= htmlspecialchars($p['code_product'] ?? '') ?></td>
                     <td>
                       <div style="display:flex;gap:5px">
-                        <button class="btn btn-ghost btn-sm btn-icon" title="ویرایش"
+                        <button class="btn btn-ghost btn-sm btn-icon" title="Edit"
                           onclick="openEditModal(<?= htmlspecialchars(json_encode($p), ENT_QUOTES) ?>)">
                           <?= icon('edit', 13) ?>
                         </button>
                         <a href="product.php?delete=<?= (int) $p['id'] ?>&_csrf=<?= csrf_token() ?>"
-                          class="btn btn-no btn-sm btn-icon" title="حذف"
-                          data-confirm="حذف محصول «<?= htmlspecialchars($p['name_product']) ?>»؟">
+                          class="btn btn-no btn-sm btn-icon" title="Delete"
+                          data-confirm="Delete product “<?= htmlspecialchars($p['name_product']) ?>”?">
                           <?= icon('trash', 13) ?>
                         </a>
                       </div>
@@ -371,7 +370,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="addModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>افزودن محصول جدید</h3>
+      <h3>Add new product</h3>
       <button class="modal-x" onclick="closeModal('addModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST">
@@ -380,41 +379,41 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="action" value="add">
         <div class="form-grid">
           <div class="field full">
-            <label>نام محصول *</label>
-            <input type="text" name="name_product" class="input" placeholder="مثلاً: ۵۰ گیگ یک ماهه" required>
+            <label>Product name *</label>
+            <input type="text" name="name_product" class="input" placeholder="e.g. 50 GB / 1 month" required>
           </div>
           <?php if ($hasEmojiCol): ?>
           <div class="field full">
-            <label>شناسه ایموجی پرمیوم (اختیاری)</label>
-            <input type="text" name="emoji_id" class="input" placeholder="مثلاً 5368324170671202286" inputmode="numeric" dir="ltr">
-            <small class="cf" style="display:block;margin-top:4px">از ربات تلگرام با ارسال ایموجی پرمیوم هم می‌توانید تنظیم کنید.</small>
+            <label>Premium emoji ID (optional)</label>
+            <input type="text" name="emoji_id" class="input" placeholder="e.g. 5368324170671202286" inputmode="numeric" dir="ltr">
+            <small class="cf" style="display:block;margin-top:4px">You can also set this from the Telegram bot by sending a premium emoji.</small>
           </div>
           <?php endif; ?>
           <div class="field">
-            <label>قیمت (تومان)</label>
-            <input type="number" name="price_product" class="input" placeholder="۰" min="0">
+            <label>Price (USD)</label>
+            <input type="number" name="price_product" class="input" placeholder="0" min="0">
           </div>
           <div class="field">
-            <label>حجم (GB)</label>
-            <input type="number" name="volume_product" class="input" placeholder="۵۰" min="0">
+            <label>Volume (GB)</label>
+            <input type="number" name="volume_product" class="input" placeholder="50" min="0">
           </div>
           <div class="field">
-            <label>مدت (روز)</label>
-            <input type="number" name="time_product" class="input" placeholder="۳۰" min="0">
+            <label>Duration (days)</label>
+            <input type="number" name="time_product" class="input" placeholder="30" min="0">
           </div>
           <div class="field">
-            <label>دسته‌بندی</label>
+            <label>Category</label>
             <select name="cetegory_product" class="select">
-              <option value="">— بدون دسته —</option>
+              <option value="">— No category —</option>
               <?php foreach ($categories as $cat): ?>
                 <option value="<?= htmlspecialchars($cat['remark']) ?>"><?= htmlspecialchars($cat['remark']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
           <div class="field">
-            <label>پنل</label>
+            <label>Panel</label>
             <select name="namepanel" class="select">
-              <option value="">— انتخاب نشده —</option>
+              <option value="">— Not selected —</option>
               <?php foreach ($panels as $pl): ?>
                 <option value="<?= htmlspecialchars($pl['name_panel'] ?? $pl['id']) ?>">
                   <?= htmlspecialchars($pl['name_panel'] ?? $pl['id']) ?>
@@ -422,27 +421,27 @@ include __DIR__ . '/inc/layout_head.php';
             </select>
           </div>
           <div class="field">
-            <label>نمایندگی</label>
+            <label>Agency</label>
             <select name="agent_product" class="select">
-              <option value="f">کاربر عادی</option>
-              <option value="n">نماینده</option>
-              <option value="n2">نماینده پیشرفته</option>
+              <option value="f">Regular user</option>
+              <option value="n">Agent</option>
+              <option value="n2">Advanced agent</option>
             </select>
           </div>
           <div class="field" id="add_hwid_field" style="display:none">
-            <label>محدودیت دستگاه (HWID)</label>
-            <input type="number" name="hwid_limit" id="add_hwid_limit" class="input" placeholder="خالی = بدون محدودیت" min="1">
-            <small class="cf" style="display:block;margin-top:4px">فقط برای پنل پاسارگارد — حداکثر تعداد دستگاه مجاز</small>
+            <label>Device limit (HWID)</label>
+            <input type="number" name="hwid_limit" id="add_hwid_limit" class="input" placeholder="Empty = unlimited" min="1">
+            <small class="cf" style="display:block;margin-top:4px">PasarGuard panels only — maximum allowed devices</small>
           </div>
           <div class="field full">
-            <label>توضیحات</label>
-            <input type="text" name="note_product" class="input" placeholder="توضیحات اختیاری">
+            <label>Description</label>
+            <input type="text" name="note_product" class="input" placeholder="Optional description">
           </div>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary"><?= icon('plus', 13) ?> ذخیره محصول</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary"><?= icon('plus', 13) ?> Save product</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -451,7 +450,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="editModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>ویرایش محصول</h3>
+      <h3>Edit product</h3>
       <button class="modal-x" onclick="closeModal('editModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST">
@@ -461,40 +460,40 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="edit_id" id="edit_id">
         <div class="form-grid">
           <div class="field full">
-            <label>نام محصول *</label>
+            <label>Product name *</label>
             <input type="text" name="name_product" id="edit_name" class="input" required>
           </div>
           <?php if ($hasEmojiCol): ?>
           <div class="field full">
-            <label>شناسه ایموجی پرمیوم (اختیاری)</label>
-            <input type="text" name="emoji_id" id="edit_emoji_id" class="input" placeholder="مثلاً 5368324170671202286" inputmode="numeric" dir="ltr">
+            <label>Premium emoji ID (optional)</label>
+            <input type="text" name="emoji_id" id="edit_emoji_id" class="input" placeholder="e.g. 5368324170671202286" inputmode="numeric" dir="ltr">
           </div>
           <?php endif; ?>
           <div class="field">
-            <label>قیمت (تومان)</label>
+            <label>Price (USD)</label>
             <input type="number" name="price_product" id="edit_price" class="input" min="0">
           </div>
           <div class="field">
-            <label>حجم (GB)</label>
+            <label>Volume (GB)</label>
             <input type="number" name="volume_product" id="edit_volume" class="input" min="0">
           </div>
           <div class="field">
-            <label>مدت (روز)</label>
+            <label>Duration (days)</label>
             <input type="number" name="time_product" id="edit_time" class="input" min="0">
           </div>
           <div class="field">
-            <label>دسته‌بندی</label>
+            <label>Category</label>
             <select name="cetegory_product" id="edit_cat" class="select">
-              <option value="">— بدون دسته —</option>
+              <option value="">— No category —</option>
               <?php foreach ($categories as $cat): ?>
                 <option value="<?= htmlspecialchars($cat['remark']) ?>"><?= htmlspecialchars($cat['remark']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
           <div class="field">
-            <label>پنل</label>
+            <label>Panel</label>
             <select name="namepanel" id="edit_panel" class="select">
-              <option value="">— انتخاب نشده —</option>
+              <option value="">— Not selected —</option>
               <?php foreach ($panels as $pl): ?>
                 <option value="<?= htmlspecialchars($pl['name_panel'] ?? $pl['id']) ?>">
                   <?= htmlspecialchars($pl['name_panel'] ?? $pl['id']) ?>
@@ -502,27 +501,27 @@ include __DIR__ . '/inc/layout_head.php';
             </select>
           </div>
           <div class="field">
-            <label>نمایندگی</label>
+            <label>Agency</label>
             <select name="agent_product" id="edit_agent" class="select">
-              <option value="f">کاربر عادی</option>
-              <option value="n">نماینده</option>
-              <option value="n2">نماینده پیشرفته</option>
+              <option value="f">Regular user</option>
+              <option value="n">Agent</option>
+              <option value="n2">Advanced agent</option>
             </select>
           </div>
           <div class="field" id="edit_hwid_field" style="display:none">
-            <label>محدودیت دستگاه (HWID)</label>
-            <input type="number" name="hwid_limit" id="edit_hwid_limit" class="input" placeholder="خالی = بدون محدودیت" min="1">
-            <small class="cf" style="display:block;margin-top:4px">فقط برای پنل پاسارگارد — حداکثر تعداد دستگاه مجاز</small>
+            <label>Device limit (HWID)</label>
+            <input type="number" name="hwid_limit" id="edit_hwid_limit" class="input" placeholder="Empty = unlimited" min="1">
+            <small class="cf" style="display:block;margin-top:4px">PasarGuard panels only — maximum allowed devices</small>
           </div>
           <div class="field full">
-            <label>توضیحات</label>
+            <label>Description</label>
             <input type="text" name="note_product" id="edit_note" class="input">
           </div>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary"><?= icon('check', 13) ?> ذخیره تغییرات</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary"><?= icon('check', 13) ?> Save changes</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">Cancel</button>
       </div>
     </form>
   </div>

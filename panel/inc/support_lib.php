@@ -13,19 +13,19 @@ function panel_support_conversation_statuses(): array
 function panel_support_status_map(): array
 {
     return [
-        'Unseen' => ['tag-warn', 'پاسخ داده نشده'],
-        'Customerresponse' => ['tag-warn', 'پاسخ جدید کاربر'],
-        'Pending' => ['tag-warn', 'در انتظار'],
-        'Answered' => ['tag-ok', 'پاسخ داده شده'],
-        'close' => ['tag-plain', 'بسته شده'],
-        'flagged' => ['tag-flag', 'نشانه گذاری شده'],
-        'کمپین' => ['tag-info', 'کمپین'],
+        'Unseen' => ['tag-warn', 'Unanswered'],
+        'Customerresponse' => ['tag-warn', 'New user reply'],
+        'Pending' => ['tag-warn', 'Pending'],
+        'Answered' => ['tag-ok', 'Answered'],
+        'close' => ['tag-plain', 'Closed'],
+        'flagged' => ['tag-flag', 'Flagged'],
+        'کمپین' => ['tag-info', 'Campaign'],
     ];
 }
 
 function panel_support_status_info(string $status): array
 {
-    return panel_support_status_map()[$status] ?? ['tag-plain', $status ?: 'نامشخص'];
+    return panel_support_status_map()[$status] ?? ['tag-plain', $status ?: 'Unknown'];
 }
 
 function panel_support_chat_status_from_messages(array $messages): string
@@ -70,7 +70,7 @@ function panel_support_preview_message(array $item): array
     }
 
     return [
-        'text' => '📎 فایل پیوست',
+        'text' => '📎 Attachment',
         'from' => 'user',
         'time' => $time,
     ];
@@ -107,12 +107,12 @@ function panel_support_send_reply(array $ticket, string $reply, ?array $upload =
 {
     $botapi = dirname(__DIR__, 2) . '/botapi.php';
     if (!is_file($botapi)) {
-        return ['ok' => false, 'msg' => 'فایل ارتباط با ربات یافت نشد.'];
+        return ['ok' => false, 'msg' => 'Bot connection file not found.'];
     }
 
     require_once $botapi;
     if (!function_exists('sendmessage')) {
-        return ['ok' => false, 'msg' => 'امکان ارسال پیام از طریق ربات فراهم نیست.'];
+        return ['ok' => false, 'msg' => 'Sending messages through the bot is not available.'];
     }
 
     $tracking = (string) ($ticket['Tracking'] ?? '');
@@ -154,17 +154,17 @@ function panel_support_send_reply(array $ticket, string $reply, ?array $upload =
                 $file['file_size'] ?? $upload['size'],
             ]];
             if ($media[0][1] === '') {
-                return ['ok' => false, 'msg' => 'فایل ارسال شد اما شناسه آن از تلگرام دریافت نشد.'];
+                return ['ok' => false, 'msg' => 'File was sent but Telegram did not return a file ID.'];
             }
         }
     } else {
         $response = sendmessage($ticket['iduser'], $message, $keyboard, 'HTML');
     }
     if (empty($response['ok'])) {
-        return ['ok' => false, 'msg' => 'ارسال پیام به کاربر ناموفق بود: ' . ($response['description'] ?? 'خطای نامشخص')];
+        return ['ok' => false, 'msg' => 'Could not send the message to the user: ' . ($response['description'] ?? 'Unknown error')];
     }
 
-    return ['ok' => true, 'msg' => 'پاسخ برای کاربر ارسال شد.', 'media' => $media];
+    return ['ok' => true, 'msg' => 'Reply sent to the user.', 'media' => $media];
 }
 
 /**
@@ -176,10 +176,10 @@ function panel_support_prepare_upload(array $file): array
         return ['ok' => true, 'upload' => null];
     }
     if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'] ?? '')) {
-        return ['ok' => false, 'msg' => 'بارگذاری فایل ناموفق بود.'];
+        return ['ok' => false, 'msg' => 'File upload failed.'];
     }
     if (($file['size'] ?? 0) < 1 || $file['size'] > 20 * 1024 * 1024) {
-        return ['ok' => false, 'msg' => 'حجم فایل باید حداکثر ۲۰ مگابایت باشد.'];
+        return ['ok' => false, 'msg' => 'File size must be at most 20 MB.'];
     }
 
     $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']) ?: 'application/octet-stream';

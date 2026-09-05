@@ -10,7 +10,7 @@ $id = (int) ($_GET['id'] ?? 0);
 $row = withdraw_get($id, $pdo);
 if (!$row) {
     http_response_code(404);
-    exit('رسید یافت نشد.');
+    exit('Receipt not found.');
 }
 
 $path = trim((string) ($row['receipt_path'] ?? ''));
@@ -31,14 +31,14 @@ if ($fileReal && $root && str_starts_with($fileReal, $root) && is_file($fileReal
 $fileId = trim((string) ($row['receipt_file_id'] ?? ''));
 if ($fileId === '') {
     http_response_code(404);
-    exit('فایل رسید در دسترس نیست.');
+    exit('Receipt file is not available.');
 }
 
 withdraw_telegram_ready();
 $downloaded = withdraw_download_telegram_file($fileId);
 if (!$downloaded) {
     http_response_code(404);
-    exit('دانلود رسید از تلگرام ناموفق بود.');
+    exit('Failed to download the receipt from Telegram.');
 }
 
 $saved = withdraw_save_bytes($id, $downloaded['bytes'], $downloaded['ext']);

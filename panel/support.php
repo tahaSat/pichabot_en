@@ -8,7 +8,10 @@ support_ensure_schema($pdo);
 $currentAdmin = db_fetch($pdo, 'SELECT id_admin, username FROM admin WHERE username = ?', [$_SESSION['admin_user'] ?? '']);
 
 $tab = $_GET['tab'] ?? 'unanswered';
-if (!in_array($tab, ['unanswered', 'all', 'Answered', 'close', 'flagged', 'کمپین'], true)) {
+if ($tab === 'کمپین') {
+    $tab = 'campaign';
+}
+if (!in_array($tab, ['unanswered', 'all', 'Answered', 'close', 'flagged', 'campaign'], true)) {
     $tab = 'unanswered';
 }
 $search = trim($_GET['q'] ?? '');
@@ -34,15 +37,15 @@ function support_media_markup(array $media): string
     foreach ($media as $item) {
         $id = (int) $item['id'];
         $url = 'support_media.php?id=' . $id;
-        $name = htmlspecialchars($item['file_name'] ?: 'فایل پیوست', ENT_QUOTES, 'UTF-8');
+        $name = htmlspecialchars($item['file_name'] ?: 'Attachment', ENT_QUOTES, 'UTF-8');
         $type = htmlspecialchars((string) $item['media_type'], ENT_QUOTES, 'UTF-8');
         $label = match ($item['media_type']) {
-            'photo' => '🖼 مشاهده تصویر',
-            'video' => '🎬 پخش ویدیو',
-            'audio', 'voice' => '🎧 پخش صوت',
-            default => '📎 دانلود فایل',
+            'photo' => '🖼 View image',
+            'video' => '🎬 Play video',
+            'audio', 'voice' => '🎧 Play audio',
+            default => '📎 Download file',
         };
-        $html .= '<button type="button" class="support-media-load" data-media-id="' . $id . '" data-media-url="' . $url . '" data-media-type="' . $type . '" data-media-name="' . $name . '">' . $label . ($name !== 'فایل پیوست' ? ' · ' . $name : '') . '</button>';
+        $html .= '<button type="button" class="support-media-load" data-media-id="' . $id . '" data-media-url="' . $url . '" data-media-type="' . $type . '" data-media-name="' . $name . '">' . $label . ($name !== 'Attachment' ? ' · ' . $name : '') . '</button>';
     }
     return $html;
 }
@@ -61,11 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $targetUser = $postUserId !== '' ? $postUserId : (string) ($ticket['iduser'] ?? '');
         $newStatus = trim((string) ($_POST['status'] ?? ''));
         if ($targetUser === '' || !in_array($newStatus, panel_support_conversation_statuses(), true)) {
-            flash('error', 'وضعیت گفتگو نامعتبر است.');
+            flash('error', 'Invalid conversation status.');
         } elseif (support_conversation_set_status($pdo, $targetUser, $newStatus)) {
-            flash('success', 'وضعیت گفتگو به‌روزرسانی شد.');
+            flash('success', 'Conversation status updated.');
         } else {
-            flash('error', 'به‌روزرسانی وضعیت گفتگو ناموفق بود.');
+            flash('error', 'Could not update conversation status.');
         }
         $redirectUser = $newStatus === 'close' ? null : ($targetUser !== '' ? $targetUser : null);
         header('Location: ' . support_inbox_url(['user_id' => $redirectUser, 'page' => null]));
@@ -73,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$ticket) {
-        flash('error', 'پیام پشتیبانی یافت نشد.');
+        flash('error', 'Support message not found.');
     } elseif ($action === 'reply') {
         $reply = trim($_POST['reply'] ?? '');
         $uploadResult = panel_support_prepare_upload($_FILES['attachment'] ?? []);
@@ -84,11 +87,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$uploadResult['ok']) {
             flash('error', $uploadResult['msg']);
         } elseif ($reply === '' && !$upload) {
-            flash('error', 'متن پاسخ یا فایل را وارد کنید.');
+            flash('error', 'Enter a reply or attach a file.');
         } elseif (mb_strlen($reply, 'UTF-8') > 3500) {
-            flash('error', 'متن پاسخ نباید بیشتر از ۳۵۰۰ کاراکتر باشد.');
+            flash('error', 'Reply text must be at most 3500 characters.');
         } elseif (!$canReply) {
-            flash('warning', 'این گفتگو بسته شده و امکان ارسال پاسخ وجود ندارد.');
+            flash('warning', 'This conversation is closed and cannot be replied to.');
         } else {
             $sendTicket = $ticket;
             $sendTicket['Tracking'] = bin2hex(random_bytes(4));
@@ -140,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'close') {
         $closeUser = (string) ($ticket['iduser'] ?? $postUserId);
         support_conversation_set_status($pdo, $closeUser, 'close');
-        flash('success', 'گفتگو بسته شد.');
+        flash('success', 'Conversation closed.');
         header('Location: ' . support_inbox_url(['user_id' => null, 'page' => null]));
         exit;
     }
@@ -154,7 +157,7 @@ $tabStatusMap = [
     'Answered' => 'Answered',
     'close' => 'close',
     'flagged' => 'flagged',
-    'کمپین' => 'کمپین',
+    'campaign' => 'کمپین',
 ];
 $searchSql = '';
 $searchParams = [];
@@ -193,7 +196,7 @@ try {
 } catch (Throwable $e) {
     $total = 0;
     $tickets = [];
-    flash('error', 'خواندن پیام‌های پشتیبانی با خطا روبه‌رو شد.');
+    flash('error', 'Could not load support messages.');
 }
 
 $totalPages = max(1, (int) ceil($total / $perPage));
@@ -243,8 +246,8 @@ $replyTicket = $conversation ? $conversation[count($conversation) - 1] : null;
 $conversationStatus = (string) ($chatRow['status'] ?? panel_support_chat_status_from_messages($conversation));
 $canReply = $conversationStatus !== 'close' && $replyTicket;
 
-$pageTitle = 'صندوق پشتیبانی';
-$pageLede = 'پیام‌های ثبت‌شده در بخش پشتیبانی ربات و پاسخ به کاربران.';
+$pageTitle = 'Support inbox';
+$pageLede = 'Messages submitted through bot support, and replies to users.';
 $activeNav = 'support';
 include __DIR__ . '/inc/layout_head.php';
 ?>
@@ -252,39 +255,39 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="support-shell <?= $userId !== '' ? 'support-chat-open' : '' ?> fade-up">
     <section class="card support-list">
         <div class="toolbar support-toolbar">
-            <div class="toolbar-title"><?= icon('message', 17) ?> صندوق ورودی <small>(<?= number_format($total) ?>)</small></div>
+            <div class="toolbar-title"><?= icon('message', 17) ?> Inbox <small>(<?= number_format($total) ?>)</small></div>
             <form method="GET" class="search-box support-search">
                 <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
                 <?= icon('search', 15) ?>
-                <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="آیدی، نام یا کد پیگیری">
-                <button type="submit" class="search-btn">جستجو</button>
+                <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="ID, name, or tracking code">
+                <button type="submit" class="search-btn">Search</button>
             </form>
         </div>
 
         <div class="support-tabs">
-            <a class="<?= $tab === 'unanswered' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'unanswered', 'page' => null, 'user_id' => null]) ?>">پاسخ‌نداده <b><?= $unansweredCount ?></b></a>
-            <a class="<?= $tab === 'all' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'all', 'page' => null, 'user_id' => null]) ?>">همه</a>
-            <a class="<?= $tab === 'Answered' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'Answered', 'page' => null, 'user_id' => null]) ?>">پاسخ داده‌شده</a>
-            <a class="<?= $tab === 'flagged' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'flagged', 'page' => null, 'user_id' => null]) ?>">نشانه گذاری شده <b><?= $flaggedCount ?></b></a>
-            <a class="<?= $tab === 'کمپین' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'کمپین', 'page' => null, 'user_id' => null]) ?>">کمپین <b><?= $campaignCount ?></b></a>
-            <a class="<?= $tab === 'close' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'close', 'page' => null, 'user_id' => null]) ?>">بسته‌شده</a>
+            <a class="<?= $tab === 'unanswered' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'unanswered', 'page' => null, 'user_id' => null]) ?>">Unanswered <b><?= $unansweredCount ?></b></a>
+            <a class="<?= $tab === 'all' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'all', 'page' => null, 'user_id' => null]) ?>">All</a>
+            <a class="<?= $tab === 'Answered' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'Answered', 'page' => null, 'user_id' => null]) ?>">Answered</a>
+            <a class="<?= $tab === 'flagged' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'flagged', 'page' => null, 'user_id' => null]) ?>">Flagged <b><?= $flaggedCount ?></b></a>
+            <a class="<?= $tab === 'campaign' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'campaign', 'page' => null, 'user_id' => null]) ?>">Campaign <b><?= $campaignCount ?></b></a>
+            <a class="<?= $tab === 'close' ? 'active' : '' ?>" href="<?= support_inbox_url(['tab' => 'close', 'page' => null, 'user_id' => null]) ?>">Closed</a>
         </div>
 
         <div class="support-ticket-list">
             <?php if (!$tickets): ?>
-                <div class="empty"><p>پیامی برای نمایش وجود ندارد.</p></div>
+                <div class="empty"><p>No messages to display.</p></div>
             <?php endif; ?>
             <?php foreach ($tickets as $item):
                 $chatStatus = (string) ($item['chat_status'] ?? 'Unseen');
                 [$tagClass, $statusLabel] = panel_support_status_info($chatStatus);
                 $preview = panel_support_preview_message($item);
                 $itemUserName = $item['conversation_user_name'] ?? $item['message_user_name'] ?? $item['user_name'] ?? '';
-                $displayName = !empty($itemUserName) ? $itemUserName : (($item['namecustom'] && $item['namecustom'] !== 'none') ? $item['namecustom'] : (($item['username'] && $item['username'] !== 'none') ? '@' . $item['username'] : 'کاربر ناشناس'));
+                $displayName = !empty($itemUserName) ? $itemUserName : (($item['namecustom'] && $item['namecustom'] !== 'none') ? $item['namecustom'] : (($item['username'] && $item['username'] !== 'none') ? '@' . $item['username'] : 'Unknown user'));
                 $userHandle = ($item['username'] && $item['username'] !== 'none') ? '@' . $item['username'] : '';
                 if ($userHandle === $displayName) {
                     $userHandle = '';
                 }
-                $previewText = $preview['from'] === 'admin' ? ('شما: ' . $preview['text']) : $preview['text'];
+                $previewText = $preview['from'] === 'admin' ? ('You: ' . $preview['text']) : $preview['text'];
                 $dept = $item['conversation_departman'] ?? $item['name_departman'] ?? '';
                 $previewTime = $preview['time'] !== '' ? $preview['time'] : (string) ($item['last_message_at'] ?? '');
                 ?>
@@ -304,7 +307,7 @@ include __DIR__ . '/inc/layout_head.php';
 
         <?php if ($total > 0): ?>
             <div class="tbl-foot">
-                <span>صفحه <?= $page ?> از <?= $totalPages ?></span>
+                <span>Page <?= $page ?> of <?= $totalPages ?></span>
                 <div class="pager">
                     <a class="<?= $page <= 1 ? 'dis' : '' ?>" href="<?= support_inbox_url(['page' => max(1, $page - 1)]) ?>">‹</a>
                     <?php for ($number = max(1, $page - 2); $number <= min($totalPages, $page + 2); $number++): ?>
@@ -317,21 +320,21 @@ include __DIR__ . '/inc/layout_head.php';
     </section>
 
     <?php if ($userId !== ''): ?>
-        <a class="support-sheet-backdrop" href="<?= support_inbox_url(['user_id' => null]) ?>" aria-label="بستن گفتگو"></a>
+        <a class="support-sheet-backdrop" href="<?= support_inbox_url(['user_id' => null]) ?>" aria-label="Close conversation"></a>
         <script>document.body.classList.add('support-sheet-open');</script>
     <?php endif; ?>
     <section class="card support-conversation">
         <?php if (!$ticket): ?>
-            <div class="empty support-empty"><p>یک پیام را از فهرست انتخاب کنید.</p></div>
+            <div class="empty support-empty"><p>Select a message from the list.</p></div>
         <?php else:
             [$tagClass, $statusLabel] = panel_support_status_info($conversationStatus);
-            $displayName = !empty($ticket['user_name']) ? $ticket['user_name'] : (($ticket['namecustom'] && $ticket['namecustom'] !== 'none') ? $ticket['namecustom'] : (($ticket['username'] && $ticket['username'] !== 'none') ? '@' . $ticket['username'] : 'کاربر ناشناس'));
+            $displayName = !empty($ticket['user_name']) ? $ticket['user_name'] : (($ticket['namecustom'] && $ticket['namecustom'] !== 'none') ? $ticket['namecustom'] : (($ticket['username'] && $ticket['username'] !== 'none') ? '@' . $ticket['username'] : 'Unknown user'));
             $adminId = (string) ($replyTicket['idsupport'] ?? $conversation[count($conversation) - 1]['idsupport'] ?? '—');
             ?>
             <div class="support-conversation-head">
                 <div>
                     <h2><?= htmlspecialchars($displayName) ?></h2>
-                    <a href="user.php?id=<?= urlencode($ticket['iduser']) ?>">مشاهده پروفایل کاربر</a>
+                    <a href="user.php?id=<?= urlencode($ticket['iduser']) ?>">View user profile</a>
                 </div>
                 <div class="support-head-actions">
                     <div class="support-status-menu">
@@ -352,16 +355,16 @@ include __DIR__ . '/inc/layout_head.php';
                             <?php endforeach; ?>
                         </form>
                     </div>
-                    <a class="support-back" href="<?= support_inbox_url(['user_id' => null]) ?>" title="بازگشت" aria-label="بازگشت"><?= icon('arrow-left', 16) ?><span class="support-back-label">بازگشت</span></a>
+                    <a class="support-back" href="<?= support_inbox_url(['user_id' => null]) ?>" title="Back" aria-label="Back"><?= icon('arrow-left', 16) ?><span class="support-back-label">Back</span></a>
                 </div>
             </div>
             <div class="support-meta">
-                <span>تعداد پیام‌ها: <?= count($conversation) ?></span>
-                <span>آخرین پیام: <?= htmlspecialchars($conversation[count($conversation) - 1]['time']) ?></span>
+                <span>Messages: <?= count($conversation) ?></span>
+                <span>Last message: <?= htmlspecialchars($conversation[count($conversation) - 1]['time']) ?></span>
             </div>
             <div class="support-identities">
-                <span><small>شناسه کاربر</small><b><?= htmlspecialchars($ticket['iduser']) ?></b></span>
-                <span><small>شناسه ادمین دپارتمان</small><b><?= htmlspecialchars($adminId) ?></b></span>
+                <span><small>User ID</small><b><?= htmlspecialchars($ticket['iduser']) ?></b></span>
+                <span><small>Department admin ID</small><b><?= htmlspecialchars($adminId) ?></b></span>
             </div>
             <div class="support-messages">
                 <?php foreach ($conversation as $message):
@@ -374,7 +377,7 @@ include __DIR__ . '/inc/layout_head.php';
                     ?>
                     <?php if ($showUser): ?>
                         <div class="support-bubble from-user">
-                            <small>کاربر · <?= htmlspecialchars($message['time']) ?> · <?= htmlspecialchars($message['name_departman']) ?></small>
+                            <small>User · <?= htmlspecialchars($message['time']) ?> · <?= htmlspecialchars($message['name_departman']) ?></small>
                             <?php if ($userText !== ''): ?><div><?= nl2br(htmlspecialchars($userText)) ?></div><?php endif; ?>
                             <?= support_media_markup($inMedia) ?>
                         </div>
@@ -386,7 +389,7 @@ include __DIR__ . '/inc/layout_head.php';
                             $replyAdminId = $message['answered_by_admin_id'] ?? '';
                             ?>
                             <small>
-                                <?= $replyAdminName !== '' ? 'ادمین ' . htmlspecialchars($replyAdminName) : 'پاسخ ادمین (قدیمی)' ?>
+                                <?= $replyAdminName !== '' ? 'Admin ' . htmlspecialchars($replyAdminName) : 'Admin reply (legacy)' ?>
                                 <?= $replyAdminId !== '' ? ' · ' . htmlspecialchars($replyAdminId) : '' ?>
                                 <?php if (!empty($message['answered_at'])): ?> · <?= htmlspecialchars($message['answered_at']) ?><?php endif; ?>
                             </small>
@@ -402,11 +405,11 @@ include __DIR__ . '/inc/layout_head.php';
                     <input type="hidden" name="action" value="reply">
                     <input type="hidden" name="tracking" value="<?= htmlspecialchars($replyTicket['Tracking']) ?>">
                     <div class="support-reply-box">
-                        <button class="support-send-btn" type="submit" title="ارسال پاسخ" aria-label="ارسال پاسخ"><?= icon('send', 18) ?></button>
-                        <textarea class="textarea" name="reply" maxlength="3500" rows="1" placeholder="پیام خود را بنویسید..."></textarea>
+                        <button class="support-send-btn" type="submit" title="Send reply" aria-label="Send reply"><?= icon('send', 18) ?></button>
+                        <textarea class="textarea" name="reply" maxlength="3500" rows="1" placeholder="Write your message..."></textarea>
                         <label class="support-attachment-btn">
-                            <input type="file" name="attachment" onchange="var s=this.nextElementSibling.querySelector('em'); this.parentElement.classList.toggle('has-file', !!this.files[0]); s.textContent = this.files[0] ? this.files[0].name : 'افزودن فایل'">
-                            <span><?= icon('paperclip', 15) ?> <em>افزودن فایل</em></span>
+                            <input type="file" name="attachment" onchange="var s=this.nextElementSibling.querySelector('em'); this.parentElement.classList.toggle('has-file', !!this.files[0]); s.textContent = this.files[0] ? this.files[0].name : 'Attach file'">
+                            <span><?= icon('paperclip', 15) ?> <em>Attach file</em></span>
                         </label>
                     </div>
                 </form>
@@ -416,7 +419,7 @@ include __DIR__ . '/inc/layout_head.php';
 </div>
 
 <div class="support-media-viewer" id="support-media-viewer" hidden>
-  <button type="button" class="support-media-viewer-close" id="support-media-viewer-close" aria-label="بستن">×</button>
+  <button type="button" class="support-media-viewer-close" id="support-media-viewer-close" aria-label="Close">×</button>
   <div class="support-media-viewer-body" id="support-media-viewer-body"></div>
 </div>
 
@@ -491,7 +494,7 @@ include __DIR__ . '/inc/layout_head.php';
     var name = btn.dataset.mediaName || 'attachment';
     btn.dataset.loading = '1';
     btn.disabled = true;
-    btn.textContent = 'در حال دریافت...';
+    btn.textContent = 'Loading...';
 
     fetch(url, { credentials: 'same-origin', cache: 'no-store' })
       .then(function (response) {
@@ -557,7 +560,7 @@ include __DIR__ . '/inc/layout_head.php';
       .catch(function () {
         btn.dataset.loading = '0';
         btn.disabled = false;
-        btn.textContent = 'خطا در دریافت فایل · تلاش مجدد';
+        btn.textContent = 'Could not load file · try again';
       });
   });
 }());

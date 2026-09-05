@@ -17,7 +17,7 @@ $admin = db_fetch(
     [$_SESSION['admin_user'] ?? '']
 );
 if (!$admin || ($admin['rule'] ?? '') !== 'administrator') {
-    flash('error', 'فقط مدیر اصلی می‌تواند شارژ همگانی سرویس‌ها را اجرا کند.');
+    flash('error', 'Only the main administrator can run a bulk service charge.');
     header('Location: users.php');
     exit;
 }
@@ -34,7 +34,7 @@ if ($action === 'cancel') {
         ? json_decode((string) file_get_contents($giftFile), true)
         : null;
     if (!is_array($job) || empty($job['bulk_service_charge'])) {
-        flash('warning', 'عملیات شارژ همگانی فعالی برای لغو وجود ندارد.');
+        flash('warning', 'There is no active bulk charge to cancel.');
     } else {
         $remaining = [];
         if (is_file($serviceQueueFile)) {
@@ -50,7 +50,7 @@ if ($action === 'cancel') {
         if (is_file($giftFile)) {
             unlink($giftFile);
         }
-        flash('success', 'عملیات شارژ همگانی سرویس‌ها لغو شد و فهرست انجام‌نشده ارسال گردید.');
+        flash('success', 'Bulk service charge was cancelled and the unfinished list was sent.');
     }
     header('Location: users.php');
     exit;
@@ -70,24 +70,24 @@ $timeRaw = trim((string) ($_POST['time_value'] ?? ''));
 $message = trim((string) ($_POST['message'] ?? ''));
 
 if (!in_array($agent, ['all', 'f', 'n', 'n2'], true)) {
-    flash('error', 'گروه کاربری نامعتبر است.');
+    flash('error', 'Invalid user group.');
     header('Location: users.php');
     exit;
 }
 if ($panelName === '') {
-    flash('error', 'پنل را انتخاب کنید.');
+    flash('error', 'Select a panel.');
     header('Location: users.php');
     exit;
 }
 $panelRow = db_fetch($pdo, 'SELECT name_panel FROM marzban_panel WHERE name_panel = ? LIMIT 1', [$panelName]);
 if (!$panelRow) {
-    flash('error', 'پنل انتخاب‌شده نامعتبر است.');
+    flash('error', 'The selected panel is invalid.');
     header('Location: users.php');
     exit;
 }
 $panelName = (string) $panelRow['name_panel'];
 if (!$addVolume && !$addTime) {
-    flash('error', 'حداقل یکی از گزینه‌های حجم یا زمان را انتخاب کنید.');
+    flash('error', 'Select at least one of volume or time.');
     header('Location: users.php');
     exit;
 }
@@ -95,7 +95,7 @@ $volumeValue = 0;
 $timeValue = 0;
 if ($addVolume) {
     if ($volumeRaw === '' || !ctype_digit($volumeRaw) || intval($volumeRaw) <= 0) {
-        flash('error', 'حجم افزایشی باید یک عدد صحیح بزرگ‌تر از صفر (گیگابایت) باشد.');
+        flash('error', 'Added volume must be a whole number greater than zero (GB).');
         header('Location: users.php');
         exit;
     }
@@ -103,14 +103,14 @@ if ($addVolume) {
 }
 if ($addTime) {
     if ($timeRaw === '' || !ctype_digit($timeRaw) || intval($timeRaw) <= 0) {
-        flash('error', 'زمان افزایشی باید یک عدد صحیح بزرگ‌تر از صفر (روز) باشد.');
+        flash('error', 'Added time must be a whole number greater than zero (days).');
         header('Location: users.php');
         exit;
     }
     $timeValue = intval($timeRaw);
 }
 if ($message === '' || mb_strlen($message, 'UTF-8') > 4000) {
-    flash('error', 'پیام ارسالی باید بین ۱ تا ۴۰۰۰ کاراکتر باشد.');
+    flash('error', 'The message must be between 1 and 4000 characters.');
     header('Location: users.php');
     exit;
 }
@@ -124,7 +124,7 @@ foreach ([$serviceQueueFile, $messageQueueFile] as $queueFile) {
     $queueBusy = is_array($queuedItems) && count($queuedItems) > 0;
 }
 if ($queueBusy) {
-    flash('error', 'یک عملیات گروهی دیگر در حال اجرا است. پس از پایان آن دوباره تلاش کنید.');
+    flash('error', 'Another bulk operation is already running. Try again after it finishes.');
     header('Location: users.php');
     exit;
 }
@@ -156,7 +156,7 @@ $sql .= ' ORDER BY i.id_invoice';
 $services = db_fetchAll($pdo, $sql, $params);
 
 if (!$services) {
-    flash('warning', 'هیچ سرویس فعال مطابق فیلتر انتخاب‌شده یافت نشد.');
+    flash('warning', 'No active services matched the selected filter.');
     header('Location: users.php');
     exit;
 }
@@ -199,7 +199,7 @@ try {
     if (!rename($giftTemp, $giftFile)) {
         throw new RuntimeException('Unable to activate bulk service charge queue.');
     }
-    flash('success', 'شارژ همگانی برای ' . number_format(count($services)) . ' سرویس در صف اجرا قرار گرفت.');
+    flash('success', 'Bulk charge for ' . number_format(count($services)) . ' services was queued.');
 } catch (Throwable $e) {
     if (isset($queueTemp) && is_file($queueTemp)) {
         unlink($queueTemp);
@@ -211,7 +211,7 @@ try {
         unlink($serviceQueueFile);
     }
     error_log('bulk_service_charge_action.php: ' . $e->getMessage());
-    flash('error', 'ثبت عملیات شارژ همگانی ناموفق بود.');
+    flash('error', 'Could not queue the bulk charge.');
 }
 
 header('Location: users.php');

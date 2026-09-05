@@ -111,17 +111,17 @@ $dateFilterError = '';
 if ($fromDateTime !== '') {
   $fromTimestamp = invoice_parse_jalali_filter($fromDateTime);
   if ($fromTimestamp === null) {
-    $dateFilterError = 'تاریخ و ساعت شروع معتبر نیست.';
+    $dateFilterError = 'Start date and time is not valid.';
   }
 }
 if ($toDateTime !== '') {
   $toTimestamp = invoice_parse_jalali_filter($toDateTime, true);
   if ($toTimestamp === null) {
-    $dateFilterError = 'تاریخ و ساعت پایان معتبر نیست.';
+    $dateFilterError = 'End date and time is not valid.';
   }
 }
 if ($dateFilterError === '' && $fromTimestamp !== null && $toTimestamp !== null && $fromTimestamp > $toTimestamp) {
-  $dateFilterError = 'زمان شروع باید قبل از زمان پایان باشد.';
+  $dateFilterError = 'Start time must be before end time.';
 }
 if ($dateFilterError !== '') {
   flash('error', $dateFilterError);
@@ -129,52 +129,52 @@ if ($dateFilterError !== '') {
 }
 
 $serviceTypeMap = [
-  'order' => 'خرید سرویس',
-  'change_location' => 'تغییر لوکیشن',
-  'extra_user' => 'افزایش حجم',
-  'extra_time_user' => 'افزایش زمان',
-  'extend_user' => 'تمدید',
-  'extend_user_by_admin' => 'تمدید توسط ادمین',
-  'transfertouser' => 'انتقال سفارش به کاربر دیگر',
+  'order' => 'Service purchase',
+  'change_location' => 'Change location',
+  'extra_user' => 'Extra volume',
+  'extra_time_user' => 'Extra time',
+  'extend_user' => 'Renewal',
+  'extend_user_by_admin' => 'Renewed by admin',
+  'transfertouser' => 'Transfer order to another user',
 ];
 $serviceTypeLabelMap = $serviceTypeMap + [
-  'extends_not_user' => 'تمدید',
+  'extends_not_user' => 'Renewal',
 ];
 
 $paymentServiceTypeMap = [
-  'order' => 'خرید سرویس',
-  'extend_user' => 'تمدید',
-  'extend_user_by_admin' => 'تمدید توسط ادمین',
-  'extra_user' => 'افزایش حجم',
-  'extra_time_user' => 'افزایش زمان',
-  'wallet' => 'شارژ کیف پول',
+  'order' => 'Service purchase',
+  'extend_user' => 'Renewal',
+  'extend_user_by_admin' => 'Renewed by admin',
+  'extra_user' => 'Extra volume',
+  'extra_time_user' => 'Extra time',
+  'wallet' => 'Wallet top-up',
 ];
 
 $orderStatusMap = [
-  'active' => ['tag-ok', 'فعال'],
-  'end_of_time' => ['tag-warn', 'اعلان پایان زمان'],
-  'end_of_volume' => ['tag-no', 'اعلان پایان حجم'],
-  'sendedwarn' => ['tag-warn', 'ارسال تمامی اعلان ها'],
-  'send_on_hold' => ['tag-plain', 'اعلان متصنل نشدن ارسال شده'],
-  'unpaid' => ['tag-plain', 'پرداخت نشده'],
-  'Unsuccessful' => ['tag-plain', 'خطا دریافت اطلاعات'],
-  'paid' => ['tag-ok', 'پرداخت شده'],
-  'done' => ['tag-ok', 'انجام شده'],
-  'pending' => ['tag-warn', 'در انتظار'],
-  'reject' => ['tag-no', 'رد شده'],
-  'removebyadmin' => ['tag-no', 'حذف توسط ادمین'],
-  'removedbyadmin' => ['tag-no', 'حذف با تایید ادمین'],
-  'disablebyadmin' => ['tag-no', 'غیرفعال توسط ادمین'],
+  'active' => ['tag-ok', 'Active'],
+  'end_of_time' => ['tag-warn', 'Time-end notice'],
+  'end_of_volume' => ['tag-no', 'Volume-end notice'],
+  'sendedwarn' => ['tag-warn', 'All notices sent'],
+  'send_on_hold' => ['tag-plain', 'Not-connected notice sent'],
+  'unpaid' => ['tag-plain', 'Unpaid'],
+  'Unsuccessful' => ['tag-plain', 'Failed to fetch info'],
+  'paid' => ['tag-ok', 'Paid'],
+  'done' => ['tag-ok', 'Done'],
+  'pending' => ['tag-warn', 'Pending'],
+  'reject' => ['tag-no', 'Rejected'],
+  'removebyadmin' => ['tag-no', 'Removed by admin'],
+  'removedbyadmin' => ['tag-no', 'Removed with admin approval'],
+  'disablebyadmin' => ['tag-no', 'Disabled by admin'],
 ];
 $orderStatusLabelMap = $orderStatusMap;
-$orderStatusLabelMap['Unpaid'] = ['tag-plain', 'پرداخت نشده'];
+$orderStatusLabelMap['Unpaid'] = ['tag-plain', 'Unpaid'];
 
 $paymentStatusMap = [
-  'paid' => ['tag-ok', 'پرداخت شده'],
-  'Unpaid' => ['tag-no', 'پرداخت نشده'],
-  'waiting' => ['tag-warn', 'در انتظار تأیید'],
-  'reject' => ['tag-no', 'رد شده'],
-  'expire' => ['tag-plain', 'منقضی'],
+  'paid' => ['tag-ok', 'Paid'],
+  'Unpaid' => ['tag-no', 'Unpaid'],
+  'waiting' => ['tag-warn', 'Awaiting approval'],
+  'reject' => ['tag-no', 'Rejected'],
+  'expire' => ['tag-plain', 'Expired'],
 ];
 
 if ($tab === 'payments') {
@@ -295,7 +295,7 @@ try {
 } catch (Exception $e) {
   $total = 0;
   $invoices = [];
-  flash('error', 'خطای پایگاه داده: ' . $e->getMessage());
+  flash('error', 'Database error: ' . $e->getMessage());
 }
 $totalPages = max(1, (int) ceil($total / $perPage));
 
@@ -318,8 +318,8 @@ try {
   $productOptions = [];
 }
 
-$pageTitle = 'سفارشات';
-$pageLede = 'فهرست کلیه سفارشات ثبت‌شده در ربات.';
+$pageTitle = 'Orders';
+$pageLede = 'All orders recorded by the bot.';
 $activeNav = 'invoice';
 include __DIR__ . '/inc/layout_head.php';
 ?>
@@ -327,28 +327,28 @@ include __DIR__ . '/inc/layout_head.php';
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
 
 <div style="display:flex;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:4px;width:max-content;max-width:100%;margin-bottom:14px" class="fade-up">
-  <a href="invoice.php?tab=orders" class="btn btn-sm <?= $tab === 'orders' ? 'btn-primary' : 'btn-ghost' ?>">سفارشات جاری</a>
-  <a href="invoice.php?tab=payments" class="btn btn-sm <?= $tab === 'payments' ? 'btn-primary' : 'btn-ghost' ?>">گزارش پرداخت‌ها</a>
+  <a href="invoice.php?tab=orders" class="btn btn-sm <?= $tab === 'orders' ? 'btn-primary' : 'btn-ghost' ?>">Current orders</a>
+  <a href="invoice.php?tab=payments" class="btn btn-sm <?= $tab === 'payments' ? 'btn-primary' : 'btn-ghost' ?>">Payment reports</a>
 </div>
 
 <div class="card fade-up">
   <div class="toolbar">
     <div class="toolbar-title">
-      <?= $tab === 'payments' ? 'گزارش پرداخت‌ها' : 'سفارشات جاری' ?>
+      <?= $tab === 'payments' ? 'Payment reports' : 'Current orders' ?>
       <small>(<?= number_format($total) ?>)</small>
     </div>
     <form method="GET" id="invoiceForm" class="toolbar-end" style="flex-wrap:wrap;gap:8px">
       <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
       <select name="service_type" class="select" style="width:auto"
         onchange="document.getElementById('invoiceForm').submit()">
-        <option value="">همه نوع سرویس‌ها</option>
+        <option value="">All service types</option>
         <?php foreach ($activeServiceTypeMap as $k => $lbl): ?>
           <option value="<?= $k ?>" <?= $serviceType === $k ? 'selected' : '' ?>><?= $lbl ?></option>
         <?php endforeach; ?>
       </select>
       <select name="status" class="select" style="width:auto"
         onchange="document.getElementById('invoiceForm').submit()">
-        <option value="">همه وضعیت‌ها</option>
+        <option value="">All statuses</option>
         <?php foreach ($statusMap as $k => [$_, $lbl]): ?>
           <option value="<?= $k ?>" <?= $status === $k ? 'selected' : '' ?>><?= $lbl ?></option>
         <?php endforeach; ?>
@@ -356,7 +356,7 @@ include __DIR__ . '/inc/layout_head.php';
       <?php if ($tab === 'orders'): ?>
       <select name="product" class="select" style="width:auto;max-width:180px"
         onchange="document.getElementById('invoiceForm').submit()">
-        <option value="">همه محصولات</option>
+        <option value="">All products</option>
         <?php foreach ($productOptions as $pRow):
           $pname = $pRow['name_product'] ?? '';
           if ($pname === '') continue;
@@ -367,39 +367,39 @@ include __DIR__ . '/inc/layout_head.php';
         <?php endforeach; ?>
       </select>
       <input type="number" name="price_min" class="select" style="width:110px" min="0" step="1"
-        placeholder="حداقل مبلغ"
+        placeholder="Min amount"
         value="<?= $priceMin !== null ? (int) $priceMin : '' ?>">
       <input type="number" name="price_max" class="select" style="width:110px" min="0" step="1"
-        placeholder="حداکثر مبلغ"
+        placeholder="Max amount"
         value="<?= $priceMax !== null ? (int) $priceMax : '' ?>">
       <?php endif; ?>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <label style="font-size:.76rem;color:var(--text2)">از</label>
+        <label style="font-size:.76rem;color:var(--text2)">From</label>
         <div style="position:relative">
           <input class="select jalali-datetime-picker" style="width:180px;padding-left:30px" type="text" name="from"
-            placeholder="انتخاب تاریخ و ساعت" value="<?= htmlspecialchars($fromDateTime) ?>"
-            aria-label="تاریخ و ساعت شروع شمسی به وقت تهران" autocomplete="off" readonly>
+            placeholder="Pick date and time" value="<?= htmlspecialchars($fromDateTime) ?>"
+            aria-label="Start date and time (Tehran)" autocomplete="off" readonly>
           <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none">🗓</span>
         </div>
-        <label style="font-size:.76rem;color:var(--text2)">تا</label>
+        <label style="font-size:.76rem;color:var(--text2)">To</label>
         <div style="position:relative">
           <input class="select jalali-datetime-picker" style="width:180px;padding-left:30px" type="text" name="to"
-            placeholder="انتخاب تاریخ و ساعت" value="<?= htmlspecialchars($toDateTime) ?>"
-            aria-label="تاریخ و ساعت پایان شمسی به وقت تهران" autocomplete="off" readonly>
+            placeholder="Pick date and time" value="<?= htmlspecialchars($toDateTime) ?>"
+            aria-label="End date and time (Tehran)" autocomplete="off" readonly>
           <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none">🗓</span>
         </div>
       </div>
       <div class="search-box" style="min-width:240px">
         <?= icon('search', 14) ?>
         <input type="text" name="q"
-          placeholder="<?= $tab === 'payments' ? 'آیدی کاربر یا شناسه تراکنش...' : 'آیدی کاربر، نام محصول...' ?>"
+          placeholder="<?= $tab === 'payments' ? 'User ID or transaction ID...' : 'User ID, product name...' ?>"
           value="<?= htmlspecialchars($search) ?>"
           autocomplete="off">
         <button type="button" class="search-clear">✕</button>
-        <button type="submit" class="search-btn">جستجو</button>
+        <button type="submit" class="search-btn">Search</button>
       </div>
       <?php if ($search || $status || $serviceType || $fromDateTime || $toDateTime || $productFilter || $priceMin !== null || $priceMax !== null): ?>
-        <a href="invoice.php?tab=<?= urlencode($tab) ?>" class="btn-link" style="font-size:.78rem">پاک کردن</a>
+        <a href="invoice.php?tab=<?= urlencode($tab) ?>" class="btn-link" style="font-size:.78rem">Clear</a>
       <?php endif; ?>
     </form>
   </div>
@@ -410,25 +410,25 @@ include __DIR__ . '/inc/layout_head.php';
         <?php if ($tab === 'payments'): ?>
         <tr>
           <th>#</th>
-          <th>کاربر</th>
-          <th>شناسه تراکنش</th>
-          <th>نوع سرویس</th>
-          <th>روش پرداخت</th>
-          <th>مبلغ</th>
-          <th>تاریخ</th>
-          <th>وضعیت</th>
-          <th>عملیات</th>
+          <th>User</th>
+          <th>Transaction ID</th>
+          <th>Service type</th>
+          <th>Payment method</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
         </tr>
         <?php else: ?>
         <tr>
           <th>#</th>
-          <th>کاربر</th>
-          <th>محصول</th>
-          <th>نوع سرویس</th>
-          <th>قیمت</th>
-          <th>تاریخ</th>
-          <th>وضعیت</th>
-          <th>عملیات</th>
+          <th>User</th>
+          <th>Product</th>
+          <th>Service type</th>
+          <th>Price</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
         </tr>
         <?php endif; ?>
       </thead>
@@ -446,8 +446,8 @@ include __DIR__ . '/inc/layout_head.php';
                 </svg>
                 <p>
                   <?= $tab === 'payments'
-                    ? ($search ? 'پرداختی با این جستجو یافت نشد' : 'هنوز گزارشی ثبت نشده')
-                    : ($search ? 'سفارشی با این جستجو یافت نشد' : 'هنوز سفارشی ثبت نشده') ?>
+                    ? ($search ? 'No payments matched this search' : 'No reports yet')
+                    : ($search ? 'No orders matched this search' : 'No orders yet') ?>
                 </p>
               </div>
             </td>
@@ -474,10 +474,10 @@ include __DIR__ . '/inc/layout_head.php';
               <td class="cm" style="font-size:.78rem"><?= htmlspecialchars(trunc($oid !== '' ? $oid : '—', 22)) ?></td>
               <td style="font-size:.82rem;color:var(--text2)"><?= htmlspecialchars($typeLabel) ?></td>
               <td style="font-size:.8rem"><?= htmlspecialchars(panel_payment_method_label($inv['payment_method'] ?? '')) ?></td>
-              <td class="cn cs"><?= number_format((int) ($inv['price'] ?? 0)) ?> <span class="cf">ت</span></td>
+              <td class="cn cs"><?= number_format((int) ($inv['price'] ?? 0)) ?> <span class="cf">USD</span></td>
               <td class="cf">
                 <?= !empty($inv['transaction_epoch'])
-                  ? jdate('Y/m/d H:i', (int) $inv['transaction_epoch'], '', 'Asia/Tehran', 'fa')
+                  ? (new DateTime('@' . (int) $inv['transaction_epoch']))->setTimezone(new DateTimeZone('Asia/Tehran'))->format('Y-m-d H:i')
                   : '—' ?>
               </td>
               <td><span class="tag <?= $cls ?>"><?= $lbl ?></span></td>
@@ -487,7 +487,7 @@ include __DIR__ . '/inc/layout_head.php';
                     '<?= htmlspecialchars($oid, ENT_QUOTES) ?>',
                     '<?= htmlspecialchars($st, ENT_QUOTES) ?>',
                     <?= $hasProduct ? 'true' : 'false' ?>
-                  )">تغییر وضعیت</button>
+                  )">Change status</button>
               </td>
             </tr>
             <?php else: ?>
@@ -517,17 +517,17 @@ include __DIR__ . '/inc/layout_head.php';
               </td>
               <td class="cs"><?= htmlspecialchars(trunc($inv['product_name'] ?? '—', 28)) ?></td>
               <td style="font-size:.82rem;color:var(--text2)"><?= htmlspecialchars($typeLabel) ?></td>
-              <td class="cn cs"><?= number_format((int) ($inv['price'] ?? 0)) ?> <span class="cf">ت</span></td>
+              <td class="cn cs"><?= number_format((int) ($inv['price'] ?? 0)) ?> <span class="cf">USD</span></td>
               <td class="cf">
                 <?= !empty($inv['transaction_epoch'])
-                  ? jdate('Y/m/d H:i', (int) $inv['transaction_epoch'], '', 'Asia/Tehran', 'fa')
+                  ? (new DateTime('@' . (int) $inv['transaction_epoch']))->setTimezone(new DateTimeZone('Asia/Tehran'))->format('Y-m-d H:i')
                   : '—' ?>
               </td>
               <td><span class="tag <?= $cls ?>"><?= $lbl ?></span></td>
               <td>
                 <button type="button" class="btn btn-ghost btn-sm"
                   data-invoice="<?= htmlspecialchars(json_encode($editPayload, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>"
-                  onclick="openInvoiceEditModal(this)">ویرایش</button>
+                  onclick="openInvoiceEditModal(this)">Edit</button>
               </td>
             </tr>
             <?php endif; ?>
@@ -537,7 +537,7 @@ include __DIR__ . '/inc/layout_head.php';
   </div>
 
   <div class="tbl-foot">
-    <span><?= number_format($total) ?> رکورد · صفحه <?= $page ?> از <?= $totalPages ?></span>
+    <span><?= number_format($total) ?> records · page <?= $page ?> of <?= $totalPages ?></span>
     <div class="pager">
       <?php
       $qs = fn($p) => '?' . http_build_query(array_filter([
@@ -594,7 +594,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="statusModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>تغییر وضعیت پرداخت</h3>
+      <h3>Change payment status</h3>
       <button type="button" class="modal-x" onclick="closeModal('statusModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST" id="statusForm">
@@ -613,7 +613,7 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="to" value="<?= htmlspecialchars($toDateTime) ?>">
         <input type="hidden" name="page" value="<?= (int) $page ?>">
         <div class="field" style="margin-bottom:14px">
-          <label class="lbl">وضعیت جدید</label>
+          <label class="lbl">New status</label>
           <select name="new_status" id="statusNewSelect" class="select" style="width:100%">
             <?php foreach ($paymentStatusMap as $k => [$_, $lbl]): ?>
               <option value="<?= htmlspecialchars($k) ?>"><?= htmlspecialchars($lbl) ?></option>
@@ -623,25 +623,25 @@ include __DIR__ . '/inc/layout_head.php';
         <div id="rejectInvoiceWrap" style="display:none;margin-bottom:12px">
           <label style="display:flex;align-items:flex-start;gap:8px;font-size:.85rem;cursor:pointer;line-height:1.6">
             <input type="checkbox" name="reject_invoice" id="rejectInvoiceCheck" value="1" style="width:16px;height:16px;margin-top:3px">
-            <span>وضعیت فاکتور/سفارش مرتبط هم «رد شده» شود؟</span>
+            <span>Also set the related invoice/order status to Rejected?</span>
           </label>
           <p style="font-size:.75rem;color:var(--mute);margin-top:8px;line-height:1.6">
-            برای اینکه از آمار سفارشات تلگرام هم خارج شود.
+            So it is also excluded from Telegram order stats.
           </p>
         </div>
         <div id="removeProductWrap" style="display:none">
           <label style="display:flex;align-items:flex-start;gap:8px;font-size:.85rem;cursor:pointer;line-height:1.6">
             <input type="checkbox" name="remove_product" id="removeProductCheck" value="1" style="width:16px;height:16px;margin-top:3px">
-            <span>سرویس ساخته‌شده برای این پرداخت هم حذف شود؟</span>
+            <span>Also delete the service created for this payment?</span>
           </label>
           <p style="font-size:.75rem;color:var(--mute);margin-top:8px;line-height:1.6">
-            فقط برای خرید سرویس. در صورت انتخاب، سرویس از پنل و ربات حذف می‌شود.
+            Only for service purchases. If selected, the service is removed from the panel and the bot.
           </p>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary">ذخیره وضعیت</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('statusModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary">Save status</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('statusModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -683,7 +683,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="invoiceEditModal">
   <div class="modal" style="max-width:520px">
     <div class="modal-head">
-      <h3>ویرایش سفارش</h3>
+      <h3>Edit order</h3>
       <button type="button" class="modal-x" onclick="closeModal('invoiceEditModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST" id="invoiceEditForm">
@@ -703,7 +703,7 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="page" value="<?= (int) $page ?>">
 
         <div class="field" style="margin-bottom:10px">
-          <label class="lbl">وضعیت</label>
+          <label class="lbl">Status</label>
           <select name="invoice_status" id="editStatus" class="select" style="width:100%">
             <?php foreach ($orderStatusMap as $k => [$_, $lbl]): ?>
               <option value="<?= htmlspecialchars($k) ?>"><?= htmlspecialchars($lbl) ?></option>
@@ -711,7 +711,7 @@ include __DIR__ . '/inc/layout_head.php';
           </select>
         </div>
         <div class="field" style="margin-bottom:10px">
-          <label class="lbl">محصول / مقدار</label>
+          <label class="lbl">Product / value</label>
           <input type="text" name="name_product" id="editProduct" class="select" style="width:100%" list="invoiceProductList">
           <datalist id="invoiceProductList">
             <?php foreach ($productOptions as $pRow):
@@ -723,35 +723,35 @@ include __DIR__ . '/inc/layout_head.php';
           </datalist>
         </div>
         <div class="field" style="margin-bottom:10px">
-          <label class="lbl">قیمت (تومان)</label>
+          <label class="lbl">Price (USD)</label>
           <input type="number" name="price_product" id="editPrice" class="select" style="width:100%" min="0" step="1">
         </div>
         <div class="field" style="margin-bottom:10px">
-          <label class="lbl">نام کاربری سرویس</label>
+          <label class="lbl">Service username</label>
           <input type="text" name="username" id="editUsername" class="select" style="width:100%">
         </div>
         <div id="invoiceOnlyFields">
           <div class="field" style="margin-bottom:10px">
-            <label class="lbl">حجم</label>
+            <label class="lbl">Volume</label>
             <input type="text" name="Volume" id="editVolume" class="select" style="width:100%">
           </div>
           <div class="field" style="margin-bottom:10px">
-            <label class="lbl">مدت (روز)</label>
+            <label class="lbl">Duration (days)</label>
             <input type="text" name="Service_time" id="editServiceTime" class="select" style="width:100%">
           </div>
           <div class="field" style="margin-bottom:10px">
-            <label class="lbl">لوکیشن / پنل</label>
+            <label class="lbl">Location / panel</label>
             <input type="text" name="Service_location" id="editLocation" class="select" style="width:100%">
           </div>
           <div class="field" style="margin-bottom:10px">
-            <label class="lbl">یادداشت</label>
+            <label class="lbl">Note</label>
             <input type="text" name="note" id="editNote" class="select" style="width:100%">
           </div>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary">ذخیره</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('invoiceEditModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('invoiceEditModal')">Cancel</button>
       </div>
     </form>
   </div>

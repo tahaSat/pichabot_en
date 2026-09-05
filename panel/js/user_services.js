@@ -49,17 +49,17 @@
         }
         if (customGbHint && meta) {
             customGbHint.textContent = on
-                ? ('حداقل ' + (meta.minVolume || 1) + ' و حداکثر ' + (meta.maxVolume || 1000) + ' گیگابایت')
+                ? ('Min ' + (meta.minVolume || 1) + ' and max ' + (meta.maxVolume || 1000) + ' GB')
                 : '';
         }
         if (customMonths) {
             customMonths.required = !!on;
-            customMonths.innerHTML = '<option value="">انتخاب مدت...</option>';
+            customMonths.innerHTML = '<option value="">Select duration...</option>';
             if (on && meta && Array.isArray(meta.months)) {
                 meta.months.forEach(function (row) {
                     var opt = document.createElement('option');
                     opt.value = String(row.months);
-                    opt.textContent = row.label || (row.months + ' ماهه');
+                    opt.textContent = row.label || (row.months + ' months');
                     customMonths.appendChild(opt);
                 });
             }
@@ -73,23 +73,23 @@
         setUsernameMode(!!(meta && meta.asksUsername));
         if (usernameHint && meta && !meta.asksUsername) {
             usernameHint.textContent = meta.method
-                ? ('نام کاربری طبق روش پنل ساخته می‌شود: ' + meta.method)
-                : 'نام کاربری طبق روش نام‌گذاری پنل به‌صورت خودکار ساخته می‌شود.';
+                ? ('Username is generated using the panel method: ' + meta.method)
+                : 'Username is generated automatically using the panel naming method.';
         }
         if (!panel) {
             productSelect.disabled = true;
-            productSelect.innerHTML = '<option value="">ابتدا پنل را انتخاب کنید</option>';
+            productSelect.innerHTML = '<option value="">Select a panel first</option>';
             setCustomMode(false, meta);
             return;
         }
         var matches = products.filter(function (p) {
             return p.Location === panel || p.Location === '/all';
         });
-        productSelect.innerHTML = '<option value="">انتخاب محصول...</option>';
+        productSelect.innerHTML = '<option value="">Select a product...</option>';
         if (meta && meta.customEnabled) {
             var customOpt = document.createElement('option');
             customOpt.value = customToken;
-            customOpt.textContent = meta.customLabel || 'سرویس دلخواه';
+            customOpt.textContent = meta.customLabel || 'Custom service';
             productSelect.appendChild(customOpt);
         }
         matches.forEach(function (p) {
@@ -100,7 +100,7 @@
         });
         if (!meta || (!meta.customEnabled && !matches.length)) {
             productSelect.disabled = true;
-            productSelect.innerHTML = '<option value="">محصولی برای این پنل یافت نشد</option>';
+            productSelect.innerHTML = '<option value="">No products for this panel</option>';
             setCustomMode(false, meta);
             return;
         }
@@ -132,9 +132,9 @@
                 if (!gb || gb < minV || gb > maxV || !months) {
                     e.preventDefault();
                     if (typeof toast === 'function') {
-                        toast('حجم و مدت سرویس دلخواه را کامل وارد کنید.', 'warn');
+                        toast('Enter the custom service volume and duration.', 'warn');
                     } else {
-                        alert('حجم و مدت سرویس دلخواه را کامل وارد کنید.');
+                        alert('Enter the custom service volume and duration.');
                     }
                 }
             }
@@ -152,7 +152,7 @@
     function formatPrice(n) {
         n = parseInt(n, 10) || 0;
         try {
-            return n.toLocaleString('fa-IR');
+            return n.toLocaleString('en-US');
         } catch (err) {
             return String(n);
         }
@@ -174,17 +174,17 @@
         }
         if (extendCustomGbHint) {
             extendCustomGbHint.textContent = on && meta
-                ? ('حداقل ' + (meta.minVolume || 1) + ' و حداکثر ' + (meta.maxVolume || 1000) + ' گیگابایت')
+                ? ('Min ' + (meta.minVolume || 1) + ' and max ' + (meta.maxVolume || 1000) + ' GB')
                 : '';
         }
         if (extendCustomMonths) {
             extendCustomMonths.required = !!on;
-            extendCustomMonths.innerHTML = '<option value="">انتخاب مدت...</option>';
+            extendCustomMonths.innerHTML = '<option value="">Select duration...</option>';
             if (on && meta && Array.isArray(meta.months)) {
                 meta.months.forEach(function (row) {
                     var opt = document.createElement('option');
                     opt.value = String(row.months);
-                    opt.textContent = row.label || (row.months + ' ماهه');
+                    opt.textContent = row.label || (row.months + ' months');
                     extendCustomMonths.appendChild(opt);
                 });
             }
@@ -198,7 +198,7 @@
             return;
         }
         if (extendProduct.value === customToken) {
-            extendProductHint.textContent = 'حجم و مدت را وارد کنید. قیمت بر اساس تنظیمات پنل محاسبه می‌شود.';
+            extendProductHint.textContent = 'Enter volume and duration. Price is calculated from panel settings.';
             return;
         }
         var match = products.filter(function (p) {
@@ -211,13 +211,13 @@
         }
         var parts = [];
         if (match.Volume_constraint) {
-            parts.push(match.Volume_constraint + ' گیگ');
+            parts.push(match.Volume_constraint + ' GB');
         }
         if (match.Service_time) {
-            parts.push(match.Service_time + ' روز');
+            parts.push(match.Service_time + ' days');
         }
         if (match.price_product) {
-            parts.push(formatPrice(match.price_product) + ' تومان');
+            parts.push(formatPrice(match.price_product) + ' USD');
         }
         extendProductHint.textContent = parts.length ? parts.join(' · ') : '';
     }
@@ -225,7 +225,7 @@
     function fillExtendProducts(panel) {
         if (!extendProduct) return;
         var meta = panel && panelsMeta[panel] ? panelsMeta[panel] : null;
-        extendProduct.innerHTML = '<option value="">انتخاب محصول...</option>';
+        extendProduct.innerHTML = '<option value="">Select a product...</option>';
         if (!panel) {
             extendProduct.disabled = true;
             setExtendCustomMode(false, meta);
@@ -238,7 +238,7 @@
         if (meta && meta.customEnabled) {
             var customOpt = document.createElement('option');
             customOpt.value = customToken;
-            customOpt.textContent = meta.customLabel || 'سرویس دلخواه';
+            customOpt.textContent = meta.customLabel || 'Custom service';
             extendProduct.appendChild(customOpt);
         }
         matches.forEach(function (p) {
@@ -249,7 +249,7 @@
         });
         if ((!meta || !meta.customEnabled) && !matches.length) {
             extendProduct.disabled = true;
-            extendProduct.innerHTML = '<option value="">محصولی برای این پنل یافت نشد</option>';
+            extendProduct.innerHTML = '<option value="">No products for this panel</option>';
             setExtendCustomMode(false, meta);
             updateExtendProductHint();
             return;
@@ -278,7 +278,7 @@
             extendPanelName = panel;
             if (idInput) idInput.value = invoiceId;
             if (msgEl) {
-                msgEl.textContent = 'سرویس «' + username + '» با محصول انتخاب‌شده تمدید می‌شود. حجم و زمان طبق روش تمدید پنل اعمال می‌گردد.';
+                msgEl.textContent = 'Service “' + username + '” will be renewed with the selected product. Volume and time follow the panel renewal method.';
             }
             if (payCheck) payCheck.checked = true;
             fillExtendProducts(panel);
@@ -300,9 +300,9 @@
                 if (!gb || gb < minV || gb > maxV || !months) {
                     e.preventDefault();
                     if (typeof toast === 'function') {
-                        toast('حجم و مدت سرویس دلخواه را کامل وارد کنید.', 'warn');
+                        toast('Enter the custom service volume and duration.', 'warn');
                     } else {
-                        alert('حجم و مدت سرویس دلخواه را کامل وارد کنید.');
+                        alert('Enter the custom service volume and duration.');
                     }
                     return;
                 }
@@ -311,11 +311,11 @@
                 e.preventDefault();
                 var payCheck = extendForm.querySelector('input[name="record_payment"]');
                 var extra = payCheck && payCheck.checked
-                    ? 'پرداخت جدید به‌عنوان «تمدید توسط ادمین» ثبت می‌شود.'
-                    : 'پرداخت جدیدی ثبت نمی‌شود.';
-                showConfirm(extra + '\n\nادامه می‌دهید؟', function () {
+                    ? 'A new payment will be recorded as “extend by admin”.'
+                    : 'No new payment will be recorded.';
+                showConfirm(extra + '\n\nContinue?', function () {
                     extendForm.submit();
-                }, 'تأیید تمدید سرویس');
+                }, 'Confirm service renewal');
             }
         });
     }
@@ -371,7 +371,7 @@
             var idInput = document.getElementById('removeInvoiceId');
             if (idInput) idInput.value = invoiceId;
             if (msgEl) {
-                msgEl.textContent = 'سرویس «' + username + '» از پنل VPN حذف و در ربات غیرفعال می‌شود. این عمل قابل بازگشت نیست.';
+                msgEl.textContent = 'Service “' + username + '” will be removed from the VPN panel and disabled in the bot. This cannot be undone.';
             }
             if (typeof openModal === 'function') {
                 openModal('removeServiceModal');
@@ -394,11 +394,11 @@
             if (walletCheck) walletCheck.checked = false;
             if (walletLabel) {
                 walletLabel.textContent = price > 0
-                    ? 'مبلغ سرویس (' + price.toLocaleString('fa-IR') + ' تومان) به کیف پول کاربر بازگردانده شود؟'
-                    : 'مبلغ سرویس به کیف پول کاربر بازگردانده شود؟';
+                    ? 'Refund the service amount (' + price.toLocaleString('en-US') + ' USD) to the user wallet?'
+                    : 'Refund the service amount to the user wallet?';
             }
             if (msgEl) {
-                msgEl.textContent = 'سرویس «' + username + '» مرجوعی می‌شود. در صورت تمایل، مبلغ به کیف پول کاربر برمی‌گردد.';
+                msgEl.textContent = 'Service “' + username + '” will be refunded. Optionally, the amount is credited to the user wallet.';
             }
             if (typeof openModal === 'function') {
                 openModal('refundServiceModal');
@@ -410,12 +410,12 @@
     if (removeForm) {
         removeForm.addEventListener('submit', function (e) {
             var username = document.getElementById('removeServiceText');
-            var label = username ? username.textContent : 'این سرویس';
+            var label = username ? username.textContent : 'this service';
             if (typeof showConfirm === 'function') {
                 e.preventDefault();
-                showConfirm(label + '\n\nادامه می‌دهید؟', function () {
+                showConfirm(label + '\n\nContinue?', function () {
                     removeForm.submit();
-                }, 'تأیید حذف سرویس');
+                }, 'Confirm service removal');
             }
         });
     }
@@ -428,9 +428,9 @@
             if (!((walletCheck && walletCheck.checked) || (disableCheck && disableCheck.checked))) {
                 e.preventDefault();
                 if (typeof toast === 'function') {
-                    toast('یکی از گزینه‌های بازگشت مبلغ به کیف پول یا غیرفعال‌سازی سرویس را انتخاب کنید.', 'warn');
+                    toast('Choose wallet refund and/or disabling the service.', 'warn');
                 } else {
-                    alert('یکی از گزینه‌های بازگشت مبلغ به کیف پول یا غیرفعال‌سازی سرویس را انتخاب کنید.');
+                    alert('Choose wallet refund and/or disabling the service.');
                 }
                 return;
             }
@@ -438,14 +438,14 @@
                 e.preventDefault();
                 var parts = [];
                 if (walletCheck && walletCheck.checked) {
-                    parts.push('مبلغ به کیف پول کاربر بازگردانده می‌شود.');
+                    parts.push('The amount will be credited to the user wallet.');
                 }
                 if (disableCheck && disableCheck.checked) {
-                    parts.push('سرویس در پنل و ربات غیرفعال می‌شود.');
+                    parts.push('The service will be disabled on the panel and in the bot.');
                 }
-                showConfirm(parts.join('\n') + '\n\nادامه می‌دهید؟', function () {
+                showConfirm(parts.join('\n') + '\n\nContinue?', function () {
                     refundForm.submit();
-                }, 'تأیید مرجوعی سرویس');
+                }, 'Confirm service refund');
             }
         });
     }

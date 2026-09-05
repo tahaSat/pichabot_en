@@ -201,15 +201,15 @@ function payment_filter_date_presets(): array
     };
 
     $items = [
-        $pack('امروز', $todayStart->getTimestamp(), $todayEnd->getTimestamp()),
-        $pack('دیروز', $yesterdayStart->getTimestamp(), $yesterdayEnd->getTimestamp()),
-        $pack('هفته فعلی', $weekStart->getTimestamp(), $weekEnd->getTimestamp()),
+        $pack('Today', $todayStart->getTimestamp(), $todayEnd->getTimestamp()),
+        $pack('Yesterday', $yesterdayStart->getTimestamp(), $yesterdayEnd->getTimestamp()),
+        $pack('This week', $weekStart->getTimestamp(), $weekEnd->getTimestamp()),
     ];
     if ($thisMonth) {
-        $items[] = $pack('ماه فعلی', $thisMonth['start'], $thisMonth['end']);
+        $items[] = $pack('This month', $thisMonth['start'], $thisMonth['end']);
     }
     if ($lastMonth) {
-        $items[] = $pack('ماه قبل', $lastMonth['start'], $lastMonth['end']);
+        $items[] = $pack('Last month', $lastMonth['start'], $lastMonth['end']);
     }
     return $items;
 }
@@ -266,47 +266,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ? db_fetch($pdo, "SELECT * FROM Payment_report WHERE id_order = ? AND Payment_Method = 'cryptomus'", [$orderId])
             : null;
         if (!$payment) {
-            $r = ['ok' => false, 'msg' => 'تراکنش Cryptomus یافت نشد.'];
+            $r = ['ok' => false, 'msg' => 'Cryptomus transaction not found.'];
         } elseif ($action === 'cryptomus_approve') {
             if (!in_array((string) ($payment['gateway_status'] ?? ''), ['wrong_amount', 'wrong_amount_waiting'], true)) {
-                $r = ['ok' => false, 'msg' => 'فقط پرداخت دارای کسری مبلغ قابل تأیید است.'];
+                $r = ['ok' => false, 'msg' => 'Only underpaid payments can be approved this way.'];
             } else {
                 $api = cryptomus_approve_underpayment($orderId);
                 $r = [
                     'ok' => !empty($api['ok']),
                     'msg' => !empty($api['ok'])
-                        ? 'درخواست پذیرش کسری مبلغ ارسال شد؛ تحویل فقط پس از webhook یا cron تأییدشده انجام می‌شود.'
-                        : ('ارسال درخواست ناموفق بود: ' . ($api['error'] ?? 'خطای نامشخص')),
+                        ? 'Underpayment acceptance was submitted; delivery happens only after a confirmed webhook or cron.'
+                        : ('Request failed: ' . ($api['error'] ?? 'Unknown error')),
                 ];
             }
         } elseif ($action === 'cryptomus_cancel') {
             $reason = trim((string) ($_POST['reason'] ?? ''));
             if ($reason === '') {
-                $reason = 'لغو کسری مبلغ توسط مدیر';
+                $reason = 'Underpayment cancelled by admin';
             }
             $cancelled = cryptomus_cancel_underpayment($orderId, $reason);
             $r = [
                 'ok' => $cancelled,
                 'msg' => $cancelled
-                    ? 'پرداخت لغو شد؛ UUID و متادیتای درگاه حفظ شدند و بازپرداختی انجام نشد.'
-                    : 'این پرداخت دیگر شرایط لغو کسری مبلغ را ندارد.',
+                    ? 'Payment cancelled; gateway UUID and metadata were kept and no refund was issued.'
+                    : 'This payment can no longer be cancelled as an underpayment.',
             ];
             if ($cancelled) {
                 require_once __DIR__ . '/inc/users_lib.php';
                 panel_notify_user(
                     $payment['id_user'],
-                    "❌ پرداخت Cryptomus شما لغو شد.\n✍️ " . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . "\n🛒 کد پیگیری: " . $orderId
+                    "❌ Your Cryptomus payment was cancelled.\n✍️ " . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . "\n🛒 Tracking code: " . $orderId
                 );
             }
         } else {
             $address = trim((string) ($_POST['refund_address'] ?? ''));
             $confirmed = !empty($_POST['refund_confirm']);
             if (!$confirmed) {
-                $r = ['ok' => false, 'msg' => 'تأیید صریح بازپرداخت الزامی است.'];
+                $r = ['ok' => false, 'msg' => 'Explicit refund confirmation is required.'];
             } elseif (!panel_cryptomus_address_valid($address)) {
-                $r = ['ok' => false, 'msg' => 'آدرس مقصد معتبر نیست؛ طول و نویسه‌های آن را بررسی کنید.'];
+                $r = ['ok' => false, 'msg' => 'Destination address is invalid; check its length and characters.'];
             } elseif (($payment['payment_Status'] ?? '') !== 'paid' || ($payment['fulfillment_state'] ?? '') !== 'completed') {
-                $r = ['ok' => false, 'msg' => 'فقط پرداخت محلی paid با تحویل completed قابل بازپرداخت است.'];
+                $r = ['ok' => false, 'msg' => 'Only a local paid payment with completed fulfillment can be refunded.'];
             } else {
                 $isSubtract = !empty($_POST['is_subtract']);
                 $api = cryptomus_refund(
@@ -317,8 +317,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $r = [
                     'ok' => !empty($api['ok']),
                     'msg' => !empty($api['ok'])
-                        ? 'درخواست بازپرداخت کامل ثبت شد؛ موجودی کیف پول و سرویس کاربر تغییری نکرد.'
-                        : ('بازپرداخت ثبت نشد: ' . ($api['error'] ?? 'خطای نامشخص')),
+                        ? 'Full refund request submitted; the user’s wallet and service were not changed.'
+                        : ('Refund was not submitted: ' . ($api['error'] ?? 'Unknown error')),
                 ];
             }
         }
@@ -354,7 +354,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 [$like, $like, $like, $q, $q, $prefix]
             );
         } catch (Exception $e) {
-            payment_json_exit(['ok' => false, 'msg' => 'جستجوی کاربر ناموفق بود.'], 400);
+            payment_json_exit(['ok' => false, 'msg' => 'User search failed.'], 400);
         }
         $users = [];
         foreach ($rows as $u) {
@@ -383,7 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'import_commit') {
         $rows = json_decode((string) ($_POST['rows'] ?? ''), true);
         if (!is_array($rows)) {
-            payment_json_exit(['ok' => false, 'msg' => 'داده پیش‌نمایش نامعتبر است.'], 400);
+            payment_json_exit(['ok' => false, 'msg' => 'Preview data is invalid.'], 400);
         }
         $r = panel_payment_import_commit($pdo, $rows);
         payment_json_exit($r, !empty($r['ok']) ? 200 : 400);
@@ -456,7 +456,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "UPDATE Payment_report SET payment_Status = 'reject', dec_not_confirmed = 'remove_all'
              WHERE Payment_Method = 'cart to cart' AND payment_Status = 'waiting'"
         );
-        flash('success', 'همه رسیدهای در انتظار رد شدند.');
+        flash('success', 'All pending receipts were rejected.');
         $redirect = 'payment.php?tab=pending';
     } elseif ($action === 'add_manual') {
         $r = panel_payment_add_manual($pdo, [
@@ -506,13 +506,13 @@ $toRaw = trim((string) ($_GET['to'] ?? ''));
 $fromFilter = $fromRaw !== '' ? panel_payment_parse_filter_datetime($fromRaw, false) : null;
 $toFilter = $toRaw !== '' ? panel_payment_parse_filter_datetime($toRaw, true) : null;
 if ($fromRaw !== '' && $fromFilter === null) {
-    flash('error', 'تاریخ و ساعت شروع معتبر نیست.');
+    flash('error', 'Start date and time is not valid.');
 }
 if ($toRaw !== '' && $toFilter === null) {
-    flash('error', 'تاریخ و ساعت پایان معتبر نیست.');
+    flash('error', 'End date and time is not valid.');
 }
 if ($fromFilter && $toFilter && $fromFilter['ts'] > $toFilter['ts']) {
-    flash('error', 'زمان شروع باید قبل از زمان پایان باشد.');
+    flash('error', 'Start time must be before end time.');
     $fromFilter = $toFilter = null;
 }
 $fromInput = $fromFilter['input'] ?? '';
@@ -628,7 +628,7 @@ try {
 } catch (Exception $e) {
     $total = 0;
     $payments = [];
-    flash('error', 'خطای پایگاه داده در خواندن تراکنش‌ها: ' . $e->getMessage());
+    flash('error', 'Database error while reading transactions: ' . $e->getMessage());
 }
 $totalPages = max(1, (int) ceil($total / $perPage));
 
@@ -742,18 +742,18 @@ $netIncome = $totalSuccess - $totalCosts;
 $cardsFiltered = $search !== '' || $priceMin !== null || $priceMax !== null || $fromFilter || $toFilter
     || $method !== '' || $category !== '' || $kind !== '' || $expenseStatus !== ''
     || ($tab !== 'costs' && $status !== '');
-$successMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'از ابتدای فعالیت';
-$txnMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'درگاه‌ها و متدهای پرداخت';
-$capitalMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'دسته‌های غیرتراکنش ثبت‌شده';
-$costMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'هزینه شده';
-$netMeta = $cardsFiltered ? 'بر اساس فیلترهای انتخاب‌شده' : 'درآمد منهای هزینه';
+$successMeta = $cardsFiltered ? 'Based on selected filters' : 'Since the beginning';
+$txnMeta = $cardsFiltered ? 'Based on selected filters' : 'Gateways and payment methods';
+$capitalMeta = $cardsFiltered ? 'Based on selected filters' : 'Recorded non-transaction categories';
+$costMeta = $cardsFiltered ? 'Based on selected filters' : 'Expensed';
+$netMeta = $cardsFiltered ? 'Based on selected filters' : 'Income minus expenses';
 
 $statusMap = panel_payment_status_meta();
 $listStatusMap = $statusMap;
 unset($listStatusMap['cost']);
 $filterStatusMap = [
     'paid' => $listStatusMap['paid'],
-    'manual' => ['tag-mint', 'فاکتور دستی'],
+    'manual' => ['tag-mint', 'Manual invoice'],
 ] + $listStatusMap;
 
 $methodOptions = [];
@@ -845,8 +845,8 @@ $financialExportUrl = 'payment_export.php?' . http_build_query([
     'to' => $toInput,
 ], '', '&', PHP_QUERY_RFC3986);
 
-$pageTitle = 'مالی';
-$pageLede = 'گزارش پرداخت‌ها، فاکتور دستی، هزینه‌ها و درآمد خالص.';
+$pageTitle = 'Finance';
+$pageLede = 'Payment reports, manual invoices, expenses, and net income.';
 $activeNav = 'payment';
 include __DIR__ . '/inc/layout_head.php';
 ?>
@@ -889,11 +889,11 @@ include __DIR__ . '/inc/layout_head.php';
   .pay-sheet-row .pay-cell-input { height: 32px; padding: 0 8px; font-size: .8rem; }
   .pay-sheet-row.is-editing .pay-view { display: none; }
   .pay-sheet-row.is-editing .pay-edit { display: block; }
-  .pay-dd-trigger{display:inline-flex;align-items:center;gap:4px;max-width:100%;border:0;padding:0;background:transparent;font:inherit;color:inherit;cursor:pointer;text-align:right}
+  .pay-dd-trigger{display:inline-flex;align-items:center;gap:4px;max-width:100%;border:0;padding:0;background:transparent;font:inherit;color:inherit;cursor:pointer;text-align:left}
   .pay-dd-caret{opacity:.65;font-size:.68rem;flex-shrink:0;line-height:1}
   .pay-sheet-menu{position:fixed;z-index:4000;min-width:180px;max-width:min(280px,calc(100vw - 16px));max-height:min(320px,70vh);overflow:auto;padding:6px;border:1px solid var(--bd);border-radius:12px;background:var(--sf);box-shadow:0 10px 28px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:4px}
   .pay-sheet-menu[hidden]{display:none!important}
-  .pay-sheet-menu-item{display:flex;align-items:center;width:100%;padding:7px 8px;border:0;border-radius:8px;background:transparent;cursor:pointer;text-align:right;font:inherit;color:var(--text);font-size:.8rem}
+  .pay-sheet-menu-item{display:flex;align-items:center;width:100%;padding:7px 8px;border:0;border-radius:8px;background:transparent;cursor:pointer;text-align:left;font:inherit;color:var(--text);font-size:.8rem}
   .pay-sheet-menu-item:hover,.pay-sheet-menu-item.active{background:var(--sf2)}
   .pay-sheet-menu-empty{padding:10px 8px;font-size:.78rem;color:var(--text-dim);text-align:center}
   .pay-user-item{flex-direction:column;align-items:flex-start;gap:2px}
@@ -983,15 +983,15 @@ include __DIR__ . '/inc/layout_head.php';
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px" class="fade-up">
   <div style="display:flex;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:4px;flex-wrap:wrap">
-    <a href="payment.php" class="btn btn-sm <?= $tab === 'list' ? 'btn-primary' : 'btn-ghost' ?>">همه تراکنش‌ها</a>
-    <a href="payment.php?tab=income" class="btn btn-sm <?= $tab === 'income' ? 'btn-primary' : 'btn-ghost' ?>">درآمدها</a>
+    <a href="payment.php" class="btn btn-sm <?= $tab === 'list' ? 'btn-primary' : 'btn-ghost' ?>">All transactions</a>
+    <a href="payment.php?tab=income" class="btn btn-sm <?= $tab === 'income' ? 'btn-primary' : 'btn-ghost' ?>">Income</a>
     <a href="payment.php?tab=pending" class="btn btn-sm <?= $tab === 'pending' ? 'btn-primary' : 'btn-ghost' ?>">
-      رسید در انتظار
+      Pending receipts
       <?php if ($pendingCount > 0): ?>
         <span class="tag tag-warn" style="margin-right:6px;font-size:.7rem"><?= $pendingCount ?></span>
       <?php endif; ?>
     </a>
-    <a href="payment.php?tab=costs" class="btn btn-sm <?= $tab === 'costs' ? 'btn-primary' : 'btn-ghost' ?>">هزینه‌ها</a>
+    <a href="payment.php?tab=costs" class="btn btn-sm <?= $tab === 'costs' ? 'btn-primary' : 'btn-ghost' ?>">Expenses</a>
     <a href="payment.php?tab=cryptomus" class="btn btn-sm <?= $tab === 'cryptomus' ? 'btn-primary' : 'btn-ghost' ?>">
       Cryptomus
       <?php if ($cryptomusCount > 0): ?>
@@ -1000,52 +1000,52 @@ include __DIR__ . '/inc/layout_head.php';
     </a>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <a href="settings.php?tab=finance" class="btn btn-ghost btn-sm"><?= icon('wallet', 14) ?> دسته‌های مالی</a>
-    <a href="payment_methods.php" class="btn btn-ghost btn-sm"><?= icon('settings', 14) ?> درگاه‌های پرداخت</a>
+    <a href="settings.php?tab=finance" class="btn btn-ghost btn-sm"><?= icon('wallet', 14) ?> Finance categories</a>
+    <a href="payment_methods.php" class="btn btn-ghost btn-sm"><?= icon('settings', 14) ?> Payment gateways</a>
   </div>
 </div>
 
 <?php if (!in_array($tab, ['pending', 'cryptomus'], true)): ?>
 <div class="stats pay-stats">
   <div class="stat success">
-    <div class="stat-label">جمع درآمد کل</div>
+    <div class="stat-label">Total income</div>
     <div class="stat-num"><?= number_format($totalSuccess) ?><small>USD</small></div>
     <div class="stat-meta"><?= $successMeta ?></div>
   </div>
   <div class="stat">
-    <div class="stat-label">جمع کل تراکنش‌ها</div>
+    <div class="stat-label">Total transactions</div>
     <div class="stat-num"><?= number_format($totalTxnIncome) ?><small>USD</small></div>
     <div class="stat-meta"><?= $txnMeta ?></div>
   </div>
   <div class="stat">
-    <div class="stat-label">جمع سرمایه ورودی</div>
+    <div class="stat-label">Total capital in</div>
     <div class="stat-num"><?= number_format($totalCapitalIncome) ?><small>USD</small></div>
     <div class="stat-meta"><?= $capitalMeta ?></div>
   </div>
   <div class="stat">
-    <div class="stat-label">تراکنش‌های پیش‌بینی‌شده ماهانه</div>
+    <div class="stat-label">Forecast monthly transactions</div>
     <div class="stat-num"><?= number_format($forecastIncome) ?><small>USD</small></div>
-    <div class="stat-meta">بر اساس ۲۸ روز اخیر</div>
+    <div class="stat-meta">Based on the last 28 days</div>
   </div>
   <div class="stat warn">
-    <div class="stat-label">جمع هزینه‌ها</div>
+    <div class="stat-label">Total expenses</div>
     <div class="stat-num"><?= number_format($totalCosts) ?><small>USD</small></div>
     <div class="stat-meta"><?= $costMeta ?></div>
   </div>
   <div class="stat <?= $netIncome >= 0 ? 'ok' : 'no' ?>">
-    <div class="stat-label">درآمد خالص</div>
+    <div class="stat-label">Net income</div>
     <div class="stat-num"><?= number_format($netIncome) ?><small>USD</small></div>
     <div class="stat-meta"><?= $netMeta ?></div>
   </div>
   <div class="stat">
-    <div class="stat-label">تعداد کل</div>
+    <div class="stat-label">Total count</div>
     <div class="stat-num"><?= number_format($total) ?></div>
-    <div class="stat-meta"><?= $tab === 'costs' ? 'رکورد هزینه' : ($tab === 'income' ? 'رکورد درآمد' : 'رکورد تراکنش') ?></div>
+    <div class="stat-meta"><?= $tab === 'costs' ? 'expense records' : ($tab === 'income' ? 'income records' : 'transaction records') ?></div>
   </div>
   <div class="stat warn">
-    <div class="stat-label">امروز</div>
+    <div class="stat-label">Today</div>
     <div class="stat-num"><?= number_format($todayCount) ?></div>
-    <div class="stat-meta"><?= $tab === 'costs' ? 'هزینه امروز' : ($tab === 'income' ? 'درآمد امروز' : 'تراکنش جدید امروز') ?></div>
+    <div class="stat-meta"><?= $tab === 'costs' ? 'expenses today' : ($tab === 'income' ? 'income today' : 'new transactions today') ?></div>
   </div>
 </div>
 <?php endif; ?>
@@ -1055,43 +1055,43 @@ include __DIR__ . '/inc/layout_head.php';
     <div class="toolbar-title">
       <?php
       if ($tab === 'pending') {
-          echo 'رسیدهای کارت‌به‌کارت در انتظار';
+          echo 'Pending card-to-card receipts';
       } elseif ($tab === 'costs') {
-          echo 'هزینه‌ها';
+          echo 'Expenses';
       } elseif ($tab === 'income') {
-          echo 'درآمدها';
+          echo 'Income';
       } elseif ($tab === 'cryptomus') {
-          echo 'عملیات Cryptomus';
+          echo 'Cryptomus operations';
       } else {
-          echo 'همه تراکنش‌ها';
+          echo 'All transactions';
       }
       ?>
       <small>(<?= number_format($total) ?>)</small>
     </div>
     <?php if ($tab === 'pending' && $total > 0): ?>
-      <form method="POST" onsubmit="return confirm('همه رسیدهای در انتظار رد شوند؟')">
+      <form method="POST" onsubmit="return confirm('Reject all pending receipts?')">
         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
         <input type="hidden" name="action" value="reject_all">
-        <button type="submit" class="btn btn-no btn-sm">حذف همه</button>
+        <button type="submit" class="btn btn-no btn-sm">Delete all</button>
       </form>
     <?php elseif (!in_array($tab, ['pending', 'cryptomus'], true)): ?>
     <div class="toolbar-end pay-toolbar">
       <div class="pay-toolbar-actions">
         <button type="button" class="btn btn-ghost btn-sm pay-btn-import" id="payImportOpenBtn">
-          <?= icon('arrow-up', 14) ?> ورود دیتا با اکسل
+          <?= icon('arrow-up', 14) ?> Import from Excel
         </button>
         <a href="<?= htmlspecialchars($financialExportUrl, ENT_QUOTES) ?>" class="btn btn-ghost btn-sm pay-btn-export">
-          <?= icon('arrow-down', 14) ?> خروجی اکسل مالی
+          <?= icon('arrow-down', 14) ?> Export finance Excel
         </a>
         <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('paymentFilterModal')">
-          <?= icon('filter', 14) ?> فیلترها
+          <?= icon('filter', 14) ?> Filters
           <?php if ($activeFilterCount > 0): ?>
             <span class="tag tag-info" style="margin-right:4px"><?= $activeFilterCount ?></span>
           <?php endif; ?>
         </button>
-          <button type="button" class="btn btn-primary btn-sm" id="payAddRowBtn"><?= icon('plus', 14) ?> افزودن</button>
+          <button type="button" class="btn btn-primary btn-sm" id="payAddRowBtn"><?= icon('plus', 14) ?> Add</button>
         <?php if ($search || $activeFilterCount > 0): ?>
-          <a href="<?= htmlspecialchars($clearFiltersUrl) ?>" class="btn btn-ghost btn-sm pay-toolbar-clear">پاک</a>
+          <a href="<?= htmlspecialchars($clearFiltersUrl) ?>" class="btn btn-ghost btn-sm pay-toolbar-clear">Clear</a>
         <?php endif; ?>
       </div>
       <form method="GET" class="pay-toolbar-search">
@@ -1109,10 +1109,10 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="expense_status" value="<?= htmlspecialchars($expenseStatus) ?>">
         <div class="search-box">
           <?= icon('search', 14) ?>
-          <input type="text" name="q" placeholder="<?= $tab === 'costs' ? 'شناسه، یادداشت...' : 'آیدی کاربر، شماره تراکنش یا یادداشت...' ?>"
+          <input type="text" name="q" placeholder="<?= $tab === 'costs' ? 'ID, note...' : 'User ID, transaction ID, or note...' ?>"
             value="<?= htmlspecialchars($search) ?>">
           <button type="button" class="search-clear">✕</button>
-          <button type="submit" class="search-btn">جستجو</button>
+          <button type="submit" class="search-btn">Search</button>
         </div>
       </form>
     </div>
@@ -1121,8 +1121,8 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="tab" value="cryptomus">
         <div class="search-box">
           <?= icon('search', 14) ?>
-          <input type="text" name="q" placeholder="کاربر، سفارش یا وضعیت درگاه..." value="<?= htmlspecialchars($search) ?>">
-          <button type="submit" class="search-btn">جستجو</button>
+          <input type="text" name="q" placeholder="User, order, or gateway status..." value="<?= htmlspecialchars($search) ?>">
+          <button type="submit" class="search-btn">Search</button>
         </div>
       </form>
     <?php endif; ?>
@@ -1134,19 +1134,19 @@ include __DIR__ . '/inc/layout_head.php';
       <thead>
         <tr>
           <th>#</th>
-          <th>سفارش / کاربر</th>
-          <th>مبلغ USD</th>
-          <th>وضعیت محلی / درگاه</th>
+          <th>Order / user</th>
+          <th>Amount USD</th>
+          <th>Local / gateway status</th>
           <th>UUID</th>
-          <th>پرداخت‌کننده / شبکه</th>
-          <th>انقضا</th>
-          <th>تحویل / بازپرداخت</th>
-          <th>عملیات امن</th>
+          <th>Payer / network</th>
+          <th>Expiry</th>
+          <th>Fulfillment / refund</th>
+          <th>Safe actions</th>
         </tr>
       </thead>
       <tbody>
         <?php if (!$payments): ?>
-          <tr><td colspan="9"><div class="empty"><div class="empty-mark">—</div><p>تراکنش Cryptomus یافت نشد</p></div></td></tr>
+          <tr><td colspan="9"><div class="empty"><div class="empty-mark">—</div><p>No Cryptomus transactions found</p></div></td></tr>
         <?php else:
           $i = $offset + 1;
           foreach ($payments as $p):
@@ -1184,49 +1184,49 @@ include __DIR__ . '/inc/layout_head.php';
               <td class="cell-mono" style="font-size:.75rem"><?= htmlspecialchars($uuid !== '' ? trunc($uuid, 16) : '—') ?></td>
               <td style="font-size:.75rem;line-height:1.7">
                 <div><?= htmlspecialchars((string) ($meta['payer_amount'] ?? '—')) ?> <?= htmlspecialchars((string) ($meta['payer_currency'] ?? '')) ?></div>
-                <div>پرداخت: <?= htmlspecialchars((string) ($meta['payment_amount'] ?? '—')) ?></div>
-                <div>شبکه: <?= htmlspecialchars((string) ($meta['network'] ?? '—')) ?></div>
+                <div>Payment: <?= htmlspecialchars((string) ($meta['payment_amount'] ?? '—')) ?></div>
+                <div>Network: <?= htmlspecialchars((string) ($meta['network'] ?? '—')) ?></div>
               </td>
               <td style="font-size:.75rem;white-space:nowrap">
                 <?= !empty($p['gateway_expires_at']) ? htmlspecialchars(panel_payment_time_to_jalali($p['gateway_expires_at'])) : '—' ?>
               </td>
               <td style="font-size:.75rem;line-height:1.8">
-                <div>تحویل: <span class="tag tag-plain"><?= htmlspecialchars($fulfillment) ?></span></div>
-                <div>بازپرداخت: <span class="tag tag-plain"><?= htmlspecialchars($refund) ?></span></div>
+                <div>Fulfillment: <span class="tag tag-plain"><?= htmlspecialchars($fulfillment) ?></span></div>
+                <div>Refunds: <span class="tag tag-plain"><?= htmlspecialchars($refund) ?></span></div>
               </td>
               <td style="min-width:280px">
                 <?php if ($canUnderpayment): ?>
-                  <form method="POST" style="display:inline" onsubmit="return confirm('کسری مبلغ در Cryptomus پذیرفته شود؟ تحویل منتظر تأیید درگاه می‌ماند.')">
+                  <form method="POST" style="display:inline" onsubmit="return confirm('Accept the Cryptomus underpayment? Delivery stays pending until the gateway confirms.')">
                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                     <input type="hidden" name="action" value="cryptomus_approve">
                     <input type="hidden" name="order_id" value="<?= htmlspecialchars($oid) ?>">
-                    <button type="submit" class="btn btn-primary btn-sm">پذیرش کسری</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Accept underpayment</button>
                   </form>
-                  <form method="POST" style="margin-top:7px" onsubmit="return confirm('این پرداخت بدون بازپرداخت لغو شود؟')">
+                  <form method="POST" style="margin-top:7px" onsubmit="return confirm('Cancel this payment without a refund?')">
                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                     <input type="hidden" name="action" value="cryptomus_cancel">
                     <input type="hidden" name="order_id" value="<?= htmlspecialchars($oid) ?>">
-                    <input type="text" name="reason" class="input" maxlength="500" placeholder="دلیل لغو برای کاربر" required>
-                    <button type="submit" class="btn btn-no btn-sm" style="margin-top:5px">لغو بدون بازپرداخت</button>
+                    <input type="text" name="reason" class="input" maxlength="500" placeholder="Cancellation reason for the user" required>
+                    <button type="submit" class="btn btn-no btn-sm" style="margin-top:5px">Cancel without refund</button>
                   </form>
                 <?php elseif ($canRefund): ?>
-                  <form method="POST" onsubmit="return confirm('بازپرداخت کامل ثبت شود؟ این کار سرویس یا موجودی داخلی را برنمی‌گرداند.')">
+                  <form method="POST" onsubmit="return confirm('Submit a full refund? This does not reverse the internal service or balance.')">
                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                     <input type="hidden" name="action" value="cryptomus_refund">
                     <input type="hidden" name="order_id" value="<?= htmlspecialchars($oid) ?>">
-                    <input type="text" name="refund_address" class="input" dir="ltr" maxlength="256" required placeholder="آدرس مقصد تأییدشده">
+                    <input type="text" name="refund_address" class="input" dir="ltr" maxlength="256" required placeholder="Confirmed destination address">
                     <label style="display:block;font-size:.72rem;line-height:1.7;margin-top:6px">
                       <input type="checkbox" name="is_subtract" value="1">
-                      is_subtract (پیش‌فرض خاموش؛ هزینه شبکه بر عهده گیرنده)
+                      is_subtract (off by default; network fee paid by recipient)
                     </label>
                     <label style="display:block;font-size:.72rem;line-height:1.7;margin-top:4px;color:var(--mute)">
                       <input type="checkbox" name="refund_confirm" value="1" required>
-                      بازپرداخت کامل است (پارامتر مبلغ ندارد) و تحویل سرویس/موجودی را برنمی‌گرداند.
+                      This is a full refund (no amount parameter) and does not reverse service delivery or wallet credit.
                     </label>
-                    <button type="submit" class="btn btn-no btn-sm" style="margin-top:6px">بازپرداخت کامل</button>
+                    <button type="submit" class="btn btn-no btn-sm" style="margin-top:6px">Full refund</button>
                   </form>
                 <?php else: ?>
-                  <span style="font-size:.75rem;color:var(--mute)">عملیات مجاز فعالی ندارد</span>
+                  <span style="font-size:.75rem;color:var(--mute)">No allowed actions right now</span>
                 <?php endif; ?>
               </td>
             </tr>
@@ -1238,22 +1238,22 @@ include __DIR__ . '/inc/layout_head.php';
       <thead>
         <tr>
           <th>#</th>
-          <th>کاربر</th>
-          <th>شناسه</th>
-          <th>مبلغ</th>
+          <th>User</th>
+          <th>ID</th>
+          <th>Amount</th>
           <th><?php
           if ($tab === 'costs') {
-              echo 'دسته هزینه';
+              echo 'Expense category';
           } elseif ($tab === 'list') {
-              echo 'روش / دسته';
+              echo 'Method / category';
           } else {
-              echo 'روش پرداخت';
+              echo 'Payment method';
           }
           ?></th>
-          <th>یادداشت</th>
-          <th>تاریخ</th>
-          <th>وضعیت</th>
-          <th>عملیات</th>
+          <th>Note</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="paySheetBody">
@@ -1264,13 +1264,13 @@ include __DIR__ . '/inc/layout_head.php';
                 <div class="empty-mark">—</div>
                 <p><?php
                 if ($tab === 'pending') {
-                    echo 'رسید در انتظاری نیست';
+                    echo 'No pending receipts';
                 } elseif ($tab === 'costs') {
-                    echo 'هزینه‌ای ثبت نشده';
+                    echo 'No expenses recorded';
                 } elseif ($tab === 'income') {
-                    echo 'درآمدی یافت نشد';
+                    echo 'No income found';
                 } else {
-                    echo 'تراکنشی یافت نشد';
+                    echo 'No transactions found';
                 }
                 ?></p>
               </div>
@@ -1293,7 +1293,7 @@ include __DIR__ . '/inc/layout_head.php';
             $jalaliTime = panel_payment_time_to_jalali($p['time'] ?? '');
             $isCostRow = $tab === 'costs' || panel_payment_is_cost($p);
             if ($tab === 'pending' && $methodKey === 'manual invoice') {
-                [$cls, $lbl] = ['tag-mint', 'فاکتور دستی'];
+                [$cls, $lbl] = ['tag-mint', 'Manual invoice'];
             }
             ?>
             <?php if ($tab === 'pending'): ?>
@@ -1301,7 +1301,7 @@ include __DIR__ . '/inc/layout_head.php';
               <td style="color:var(--text-dim)"><?= $i++ ?></td>
               <td>
                 <?php if ($uid === '' || $uid === '0'): ?>
-                  <span style="color:var(--text-dim)">بدون کاربر</span>
+                  <span style="color:var(--text-dim)">No user</span>
                 <?php elseif (!empty($knownUsers[$uid])): ?>
                   <a href="user.php?id=<?= htmlspecialchars($uid) ?>" class="cell-mono" style="color:var(--accent)">
                     <?= htmlspecialchars($uid) ?>
@@ -1329,15 +1329,15 @@ include __DIR__ . '/inc/layout_head.php';
                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                     <input type="hidden" name="action" value="confirm">
                     <input type="hidden" name="order_id" value="<?= htmlspecialchars($oid) ?>">
-                    <button type="submit" class="btn btn-primary btn-sm">تأیید</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Approve</button>
                   </form>
                   <button type="button" class="btn btn-no btn-sm"
-                    onclick="openRejectModal('<?= htmlspecialchars($oid, ENT_QUOTES) ?>')">رد</button>
-                  <form method="POST" style="display:inline" onsubmit="return confirm('حذف بدون اطلاع کاربر؟')">
+                    onclick="openRejectModal('<?= htmlspecialchars($oid, ENT_QUOTES) ?>')">Reject</button>
+                  <form method="POST" style="display:inline" onsubmit="return confirm('Delete without notifying the user?')">
                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                     <input type="hidden" name="action" value="dismiss">
                     <input type="hidden" name="order_id" value="<?= htmlspecialchars($oid) ?>">
-                    <button type="submit" class="btn btn-ghost btn-sm">حذف</button>
+                    <button type="submit" class="btn btn-ghost btn-sm">Delete</button>
                   </form>
                 </div>
               </td>
@@ -1353,7 +1353,7 @@ include __DIR__ . '/inc/layout_head.php';
               <td>
                 <span class="pay-view pay-user-view">
                   <?php if ($uid === '' || $uid === '0'): ?>
-                    <span style="color:var(--text-dim)">بدون کاربر</span>
+                    <span style="color:var(--text-dim)">No user</span>
                   <?php elseif (!empty($knownUsers[$uid])): ?>
                     <a href="user.php?id=<?= htmlspecialchars($uid) ?>" class="cell-mono" style="color:var(--accent)">
                       <?= htmlspecialchars($uid) ?>
@@ -1363,7 +1363,7 @@ include __DIR__ . '/inc/layout_head.php';
                   <?php endif; ?>
                 </span>
                 <input class="input pay-edit pay-cell-input pay-user-input" type="text"
-                  value="<?= htmlspecialchars($uid === '0' ? '' : $uid) ?>" placeholder="آیدی یا یوزرنیم" autocomplete="off">
+                  value="<?= htmlspecialchars($uid === '0' ? '' : $uid) ?>" placeholder="ID or username" autocomplete="off">
               </td>
               <td class="cell-mono pay-oid"><?= htmlspecialchars($oid) ?></td>
               <td>
@@ -1393,14 +1393,14 @@ include __DIR__ . '/inc/layout_head.php';
                   <?= $note !== '' ? htmlspecialchars(trunc($note, 40)) : '<span style="color:var(--text-dim)">—</span>' ?>
                 </span>
                 <input class="input pay-edit pay-cell-input pay-note-input" type="text"
-                  value="<?= htmlspecialchars($note) ?>" placeholder="یادداشت">
+                  value="<?= htmlspecialchars($note) ?>" placeholder="Note">
               </td>
               <td>
                 <span class="pay-view pay-time-view"><?= htmlspecialchars($jalaliTime !== '' ? $jalaliTime : '—') ?></span>
                 <div class="pay-edit pay-time-edit">
                   <input class="input pay-cell-input jalali-datetime-picker pay-time-input" type="text"
-                    value="<?= htmlspecialchars($jalaliTime) ?>" placeholder="تاریخ و ساعت" autocomplete="off">
-                  <button type="button" class="btn btn-ghost btn-sm pay-time-now" title="تاریخ و ساعت الان">اکنون</button>
+                    value="<?= htmlspecialchars($jalaliTime) ?>" placeholder="Date and time" autocomplete="off">
+                  <button type="button" class="btn btn-ghost btn-sm pay-time-now" title="Current date and time">Now</button>
                 </div>
               </td>
               <td>
@@ -1416,9 +1416,9 @@ include __DIR__ . '/inc/layout_head.php';
               </td>
               <td>
                 <div class="pay-actions">
-                  <button type="button" class="btn btn-ghost btn-sm btn-icon pay-btn-edit" title="ویرایش"><?= icon('edit', 14) ?></button>
-                  <button type="button" class="btn btn-primary btn-sm btn-icon pay-btn-save" title="ذخیره"><?= icon('check', 14) ?></button>
-                  <button type="button" class="btn btn-no btn-sm btn-icon pay-btn-delete" title="حذف"><?= icon('trash', 14) ?></button>
+                  <button type="button" class="btn btn-ghost btn-sm btn-icon pay-btn-edit" title="Edit"><?= icon('edit', 14) ?></button>
+                  <button type="button" class="btn btn-primary btn-sm btn-icon pay-btn-save" title="Save"><?= icon('check', 14) ?></button>
+                  <button type="button" class="btn btn-no btn-sm btn-icon pay-btn-delete" title="Delete"><?= icon('trash', 14) ?></button>
                 </div>
               </td>
             </tr>
@@ -1431,7 +1431,7 @@ include __DIR__ . '/inc/layout_head.php';
 
   <?php if ($totalPages > 1): ?>
   <div class="tbl-foot">
-    <span><?= number_format($total) ?> رکورد · صفحه <?= $page ?> از <?= $totalPages ?></span>
+    <span><?= number_format($total) ?> records · page <?= $page ?> of <?= $totalPages ?></span>
     <div class="pager">
       <?php
       $qs = static function (int $p) use ($tab, $search, $status, $priceMin, $priceMax, $fromInput, $toInput, $method, $category, $kind, $expenseStatus): string {
@@ -1467,7 +1467,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal" id="rejectModal">
   <div class="modal-box" style="max-width:420px">
     <div class="modal-head">
-      <h3>رد پرداخت</h3>
+      <h3>Reject payment</h3>
       <button type="button" class="icon-btn" onclick="closeModal('rejectModal')">✕</button>
     </div>
     <form method="POST" class="modal-body">
@@ -1475,10 +1475,10 @@ include __DIR__ . '/inc/layout_head.php';
       <input type="hidden" name="action" value="reject">
       <input type="hidden" name="order_id" id="rejectOrderId" value="">
       <div class="field">
-        <label>دلیل (برای کاربر ارسال می‌شود)</label>
-        <textarea name="reason" class="input" rows="3" placeholder="اختیاری"></textarea>
+        <label>Reason (sent to the user)</label>
+        <textarea name="reason" class="input" rows="3" placeholder="Optional"></textarea>
       </div>
-      <button type="submit" class="btn btn-no">رد کردن</button>
+      <button type="submit" class="btn btn-no">Reject</button>
     </form>
   </div>
 </div>
@@ -1492,32 +1492,32 @@ function openRejectModal(orderId) {
 <div class="modal-veil" id="statusSideModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>تغییر وضعیت پرداخت</h3>
+      <h3>Change payment status</h3>
       <button type="button" class="modal-x" onclick="closeModal('statusSideModal')"><?= icon('close', 14) ?></button>
     </div>
     <div class="modal-body">
       <div id="rejectInvoiceWrap" style="margin-bottom:12px">
         <label style="display:flex;align-items:flex-start;gap:8px;font-size:.85rem;cursor:pointer;line-height:1.6">
           <input type="checkbox" id="rejectInvoiceCheck" value="1" style="width:16px;height:16px;margin-top:3px">
-          <span>وضعیت فاکتور/سفارش مرتبط هم «رد شده» شود؟</span>
+          <span>Also set the related invoice/order status to Rejected?</span>
         </label>
         <p style="font-size:.75rem;color:var(--mute);margin-top:8px;line-height:1.6">
-          برای اینکه از آمار سفارشات تلگرام هم خارج شود.
+          So it is also excluded from Telegram order stats.
         </p>
       </div>
       <div id="removeProductWrap" style="display:none">
         <label style="display:flex;align-items:flex-start;gap:8px;font-size:.85rem;cursor:pointer;line-height:1.6">
           <input type="checkbox" id="removeProductCheck" value="1" style="width:16px;height:16px;margin-top:3px">
-          <span>سرویس ساخته‌شده برای این پرداخت هم حذف شود؟</span>
+          <span>Also delete the service created for this payment?</span>
         </label>
         <p style="font-size:.75rem;color:var(--mute);margin-top:8px;line-height:1.6">
-          فقط برای خرید سرویس (نه تمدید/شارژ کیف پول). در صورت انتخاب، سرویس از پنل و ربات حذف می‌شود.
+          Only for service purchases (not renewals or wallet top-ups). If selected, the service is removed from the panel and the bot.
         </p>
       </div>
     </div>
     <div class="modal-foot">
-      <button type="button" class="btn btn-primary" id="statusSideConfirm">ادامه</button>
-      <button type="button" class="btn btn-ghost" id="statusSideCancel">انصراف</button>
+      <button type="button" class="btn btn-primary" id="statusSideConfirm">Continue</button>
+      <button type="button" class="btn btn-ghost" id="statusSideCancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -1527,7 +1527,7 @@ function openRejectModal(orderId) {
 <div class="modal-veil" id="paymentFilterModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>فیلترها</h3>
+      <h3>Filters</h3>
       <button type="button" class="modal-x" onclick="closeModal('paymentFilterModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="GET">
@@ -1539,28 +1539,28 @@ function openRejectModal(orderId) {
         <div class="form-grid">
           <?php if ($tab === 'list'): ?>
           <div class="field" style="grid-column:1/-1">
-            <label class="lbl">نوع تراکنش</label>
+            <label class="lbl">Transaction type</label>
             <select name="kind" id="payFilterKind" class="select" style="width:100%">
-              <option value="" <?= $kind === '' ? 'selected' : '' ?>>همه (درآمد و هزینه)</option>
-              <option value="income" <?= $kind === 'income' ? 'selected' : '' ?>>فقط درآمد</option>
-              <option value="expense" <?= $kind === 'expense' ? 'selected' : '' ?>>فقط هزینه</option>
+              <option value="" <?= $kind === '' ? 'selected' : '' ?>>All (income and expenses)</option>
+              <option value="income" <?= $kind === 'income' ? 'selected' : '' ?>>Income only</option>
+              <option value="expense" <?= $kind === 'expense' ? 'selected' : '' ?>>Expenses only</option>
             </select>
           </div>
           <div class="pay-filter-group<?= $kind === 'expense' ? ' is-disabled' : '' ?>" id="payFilterIncomeGroup">
-            <div class="pay-filter-group-title">درآمد</div>
+            <div class="pay-filter-group-title">Income</div>
             <div class="field">
-              <label class="lbl">وضعیت درآمد</label>
+              <label class="lbl">Income status</label>
               <select name="status" class="select" style="width:100%"<?= $kind === 'expense' ? ' disabled' : '' ?>>
-                <option value="">همه وضعیت‌ها</option>
+                <option value="">All statuses</option>
                 <?php foreach ($filterStatusMap as $k => [$_, $lbl]): ?>
                   <option value="<?= htmlspecialchars($k) ?>" <?= $status === $k ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
             <div class="field">
-              <label class="lbl">روش پرداخت</label>
+              <label class="lbl">Payment method</label>
               <select name="method" class="select" style="width:100%"<?= $kind === 'expense' ? ' disabled' : '' ?>>
-                <option value="">همه روش‌ها</option>
+                <option value="">All methods</option>
                 <?php foreach ($methodOptions as $k => $lbl): ?>
                   <option value="<?= htmlspecialchars($k) ?>" <?= $method === $k ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
                 <?php endforeach; ?>
@@ -1568,18 +1568,18 @@ function openRejectModal(orderId) {
             </div>
           </div>
           <div class="pay-filter-group<?= $kind === 'income' ? ' is-disabled' : '' ?>" id="payFilterExpenseGroup">
-            <div class="pay-filter-group-title">هزینه</div>
+            <div class="pay-filter-group-title">Expense</div>
             <div class="field">
-              <label class="lbl">وضعیت هزینه</label>
+              <label class="lbl">Expense status</label>
               <select name="expense_status" class="select" style="width:100%"<?= $kind === 'income' ? ' disabled' : '' ?>>
-                <option value="">همه وضعیت‌ها</option>
-                <option value="cost" <?= $expenseStatus === 'cost' ? 'selected' : '' ?>><?= htmlspecialchars($statusMap['cost'][1] ?? 'هزینه شده') ?></option>
+                <option value="">All statuses</option>
+                <option value="cost" <?= $expenseStatus === 'cost' ? 'selected' : '' ?>><?= htmlspecialchars($statusMap['cost'][1] ?? 'Expensed') ?></option>
               </select>
             </div>
             <div class="field">
-              <label class="lbl">دسته هزینه</label>
+              <label class="lbl">Expense category</label>
               <select name="category" class="select" style="width:100%"<?= $kind === 'income' ? ' disabled' : '' ?>>
-                <option value="">همه دسته‌ها</option>
+                <option value="">All categories</option>
                 <?php foreach ($categoryOptions as $k => $lbl): ?>
                   <option value="<?= htmlspecialchars($k) ?>" <?= $category === $k ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
                 <?php endforeach; ?>
@@ -1588,18 +1588,18 @@ function openRejectModal(orderId) {
           </div>
           <?php elseif ($tab !== 'costs'): ?>
           <div class="field">
-            <label class="lbl">وضعیت</label>
+            <label class="lbl">Status</label>
             <select name="status" class="select" style="width:100%">
-              <option value="">همه وضعیت‌ها</option>
+              <option value="">All statuses</option>
               <?php foreach ($filterStatusMap as $k => [$_, $lbl]): ?>
                 <option value="<?= htmlspecialchars($k) ?>" <?= $status === $k ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
           <div class="field">
-            <label class="lbl">روش پرداخت</label>
+            <label class="lbl">Payment method</label>
             <select name="method" class="select" style="width:100%">
-              <option value="">همه روش‌ها</option>
+              <option value="">All methods</option>
               <?php foreach ($methodOptions as $k => $lbl): ?>
                 <option value="<?= htmlspecialchars($k) ?>" <?= $method === $k ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
               <?php endforeach; ?>
@@ -1607,9 +1607,9 @@ function openRejectModal(orderId) {
           </div>
           <?php else: ?>
           <div class="field">
-            <label class="lbl">دسته هزینه</label>
+            <label class="lbl">Expense category</label>
             <select name="category" class="select" style="width:100%">
-              <option value="">همه دسته‌ها</option>
+              <option value="">All categories</option>
               <?php foreach ($categoryOptions as $k => $lbl): ?>
                 <option value="<?= htmlspecialchars($k) ?>" <?= $category === $k ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
               <?php endforeach; ?>
@@ -1619,7 +1619,7 @@ function openRejectModal(orderId) {
           <div class="field pay-price-range">
             <label class="lbl pay-price-check">
               <input type="checkbox" id="payPriceFilterOn" <?= $priceFilterOn ? 'checked' : '' ?>>
-              اعمال فیلتر مبلغ
+              Apply amount filter
             </label>
             <div class="pay-price-range-wrap<?= $priceFilterOn ? '' : ' is-off' ?>" id="payPriceRangeWrap">
               <div class="pay-price-range-labels">
@@ -1630,16 +1630,16 @@ function openRejectModal(orderId) {
                 <div class="pay-price-range-rail"></div>
                 <div class="pay-price-range-fill" id="payPriceFill" style="left:<?= $priceBoundMax > 0 ? (int) round(($priceSliderMin / $priceBoundMax) * 100) : 0 ?>%;width:<?= $priceBoundMax > 0 ? (int) round((($priceSliderMax - $priceSliderMin) / $priceBoundMax) * 100) : 0 ?>%"></div>
                 <input type="range" id="payPriceMinRange" min="0" max="<?= (int) $priceBoundMax ?>" step="1"
-                  value="<?= (int) $priceSliderMin ?>" aria-label="حداقل مبلغ">
+                  value="<?= (int) $priceSliderMin ?>" aria-label="Min amount">
                 <input type="range" id="payPriceMaxRange" min="0" max="<?= (int) $priceBoundMax ?>" step="1"
-                  value="<?= (int) $priceSliderMax ?>" aria-label="حداکثر مبلغ">
+                  value="<?= (int) $priceSliderMax ?>" aria-label="Max amount">
               </div>
             </div>
             <input type="hidden" name="price_min" id="payPriceMinHidden" value="<?= $priceFilterOn ? (int) $priceSliderMin : '' ?>">
             <input type="hidden" name="price_max" id="payPriceMaxHidden" value="<?= $priceFilterOn ? (int) $priceSliderMax : '' ?>">
           </div>
           <div class="field" style="grid-column:1/-1">
-            <label class="lbl">بازه تاریخ</label>
+            <label class="lbl">Date range</label>
             <div class="pay-date-presets">
               <?php foreach ($datePresets as $preset): ?>
                 <button type="button" class="btn btn-sm btn-ghost pay-date-preset"
@@ -1651,39 +1651,39 @@ function openRejectModal(orderId) {
             </div>
           </div>
           <div class="field" style="grid-column:1/-1">
-            <label class="lbl">از تاریخ</label>
+            <label class="lbl">From date</label>
             <div class="pay-dt-row">
               <div class="pay-dt-date">
                 <input class="input jalali-date-picker" id="payFilterFromDate" style="padding-left:30px" type="text"
-                  placeholder="انتخاب تاریخ" value="<?= htmlspecialchars($fromDate) ?>"
-                  aria-label="تاریخ شروع شمسی به وقت تهران" autocomplete="off" readonly>
+                  placeholder="Pick a date" value="<?= htmlspecialchars($fromDate) ?>"
+                  aria-label="Start date (Tehran)" autocomplete="off" readonly>
                 <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none">🗓</span>
               </div>
               <input type="time" class="input pay-filter-time" id="payFilterFromTime" value="<?= htmlspecialchars($fromTime) ?>"
-                step="60" aria-label="ساعت شروع">
+                step="60" aria-label="Start time">
             </div>
             <input type="hidden" name="from" id="payFilterFrom" value="<?= htmlspecialchars($fromInput) ?>">
           </div>
           <div class="field" style="grid-column:1/-1">
-            <label class="lbl">تا تاریخ</label>
+            <label class="lbl">To date</label>
             <div class="pay-dt-row">
               <div class="pay-dt-date">
                 <input class="input jalali-date-picker" id="payFilterToDate" style="padding-left:30px" type="text"
-                  placeholder="انتخاب تاریخ" value="<?= htmlspecialchars($toDate) ?>"
-                  aria-label="تاریخ پایان شمسی به وقت تهران" autocomplete="off" readonly>
+                  placeholder="Pick a date" value="<?= htmlspecialchars($toDate) ?>"
+                  aria-label="End date (Tehran)" autocomplete="off" readonly>
                 <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none">🗓</span>
               </div>
               <input type="time" class="input pay-filter-time" id="payFilterToTime" value="<?= htmlspecialchars($toTime) ?>"
-                step="60" aria-label="ساعت پایان">
+                step="60" aria-label="End time">
             </div>
             <input type="hidden" name="to" id="payFilterTo" value="<?= htmlspecialchars($toInput) ?>">
           </div>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary">اعمال فیلتر</button>
-        <a class="btn btn-ghost" href="<?= htmlspecialchars($clearFiltersUrl) ?>">پاک کردن</a>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('paymentFilterModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary">Apply filters</button>
+        <a class="btn btn-ghost" href="<?= htmlspecialchars($clearFiltersUrl) ?>">Clear</a>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('paymentFilterModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -1692,39 +1692,39 @@ function openRejectModal(orderId) {
 <div class="modal-veil" id="paymentImportModal">
   <div class="modal">
     <div class="modal-head">
-      <h3 id="payImportTitle">ورود دیتا با اکسل</h3>
+      <h3 id="payImportTitle">Import from Excel</h3>
       <button type="button" class="modal-x" onclick="closeModal('paymentImportModal')"><?= icon('close', 14) ?></button>
     </div>
     <div class="modal-body">
       <div id="payImportStepFile">
         <label class="pay-import-drop" for="payImportFile">
           <?= icon('arrow-up', 20) ?>
-          <strong>انتخاب فایل CSV یا XLSX</strong>
-          <span>حداکثر ۵ مگابایت — ستون‌ها مطابق نمونه مالی</span>
+          <strong>Choose a CSV or XLSX file</strong>
+          <span>Max 5 MB — columns must match the finance sample</span>
         </label>
         <input type="file" id="payImportFile" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
         <div class="pay-import-file-name" id="payImportFileName"></div>
       </div>
       <div id="payImportStepRate" hidden>
-        <p class="pay-import-hint">نرخ تبدیل برای سطرهایی که واحد آن‌ها تومان است استفاده می‌شود. اگر فایل فقط دلار (USD) دارد می‌توانید این فیلد را خالی بگذارید.</p>
+        <p class="pay-import-hint">Used for rows whose unit is toman. Leave this empty if the file is already in USD.</p>
         <div class="field" style="margin-top:12px">
-          <label class="lbl">هر ۱ دلار چند تومان؟</label>
-          <input type="number" class="input" id="payImportUsdRate" min="1" step="1" placeholder="مثلاً 100000">
+          <label class="lbl">How many toman per 1 USD?</label>
+          <input type="number" class="input" id="payImportUsdRate" min="1" step="1" placeholder="e.g. 100000">
         </div>
       </div>
       <div id="payImportStepPreview" hidden>
         <div class="pay-import-stats" id="payImportStats"></div>
-        <p class="pay-import-hint">مبالغ به دلار (USD) تبدیل شده‌اند. قبل از ورود به دیتابیس همه فیلدها را بررسی و در صورت نیاز ویرایش کنید. سطرهای بدون دسته باید دستی انتخاب شوند.</p>
+        <p class="pay-import-hint">Amounts have been converted to USD. Review and edit every field before importing. Rows without a category must be selected manually.</p>
         <div class="pay-import-table-wrap" style="margin-top:10px">
           <table class="pay-import-table">
             <thead>
               <tr>
                 <th style="width:42px">#</th>
-                <th style="width:110px">نوع</th>
-                <th style="width:170px">تاریخ</th>
-                <th style="width:140px">مبلغ (USD)</th>
-                <th>یادداشت</th>
-                <th style="width:180px">دسته‌بندی</th>
+                <th style="width:110px">Type</th>
+                <th style="width:170px">Date</th>
+                <th style="width:140px">Amount (USD)</th>
+                <th>Note</th>
+                <th style="width:180px">Category</th>
               </tr>
             </thead>
             <tbody id="payImportPreviewBody"></tbody>
@@ -1734,9 +1734,9 @@ function openRejectModal(orderId) {
       <div class="pay-import-error" id="payImportError" hidden></div>
     </div>
     <div class="modal-foot">
-      <button type="button" class="btn btn-ghost" id="payImportBackBtn" hidden>بازگشت</button>
-      <button type="button" class="btn btn-primary" id="payImportNextBtn" disabled>ادامه</button>
-      <button type="button" class="btn btn-ghost" onclick="closeModal('paymentImportModal')">انصراف</button>
+      <button type="button" class="btn btn-ghost" id="payImportBackBtn" hidden>Back</button>
+      <button type="button" class="btn btn-primary" id="payImportNextBtn" disabled>Continue</button>
+      <button type="button" class="btn btn-ghost" onclick="closeModal('paymentImportModal')">Cancel</button>
     </div>
   </div>
 </div>
@@ -1748,7 +1748,7 @@ $sheetStatusJs = [];
 foreach ($listStatusMap as $k => [$cls, $lbl]) {
     $sheetStatusJs[$k] = ['cls' => $cls, 'lbl' => $lbl];
 }
-$costStatusJs = $statusMap['cost'] ?? ['tag-plain', 'هزینه شده'];
+$costStatusJs = $statusMap['cost'] ?? ['tag-plain', 'Expensed'];
 ?>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
@@ -1758,7 +1758,7 @@ window.PAYMENT_SHEET = <?= json_encode([
     'csrf' => csrf_token(),
     'tab' => $tab,
     'nowJalali' => $nowJalali,
-    'emptyText' => $tab === 'costs' ? 'هزینه‌ای ثبت نشده' : ($tab === 'income' ? 'درآمدی یافت نشد' : 'تراکنشی یافت نشد'),
+    'emptyText' => $tab === 'costs' ? 'No expenses recorded' : ($tab === 'income' ? 'No income found' : 'No transactions found'),
     'statusOptions' => $sheetStatusJs,
     'costStatus' => ['cls' => $costStatusJs[0], 'lbl' => $costStatusJs[1]],
     'methodOptions' => $sheetMethodOptions,

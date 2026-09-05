@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $redirectView = 'admins';
     if (!$canManageAdmins) {
-        flash('error', 'فقط مدیر اصلی می‌تواند ادمین‌ها را مدیریت کند.');
+        flash('error', 'Only the main administrator can manage admins.');
         if ($action === 'reset_all_test_limits') {
             $redirectView = 'users';
         }
@@ -48,17 +48,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $redirectView = 'users';
         $limit = trim($_POST['limit'] ?? '');
         if ($limit === '' || !ctype_digit($limit)) {
-            flash('error', 'محدودیت اکانت تست باید عدد باشد.');
+            flash('error', 'Test account limit must be a number.');
         } else {
             try {
                 ensureColumnExistsForUpdate('user', 'time_usertest', '0');
                 db_query($pdo, "UPDATE user SET limit_usertest = ?, time_usertest = '0'", [$limit]);
                 db_query($pdo, 'UPDATE setting SET limit_usertest_all = ?', [$limit]);
                 $affected = db_count($pdo, 'SELECT COUNT(*) FROM user');
-                flash('success', 'محدودیت اکانت تست همه کاربران (' . number_format($affected) . ' نفر) به ' . number_format((int) $limit) . ' ریست شد.');
+                flash('success', 'Test account limit for all users (' . number_format($affected) . ') was reset to ' . number_format((int) $limit) . '.');
             } catch (Exception $e) {
                 error_log('users.php reset_all_test_limits: ' . $e->getMessage());
-                flash('error', 'ریست محدودیت اکانت تست ناموفق بود.');
+                flash('error', 'Could not reset the test account limit.');
             }
         }
     } elseif ($action === 'add_admin') {
@@ -67,13 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = $_POST['admin_password'] ?? '';
         $adminRule = $_POST['admin_rule'] ?? 'support';
         if (!preg_match('/^\d{4,20}$/', $adminId)) {
-            flash('error', 'شناسه عددی تلگرام ادمین نامعتبر است.');
+            flash('error', 'Invalid numeric Telegram ID for the admin.');
         } elseif (!preg_match('/^[A-Za-z0-9_.-]{3,100}$/', $adminUsername)) {
-            flash('error', 'نام کاربری پنل باید ۳ تا ۱۰۰ کاراکتر و فقط شامل حروف، عدد، نقطه، خط تیره یا زیرخط باشد.');
+            flash('error', 'Panel username must be 3 to 100 characters and only letters, numbers, dots, hyphens, or underscores.');
         } elseif (mb_strlen($password, 'UTF-8') < 8) {
-            flash('error', 'رمز عبور باید حداقل ۸ کاراکتر باشد.');
+            flash('error', 'Password must be at least 8 characters.');
         } elseif (!in_array($adminRule, ['administrator', 'support', 'Seller'], true)) {
-            flash('error', 'نقش ادمین نامعتبر است.');
+            flash('error', 'Invalid admin role.');
         } else {
             try {
                 db_query(
@@ -81,23 +81,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'INSERT INTO admin (id_admin, username, password, rule) VALUES (?, ?, ?, ?)',
                     [$adminId, $adminUsername, password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]), $adminRule]
                 );
-                flash('success', 'ادمین جدید اضافه شد.');
+                flash('success', 'New admin was added.');
             } catch (PDOException $e) {
-                flash('error', 'شناسه تلگرام یا نام کاربری پنل تکراری است.');
+                flash('error', 'Telegram ID or panel username is already in use.');
             }
         }
     } elseif ($action === 'remove_admin') {
         $adminId = trim($_POST['admin_id'] ?? '');
         $target = db_fetch($pdo, 'SELECT id_admin, username, rule FROM admin WHERE id_admin = ?', [$adminId]);
         if (!$target) {
-            flash('error', 'ادمین موردنظر یافت نشد.');
+            flash('error', 'Admin not found.');
         } elseif ($target['id_admin'] === ($currentPanelAdmin['id_admin'] ?? '')) {
-            flash('error', 'امکان حذف حساب ادمین فعلی وجود ندارد.');
+            flash('error', 'You cannot delete the current admin account.');
         } elseif ($target['rule'] === 'administrator' && db_count($pdo, "SELECT COUNT(*) FROM admin WHERE rule = 'administrator'") <= 1) {
-            flash('error', 'آخرین مدیر اصلی قابل حذف نیست.');
+            flash('error', 'The last main administrator cannot be deleted.');
         } else {
             db_query($pdo, 'DELETE FROM admin WHERE id_admin = ?', [$adminId]);
-            flash('success', 'ادمین حذف شد.');
+            flash('success', 'Admin was deleted.');
         }
     }
     header('Location: users.php' . ($redirectView === 'admins' ? '?view=admins' : ''));
@@ -169,8 +169,8 @@ $activeFilterCount = (int) ($status !== '')
 $filtersActive = $activeFilterCount > 0 || $search !== '';
 $pageUserIds = $view === 'users' ? array_values(array_map(static fn($u) => (string) $u['id'], $users)) : [];
 
-$pageTitle = 'کاربران';
-$pageLede = 'فهرست کاربران ربات.';
+$pageTitle = 'Users';
+$pageLede = 'Bot user list.';
 $activeNav = 'users';
 include __DIR__ . '/inc/layout_head.php';
 ?>
@@ -178,42 +178,42 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="card fade-up">
     <div class="toolbar">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <div class="toolbar-title"><?= $view === 'admins' ? 'ادمین‌ها' : 'کاربران' ?> <small>(<?= number_format($total) ?>)</small></div>
-            <a href="users.php" class="tag <?= $view === 'users' ? 'tag-info' : 'tag-plain' ?>" style="cursor:pointer">کاربران</a>
-            <a href="users.php?view=admins" class="tag <?= $view === 'admins' ? 'tag-info' : 'tag-plain' ?>" style="cursor:pointer">ادمین‌ها</a>
+            <div class="toolbar-title"><?= $view === 'admins' ? 'Admins' : 'Users' ?> <small>(<?= number_format($total) ?>)</small></div>
+            <a href="users.php" class="tag <?= $view === 'users' ? 'tag-info' : 'tag-plain' ?>" style="cursor:pointer">Users</a>
+            <a href="users.php?view=admins" class="tag <?= $view === 'admins' ? 'tag-info' : 'tag-plain' ?>" style="cursor:pointer">Admins</a>
             <?php if ($view === 'admins' && $canManageAdmins): ?>
-                <button type="button" class="btn btn-primary btn-sm" onclick="openModal('addAdminModal')"><?= icon('plus', 14) ?> افزودن ادمین</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="openModal('addAdminModal')"><?= icon('plus', 14) ?> Add admin</button>
             <?php endif; ?>
             <?php if ($view === 'users' && $canManageAdmins): ?>
                 <?php if ($bulkChargeJob): ?>
                     <span class="tag tag-warn">
-                        شارژ همگانی در حال اجرا · <?= number_format($bulkChargeRemaining) ?> باقی‌مانده
+                        Bulk charge in progress · <?= number_format($bulkChargeRemaining) ?> remaining
                     </span>
                     <form method="POST" action="bulk_service_charge_action.php"
-                        onsubmit="return confirm('عملیات شارژ همگانی سرویس‌ها لغو شود؟')">
+                        onsubmit="return confirm('Cancel the bulk service charge?')">
                         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                         <input type="hidden" name="action" value="cancel">
-                        <button type="submit" class="btn btn-no btn-sm"><?= icon('close', 13) ?> لغو عملیات</button>
+                        <button type="submit" class="btn btn-no btn-sm"><?= icon('close', 13) ?> Cancel</button>
                     </form>
                 <?php else: ?>
                     <button type="button" class="btn btn-primary btn-sm" onclick="openModal('bulkServiceChargeModal')">
-                        <?= icon('plus', 14) ?> شارژ همگانی سرویس‌ها
+                        <?= icon('plus', 14) ?> Bulk service charge
                     </button>
                 <?php endif; ?>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('resetTestLimitModal')">
-                    <?= icon('users', 14) ?> ریست محدودیت اکانت تست
+                    <?= icon('users', 14) ?> Reset test account limit
                 </button>
             <?php endif; ?>
 
             <?php if ($view === 'users' && $campaignJob): ?>
                 <span class="tag tag-info">
-                    ارسال پیام در حال اجرا · <?= number_format($campaignRemaining) ?> باقی‌مانده
+                    Message send in progress · <?= number_format($campaignRemaining) ?> remaining
                 </span>
                 <form method="POST" action="user_campaign_action.php"
-                    onsubmit="return confirm('ارسال پیام همگانی لغو شود؟')">
+                    onsubmit="return confirm('Cancel the broadcast?')">
                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                     <input type="hidden" name="action" value="cancel">
-                    <button type="submit" class="btn btn-no btn-sm"><?= icon('close', 13) ?> لغو ارسال</button>
+                    <button type="submit" class="btn btn-no btn-sm"><?= icon('close', 13) ?> Cancel send</button>
                 </form>
             <?php endif; ?>
         </div>
@@ -227,7 +227,7 @@ include __DIR__ . '/inc/layout_head.php';
                 <input type="hidden" name="min_buys" value="<?= $userFilters['min_buys'] !== null ? (int) $userFilters['min_buys'] : '' ?>">
                 <input type="hidden" name="min_extends" value="<?= $userFilters['min_extends'] !== null ? (int) $userFilters['min_extends'] : '' ?>">
                 <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('usersFilterModal')">
-                    <?= icon('filter', 14) ?> فیلترها
+                    <?= icon('filter', 14) ?> Filters
                     <?php if ($activeFilterCount > 0): ?>
                         <span class="tag tag-info" style="margin-right:4px"><?= $activeFilterCount ?></span>
                     <?php endif; ?>
@@ -236,16 +236,16 @@ include __DIR__ . '/inc/layout_head.php';
 
             <div class="search-box users-search">
                 <?= icon('search', 15) ?>
-                <input type="text" name="q" placeholder="<?= $view === 'admins' ? 'آیدی، یوزرنیم یا نقش...' : 'آیدی، یوزرنیم، نام، شماره...' ?>"
+                <input type="text" name="q" placeholder="<?= $view === 'admins' ? 'ID, username, or role...' : 'ID, username, name, phone...' ?>"
                     value="<?= htmlspecialchars($search) ?>" autocomplete="off">
                 <button type="button" class="search-clear">✕</button>
-                <button type="submit" class="search-btn">جستجو</button>
+                <button type="submit" class="search-btn">Search</button>
             </div>
 
             <?php if ($filtersActive && $view === 'users'): ?>
-                <a href="users.php" class="btn-link" style="font-size:.78rem;white-space:nowrap">پاک کردن</a>
+                <a href="users.php" class="btn-link" style="font-size:.78rem;white-space:nowrap">Clear</a>
             <?php elseif ($search && $view === 'admins'): ?>
-                <a href="users.php?view=admins" class="btn-link" style="font-size:.78rem;white-space:nowrap">پاک کردن</a>
+                <a href="users.php?view=admins" class="btn-link" style="font-size:.78rem;white-space:nowrap">Clear</a>
             <?php endif; ?>
         </form>
     </div>
@@ -273,12 +273,12 @@ include __DIR__ . '/inc/layout_head.php';
             <label class="user-select" style="padding:0">
                 <input type="checkbox" id="selectPageUsers">
             </label>
-            <strong id="campaignSelectedLabel">۰ کاربر انتخاب شده</strong>
-            <button type="button" class="btn btn-ghost btn-sm" id="selectFilteredBtn">انتخاب همه نتایج (<?= number_format($total) ?>)</button>
-            <button type="button" class="btn btn-link btn-sm" id="clearSelectedBtn">لغو انتخاب</button>
+            <strong id="campaignSelectedLabel">0 users selected</strong>
+            <button type="button" class="btn btn-ghost btn-sm" id="selectFilteredBtn">Select all results (<?= number_format($total) ?>)</button>
+            <button type="button" class="btn btn-link btn-sm" id="clearSelectedBtn">Clear selection</button>
         </div>
         <button type="button" class="btn btn-primary btn-sm" id="openCampaignBtn" <?= $campaignJob ? 'disabled data-busy="1"' : '' ?>>
-            <?= icon('send', 14) ?> ارسال پیام
+            <?= icon('send', 14) ?> Send message
         </button>
     </div>
     <?php endif; ?>
@@ -286,7 +286,7 @@ include __DIR__ . '/inc/layout_head.php';
 
     <?php if ($view === 'admins'): ?>
         <?php if (empty($users)): ?>
-            <div class="empty"><p><?= $search ? 'ادمینی یافت نشد' : 'هنوز ادمینی ثبت نشده' ?></p></div>
+            <div class="empty"><p><?= $search ? 'No admin found' : 'No admins yet' ?></p></div>
         <?php else: ?>
             <div class="data-list">
                 <?php foreach ($users as $index => $admin): ?>
@@ -301,26 +301,26 @@ include __DIR__ . '/inc/layout_head.php';
                             </div>
                             <div class="data-row-fields">
                                 <div class="data-field">
-                                    <span class="data-field-label">شناسه تلگرام</span>
+                                    <span class="data-field-label">Telegram ID</span>
                                     <span class="data-field-val cm"><?= htmlspecialchars($admin['id_admin']) ?></span>
                                 </div>
                                 <div class="data-field">
-                                    <span class="data-field-label">نام کاربری پنل</span>
+                                    <span class="data-field-label">Panel username</span>
                                     <span class="data-field-val cm"><?= htmlspecialchars($admin['username']) ?></span>
                                 </div>
                                 <div class="data-field">
-                                    <span class="data-field-label">نقش</span>
+                                    <span class="data-field-label">Role</span>
                                     <span class="data-field-val"><?= htmlspecialchars($admin['rule']) ?></span>
                                 </div>
                             </div>
                         </div>
                         <?php if ($canManageAdmins && $admin['id_admin'] !== ($currentPanelAdmin['id_admin'] ?? '')): ?>
                             <div class="data-row-actions">
-                                <form method="POST" onsubmit="return confirm('ادمین «<?= htmlspecialchars($admin['username']) ?>» حذف شود؟')">
+                                <form method="POST" onsubmit="return confirm('Delete admin “<?= htmlspecialchars($admin['username']) ?>”?')">
                                     <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                                     <input type="hidden" name="action" value="remove_admin">
                                     <input type="hidden" name="admin_id" value="<?= htmlspecialchars($admin['id_admin']) ?>">
-                                    <button class="btn btn-no btn-sm btn-icon" title="حذف ادمین" type="submit"><?= icon('trash', 14) ?></button>
+                                    <button class="btn btn-no btn-sm btn-icon" title="Delete admin" type="submit"><?= icon('trash', 14) ?></button>
                                 </form>
                             </div>
                         <?php endif; ?>
@@ -336,7 +336,7 @@ include __DIR__ . '/inc/layout_head.php';
                 <path d="M62 105 Q100 88 138 105" stroke="var(--bds)" stroke-width="8"
                     stroke-linecap="round" fill="none" />
             </svg>
-            <p><?= $search ? 'نتیجه‌ای یافت نشد' : 'هنوز کاربری ثبت نشده' ?></p>
+            <p><?= $search ? 'No results found' : 'No users yet' ?></p>
         </div>
     <?php else: ?>
         <div class="data-list" id="usersList" data-filtered-count="<?= (int) $total ?>">
@@ -352,7 +352,7 @@ include __DIR__ . '/inc/layout_head.php';
                 if ($uname === 'none')
                     $uname = '';
                 $serviceCount = $serviceCounts[(int) $u['id']] ?? 0;
-                $displayName = $name ?: ($uname ? '@' . $uname : 'کاربر #' . $u['id']);
+                $displayName = $name ?: ($uname ? '@' . $uname : 'User #' . $u['id']);
                 $phone = (!empty($u['number']) && $u['number'] !== 'none') ? $u['number'] : '';
                 ?>
                 <div class="data-row user-data-row" role="link" tabindex="0"
@@ -369,34 +369,34 @@ include __DIR__ . '/inc/layout_head.php';
                                 <a href="user.php?id=<?= (int) $u['id'] ?>"><?= htmlspecialchars($displayName) ?></a>
                             </div>
                             <?php if ($isBlocked): ?>
-                                <span class="tag tag-no">مسدود</span>
+                                <span class="tag tag-no">Blocked</span>
                             <?php else: ?>
                                 <span class="tag <?= user_role_tag($agent) ?>"><?= user_role_label($agent) ?></span>
                             <?php endif; ?>
                         </div>
                         <div class="data-row-fields">
                             <div class="data-field">
-                                <span class="data-field-label">آیدی</span>
+                                <span class="data-field-label">ID</span>
                                 <span class="data-field-val cm"><?= htmlspecialchars($u['id']) ?></span>
                             </div>
                             <?php if ($uname): ?>
                                 <div class="data-field">
-                                    <span class="data-field-label">یوزرنیم</span>
+                                    <span class="data-field-label">Username</span>
                                     <span class="data-field-val cm" style="color:var(--ac)">@<?= htmlspecialchars($uname) ?></span>
                                 </div>
                             <?php endif; ?>
                             <?php if ($phone): ?>
                                 <div class="data-field">
-                                    <span class="data-field-label">شماره</span>
+                                    <span class="data-field-label">Phone</span>
                                     <span class="data-field-val cm"><?= htmlspecialchars($phone) ?></span>
                                 </div>
                             <?php endif; ?>
                             <div class="data-field">
-                                <span class="data-field-label">موجودی</span>
-                                <span class="data-field-val cn"><?= number_format((int) ($u['Balance'] ?? 0)) ?> ت</span>
+                                <span class="data-field-label">Balance</span>
+                                <span class="data-field-val cn"><?= number_format((int) ($u['Balance'] ?? 0)) ?> USD</span>
                             </div>
                             <div class="data-field">
-                                <span class="data-field-label">سرویس</span>
+                                <span class="data-field-label">Service</span>
                                 <span class="data-field-val">
                                     <?php if ($serviceCount > 0): ?>
                                         <a href="user_services.php?id=<?= (int) $u['id'] ?>"><?= number_format($serviceCount) ?></a>
@@ -407,37 +407,37 @@ include __DIR__ . '/inc/layout_head.php';
                             </div>
                             <?php if ($userFiltersActive): ?>
                                 <div class="data-field">
-                                    <span class="data-field-label">خرید</span>
+                                    <span class="data-field-label">Purchases</span>
                                     <span class="data-field-val cn"><?= number_format((int) ($u['buy_count'] ?? 0)) ?></span>
                                 </div>
                                 <div class="data-field">
-                                    <span class="data-field-label">تمدید</span>
+                                    <span class="data-field-label">Renewals</span>
                                     <span class="data-field-val cn"><?= number_format((int) ($u['extend_count'] ?? 0)) ?></span>
                                 </div>
                                 <div class="data-field">
-                                    <span class="data-field-label">اکانت تست</span>
-                                    <span class="data-field-val"><?= ((int) ($u['test_count'] ?? 0)) > 0 ? 'دارد' : 'ندارد' ?></span>
+                                    <span class="data-field-label">Test account</span>
+                                    <span class="data-field-val"><?= ((int) ($u['test_count'] ?? 0)) > 0 ? 'Yes' : 'No' ?></span>
                                 </div>
                             <?php endif; ?>
                             <div class="data-field">
-                                <span class="data-field-label">ثبت‌نام</span>
+                                <span class="data-field-label">Joined</span>
                                 <span class="data-field-val"><?= safe_date($u['register'] ?? null) ?></span>
                             </div>
                         </div>
                     </div>
                     <div class="data-row-actions">
                         <a href="user.php?id=<?= (int) $u['id'] ?>" class="btn btn-ghost btn-sm btn-icon"
-                            title="مدیریت کاربر"><?= icon('eye', 14) ?></a>
+                            title="Manage user"><?= icon('eye', 14) ?></a>
                         <a href="user_services.php?id=<?= (int) $u['id'] ?>" class="btn btn-ghost btn-sm btn-icon"
-                            title="سرویس‌های کاربر"><?= icon('package', 14) ?></a>
+                            title="User services"><?= icon('package', 14) ?></a>
                         <?php if ($isBlocked): ?>
                             <a href="user_action.php?action=unblock&id=<?= (int) $u['id'] ?>&_csrf=<?= csrf_token() ?>&back=users.php"
-                                class="btn btn-ok btn-sm btn-icon" title="رفع مسدودیت"
-                                data-confirm="رفع مسدودیت کاربر <?= htmlspecialchars($name ?: $u['id']) ?>؟"><?= icon('check', 13) ?></a>
+                                class="btn btn-ok btn-sm btn-icon" title="Unblock"
+                                data-confirm="Unblock user <?= htmlspecialchars($name ?: $u['id']) ?>?"><?= icon('check', 13) ?></a>
                         <?php else: ?>
                             <a href="user_action.php?action=block&id=<?= (int) $u['id'] ?>&_csrf=<?= csrf_token() ?>&back=users.php"
-                                class="btn btn-no btn-sm btn-icon" title="مسدود کردن"
-                                data-confirm="مسدود کردن کاربر <?= htmlspecialchars($name ?: $u['id']) ?>؟"><?= icon('block', 13) ?></a>
+                                class="btn btn-no btn-sm btn-icon" title="Block"
+                                data-confirm="Block user <?= htmlspecialchars($name ?: $u['id']) ?>?"><?= icon('block', 13) ?></a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -446,7 +446,7 @@ include __DIR__ . '/inc/layout_head.php';
     <?php endif; ?>
 
     <div class="tbl-foot">
-        <span><?= number_format($total) ?> <?= $view === 'admins' ? 'ادمین' : 'کاربر' ?> · صفحه <?= $page ?> از <?= $totalPages ?></span>
+        <span><?= number_format($total) ?> <?= $view === 'admins' ? 'admins' : 'users' ?> · page <?= $page ?> of <?= $totalPages ?></span>
         <div class="pager">
             <?php
             $qs = fn($p) => '?view=' . urlencode($view)
@@ -471,7 +471,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="usersFilterModal">
     <div class="modal">
         <div class="modal-head">
-            <h3>فیلتر کاربران</h3>
+            <h3>Filter users</h3>
             <button class="modal-x" type="button" onclick="closeModal('usersFilterModal')"><?= icon('close', 14) ?></button>
         </div>
         <form method="GET">
@@ -481,61 +481,61 @@ include __DIR__ . '/inc/layout_head.php';
                 <?php if ($blockedCount > 0 || $agentCount > 0 || $agentAdvCount > 0): ?>
                     <div class="users-filter-shortcuts">
                         <?php if ($blockedCount > 0): ?>
-                            <a href="?status=block" class="tag tag-no"><?= $blockedCount ?> مسدود</a>
+                            <a href="?status=block" class="tag tag-no"><?= $blockedCount ?> blocked</a>
                         <?php endif; ?>
                         <?php if ($agentCount > 0): ?>
-                            <a href="?role=n" class="tag tag-info"><?= $agentCount ?> نماینده</a>
+                            <a href="?role=n" class="tag tag-info"><?= $agentCount ?> agents</a>
                         <?php endif; ?>
                         <?php if ($agentAdvCount > 0): ?>
-                            <a href="?role=n2" class="tag tag-warn"><?= $agentAdvCount ?> نماینده پیشرفته</a>
+                            <a href="?role=n2" class="tag tag-warn"><?= $agentAdvCount ?> advanced agents</a>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
                 <div class="users-filter-grid">
                     <div class="field">
-                        <label>وضعیت</label>
+                        <label>Status</label>
                         <select name="status" class="select">
-                            <option value="">همه وضعیت‌ها</option>
-                            <option value="active" <?= $status === 'active' ? 'selected' : '' ?>>فعال</option>
-                            <option value="block" <?= $status === 'block' ? 'selected' : '' ?>>مسدود</option>
+                            <option value="">All statuses</option>
+                            <option value="active" <?= $status === 'active' ? 'selected' : '' ?>>Active</option>
+                            <option value="block" <?= $status === 'block' ? 'selected' : '' ?>>Blocked</option>
                         </select>
                     </div>
                     <div class="field">
-                        <label>گروه کاربری</label>
+                        <label>User group</label>
                         <select name="role" class="select">
-                            <option value="">همه گروه‌ها</option>
-                            <option value="f" <?= $role === 'f' ? 'selected' : '' ?>>کاربر عادی</option>
-                            <option value="n" <?= $role === 'n' ? 'selected' : '' ?>>نماینده</option>
-                            <option value="n2" <?= $role === 'n2' ? 'selected' : '' ?>>نماینده پیشرفته</option>
+                            <option value="">All groups</option>
+                            <option value="f" <?= $role === 'f' ? 'selected' : '' ?>>Regular user</option>
+                            <option value="n" <?= $role === 'n' ? 'selected' : '' ?>>Agent</option>
+                            <option value="n2" <?= $role === 'n2' ? 'selected' : '' ?>>Advanced agent</option>
                         </select>
                     </div>
                     <div class="field">
-                        <label>اکانت تست</label>
+                        <label>Test account</label>
                         <select name="test" class="select">
-                            <option value="">همه</option>
-                            <option value="yes" <?= $userFilters['test'] === 'yes' ? 'selected' : '' ?>>دارای اکانت تست</option>
-                            <option value="no" <?= $userFilters['test'] === 'no' ? 'selected' : '' ?>>بدون اکانت تست</option>
-                            <option value="only" <?= $userFilters['test'] === 'only' ? 'selected' : '' ?>>فقط اکانت تست</option>
+                            <option value="">All</option>
+                            <option value="yes" <?= $userFilters['test'] === 'yes' ? 'selected' : '' ?>>Has test account</option>
+                            <option value="no" <?= $userFilters['test'] === 'no' ? 'selected' : '' ?>>No test account</option>
+                            <option value="only" <?= $userFilters['test'] === 'only' ? 'selected' : '' ?>>Test account only</option>
                         </select>
                     </div>
                     <div class="field">
-                        <label>حداقل خرید غیرتست</label>
+                        <label>Minimum non-test purchases</label>
                         <input class="input" type="number" name="min_buys" min="0" step="1" inputmode="numeric"
-                            placeholder="مثلاً ۲"
+                            placeholder="e.g. 2"
                             value="<?= $userFilters['min_buys'] !== null ? (int) $userFilters['min_buys'] : '' ?>">
                     </div>
                     <div class="field full">
-                        <label>حداقل تمدید</label>
+                        <label>Minimum renewals</label>
                         <input class="input" type="number" name="min_extends" min="0" step="1" inputmode="numeric"
-                            placeholder="مثلاً ۱"
+                            placeholder="e.g. 1"
                             value="<?= $userFilters['min_extends'] !== null ? (int) $userFilters['min_extends'] : '' ?>">
                     </div>
                 </div>
             </div>
             <div class="modal-foot">
-                <button class="btn btn-primary" type="submit">اعمال فیلتر</button>
-                <a class="btn btn-ghost" href="users.php">پاک کردن</a>
-                <button class="btn btn-ghost" type="button" onclick="closeModal('usersFilterModal')">انصراف</button>
+                <button class="btn btn-primary" type="submit">Apply filters</button>
+                <a class="btn btn-ghost" href="users.php">Clear</a>
+                <button class="btn btn-ghost" type="button" onclick="closeModal('usersFilterModal')">Cancel</button>
             </div>
         </form>
     </div>
@@ -544,7 +544,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="usersCampaignModal">
     <div class="modal">
         <div class="modal-head">
-            <h3>ارسال پیام کمپین</h3>
+            <h3>Send campaign message</h3>
             <button class="modal-x" type="button" onclick="closeModal('usersCampaignModal')"><?= icon('close', 14) ?></button>
         </div>
         <form method="POST" action="user_campaign_action.php" id="usersCampaignForm">
@@ -561,15 +561,15 @@ include __DIR__ . '/inc/layout_head.php';
                 <div id="campaignUserIds"></div>
                 <p class="field-hint" id="campaignCountHint" style="margin-bottom:12px"></p>
                 <div class="field">
-                    <label>متن پیام</label>
+                    <label>Message text</label>
                     <textarea class="textarea" name="message" rows="6" maxlength="3500" required
-                        placeholder="پیامی که از طریق کرون برای کاربران انتخاب‌شده ارسال می‌شود"></textarea>
-                    <span class="field-hint">برای هر ارسال موفق، یک گفتگوی پشتیبانی با وضعیت «کمپین» ساخته می‌شود.</span>
+                        placeholder="Message sent via cron to the selected users"></textarea>
+                    <span class="field-hint">Each successful send creates a support conversation with status “Campaign”.</span>
                 </div>
             </div>
             <div class="modal-foot">
-                <button class="btn btn-primary" type="submit"><?= icon('send', 14) ?> ارسال</button>
-                <button class="btn btn-ghost" type="button" onclick="closeModal('usersCampaignModal')">انصراف</button>
+                <button class="btn btn-primary" type="submit"><?= icon('send', 14) ?> Send</button>
+                <button class="btn btn-ghost" type="button" onclick="closeModal('usersCampaignModal')">Cancel</button>
             </div>
         </form>
     </div>
@@ -580,7 +580,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="resetTestLimitModal">
     <div class="modal">
         <div class="modal-head">
-            <h3>ریست محدودیت اکانت تست همه کاربران</h3>
+            <h3>Reset test account limit for all users</h3>
             <button class="modal-x" type="button" onclick="closeModal('resetTestLimitModal')"><?= icon('close', 14) ?></button>
         </div>
         <form method="POST" id="resetTestLimitForm">
@@ -588,18 +588,18 @@ include __DIR__ . '/inc/layout_head.php';
                 <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                 <input type="hidden" name="action" value="reset_all_test_limits">
                 <div class="field">
-                    <label>تعداد مجاز اکانت تست</label>
+                    <label>Allowed test accounts</label>
                     <input class="input" type="number" name="limit" min="0" step="1" inputmode="numeric"
                         value="<?= htmlspecialchars($defaultTestLimit) ?>" required>
-                    <span class="field-hint">این مقدار برای همه کاربران اعمال می‌شود و دوره محدودیت آن‌ها هم ریست می‌گردد.</span>
+                    <span class="field-hint">This value is applied to all users and their limit period is reset.</span>
                 </div>
                 <div style="margin:0;padding:10px 12px;border:1px solid var(--warn);border-radius:var(--r);color:var(--warn);font-size:.8rem;line-height:1.8">
-                    محدودیت پیش‌فرض سیستم نیز به همین عدد به‌روز می‌شود.
+                    The system default limit is also updated to this number.
                 </div>
             </div>
             <div class="modal-foot">
-                <button class="btn btn-primary" type="submit">ریست همه کاربران</button>
-                <button class="btn btn-ghost" type="button" onclick="closeModal('resetTestLimitModal')">انصراف</button>
+                <button class="btn btn-primary" type="submit">Reset all users</button>
+                <button class="btn btn-ghost" type="button" onclick="closeModal('resetTestLimitModal')">Cancel</button>
             </div>
         </form>
     </div>
@@ -609,7 +609,7 @@ include __DIR__ . '/inc/layout_head.php';
     var form = document.getElementById('resetTestLimitForm');
     if (!form) return;
     form.addEventListener('submit', function (event) {
-        if (!window.confirm('محدودیت اکانت تست همه کاربران ریست شود؟')) {
+        if (!window.confirm('Reset the test account limit for all users?')) {
             event.preventDefault();
         }
     });
@@ -621,7 +621,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="bulkServiceChargeModal">
     <div class="modal">
         <div class="modal-head">
-            <h3>شارژ همگانی سرویس‌ها</h3>
+            <h3>Bulk service charge</h3>
             <button class="modal-x" type="button" onclick="closeModal('bulkServiceChargeModal')"><?= icon('close', 14) ?></button>
         </div>
         <form method="POST" action="bulk_service_charge_action.php" id="bulkServiceChargeForm">
@@ -630,20 +630,20 @@ include __DIR__ . '/inc/layout_head.php';
                 <input type="hidden" name="action" value="start">
 
                 <div class="field">
-                    <label>گروه کاربری</label>
+                    <label>User group</label>
                     <select class="select" name="agent" required>
-                        <option value="all">همه کاربران</option>
-                        <option value="f">کاربران گروه f</option>
-                        <option value="n">کاربران گروه n</option>
-                        <option value="n2">کاربران گروه n2</option>
+                        <option value="all">All users</option>
+                        <option value="f">Group f users</option>
+                        <option value="n">Group n users</option>
+                        <option value="n2">Group n2 users</option>
                     </select>
-                    <span class="field-hint">فقط کاربرانی که خرید و سرویس فعال دارند انتخاب می‌شوند.</span>
+                    <span class="field-hint">Only users with a purchase and an active service are selected.</span>
                 </div>
 
                 <div class="field">
-                    <label>پنل</label>
+                    <label>Panel</label>
                     <select class="select" name="panel" id="bulkChargePanel" required>
-                        <option value="">انتخاب پنل...</option>
+                        <option value="">Select panel...</option>
                         <?php
                         $bulkChargePanels = db_fetchAll($pdo, "SELECT name_panel FROM marzban_panel WHERE status = 'active' ORDER BY name_panel");
                         if (!$bulkChargePanels) {
@@ -658,52 +658,52 @@ include __DIR__ . '/inc/layout_head.php';
                             <option value="<?= htmlspecialchars($bulkPanelName) ?>"><?= htmlspecialchars($bulkPanelName) ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <span class="field-hint">افزایش فقط روی سرویس‌های همین پنل اعمال می‌شود.</span>
+                    <span class="field-hint">The increase is applied only to services on this panel.</span>
                 </div>
 
                 <div class="field">
-                    <label>نوع سرویس</label>
+                    <label>Service type</label>
                     <div style="display:flex;gap:16px;flex-wrap:wrap">
                         <label class="check-row" style="margin:0">
                             <input type="checkbox" name="service_types[]" value="volume" id="bulkChargeVolume">
-                            <span>حجم</span>
+                            <span>Volume</span>
                         </label>
                         <label class="check-row" style="margin:0">
                             <input type="checkbox" name="service_types[]" value="day" id="bulkChargeTime">
-                            <span>زمان</span>
+                            <span>Time</span>
                         </label>
                     </div>
-                    <span class="field-hint">می‌توانید هر دو را هم‌زمان انتخاب کنید. باکس مربوط به هر گزینه پس از انتخاب باز می‌شود.</span>
+                    <span class="field-hint">You can select both. The matching field appears after you choose an option.</span>
                 </div>
 
                 <div class="field" id="bulkVolumeField" hidden>
-                    <label>حجم افزایشی (گیگابایت)</label>
+                    <label>Added volume (GB)</label>
                     <input class="input" type="number" name="volume_value" id="bulkVolumeValue"
                         min="1" step="1" inputmode="numeric">
-                    <span class="field-hint">این مقدار به حجم تمام سرویس‌های فعال اضافه می‌شود.</span>
+                    <span class="field-hint">This amount is added to the volume of every active service.</span>
                 </div>
 
                 <div class="field" id="bulkTimeField" hidden>
-                    <label>زمان افزایشی (روز)</label>
+                    <label>Added time (days)</label>
                     <input class="input" type="number" name="time_value" id="bulkTimeValue"
                         min="1" step="1" inputmode="numeric">
-                    <span class="field-hint">این مقدار به زمان تمام سرویس‌های فعال اضافه می‌شود.</span>
+                    <span class="field-hint">This amount is added to the time of every active service.</span>
                 </div>
 
                 <div class="field">
-                    <label>پیام ارسالی</label>
+                    <label>Message to send</label>
                     <textarea class="input" name="message" rows="5" maxlength="4000" required
-                        placeholder="پیامی که پس از شارژ موفق هر سرویس برای کاربر ارسال می‌شود"></textarea>
-                    <span class="field-hint">برای هر سرویس که با موفقیت شارژ شود، این پیام یک‌بار ارسال خواهد شد.</span>
+                        placeholder="Message sent to the user after each successful charge"></textarea>
+                    <span class="field-hint">This message is sent once for each service that is charged successfully.</span>
                 </div>
 
                 <div style="margin:0;padding:10px 12px;border:1px solid var(--warn);border-radius:var(--r);color:var(--warn);font-size:.8rem;line-height:1.8">
-                    عملیات فقط روی سرویس‌های فعال پنل انتخاب‌شده مطابق فیلتر اجرا می‌شود و ممکن است چند دقیقه زمان ببرد.
+                    The operation runs only on active services of the selected panel matching the filter and may take a few minutes.
                 </div>
             </div>
             <div class="modal-foot">
-                <button class="btn btn-primary" type="submit">تایید و شروع عملیات</button>
-                <button class="btn btn-ghost" type="button" onclick="closeModal('bulkServiceChargeModal')">انصراف</button>
+                <button class="btn btn-primary" type="submit">Confirm and start</button>
+                <button class="btn btn-ghost" type="button" onclick="closeModal('bulkServiceChargeModal')">Cancel</button>
             </div>
         </form>
     </div>
@@ -735,19 +735,19 @@ include __DIR__ . '/inc/layout_head.php';
     form.addEventListener('submit', function (event) {
         if (!volumeCheck.checked && !timeCheck.checked) {
             event.preventDefault();
-            window.alert('حداقل یکی از گزینه‌های حجم یا زمان را انتخاب کنید.');
+            window.alert('Select at least one of volume or time.');
             return;
         }
         var parts = [];
-        if (volumeCheck.checked) parts.push('حجم');
-        if (timeCheck.checked) parts.push('زمان');
+        if (volumeCheck.checked) parts.push('volume');
+        if (timeCheck.checked) parts.push('time');
         var panel = document.getElementById('bulkChargePanel');
         var panelName = panel && panel.value ? panel.options[panel.selectedIndex].text : '';
-        var msg = 'افزایش ' + parts.join(' و ') + ' برای سرویس‌های فعال';
+        var msg = 'Add ' + parts.join(' and ') + ' to active services';
         if (panelName) {
-            msg += ' پنل «' + panelName + '»';
+            msg += ' on panel “' + panelName + '”';
         }
-        msg += ' مطابق فیلتر آغاز شود؟';
+        msg += ' matching the filter?';
         if (!window.confirm(msg)) {
             event.preventDefault();
         }
@@ -760,35 +760,35 @@ include __DIR__ . '/inc/layout_head.php';
 <?php if ($canManageAdmins): ?>
 <div class="modal-veil" id="addAdminModal">
     <div class="modal">
-        <div class="modal-head"><h3>افزودن ادمین</h3><button class="modal-x" type="button" onclick="closeModal('addAdminModal')"><?= icon('close', 14) ?></button></div>
+        <div class="modal-head"><h3>Add admin</h3><button class="modal-x" type="button" onclick="closeModal('addAdminModal')"><?= icon('close', 14) ?></button></div>
         <form method="POST">
             <div class="modal-body">
                 <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
                 <input type="hidden" name="action" value="add_admin">
                 <div class="field">
-                    <label>شناسه عددی تلگرام</label>
+                    <label>Numeric Telegram ID</label>
                     <input class="input" type="text" name="admin_id" inputmode="numeric" required>
                 </div>
                 <div class="field">
-                    <label>نام کاربری پنل</label>
+                    <label>Panel username</label>
                     <input class="input" type="text" name="admin_username" autocomplete="username" required>
                 </div>
                 <div class="field">
-                    <label>رمز عبور</label>
+                    <label>Password</label>
                     <input class="input" type="password" name="admin_password" autocomplete="new-password" minlength="8" required>
                 </div>
                 <div class="field">
-                    <label>نقش</label>
+                    <label>Role</label>
                     <select class="select" name="admin_rule">
-                        <option value="support">پشتیبان</option>
-                        <option value="Seller">فروشنده</option>
-                        <option value="administrator">مدیر اصلی</option>
+                        <option value="support">Support</option>
+                        <option value="Seller">Seller</option>
+                        <option value="administrator">Administrator</option>
                     </select>
                 </div>
             </div>
             <div class="modal-foot">
-                <button class="btn btn-primary" type="submit">افزودن</button>
-                <button class="btn btn-ghost" type="button" onclick="closeModal('addAdminModal')">انصراف</button>
+                <button class="btn btn-primary" type="submit">Add</button>
+                <button class="btn btn-ghost" type="button" onclick="closeModal('addAdminModal')">Cancel</button>
             </div>
         </form>
     </div>

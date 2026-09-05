@@ -963,6 +963,356 @@
             }
         },
         "Admin": {
+            "backadmin": "🏠 Back to admin menu",
+            "backmenu": "▶️ Back to previous menu",
+            "textpaneladmin": "👨‍💼 Admin panel",
+            "activebottext": "To use the admin panel features:\n\nGo to a page that has a keyboard at the bottom.\nIn the keyboard, find the Bot reports button and tap it.\nAfter tapping Bot reports, a page will open.\nOn that page, you can select and configure the group you want.\nThis step is required",
+            "TextPanelAdminLogin": "",
+            "affiliates": {
+                "titletopic": "🎁 Commission reports"
+            },
+            "Back-Admin": "Returned to the admin panel!",
+            "Back-menu": "Returned to the previous menu!",
+            "not-user": "No user was found with this ID",
+            "perfectmoney": {
+                "setnumberacount": "✅ Account number was saved"
+            },
+            "channel": {
+                "title": "Add channel",
+                "removechannelbtn": "Remove channel",
+                "changechannel": "To set a required-join channel, send the channel username with @ or the numeric channel ID starting with -100",
+                "setchannel": "🔰 Report group was set.",
+                "description": "📌 Add a channel to enable required join\nNotes:\n- The bot must be an admin of the channel\n- To disable this feature, remove all channels",
+                "removechannel": "📌 Send one of the channels below to remove it",
+                "removedchannel": "❌ Channel was removed."
+            },
+            "manageadmin": {
+                "getid": "🌟 Send the numeric ID of the new admin",
+                "getiddelete": "⛔️ Send the numeric ID of the admin you want to remove",
+                "addadminset": "🥳 Admin was added",
+                "setrule": "⭕️ Send the admin access level\nThe administrator level has access to all sections\nThe Seller level only has access to receipt approval, user services, and bot stats\nThe support level has access to user services and support replies",
+                "removedadmin": "✅ Admin was removed.",
+                "invalidrule": "❌ Invalid access level",
+                "adminedsenduser": "⭕️ You are now a bot admin. Send the <code>panel</code> command to open the admin panel"
+            },
+            "getlimitusertest": {
+                "setlimitbtn": "➕ Test-account creation limit for everyone",
+                "getid": "Send the test-account creation limit",
+                "setlimit": "The limit was set for the user.",
+                "limitall": "Enter the test-account creation limit.",
+                "setlimitall": "The account-creation limit was set for all users"
+            },
+            "getstats": "If you want to view stats for another date range, send the start date first.\nExample:\n<code>%s</code>",
+            "managepanel": {
+                "selectpanel": "Select your panel",
+                "saveddata": "✅ Changes were saved.",
+                "errorstateuspanel": "Could not connect to the panel 😔 The error is shown below. If it is not resolved, contact support",
+                "addpanelname": "Send the panel name\n       \n⚠️ Note: the panel name is shown during search operations.",
+                "addpanelurl": "🔗 Panel name saved. Now send your panel URL\n    ⚠️ Notes:\n    🔸 Do not include dashboard in the panel URL.\n    🔹 If the panel port is 443, do not enter the port. (Sometimes you must include the port.)\n    🔸 The URL must not end with /\n    🔹 If you enter an IP, it must include http or https",
+                "Invalid-domain": "🔗 Invalid domain URL",
+                "usernameset": "👤 Panel URL saved. Now send the username",
+                "getpassword": "🔑 Username saved. Enter your password",
+                "addedpanel": "Congratulations, your panel was added",
+                "getlimitedpanel": "📌 Set the account-creation limit for this panel.\n⚠️ The limit is based on active orders in the bot\nTo make it unlimited, send unlimited",
+                "GetRemoveNamePanel": "Select the panel you want to remove.",
+                "RemovedPanel": "Panel was removed",
+                "nullpanel": "⭕️ No location was found. Please contact support.",
+                "limitedpanel": "❌ This panel is at capacity. Please use another panel.",
+                "limitedpanelfirst": "❌ Account creation is at capacity. Please try again later.",
+                "nullpaneladmin": "No panel is defined. Define a panel first, then add a product",
+                "getloc": "Send the panel name to edit it",
+                "GetNameNew": "Send the new panel name",
+                "ChangedNmaePanel": "✅ Panel name was changed.",
+                "geturlnew": " Send the new panel URL",
+                "setlimit": "Send the new account-creation limit. To make it unlimited, send unlimited",
+                "ChangedurlPanel": "✅ Panel URL was changed.",
+                "changedlimit": "The new limit was set",
+                "Repeatpanel": "❌ This panel name is already registered and cannot be added again",
+                "customnamesend": "Send your custom text for regular products",
+                "customnamesend_test": "📌 Send the username prefix for test accounts.\nTo use the same prefix as regular products, send <code>-</code>.",
+                "invalidname": "Invalid name (3 to 32 characters: English letters, numbers, @, ., - or _)",
+                "savedname": "✅ Name was saved",
+                "getusernamenew": " Send the new panel username",
+                "ChangedusernamePanel": "✅ Panel username was changed.",
+                "getpasswordnew": "Send the new panel password",
+                "ChangedpasswordPanel": "✅ Panel password was changed.",
+                "settingprotocol": "To enable or disable a protocol, choose one of the options below",
+                "staatusprotocol": "Select the protocol status",
+                "onprotocol": "Protocol was turned off",
+                "offprotocol": "Protocol was turned on",
+                "connectx-ui": "✅ Panel is connected",
+                "Inbound": {
+                    "GetProtocol": "🔱 Select your protocol",
+                    "invalidprotocol": "⛔️ Invalid protocol. The protocol must be one of the options below",
+                    "getInbound": "🔰 Send the inbound names you want to set for this protocol.",
+                    "addInbound": "⭕️ Inbound received. To add another inbound, send the new inbound name; otherwise send /end",
+                    "endInbound": "🥳 Inbounds were saved",
+                    "remove": "⭕️ Send the inbound you want to remove. To remove all inbounds for this protocol, send all",
+                    "removeed": "❌ Inbound was removed",
+                    "RepetitiousInbound": "This inbound has already been added",
+                    "gettypepanel": "📌 Select your panel type"
+                },
+                "setprotocol": "✅ Protocol was set"
+            },
+            "ManageUser": {
+                "SendMessageuser": "✅ Message was sent to the user.",
+                "GetTextResponse": "Send your reply message.",
+                "GetText": "Send your text",
+                "textconfirm": "To confirm, send the following text\n<code>confirm</code>",
+                "ForwardGetext": "Send the message you want to forward",
+                "ForwardSendAllUser": "✅ Message was forwarded to all users.",
+                "MessageSent": "✅ Message sent",
+                "ChangeTextGet": " Send your new text.\nCurrent text:",
+                "GetIDMessage": "✅ Text received. Now send the user's numeric ID.",
+                "notfoundagent": "❌ There is no agent to send a message to",
+                "ErrorText": "You can send text only",
+                "SaveText": "✅ Text was saved",
+                "BlockUserId": "👤 Send the user's numeric ID",
+                "BlockedUser": "This user is already blocked❗️",
+                "BlockUser": "🚫 User was blocked. Now send the block reason.",
+                "RemoveService": "In this section you can remove a service from the bot.\nTo remove a service, send the username registered in the panel",
+                "RemovedService": "✅ User service was removed.",
+                "DescriptionBlock": "✍️ The block reason was saved",
+                "GetIdUserunblock": "👤 Send the user's numeric ID",
+                "UserNotBlock": "This user is not blocked 😐",
+                "UserUnblocked": "User was unblocked. 🤩",
+                "Acceptedphone": "Verified",
+                "Failedphone": "Not verified",
+                "ViewOrder": "👁 To view a user's orders, send the user's numeric ID",
+                "dataorder": " Date is not recorded",
+                "SendOrder": "The user's order list was sent",
+                "mangebtnuser": "⚙️ Manage user",
+                "newuser": "🎉 A new user started the bot\n Name: %s\nUsername: @%s\nNumeric ID: %s",
+                "mangebtnuserdec": "⭕️ In this section you can view all users\n⚠️ To manage a user, tap the Manage user button next to them",
+                "backlistuser": "🏠 Back to user list",
+                "addbalanceuser": "👆Add balance",
+                "lowbalanceuser": "👇 Deduct balance",
+                "addbalanceuserdec": "⭕️ Send the amount you want to add",
+                "lowbalanceuserdec": "⭕️ Send the amount you want to deduct",
+                "addbalanced": "✅ Balance was added to the user's account.",
+                "lowbalanced": "✅ Balance was deducted from the user's account.",
+                "banuserlist": "🔒 Block user",
+                "unbanuserlist": "🔓 Unblock user",
+                "confirmnumber": "Manually verify phone number",
+                "vieworderuser": "🛍 View user orders",
+                "viewpaymentuser": "💰 View user payments",
+                "sendpayemntlist": "✅ The user's payment list was sent",
+                "removeservice": "❌ Delete order",
+                "removeserviceandback": "❌ Delete order and refund",
+                "removeagent": "🤖 Remove agent",
+                "addagent": "🤖 Add agent"
+            },
+            "Help": {
+                "GetAddNameHelp": "To add a guide, send a name \n⚠️ Note: this is the name users see in the list.",
+                "GetAddDecHelp": " 🔗 Guide name saved. Now send the description \n⚠️ Notes:\n🔸 You can send the description with a photo or video",
+                "SaveHelp": "✅ Guide was saved",
+                "SelectName": "Select the guide name",
+                "RemoveHelp": "✅ Guide was removed."
+            },
+            "Status": {
+                "btn": "📊 Bot stats",
+                "BotTitle": "📌 In this section you can enable or disable the features below.",
+                "subject": "Title",
+                "statussubject": "Status",
+                "stautsbot": "📡 Bot status",
+                "statususernamebtn": "👤 Username button",
+                "statuscategorytime": "⏱ Time category",
+                "statusnotifnewuser": "👤 New-user notification",
+                "statusshowagent": "👨‍💻  Agency request",
+                "stautsrolee": "♨️ Rules",
+                "statususertest": "🔑 Test account",
+                "statusvolumeextra": "🔋 Extra data status",
+                "customvolume": "❤️ Custom data status",
+                "paydirect": "🎯  Direct purchase status",
+                "statustimeextra": "⏳  Extra time",
+                "statushelpbot": "💡  Help section",
+                "statusterfhh": "💵 Subscription plans",
+                "Authenticationphone": "☎️  Phone verification",
+                "Authenticationiran": "🇮🇷 Iranian number verification",
+                "inlinebtns": "🛡 Glass-style bot buttons",
+                "statuson": "✅ On",
+                "statusoff": "❌ Off",
+                "Discountaffiliates": "Gift feature status",
+                "DiscountaffiliatesStatusOff": "Gift feature was disabled",
+                "DiscountaffiliatesStatuson": "Gift feature was enabled",
+                "commission": "Status of the gift feature after starting the bot",
+                "commissionStatusOff": "Commission feature was disabled",
+                "commissionStatuson": "Commission feature was enabled",
+                "flow": "Flow feature status",
+                "flowStatusOff": "flow was disabled",
+                "flowStatuson": "flow was enabled",
+                "affiliates": "📌 In this section you can turn the referral program on or off",
+                "affiliatesStatusOff": "Referral program was disabled",
+                "affiliatesStatuson": "Referral program was enabled",
+                "TestAccount": "⭕️ In this section you can choose whether users receive a test account from this location",
+                "TestAccountStatusOff": "Test accounts were turned off for this panel",
+                "TestAccountStatuson": "Test accounts were turned on for this panel",
+                "activepanel": "⭕️ In this section you can turn the panel on or off for sales",
+                "activepanelStatusOff": "❌ Panel was turned off",
+                "activepaneltatuson": "✅ Panel was turned on",
+                "BotStatusOff": "❌ Bot was turned off ",
+                "BotStatuson": "🤖 Bot was turned on",
+                "rollTitle": "Rules status",
+                "rollStatusOff": "❌ Rules were disabled ",
+                "rollStatuson": "♨️ Rules were enabled. Users who have not accepted the rules cannot use the bot",
+                "phoneTitle": "📞 Phone verification status",
+                "phoneStatusOff": "❌ Phone verification was disabled",
+                "phoneStatuson": "🥳 Phone verification was enabled. Users must send their phone number to use the bot.",
+                "HelpTitle": "Help section status",
+                "HelpStatusOff": "❌ Help is disabled",
+                "HelpStatuson": "📚 Help section was turned on",
+                "PhoneIranTitle": "Here you can require Iranian phone numbers only, or allow all numbers, during verification",
+                "PhoneIranStatusOff": "❌ Phone verification now accepts all numbers.",
+                "PhoneIranStatuson": "🇮🇷 Phone verification now accepts Iranian numbers only ",
+                "subTitle": "Here you can choose whether users receive a subscription link after purchase",
+                "subStatusOff": "⭕️ Subscription-link delivery was disabled. Users will not receive a subscription link after purchase.",
+                "subStatuson": "Subscription link was enabled. Users will receive a subscription link after purchase",
+                "configTitle": "Here you can choose whether users receive manual configs after purchase",
+                "configStatusOff": "⭕️ Manual config delivery was disabled. Users will not receive a manual config after purchase.",
+                "configStatuson": "Manual config delivery after purchase was enabled. Users will also receive a manual config",
+                "cardTitle": "In this section you can turn the offline gateway on or off",
+                "cardStatusOff": "⭕ Offline gateway was turned off",
+                "cardStatuson": "Offline gateway was turned on",
+                "cardTitlepv": "In this section you can disable card-to-card in the bot and handle it in private chat",
+                "cardStatusOffpv": "⭕ Offline gateway in private chat was turned off",
+                "cardStatusonpv": "Offline gateway in private chat was turned on",
+                "autoconfirmcard": "Auto-confirm card-to-card receipts",
+                "cardStatusOffautoconfirmcard": "Auto-confirm was turned off",
+                "cardStatusonautoconfirmcard": "Auto-confirm was turned on",
+                "nowpaymentsTitle": "In this section you can enable or disable the NowPayments gateway",
+                "nowpaymentsStatusOff": "⭕ Gateway was turned off",
+                "nowpaymentsStatuson": "Gateway was turned on",
+                "digiTitle": "In this section you can enable or disable the DigiSwap gateway",
+                "digiStatusOff": "⭕ Gateway was turned off",
+                "digiStatuson": "Gateway was turned on",
+                "zarinpalTitle": "In this section you can enable or disable the Swap Wallet gateway",
+                "zarrinpalStatusOff": "⭕ Gateway was turned off",
+                "zarinpalStatuson": "Gateway was turned on",
+                "digitalTitle": "In this section you can enable or disable the offline crypto gateway",
+                "digitalStatusOff": "⭕ Gateway was turned off",
+                "digitalStatuson": "Gateway was turned on",
+                "aqayepardakhtTitle": "In this section you can enable or disable the Aghaye Pardakht gateway",
+                "aqayepardakhtStatusOff": "⭕ Gateway was turned off",
+                "aqayepardakhtStatuson": "Gateway was turned on"
+            },
+            "phone": {
+                "notactive": "🛑 Mobile number is not verified 🛑",
+                "active": "The user's mobile number is verified ✅🎉"
+            },
+            "Channel": {
+                "SetChannelReport": "🔰 Channel was set",
+                "TestChannel": "Test group connection"
+            },
+            "Product": {
+                "Service_location": "📌 Select the product location\n\n ⭕️ To define the product in all locations, send /all",
+                "nullpProduct": "⭕️ No product was found. Please contact support.",
+                "Rmove_location": "📌 Select the product location",
+                "selectRemoveProduct": "Select the product you want to remove",
+                "selectEditProduct": "Select the product you want to edit",
+                "RemoveedProduct": "✅ Product was removed.",
+                "AddProductStepOne": " First send the subscription name\n⚠️ When entering the product name:\n• Include the subscription price next to the name.\n• Include the subscription duration next to the name.",
+                "GetLimit": "Send the subscription data limit in gigabytes\n\nTo make data unlimited, send 0",
+                "Invalidvolume": "Invalid volume",
+                "Invalidtime": "Invalid number of days",
+                "GettIime": "\nEnter the subscription duration in days\nTo make the duration unlimited, send 0",
+                "GetPrice": "\nSend the subscription price.\nNote:\nThe product is priced in USD. Send the price with no extra characters.",
+                "InvalidPrice": "Invalid price",
+                "gettimereset": "📌 Send the periodic data-reset interval. If you do not want a reset, send no_reset",
+                "SaveProduct": "Product was saved 🥳🎉",
+                "volumeUpdated": "✅ Product data was updated",
+                "TimeUpdated": "✅ Product duration was updated",
+                "NewTime": "Send the new duration"
+            },
+            "Payment": {
+                "reviewedpayment": "❌ This payment was already reviewed by another admin",
+                "Reasonrejecting": "Send the reason for rejecting the payment",
+                "Rejected": "⭕️ Payment was rejected and the user was notified"
+            },
+            "Usertest": {
+                "TimeUpdated": "✅ Test-service duration was updated",
+                "VolumeUpdated": "✅ Test-service data was updated"
+            },
+            "Balance": {
+                "AddBalance": "⚜️ Send the user's numeric ID \nDescription: to add balance, first send the user's numeric ID",
+                "NegativeBalance": "⚜️ Send the user's numeric ID \nDescription: to deduct balance, first send the user's numeric ID",
+                "PriceBalance": "Numeric ID received. Send the amount to add to the user, in USD",
+                "PriceBalancek": "Numeric ID received. Send the amount to deduct from the user, in USD",
+                "Invalidprice": "Invalid amount",
+                "AddBalanceUser": "✅ Amount was added to the user's balance",
+                "AddBalanceUsers": "✅ Amount was added to users' balances",
+                "NegativeBalanceUser": "✅ Amount was deducted from the user's balance",
+                "addallbalance": "📌 Send the amount for a global top-up"
+            },
+            "Discount": {
+                "GetCode": "Send a code for the gift code",
+                "ErrorCode": "Invalid code. It must be English with no extra characters",
+                "PriceCode": "Code received. Now send the code amount",
+                "setlimituse": "📌 Send the usage limit.\n⚠️ This limit applies to all users",
+                "SaveCode": "✅  Code was saved",
+                "RemoveCode": "Select the code you want to remove",
+                "RemovedCode": "✅ Code was removed.",
+                "NotCode": "❌ Error \n📝 The selected gift code does not exist",
+                "PriceCodesell": "Code received. Now send the discount percentage",
+                "agentcode": "Which user type should this code apply to?\n\n⚠️ To apply it to all users, send <code>allusers</code>",
+                "invalidagentcode": "❌ Invalid user type",
+                "invalidcodedis": "❌ Invalid discount code",
+                "firstdiscount": "📌 Should this discount code apply to the first purchase only, or all purchases?"
+            },
+            "Discountsell": {
+                "GetCode": "Send a code for the discount code",
+                "getlimit": "📌 How many users can use this discount code?"
+            },
+            "Protocol": {
+                "Title": "In this section you can choose which protocols customers receive.\n📨 To add a protocol, send it from the list below",
+                "invalidProtocol": "❌ Invalid protocol",
+                "AddedProtocol": "✅ Protocol was added.",
+                "RemoveProtocol": "Select the protocol you want to remove.",
+                "RemovedProtocol": "Protocol was removed."
+            },
+            "AlgortimeUsername": {
+                "SaveData": "✅ Username generation method was updated"
+            },
+            "Algortimeextend": {
+                "SaveData": "✅ Service-renewal method was updated"
+            },
+            "SettingPayment": {
+                "getnamecard": "📌 Send the cardholder name.",
+                "Savacard": "✅ Your card number was saved.",
+                "CartDirect": "✅ Your username was saved.",
+                "issetpay": "❌ You have an unconfirmed payment. Wait for it to be reviewed before sending a new one."
+            },
+            "SettingnowPayment": {
+                "Savaapi": "✅ Changes were saved",
+                "Saviduser": "✅ Saved.",
+                "disableshowcardstatus": "📌 Card-number display was disabled.",
+                "activeshowcardstatus": "📌 Card-number display was enabled for all users.",
+                "getuserstatuscard": "📌 Use this feature to choose which users see the card number. Send the user's numeric ID to show the card number.\n⚠️ Before using this, go to Finance > Card-to-card settings and tap the card-number display button so it is disabled for all users.",
+                "errordefrrentprice": "❌ This receipt cannot be approved\n\n✍️ Difference between the order amount and the payment"
+            },
+            "agent": {
+                "agentsendid": "⭕ Send the user's numeric ID.",
+                "invalidtypeagent": "❌ Invalid agent type",
+                "gettypeagent": "📌 To add an agent, send the agent type\n1- Type n: this agent has standard features\n2- Type n2: this agent can buy services with no credit limit.",
+                "agentsendidremove": "⭕️ To remove an agent, send the user's numeric ID",
+                "useragented": "✅ The user is now an agent",
+                "useragentremoved": "❌ The user was removed from agent status",
+                "invalidvlue": "⭕️ Invalid input",
+                "setagentproduct": "Which user type should see this product\nType f: regular user\nType n: second-type agent with limited features\nType n2: third-type agent with more features",
+                "agenttext": "👋 Welcome to the agency panel",
+                "submitusername": "✅ Your username was saved."
+            },
+            "order": {
+                "selectstep": "📌 How do you want to view the order?",
+                "notfound": "❌ No order was found",
+                "vieworderusername": "👁 To view a user's orders, send the config username"
+            },
+            "cronjob": {
+                "setdayremove": "📌 Send how many days after expiry expired accounts should be deleted\nCurrent value: ",
+                "setvolumeremove": "📌 Send how many days after data runs out accounts should be deleted. Time is based on the user's last connection. This feature is for the Marzban panel\nCurrent value: ",
+                "changeddata": "✅ Changes were saved",
+                "cronjobctive": "✅ Cron job was enabled",
+                "cronjobdisable": "❌ Cron job was disabled."
+            },
             "transfor": {
                 "title": "🚚 Transfer service to another user",
                 "transfornotvalid": "❌ Test services cannot be transferred to another user.",
@@ -989,29 +1339,33 @@
                 "365": "⏳ 1 year",
                 "unlimited": "🔋 Data-only"
             },
-            "Product": {
-                "nullpProduct": "⭕️ No product was found. Please contact support.",
-                "Invalidvolume": "Invalid volume",
-                "Invalidtime": "Invalid number of days"
+            "update": "✅ Your bot was updated.",
+            "addorder": {
+                "onestep": "📌 To add an order for a user, first send the user's numeric ID.",
+                "towstep": "📌 Send the user's config username.",
+                "threestep": "📌 Select the config location.",
+                "fourstep": "📌 Send the product name.",
+                "fivestep": "📌 The service was added to the user's account."
             },
-            "Discount": {
-                "invalidcodedis": "❌ Invalid discount code"
+            "btnkeyboardadmin": {
+                "managementpanel": "✏️ Manage panel",
+                "addpanel": "🖥 Add panel",
+                "managruser": "👤 Manage user"
             },
-            "managepanel": {
-                "nullpanel": "⭕️ No location was found. Please contact support.",
-                "limitedpanel": "❌ This panel is at capacity. Please use another panel.",
-                "limitedpanelfirst": "❌ Account creation is at capacity. Please try again later."
+            "report": {
+                "reportnight": "🌙 Nightly report",
+                "reportcron": "📝 Notification reports",
+                "reportsms": "📨 Message-sending report"
             },
-            "agent": {
-                "invalidvlue": "⭕️ Invalid input",
-                "agenttext": "👋 Welcome to the agency panel",
-                "submitusername": "✅ Your username was saved."
+            "reportgroup": {
+                "adminadded": "👨‍💼 A user with the details below added an admin.\n\nUsername %s\nNumeric ID: %s\nAccess type: %s\n\n⭕️ New admin details:\nNumeric ID: %s",
+                "new-payment-star": "💵 New payment\n- 👤 Username: @%s\n- 🆔 User numeric ID: %s\n- 💸 Transaction amount %s\n- 📥 Stars amount deposited: %s\n- 💳 Payment method: Telegram Stars",
+                "volumepurchase": "⭕️ A user bought extra data\n\nUser details:\n🪪 Numeric ID: %s\n🛍 Data purchased: %s\n💰 Amount paid: %s USD\nUser balance before purchase: %s\n👤 Config username: %s",
+                "renewaldetails": "📣 Account renewal details were recorded in your bot.\n▫️User numeric ID: <code>%s</code>\n▫️Username: @%s\n▫️Config username: %s\n▫️User name: %s\n▫️Service location: %s\n▫️Product name: %s\n▫️Product data: %s\n▫️Product duration: %s\n▫️Renewal amount: %s USD\n▫️User balance: %s USD\n▫️Purchase time: %s"
             },
-            "SettingPayment": {
-                "issetpay": "❌ You have an unconfirmed payment. Wait for it to be reviewed before sending a new one."
-            },
-            "ManageUser": {
-                "GetTextResponse": "Send your reply message."
+            "MessageBulk": {
+                "userresponse": "📥 A reply was received from a user. Tap the button below to reply and send your message.\n\nNumeric ID: %s\nUsername: %s\n📝 Message: %s",
+                "usermessage": "📥 A reply was received from a user. Tap the button below to reply and send your message.\n\nNumeric ID: %s\nUsername: @%s\n📝 Message: %s"
             }
         }
     }

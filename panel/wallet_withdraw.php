@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'save_settings') {
         $min = withdraw_parse_int((string) ($_POST['min_amount'] ?? '0'));
         if ($min === null) {
-            flash('error', 'حداقل برداشت باید عدد باشد.');
+            flash('error', 'Minimum withdrawal must be a number.');
             header('Location: ' . wallet_withdraw_redirect('settings'));
             exit;
         }
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (function_exists('clearSelectCache')) {
             clearSelectCache('textbot');
         }
-        flash('success', 'تنظیمات برداشت ذخیره شد.');
+        flash('success', 'Withdrawal settings saved.');
         header('Location: ' . wallet_withdraw_redirect('settings'));
         exit;
     }
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['id'] ?? 0);
         $upload = withdraw_save_receipt_from_upload($id, $_FILES['receipt'] ?? []);
         if (empty($upload['ok'])) {
-            flash('error', $upload['msg'] ?? 'آپلود رسید ناموفق بود.');
+            flash('error', $upload['msg'] ?? 'Receipt upload failed.');
             header('Location: ' . wallet_withdraw_redirect('pending'));
             exit;
         }
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'abs_path' => withdraw_absolute_receipt_path($upload['path']),
             'mime' => $upload['mime'] ?? 'image/jpeg',
         ], $pdo);
-        flash(!empty($result['ok']) ? 'success' : 'error', $result['msg'] ?? 'خطا');
+        flash(!empty($result['ok']) ? 'success' : 'error', $result['msg'] ?? 'Error');
         header('Location: ' . wallet_withdraw_redirect(!empty($result['ok']) ? 'history' : 'pending'));
         exit;
     }
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['id'] ?? 0);
         $reason = trim((string) ($_POST['reason'] ?? ''));
         $result = withdraw_reject($id, wallet_withdraw_admin_id(), $reason, $pdo);
-        flash(!empty($result['ok']) ? 'success' : 'error', $result['msg'] ?? 'خطا');
+        flash(!empty($result['ok']) ? 'success' : 'error', $result['msg'] ?? 'Error');
         header('Location: ' . wallet_withdraw_redirect('pending'));
         exit;
     }
@@ -136,29 +136,29 @@ $minAmount = withdraw_min_amount($pdo);
 $promptText = pay_textbot_get($pdo, WITHDRAW_TEXT_PROMPT, withdraw_prompt_default());
 $successText = pay_textbot_get($pdo, WITHDRAW_TEXT_SUCCESS, withdraw_success_default());
 
-$pageTitle = 'برداشت از کیف پول';
-$pageLede = 'تنظیم حداقل برداشت، بررسی درخواست‌ها و تاریخچه تسویه حساب.';
+$pageTitle = 'Wallet withdrawals';
+$pageLede = 'Set the minimum withdrawal, review requests, and view payout history.';
 $activeNav = 'wallet_withdraw';
 include __DIR__ . '/inc/layout_head.php';
 ?>
 
 <div style="display:flex;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:4px;flex-wrap:wrap;margin-bottom:18px" class="fade-up">
-  <a href="wallet_withdraw.php?tab=settings" class="btn btn-sm <?= $tab === 'settings' ? 'btn-primary' : 'btn-ghost' ?>">تنظیمات</a>
+  <a href="wallet_withdraw.php?tab=settings" class="btn btn-sm <?= $tab === 'settings' ? 'btn-primary' : 'btn-ghost' ?>">Settings</a>
   <a href="wallet_withdraw.php?tab=pending" class="btn btn-sm <?= $tab === 'pending' ? 'btn-primary' : 'btn-ghost' ?>">
-    درخواست‌ها
+    Requests
     <?php if ($pendingCount > 0): ?>
       <span class="tag tag-warn" style="margin-right:6px;font-size:.7rem"><?= number_format($pendingCount) ?></span>
     <?php endif; ?>
   </a>
-  <a href="wallet_withdraw.php?tab=history" class="btn btn-sm <?= $tab === 'history' ? 'btn-primary' : 'btn-ghost' ?>">تاریخچه</a>
+  <a href="wallet_withdraw.php?tab=history" class="btn btn-sm <?= $tab === 'history' ? 'btn-primary' : 'btn-ghost' ?>">History</a>
 </div>
 
 <?php if ($tab === 'settings'): ?>
 <div class="card fade-up">
   <div class="card-head">
     <div>
-      <div class="card-title">تنظیمات برداشت</div>
-      <div class="card-subtitle">حداقل مبلغ و متن‌های ربات</div>
+      <div class="card-title">Withdrawal settings</div>
+      <div class="card-subtitle">Minimum amount and bot messages</div>
     </div>
   </div>
   <form method="POST" class="card-body" style="display:flex;flex-direction:column;gap:16px;max-width:720px">
@@ -166,20 +166,20 @@ include __DIR__ . '/inc/layout_head.php';
     <input type="hidden" name="action" value="save_settings">
     <input type="hidden" name="tab" value="settings">
     <div class="field">
-      <label>حداقل برداشت (تومان)</label>
+      <label>Minimum withdrawal (USD)</label>
       <input type="number" name="min_amount" class="input" min="0" step="1" required value="<?= (int) $minAmount ?>">
     </div>
     <div class="field">
-      <label>متن پیام دکمه تسویه حساب</label>
+      <label>Payout button message</label>
       <textarea name="prompt_text" class="input" rows="4" required><?= htmlspecialchars($promptText) ?></textarea>
-      <div style="font-size:.75rem;color:var(--mute);margin-top:6px">زمانی که کاربر روی درخواست برداشت کلیک می‌کند این متن ارسال می‌شود.</div>
+      <div style="font-size:.75rem;color:var(--mute);margin-top:6px">This text is sent when the user taps the withdrawal request button.</div>
     </div>
     <div class="field">
-      <label>متن پیام بعد از ثبت موفق درخواست</label>
+      <label>Message after a successful request</label>
       <textarea name="success_text" class="input" rows="3" required><?= htmlspecialchars($successText) ?></textarea>
     </div>
     <div>
-      <button type="submit" class="btn btn-primary"><?= icon('check', 14) ?> ذخیره تنظیمات</button>
+      <button type="submit" class="btn btn-primary"><?= icon('check', 14) ?> Save settings</button>
     </div>
   </form>
 </div>
@@ -188,8 +188,8 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="card fade-up">
   <div class="card-head">
     <div>
-      <div class="card-title">درخواست‌های در انتظار</div>
-      <div class="card-subtitle"><?= number_format($total) ?> مورد</div>
+      <div class="card-title">Pending requests</div>
+      <div class="card-subtitle"><?= number_format($total) ?> items</div>
     </div>
   </div>
   <div class="tbl-wrap">
@@ -197,13 +197,13 @@ include __DIR__ . '/inc/layout_head.php';
       <thead>
         <tr>
           <th>#</th>
-          <th>کاربر</th>
-          <th>مبلغ</th>
-          <th>شماره کارت</th>
-          <th>صاحب حساب</th>
-          <th>موجودی فعلی</th>
-          <th>زمان</th>
-          <th>عملیات</th>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Card number</th>
+          <th>Account holder</th>
+          <th>Current balance</th>
+          <th>Time</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -212,7 +212,7 @@ include __DIR__ . '/inc/layout_head.php';
             <td colspan="8">
               <div class="empty">
                 <div class="empty-mark">—</div>
-                <p>درخواست در انتظاری نیست</p>
+                <p>No pending requests</p>
               </div>
             </td>
           </tr>
@@ -234,7 +234,7 @@ include __DIR__ . '/inc/layout_head.php';
                 <a href="user.php?id=<?= htmlspecialchars($uid) ?>" class="cell-mono" style="color:var(--accent)"><?= htmlspecialchars($uid) ?></a>
                 <?php if ($uname !== ''): ?><div style="font-size:.75rem;color:var(--mute)">@<?= htmlspecialchars($uname) ?></div><?php endif; ?>
               </td>
-              <td class="cell-strong cell-num"><?= number_format((int) $row['amount']) ?> <span style="color:var(--text-dim);font-weight:400;font-size:.72rem">ت</span></td>
+              <td class="cell-strong cell-num"><?= number_format((int) $row['amount']) ?> <span style="color:var(--text-dim);font-weight:400;font-size:.72rem">USD</span></td>
               <td class="cell-mono" dir="ltr"><?= htmlspecialchars(withdraw_format_card((string) $row['card_number'])) ?></td>
               <td><?= htmlspecialchars((string) $row['card_holder']) ?></td>
               <td class="cell-num" style="<?= $over ? 'color:var(--danger,#ef4444)' : '' ?>">
@@ -243,8 +243,8 @@ include __DIR__ . '/inc/layout_head.php';
               <td style="font-size:.78rem;color:var(--text-dim);white-space:nowrap"><?= htmlspecialchars(wallet_withdraw_when((int) $row['created_at'])) ?></td>
               <td>
                 <div style="display:flex;gap:6px;flex-wrap:wrap">
-                  <button type="button" class="btn btn-primary btn-sm" onclick="openApproveModal(<?= $id ?>)">تأیید</button>
-                  <button type="button" class="btn btn-no btn-sm" onclick="openRejectModal(<?= $id ?>)">رد</button>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="openApproveModal(<?= $id ?>)">Approve</button>
+                  <button type="button" class="btn btn-no btn-sm" onclick="openRejectModal(<?= $id ?>)">Reject</button>
                 </div>
               </td>
             </tr>
@@ -258,7 +258,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="wdApproveModal">
   <div class="modal" style="max-width:460px">
     <div class="modal-head">
-      <h3>تأیید برداشت</h3>
+      <h3>Approve withdrawal</h3>
       <button type="button" class="modal-x" onclick="closeModal('wdApproveModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST" enctype="multipart/form-data">
@@ -266,15 +266,15 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
         <input type="hidden" name="action" value="approve">
         <input type="hidden" name="id" id="wdApproveId" value="">
-        <p style="font-size:.85rem;color:var(--mute);margin:0 0 12px">عکس رسید پرداخت الزامی است. پس از تأیید، مبلغ از کیف پول کاربر کسر می‌شود.</p>
+        <p style="font-size:.85rem;color:var(--mute);margin:0 0 12px">A payment receipt photo is required. After approval, the amount is deducted from the user’s wallet.</p>
         <div class="field">
-          <label>عکس رسید *</label>
+          <label>Receipt photo *</label>
           <input type="file" name="receipt" class="input" accept="image/*" required>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-primary">تأیید و ارسال رسید</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('wdApproveModal')">انصراف</button>
+        <button type="submit" class="btn btn-primary">Approve and send receipt</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('wdApproveModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -283,7 +283,7 @@ include __DIR__ . '/inc/layout_head.php';
 <div class="modal-veil" id="wdRejectModal">
   <div class="modal" style="max-width:460px">
     <div class="modal-head">
-      <h3>رد درخواست</h3>
+      <h3>Reject request</h3>
       <button type="button" class="modal-x" onclick="closeModal('wdRejectModal')"><?= icon('close', 14) ?></button>
     </div>
     <form method="POST">
@@ -292,13 +292,13 @@ include __DIR__ . '/inc/layout_head.php';
         <input type="hidden" name="action" value="reject">
         <input type="hidden" name="id" id="wdRejectId" value="">
         <div class="field">
-          <label>دلیل رد (برای کاربر ارسال می‌شود) *</label>
-          <textarea name="reason" class="input" rows="3" required placeholder="دلیل رد را بنویسید"></textarea>
+          <label>Rejection reason (sent to the user) *</label>
+          <textarea name="reason" class="input" rows="3" required placeholder="Write the rejection reason"></textarea>
         </div>
       </div>
       <div class="modal-foot">
-        <button type="submit" class="btn btn-no">رد کردن</button>
-        <button type="button" class="btn btn-ghost" onclick="closeModal('wdRejectModal')">انصراف</button>
+        <button type="submit" class="btn btn-no">Reject</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('wdRejectModal')">Cancel</button>
       </div>
     </form>
   </div>
@@ -318,8 +318,8 @@ function openRejectModal(id) {
 <div class="card fade-up">
   <div class="card-head">
     <div>
-      <div class="card-title">تاریخچه برداشت‌های پرداخت‌شده</div>
-      <div class="card-subtitle"><?= number_format($total) ?> مورد</div>
+      <div class="card-title">Paid withdrawal history</div>
+      <div class="card-subtitle"><?= number_format($total) ?> items</div>
     </div>
   </div>
   <div class="tbl-wrap">
@@ -327,13 +327,13 @@ function openRejectModal(id) {
       <thead>
         <tr>
           <th>#</th>
-          <th>کاربر</th>
-          <th>مبلغ</th>
-          <th>شماره کارت</th>
-          <th>صاحب حساب</th>
-          <th>رسید</th>
-          <th>هزینه مالی</th>
-          <th>زمان</th>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Card number</th>
+          <th>Account holder</th>
+          <th>Receipt</th>
+          <th>Finance expense</th>
+          <th>Time</th>
         </tr>
       </thead>
       <tbody>
@@ -342,7 +342,7 @@ function openRejectModal(id) {
             <td colspan="8">
               <div class="empty">
                 <div class="empty-mark">—</div>
-                <p>تاریخچه‌ای ثبت نشده</p>
+                <p>No history yet</p>
               </div>
             </td>
           </tr>
@@ -364,12 +364,12 @@ function openRejectModal(id) {
                 <a href="user.php?id=<?= htmlspecialchars($uid) ?>" class="cell-mono" style="color:var(--accent)"><?= htmlspecialchars($uid) ?></a>
                 <?php if ($uname !== ''): ?><div style="font-size:.75rem;color:var(--mute)">@<?= htmlspecialchars($uname) ?></div><?php endif; ?>
               </td>
-              <td class="cell-strong cell-num"><?= number_format((int) $row['amount']) ?> <span style="color:var(--text-dim);font-weight:400;font-size:.72rem">ت</span></td>
+              <td class="cell-strong cell-num"><?= number_format((int) $row['amount']) ?> <span style="color:var(--text-dim);font-weight:400;font-size:.72rem">USD</span></td>
               <td class="cell-mono" dir="ltr"><?= htmlspecialchars(withdraw_format_card((string) $row['card_number'])) ?></td>
               <td><?= htmlspecialchars((string) $row['card_holder']) ?></td>
               <td>
                 <?php if ($hasReceipt): ?>
-                  <a href="withdraw_receipt.php?id=<?= $id ?>" target="_blank" class="btn btn-ghost btn-sm">مشاهده رسید</a>
+                  <a href="withdraw_receipt.php?id=<?= $id ?>" target="_blank" class="btn btn-ghost btn-sm">View receipt</a>
                 <?php else: ?>
                   <span style="color:var(--text-dim)">—</span>
                 <?php endif; ?>
@@ -393,7 +393,7 @@ function openRejectModal(id) {
 
 <?php if (($tab === 'pending' || $tab === 'history') && $totalPages > 1): ?>
 <div class="tbl-foot fade-up">
-  <span><?= number_format($total) ?> رکورد · صفحه <?= $page ?> از <?= $totalPages ?></span>
+  <span><?= number_format($total) ?> records · page <?= $page ?> of <?= $totalPages ?></span>
   <div class="pager">
     <a class="<?= $page <= 1 ? 'dis' : '' ?>" href="wallet_withdraw.php?tab=<?= htmlspecialchars($tab) ?>&page=<?= max(1, $page - 1) ?>">‹</a>
     <?php for ($p2 = max(1, $page - 2); $p2 <= min($totalPages, $page + 2); $p2++): ?>

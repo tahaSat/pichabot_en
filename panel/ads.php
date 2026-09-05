@@ -19,12 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
             'started_at' => $_POST['started_at'] ?? '',
         ], $editId ?: null);
         $link = !empty($saved['code']) ? ads_build_link((string) $saved['code']) : '';
-        flash('success', $editId ? 'تبلیغ ویرایش شد.' : ('تبلیغ ثبت شد.' . ($link !== '' ? ' لینک: ' . $link : '')));
+        flash('success', $editId ? 'Ad updated.' : ('Ad saved.' . ($link !== '' ? ' Link: ' . $link : '')));
     } catch (InvalidArgumentException $e) {
         flash('error', $e->getMessage());
     } catch (Throwable $e) {
         error_log('ads save: ' . $e->getMessage());
-        flash('error', 'ذخیره تبلیغ ناموفق بود.');
+        flash('error', 'Could not save the ad.');
     }
     header('Location: ads.php');
     exit;
@@ -34,10 +34,10 @@ if (isset($_GET['delete'])) {
     csrf_check_get();
     try {
         ads_lib_delete($pdo, (int) $_GET['delete']);
-        flash('success', 'تبلیغ حذف شد.');
+        flash('success', 'Ad deleted.');
     } catch (Throwable $e) {
         error_log('ads delete: ' . $e->getMessage());
-        flash('error', 'حذف تبلیغ ناموفق بود.');
+        flash('error', 'Could not delete the ad.');
     }
     header('Location: ads.php');
     exit;
@@ -64,8 +64,8 @@ if ($page > $totalPages) {
     $page = $totalPages;
 }
 
-$pageTitle = 'پنل تبلیغات';
-$pageLede = 'ثبت تبلیغ‌کننده، لینک یکتا بدون آیدی تلگرام، و شمارش جوین.';
+$pageTitle = 'Ads panel';
+$pageLede = 'Register advertisers, unique links without a Telegram ID, and join counts.';
 $activeNav = 'referral';
 $referralTab = 'ads';
 include __DIR__ . '/inc/layout_head.php';
@@ -73,13 +73,13 @@ include __DIR__ . '/inc/referral_nav.php';
 ?>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px" class="fade-up">
-  <div style="font-size:.85rem;color:var(--mute)"><?= number_format($total) ?> تبلیغ‌کننده</div>
-  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> افزودن تبلیغ</button>
+  <div style="font-size:.85rem;color:var(--mute)"><?= number_format($total) ?> advertisers</div>
+  <button class="btn btn-primary" onclick="openModal('addModal')"><?= icon('plus', 14) ?> Add ad</button>
 </div>
 
 <div class="card fade-up" id="list">
   <div class="toolbar" style="flex-wrap:wrap;gap:10px">
-    <div class="toolbar-title">تبلیغ‌کننده‌ها <small>(<?= number_format($total) ?>)</small></div>
+    <div class="toolbar-title">Advertisers <small>(<?= number_format($total) ?>)</small></div>
     <form method="GET" class="toolbar-end">
       <?php if ($sort !== 'id'): ?>
         <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
@@ -87,19 +87,19 @@ include __DIR__ . '/inc/referral_nav.php';
       <?php endif; ?>
       <div class="search-box" style="min-width:240px">
         <?= icon('search', 15) ?>
-        <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="نام یا کد لینک..." autocomplete="off">
-        <button type="submit" class="search-btn">جستجو</button>
+        <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Name or link code..." autocomplete="off">
+        <button type="submit" class="search-btn">Search</button>
       </div>
       <?php if ($search !== ''): ?>
-        <a href="ads.php<?= $sort !== 'id' ? ('?sort=' . urlencode($sort) . '&dir=' . urlencode($dir)) : '' ?>" class="btn-link" style="font-size:.78rem">پاک کردن</a>
+        <a href="ads.php<?= $sort !== 'id' ? ('?sort=' . urlencode($sort) . '&dir=' . urlencode($dir)) : '' ?>" class="btn-link" style="font-size:.78rem">Clear</a>
       <?php endif; ?>
     </form>
   </div>
   <?php if (empty($list['rows'])): ?>
     <div class="empty" style="padding:48px 20px">
-      <p><?= $search !== '' ? 'نتیجه‌ای یافت نشد.' : 'هنوز تبلیغی ثبت نشده است.' ?></p>
+      <p><?= $search !== '' ? 'No results found.' : 'No ads recorded yet.' ?></p>
       <?php if ($search === ''): ?>
-        <button class="btn btn-primary" style="margin-top:14px" onclick="openModal('addModal')"><?= icon('plus', 14) ?> افزودن اولین تبلیغ</button>
+        <button class="btn btn-primary" style="margin-top:14px" onclick="openModal('addModal')"><?= icon('plus', 14) ?> Add the first ad</button>
       <?php endif; ?>
     </div>
   <?php else: ?>
@@ -107,7 +107,7 @@ include __DIR__ . '/inc/referral_nav.php';
       <table class="tbl-lg">
         <thead>
           <tr>
-            <th>نام</th>
+            <th>Name</th>
             <?php
             $sortLink = function (string $key, string $label) use ($sort, $dir, $search): string {
                 $nextDir = ($sort === $key && $dir === 'desc') ? 'asc' : 'desc';
@@ -122,12 +122,12 @@ include __DIR__ . '/inc/referral_nav.php';
                     : 'color:inherit;text-decoration:none;white-space:nowrap';
                 return '<th><a href="' . htmlspecialchars($href) . '" style="' . $style . '">' . htmlspecialchars($label) . $arrow . '</a></th>';
             };
-            echo $sortLink('join_count', 'جوین');
-            echo $sortLink('amount', 'مبلغ تبلیغ');
-            echo $sortLink('started_at', 'تاریخ شروع');
+            echo $sortLink('join_count', 'Joins');
+            echo $sortLink('amount', 'Ad amount');
+            echo $sortLink('started_at', 'Start date');
             ?>
-            <th>لینک</th>
-            <th>عملیات</th>
+            <th>Link</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -137,12 +137,12 @@ include __DIR__ . '/inc/referral_nav.php';
             <tr>
               <td><?= htmlspecialchars((string) $row['name']) ?></td>
               <td><?= number_format((int) $row['join_count']) ?></td>
-              <td class="cn"><?= number_format((int) $row['amount']) ?> <span class="cf">ت</span></td>
+              <td class="cn"><?= number_format((int) $row['amount']) ?> <span class="cf">USD</span></td>
               <td class="cf"><?= htmlspecialchars((string) $row['started_at']) ?></td>
               <td>
                 <div style="display:flex;align-items:center;gap:6px;max-width:280px">
                   <code class="cm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;text-align:left"><?= htmlspecialchars($link) ?></code>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(<?= htmlspecialchars(json_encode($link), ENT_QUOTES) ?>).then(()=>{this.textContent='کپی شد';setTimeout(()=>this.textContent='کپی',1200)})">کپی</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(<?= htmlspecialchars(json_encode($link), ENT_QUOTES) ?>).then(()=>{this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1200)})">Copy</button>
                 </div>
               </td>
               <td>
@@ -152,8 +152,8 @@ include __DIR__ . '/inc/referral_nav.php';
                   'join_count' => (int) $row['join_count'],
                   'amount' => (int) $row['amount'],
                   'started_at' => ads_lib_date_input_value((string) $row['started_at']),
-                ], JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>)'>ویرایش</button>
-                <a href="ads.php?delete=<?= (int) $row['id'] ?>&_csrf=<?= csrf_token() ?>" class="btn btn-no btn-sm" data-confirm="حذف تبلیغ «<?= htmlspecialchars((string) $row['name']) ?>»؟">حذف</a>
+                ], JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>)'>Edit</button>
+                <a href="ads.php?delete=<?= (int) $row['id'] ?>&_csrf=<?= csrf_token() ?>" class="btn btn-no btn-sm" data-confirm="Delete ad “<?= htmlspecialchars((string) $row['name']) ?>”?">Delete</a>
               </td>
             </tr>
           <?php endforeach; ?>
@@ -162,7 +162,7 @@ include __DIR__ . '/inc/referral_nav.php';
     </div>
     <?php if ($totalPages > 1): ?>
       <div class="tbl-foot">
-        <span><?= number_format($total) ?> مورد · صفحه <?= $page ?> از <?= $totalPages ?></span>
+        <span><?= number_format($total) ?> items · page <?= $page ?> of <?= $totalPages ?></span>
         <div class="pager">
           <?php $qs = fn($p) => 'ads.php?q=' . urlencode($search)
               . ($sort !== 'id' ? '&sort=' . urlencode($sort) . '&dir=' . urlencode($dir) : '')
@@ -181,26 +181,26 @@ include __DIR__ . '/inc/referral_nav.php';
 <div class="modal-veil" id="addModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>افزودن تبلیغ</h3>
+      <h3>Add ad</h3>
       <button type="button" class="modal-x" onclick="closeModal('addModal')">✕</button>
     </div>
     <form method="post">
       <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="action" value="save">
       <div class="modal-body">
-        <p class="cf" style="margin-bottom:12px">پس از ذخیره، یک لینک تلگرامی یکتا بدون آیدی شخص ساخته می‌شود.</p>
-        <label class="lbl">نام تبلیغ‌کننده</label>
+        <p class="cf" style="margin-bottom:12px">After saving, a unique Telegram link is created without a personal ID.</p>
+        <label class="lbl">Advertiser name</label>
         <input class="inp" name="name" required>
-        <label class="lbl">تعداد جوین</label>
+        <label class="lbl">Join count</label>
         <input class="inp" type="number" name="join_count" min="0" value="0" required>
-        <label class="lbl">مبلغ تبلیغات (تومان)</label>
+        <label class="lbl">Ad amount (USD)</label>
         <input class="inp" type="number" name="amount" min="0" value="0" required>
-        <label class="lbl">تاریخ شروع تبلیغ</label>
+        <label class="lbl">Ad start date</label>
         <input class="inp" type="date" name="started_at" value="<?= date('Y-m-d') ?>" required>
       </div>
       <div class="modal-foot">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">انصراف</button>
-        <button type="submit" class="btn btn-primary">ذخیره و ساخت لینک</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('addModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save and create link</button>
       </div>
     </form>
   </div>
@@ -209,7 +209,7 @@ include __DIR__ . '/inc/referral_nav.php';
 <div class="modal-veil" id="editModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>ویرایش تبلیغ</h3>
+      <h3>Edit ad</h3>
       <button type="button" class="modal-x" onclick="closeModal('editModal')">✕</button>
     </div>
     <form method="post">
@@ -217,18 +217,18 @@ include __DIR__ . '/inc/referral_nav.php';
       <input type="hidden" name="action" value="save">
       <input type="hidden" name="edit_id" id="edit_id">
       <div class="modal-body">
-        <label class="lbl">نام تبلیغ‌کننده</label>
+        <label class="lbl">Advertiser name</label>
         <input class="inp" name="name" id="edit_name" required>
-        <label class="lbl">تعداد جوین</label>
+        <label class="lbl">Join count</label>
         <input class="inp" type="number" name="join_count" id="edit_join_count" min="0" required>
-        <label class="lbl">مبلغ تبلیغات (تومان)</label>
+        <label class="lbl">Ad amount (USD)</label>
         <input class="inp" type="number" name="amount" id="edit_amount" min="0" required>
-        <label class="lbl">تاریخ شروع تبلیغ</label>
+        <label class="lbl">Ad start date</label>
         <input class="inp" type="date" name="started_at" id="edit_started_at" required>
       </div>
       <div class="modal-foot">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">انصراف</button>
-        <button type="submit" class="btn btn-primary">ذخیره</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
       </div>
     </form>
   </div>

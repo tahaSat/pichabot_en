@@ -4,7 +4,7 @@ require_once __DIR__ . '/support_lib.php';
 $pageLede = $pageLede ?? '';
 $activeNav = $activeNav ?? '';
 $showPageHead = $showPageHead ?? true;
-$currentUser = $_SESSION['admin_user'] ?? 'ادمین';
+$currentUser = $_SESSION['admin_user'] ?? 'Admin';
 $initials = mb_strtoupper(mb_substr($currentUser, 0, 1, 'UTF-8'), 'UTF-8');
 $supportUnansweredCount = isset($pdo) && $pdo instanceof PDO ? panel_support_unanswered_count($pdo) : 0;
 $withdrawPendingCount = 0;
@@ -20,7 +20,7 @@ $devModeOn = function_exists('mirza_is_development_mode')
     : !empty($GLOBALS['development_mode']);
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
   <meta charset="UTF-8">
@@ -31,7 +31,7 @@ $devModeOn = function_exists('mirza_is_development_mode')
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/panel/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/panel/icons/apple-touch-icon.png">
-  <title>پنل مدیریت پیچا</title>
+  <title>Picha Admin Panel</title>
   <link rel="stylesheet" href="<?= htmlspecialchars(panel_asset('css/style.css')) ?>">
   <?php panel_sw_register_script(); ?>
   <script>
@@ -74,11 +74,11 @@ $devModeOn = function_exists('mirza_is_development_mode')
   <div class="confirm-veil" id="confirm-veil">
     <div class="confirm-box">
       <div class="confirm-icon"><?= icon('block', 26) ?></div>
-      <h4 id="confirm-title">تأیید عملیات</h4>
-      <p id="confirm-msg">آیا اطمینان دارید؟ این عملیات قابل بازگشت نیست.</p>
+      <h4 id="confirm-title">Confirm action</h4>
+      <p id="confirm-msg">Are you sure? This action cannot be undone.</p>
       <div class="confirm-btns">
-        <button class="btn btn-no" id="confirm-ok">بله، ادامه</button>
-        <button class="btn btn-ghost" onclick="closeConfirm()">انصراف</button>
+        <button class="btn btn-no" id="confirm-ok">Yes, continue</button>
+        <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
       </div>
     </div>
   </div>
@@ -88,73 +88,73 @@ $devModeOn = function_exists('mirza_is_development_mode')
 
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark"><img src="/panel/icons/icon-192.png" alt="پیچا" width="28" height="28" style="display:block;border-radius:8px"></div>
-        <div class="brand-name">پیچا<span> · پنل</span></div>
+        <div class="brand-mark"><img src="/panel/icons/icon-192.png" alt="Picha" width="28" height="28" style="display:block;border-radius:8px"></div>
+        <div class="brand-name">Picha<span> · Panel</span></div>
       </div>
       <nav class="sidebar-nav">
         <div class="nav-section">
-          <div class="nav-heading">عمومی</div>
-          <a href="index.php" class="nav-item <?= $activeNav === 'dashboard' ? 'active' : '' ?>" title="داشبورد">
-            <span class="nav-icon"><?= icon('dashboard') ?></span><span class="nav-label">داشبورد</span>
+          <div class="nav-heading">General</div>
+          <a href="index.php" class="nav-item <?= $activeNav === 'dashboard' ? 'active' : '' ?>" title="Dashboard">
+            <span class="nav-icon"><?= icon('dashboard') ?></span><span class="nav-label">Dashboard</span>
           </a>
         </div>
         <div class="nav-section">
-          <div class="nav-heading">مدیریت</div>
-          <a href="users.php" class="nav-item <?= $activeNav === 'users' ? 'active' : '' ?>" title="کاربران">
-            <span class="nav-icon"><?= icon('users') ?></span><span class="nav-label">کاربران</span>
+          <div class="nav-heading">Manage</div>
+          <a href="users.php" class="nav-item <?= $activeNav === 'users' ? 'active' : '' ?>" title="Users">
+            <span class="nav-icon"><?= icon('users') ?></span><span class="nav-label">Users</span>
           </a>
-          <a href="agents.php" class="nav-item <?= $activeNav === 'agents' ? 'active' : '' ?>" title="نمایندگان">
-            <span class="nav-icon"><?= icon('users') ?></span><span class="nav-label">نمایندگان</span>
+          <a href="agents.php" class="nav-item <?= $activeNav === 'agents' ? 'active' : '' ?>" title="Agents">
+            <span class="nav-icon"><?= icon('users') ?></span><span class="nav-label">Agents</span>
           </a>
-          <a href="invoice.php" class="nav-item <?= $activeNav === 'invoice' ? 'active' : '' ?>" title="سفارشات">
-            <span class="nav-icon"><?= icon('invoice') ?></span><span class="nav-label">سفارشات</span>
+          <a href="invoice.php" class="nav-item <?= $activeNav === 'invoice' ? 'active' : '' ?>" title="Orders">
+            <span class="nav-icon"><?= icon('invoice') ?></span><span class="nav-label">Orders</span>
           </a>
-          <a href="product.php" class="nav-item <?= $activeNav === 'product' ? 'active' : '' ?>" title="محصولات">
-            <span class="nav-icon"><?= icon('package') ?></span><span class="nav-label">محصولات</span>
+          <a href="product.php" class="nav-item <?= $activeNav === 'product' ? 'active' : '' ?>" title="Products">
+            <span class="nav-icon"><?= icon('package') ?></span><span class="nav-label">Products</span>
           </a>
-          <a href="affiliates.php" class="nav-item <?= $activeNav === 'referral' ? 'active' : '' ?>" title="بخش رفرال">
-            <span class="nav-icon"><?= icon('users') ?></span><span class="nav-label">بخش رفرال</span>
+          <a href="affiliates.php" class="nav-item <?= $activeNav === 'referral' ? 'active' : '' ?>" title="Referral">
+            <span class="nav-icon"><?= icon('users') ?></span><span class="nav-label">Referral</span>
           </a>
-          <a href="categories.php" class="nav-item <?= $activeNav === 'categories' ? 'active' : '' ?>" title="دسته‌بندی‌ها">
-            <span class="nav-icon"><?= icon('package') ?></span><span class="nav-label">دسته‌بندی‌ها</span>
+          <a href="categories.php" class="nav-item <?= $activeNav === 'categories' ? 'active' : '' ?>" title="Categories">
+            <span class="nav-icon"><?= icon('package') ?></span><span class="nav-label">Categories</span>
           </a>
-          <a href="discounts.php" class="nav-item <?= $activeNav === 'discounts' ? 'active' : '' ?>" title="تخفیف">
-            <span class="nav-icon"><?= icon('wallet') ?></span><span class="nav-label">تخفیف</span>
+          <a href="discounts.php" class="nav-item <?= $activeNav === 'discounts' ? 'active' : '' ?>" title="Discounts">
+            <span class="nav-icon"><?= icon('wallet') ?></span><span class="nav-label">Discounts</span>
           </a>
-          <a href="payment.php" class="nav-item <?= $activeNav === 'payment' ? 'active' : '' ?>" title="مالی">
-            <span class="nav-icon"><?= icon('card') ?></span><span class="nav-label">مالی</span>
+          <a href="payment.php" class="nav-item <?= $activeNav === 'payment' ? 'active' : '' ?>" title="Finance">
+            <span class="nav-icon"><?= icon('card') ?></span><span class="nav-label">Finance</span>
           </a>
-          <a href="wallet_withdraw.php" class="nav-item <?= $activeNav === 'wallet_withdraw' ? 'active' : '' ?>" title="برداشت از کیف پول">
-            <span class="nav-icon"><?= icon('wallet') ?></span><span class="nav-label">برداشت کیف پول</span>
+          <a href="wallet_withdraw.php" class="nav-item <?= $activeNav === 'wallet_withdraw' ? 'active' : '' ?>" title="Wallet withdrawals">
+            <span class="nav-icon"><?= icon('wallet') ?></span><span class="nav-label">Withdrawals</span>
             <?php if (($withdrawPendingCount ?? 0) > 0): ?><span class="nav-count"><?= number_format($withdrawPendingCount) ?></span><?php endif; ?>
           </a>
-          <a href="payment_methods.php" class="nav-item <?= $activeNav === 'payment_methods' ? 'active' : '' ?>" title="درگاه‌های پرداخت">
-            <span class="nav-icon"><?= icon('settings') ?></span><span class="nav-label">درگاه‌ها</span>
+          <a href="payment_methods.php" class="nav-item <?= $activeNav === 'payment_methods' ? 'active' : '' ?>" title="Payment gateways">
+            <span class="nav-icon"><?= icon('settings') ?></span><span class="nav-label">Gateways</span>
           </a>
-          <a href="panels.php" class="nav-item <?= $activeNav === 'panels' ? 'active' : '' ?>" title="پنل‌های VPN">
-            <span class="nav-icon"><?= icon('server') ?></span><span class="nav-label">پنل‌های VPN</span>
+          <a href="panels.php" class="nav-item <?= $activeNav === 'panels' ? 'active' : '' ?>" title="VPN panels">
+            <span class="nav-icon"><?= icon('server') ?></span><span class="nav-label">VPN panels</span>
           </a>
         </div>
         <div class="nav-section">
-          <div class="nav-heading">پنل</div>
-          <a href="stats.php" class="nav-item <?= $activeNav === 'stats' ? 'active' : '' ?>" title="آمار">
-            <span class="nav-icon"><?= icon('chart') ?></span><span class="nav-label">آمار</span>
+          <div class="nav-heading">Panel</div>
+          <a href="stats.php" class="nav-item <?= $activeNav === 'stats' ? 'active' : '' ?>" title="Statistics">
+            <span class="nav-icon"><?= icon('chart') ?></span><span class="nav-label">Statistics</span>
           </a>
-          <a href="reports.php" class="nav-item <?= $activeNav === 'reports' ? 'active' : '' ?>" title="گزارشات">
-            <span class="nav-icon"><?= icon('search') ?></span><span class="nav-label">گزارشات</span>
+          <a href="reports.php" class="nav-item <?= $activeNav === 'reports' ? 'active' : '' ?>" title="Reports">
+            <span class="nav-icon"><?= icon('search') ?></span><span class="nav-label">Reports</span>
           </a>
-          <a href="support.php" class="nav-item <?= $activeNav === 'support' ? 'active' : '' ?>" title="صندوق پشتیبانی">
-            <span class="nav-icon"><?= icon('message') ?></span><span class="nav-label">صندوق پشتیبانی</span>
+          <a href="support.php" class="nav-item <?= $activeNav === 'support' ? 'active' : '' ?>" title="Support inbox">
+            <span class="nav-icon"><?= icon('message') ?></span><span class="nav-label">Support inbox</span>
             <?php if ($supportUnansweredCount > 0): ?><span class="nav-count"><?= number_format($supportUnansweredCount) ?></span><?php endif; ?>
           </a>
-          <a href="settings.php?tab=bot" class="nav-item <?= $activeNav === 'bot_menu' ? 'active' : '' ?>" title="منوی ربات">
-            <span class="nav-icon"><?= icon('menu') ?></span><span class="nav-label">منوی ربات</span>
+          <a href="settings.php?tab=bot" class="nav-item <?= $activeNav === 'bot_menu' ? 'active' : '' ?>" title="Bot menu">
+            <span class="nav-icon"><?= icon('menu') ?></span><span class="nav-label">Bot menu</span>
           </a>
-          <a href="settings.php" class="nav-item <?= $activeNav === 'settings' ? 'active' : '' ?>" title="تنظیمات">
-            <span class="nav-icon"><?= icon('settings') ?></span><span class="nav-label">تنظیمات</span>
+          <a href="settings.php" class="nav-item <?= $activeNav === 'settings' ? 'active' : '' ?>" title="Settings">
+            <span class="nav-icon"><?= icon('settings') ?></span><span class="nav-label">Settings</span>
           </a>
-          <a href="logout.php" class="nav-item" title="خروج">
-            <span class="nav-icon"><?= icon('logout') ?></span><span class="nav-label">خروج</span>
+          <a href="logout.php" class="nav-item" title="Log out">
+            <span class="nav-icon"><?= icon('logout') ?></span><span class="nav-label">Log out</span>
           </a>
         </div>
       </nav>
@@ -163,7 +163,7 @@ $devModeOn = function_exists('mirza_is_development_mode')
           <div class="user-mono"><?= htmlspecialchars($initials) ?></div>
           <div class="user-info">
             <div class="uname"><?= htmlspecialchars($currentUser) ?></div>
-            <div class="urole">مدیر پنل</div>
+            <div class="urole">Panel admin</div>
           </div>
         </div>
       </div>
@@ -176,13 +176,13 @@ $devModeOn = function_exists('mirza_is_development_mode')
           <button class="icon-btn sb-toggle" onclick="toggleSidebar()"><?= icon('menu', 17) ?></button>
           <div>
             <div class="topbar-title"><?= htmlspecialchars($pageTitle) ?></div>
-            <div class="crumb"><span>پیچا</span><span
+            <div class="crumb"><span>Picha</span><span
                 style="opacity:.4;margin:0 3px">/</span><span><?= htmlspecialchars($pageTitle) ?></span></div>
           </div>
         </div>
         <div class="topbar-tools">
-          <a href="settings.php" class="icon-btn" title="تنظیمات"><?= icon('settings', 16) ?></a>
-          <a href="logout.php" class="icon-btn" title="خروج"><?= icon('logout', 16) ?></a>
+          <a href="settings.php" class="icon-btn" title="Settings"><?= icon('settings', 16) ?></a>
+          <a href="logout.php" class="icon-btn" title="Log out"><?= icon('logout', 16) ?></a>
         </div>
       </header>
       <main class="content">
