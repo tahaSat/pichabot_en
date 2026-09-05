@@ -11,7 +11,7 @@ const WITHDRAW_TEXT_SUCCESS = 'text_wallet_withdraw_success';
 
 function withdraw_prompt_default(): string
 {
-    return "💸 Enter the amount you want to withdraw from your wallet in USD.";
+    return "💸 Enter the amount you want to withdraw from your wallet in $.";
 }
 
 function withdraw_success_default(): string
@@ -266,7 +266,7 @@ function withdraw_normalize_card(string $text): ?string
 function withdraw_validate_amount(int $amount, int $balance, ?PDO $pdo = null): array
 {
     if ($amount < 1) {
-        return ['ok' => false, 'error' => '❌ Invalid amount. Enter a number in USD.'];
+        return ['ok' => false, 'error' => '❌ Invalid amount. Enter a number in $.'];
     }
     $min = withdraw_min_amount($pdo);
     if ($amount < $min) {
@@ -424,7 +424,7 @@ function withdraw_card_picker_keyboard(string $userId, bool $canBackToReview = f
 function withdraw_user_review_text(int $amount, string $card, string $holder): string
 {
     return "📋 Please review the withdrawal request:\n\n"
-        . '💰 Amount: <code>' . number_format($amount) . "</code> USD\n"
+        . '💰 Amount: <code>$' . number_format($amount) . "</code>\n"
         . '💳 Card number: <code>' . withdraw_esc(withdraw_format_card($card)) . "</code>\n"
         . '👤 Account holder: <code>' . withdraw_esc($holder) . "</code>\n\n"
         . 'If the details are correct, confirm.';
@@ -473,7 +473,7 @@ function withdraw_amount_keyboard(int $balance): string
     $back = is_array($textbotlang) ? ($textbotlang['users']['stateus']['backinfo'] ?? '🔙 Back') : '🔙 Back';
     $allLabel = '💰 Withdraw full balance';
     if ($balance > 0) {
-        $allLabel .= ' (' . number_format($balance) . ' USD)';
+        $allLabel .= ' ($' . number_format($balance) . ')';
     }
     return json_encode([
         'inline_keyboard' => [
@@ -623,7 +623,7 @@ function withdraw_admin_detail_text(array $row, array $userRow = [], string $fal
     $text .= "📌 Status: $statusLabel\n";
     $text .= "📅 Time: $when\n\n";
     $text .= withdraw_user_account_line($userRow, $fallbackName, $fallbackUsername) . "\n\n";
-    $text .= '💰 Amount: <code>' . number_format($amount) . "</code> USD\n";
+    $text .= '💰 Amount: <code>$' . number_format($amount) . "</code>\n";
     $text .= '💳 Card number: <code>' . withdraw_esc(withdraw_format_card((string) ($row['card_number'] ?? ''))) . "</code>\n";
     $text .= '👤 Account holder: <code>' . withdraw_esc((string) ($row['card_holder'] ?? '')) . '</code>';
     if ($status === WITHDRAW_STATUS_REJECTED && trim((string) ($row['reject_reason'] ?? '')) !== '') {
@@ -1038,7 +1038,7 @@ function withdraw_admin_settings_text(): string
 {
     $min = number_format(withdraw_min_amount());
     return "⚙️ Wallet withdrawal settings\n\n"
-        . "⬇️ Minimum withdrawal: <code>$min</code> USD\n\n"
+        . "⬇️ Minimum withdrawal: <code>\$$min</code>\n\n"
         . "📝 Settlement button text:\n" . withdraw_prompt_text() . "\n\n"
         . "✅ Success text after submit:\n" . withdraw_success_text();
 }
@@ -1096,7 +1096,7 @@ function withdraw_admin_pending_view(int $page = 1): array
                 $who = $uname !== '' && $uname !== 'none'
                     ? '@' . withdraw_esc(ltrim($uname, '@'))
                     : withdraw_esc((string) $row['id_user']);
-                $text .= "▪️ #$id — " . number_format((int) $row['amount']) . " USD — $who\n";
+                $text .= "▪️ #$id — $" . number_format((int) $row['amount']) . " — $who\n";
                 $text .= '💳 ' . withdraw_esc(withdraw_format_card((string) $row['card_number']))
                     . ' | ' . withdraw_esc((string) $row['card_holder']) . "\n\n";
         $extra[] = [
@@ -1129,7 +1129,7 @@ function withdraw_admin_history_view(int $page = 1): array
         $whenTxt = $when > 0 && function_exists('jalali_tehran_format')
             ? jalali_tehran_format($when, 'Y/m/d H:i')
             : date('Y/m/d H:i', $when);
-        $text .= '▪️ #' . (int) $row['id'] . ' — ' . number_format((int) $row['amount']) . ' USD — '
+        $text .= '▪️ #' . (int) $row['id'] . ' — $' . number_format((int) $row['amount']) . ' — '
             . (string) $row['id_user'] . "\n📅 $whenTxt\n\n";
     }
     return [

@@ -729,7 +729,7 @@
                 "changedpriceDiscount": "✅ Referral bonus amount was saved",
                 "offaffiliates": "❌ The referral program is currently disabled",
                 "affiliateedago": "❌ You have already been referred by another user and cannot join again",
-                "affiliateinfo": "🤔 How does the referral program work?\n\n👨🏻‍💻 You can grow your wallet balance and use the bot without paying us anything.\n\n👥 Invite friends with your personal link and earn commission on their purchases.\n\n👤 Use the banner above to collect referrals.\n\n💵 Bonus per signup: %s USD\n💴 Commission on referral purchases: %s%%\n\n📊 Your stats\n• Users who joined with your link: %s\n• Number of purchases: %s\n • Purchase amount: %s USD"
+                "affiliateinfo": "🤔 How does the referral program work?\n\n👨🏻‍💻 You can grow your wallet balance and use the bot without paying us anything.\n\n👥 Invite friends with your personal link and earn commission on their purchases.\n\n👤 Use the banner above to collect referrals.\n\n💵 Bonus per signup: $%s\n💴 Commission on referral purchases: %s%%\n\n📊 Your stats\n• Users who joined with your link: %s\n• Number of purchases: %s\n • Purchase amount: $%s"
             },
             "number": {
                 "false": "❌ Invalid phone number. Please send it using the button below.",
@@ -815,8 +815,8 @@
                 "autorenew_enabled": "✅ Auto-renew was enabled for this service.\n\n📌 When remaining data reaches the cron warning threshold, the service is renewed with the same plan and the amount is deducted from your wallet.",
                 "autorenew_disabled": "❌ Auto-renew was disabled for this service.",
                 "autorenew_insufficient": "Your wallet balance is not enough for auto-renew",
-                "autorenew_prewarn": "Service %s has auto-renew enabled, but your wallet balance is too low. Please add at least %s USD to your wallet for a successful renewal.",
-                "autorenew_success": "✅ Service %s was renewed automatically.\n\n🛍 Plan: %s\n💸 Amount deducted: %s USD",
+                "autorenew_prewarn": "Service %s has auto-renew enabled, but your wallet balance is too low. Please add at least $%s to your wallet for a successful renewal.",
+                "autorenew_success": "✅ Service %s was renewed automatically.\n\n🛍 Plan: %s\n💸 Amount deducted: $%s",
                 "autorenew_noproduct": "❌ No matching plan was found for auto-renew.",
                 "autorenew_cron_off": "💡 Enable auto-renew and keep your wallet funded to stay connected",
                 "autorenew_cron_on": "✅ Auto-renew is enabled for this service.",
@@ -830,8 +830,8 @@
                 "extracheck": "Confirm and add extra data",
                 "invalidprice": "🚫 Minimum extra data is 1 GB",
                 "setpricerxtratime": "Send the price you want for each extra day",
-                "extravolumeinvoice": "📇 Extra data invoice created.\n\n💰 Price per extra GB: %s USD\n📝 Invoice total: %s USD\n📥 Requested extra data: %s GB\n\n✅ Tap the button below to pay and add the data.",
-                "enterextravolume": "🔋 Enter the extra data you want (in GB):\n\n📌 Price per GB: %s USD"
+                "extravolumeinvoice": "📇 Extra data invoice created.\n\n💰 Price per extra GB: $%s\n📝 Invoice total: $%s\n📥 Requested extra data: %s GB\n\n✅ Tap the button below to pay and add the data.",
+                "enterextravolume": "🔋 Enter the extra data you want (in GB):\n\n📌 Price per GB: $%s"
             },
             "Extra_time": {
                 "title": "⏳ Buy extra time",
@@ -858,8 +858,8 @@
             "Balance": {
                 "errorprice": "❌ Error\n💬 Please enter numbers only",
                 "selectPatment": "💵 Choose your payment method",
-                "nowpayments": "❌ Error\n    The minimum amount for this gateway is 1 USD.",
-                "zarinpal": "❌ Error\n    The minimum amount for this gateway is 5000 USD.",
+                "nowpayments": "❌ Error\n    The minimum amount for this gateway is $1.",
+                "zarinpal": "❌ Error\n    The minimum amount for this gateway is $5000.",
                 "linkpayments": "Creating payment link...",
                 "payments": "Pay",
                 "changeto": "❌ Error\n    The minimum amount for this gateway is 2 TRX.",
@@ -880,7 +880,7 @@
                 "Send-receipt": "🚀 Your payment receipt was sent. After admin approval, the amount will be added to your wallet.",
                 "Send-receiptadnsendconfig": "🚀 Your receipt was sent. After review, the service details will be sent to you.",
                 "maxpurchasereached": "❌ You have reached your purchase limit. Top up your wallet first, then buy or renew a service.",
-                "insufficientbalance": "❌ Your balance is not enough to buy this service.\n💸 Enter an amount in USD to top up:\n✅ Minimum %s USD, maximum %s USD",
+                "insufficientbalance": "❌ Your balance is not enough to buy this service.\n💸 Enter an amount in $ to top up:\n✅ Minimum $%s, maximum $%s",
                 "receiptimage": "🖼 Receipt image"
             },
             "Discount": {
@@ -890,10 +890,10 @@
                 "erorrlimit": "❌ This discount code has reached its usage limit",
                 "erorrlimitdiscount": "❌ This gift code has reached its usage limit",
                 "firstdiscount": "❌ This discount code is for first-time purchases only.",
-                "gift-deposit": "🎁 %s USD was added to your account as a deposit bonus.",
+                "gift-deposit": "🎁 $%s was added to your account as a deposit bonus.",
                 "discountapplied": "Congratulations 🎉\n📌 Your purchase received a %s percent discount",
                 "giftcodeused": "⭕️ User @%s (ID %s) used gift code %s.",
-                "giftcodesuccess": "Gift code applied. %s USD was added to your balance. 🥳",
+                "giftcodesuccess": "Gift code applied. $%s was added to your balance. 🥳",
                 "giftcodeonce": "📌 This code can only be used once."
             },
             "changelink": {
@@ -938,7 +938,7 @@
                 "acceptrequest": "✅ Approve request",
                 "rejectrequest": "❌ Reject request",
                 "agent-request": "📣 A user requested agency. Please review and decide.\n\nUser ID: <code>%s</code>\nUsername: @%s\nAccount name: %s\nNotes: %s",
-                "insufficientbalanceagent": "❌ Your balance is not enough to request agency. Top up first, then send the request.\n\n💸 Agency fee: %s USD",
+                "insufficientbalanceagent": "❌ Your balance is not enough to request agency. Top up first, then send the request.\n\n💸 Agency fee: $%s",
                 "customnameusername": "👤 Choose a custom name"
             },
             "note": {
@@ -951,13 +951,13 @@
                 "appempty": "❌ There are no apps to download."
             },
             "pricearze": {
-                "tether-price": "Current USDT price: %s USD",
-                "tron-price": "Current TRX price: %s USD"
+                "tether-price": "Current USDT price: $%s",
+                "tron-price": "Current TRX price: $%s"
             },
             "wheel_luck": {
                 "notWinner": "🥲 You did not win this time. Try again tomorrow.",
                 "wheel-winner": "⭕️ User @%s (ID %s) won the lucky wheel",
-                "winner-congratulations": "🤩 Congratulations, you won! %s USD was added to your account.",
+                "winner-congratulations": "🤩 Congratulations, you won! $%s was added to your account.",
                 "already-participated": "❌ You already played today. Try again tomorrow.",
                 "feature-disabled": "❌ This feature is currently disabled"
             }
@@ -1215,7 +1215,7 @@
                 "Invalidvolume": "Invalid volume",
                 "Invalidtime": "Invalid number of days",
                 "GettIime": "\nEnter the subscription duration in days\nTo make the duration unlimited, send 0",
-                "GetPrice": "\nSend the subscription price.\nNote:\nThe product is priced in USD. Send the price with no extra characters.",
+                "GetPrice": "\nSend the subscription price.\nNote:\nThe product is priced in $. Send the price with no extra characters.",
                 "InvalidPrice": "Invalid price",
                 "gettimereset": "📌 Send the periodic data-reset interval. If you do not want a reset, send no_reset",
                 "SaveProduct": "Product was saved 🥳🎉",
@@ -1235,8 +1235,8 @@
             "Balance": {
                 "AddBalance": "⚜️ Send the user's numeric ID \nDescription: to add balance, first send the user's numeric ID",
                 "NegativeBalance": "⚜️ Send the user's numeric ID \nDescription: to deduct balance, first send the user's numeric ID",
-                "PriceBalance": "Numeric ID received. Send the amount to add to the user, in USD",
-                "PriceBalancek": "Numeric ID received. Send the amount to deduct from the user, in USD",
+                "PriceBalance": "Numeric ID received. Send the amount to add to the user, in $",
+                "PriceBalancek": "Numeric ID received. Send the amount to deduct from the user, in $",
                 "Invalidprice": "Invalid amount",
                 "AddBalanceUser": "✅ Amount was added to the user's balance",
                 "AddBalanceUsers": "✅ Amount was added to users' balances",
@@ -1360,8 +1360,8 @@
             "reportgroup": {
                 "adminadded": "👨‍💼 A user with the details below added an admin.\n\nUsername %s\nNumeric ID: %s\nAccess type: %s\n\n⭕️ New admin details:\nNumeric ID: %s",
                 "new-payment-star": "💵 New payment\n- 👤 Username: @%s\n- 🆔 User numeric ID: %s\n- 💸 Transaction amount %s\n- 📥 Stars amount deposited: %s\n- 💳 Payment method: Telegram Stars",
-                "volumepurchase": "⭕️ A user bought extra data\n\nUser details:\n🪪 Numeric ID: %s\n🛍 Data purchased: %s\n💰 Amount paid: %s USD\nUser balance before purchase: %s\n👤 Config username: %s",
-                "renewaldetails": "📣 Account renewal details were recorded in your bot.\n▫️User numeric ID: <code>%s</code>\n▫️Username: @%s\n▫️Config username: %s\n▫️User name: %s\n▫️Service location: %s\n▫️Product name: %s\n▫️Product data: %s\n▫️Product duration: %s\n▫️Renewal amount: %s USD\n▫️User balance: %s USD\n▫️Purchase time: %s"
+                "volumepurchase": "⭕️ A user bought extra data\n\nUser details:\n🪪 Numeric ID: %s\n🛍 Data purchased: %s\n💰 Amount paid: $%s\nUser balance before purchase: %s\n👤 Config username: %s",
+                "renewaldetails": "📣 Account renewal details were recorded in your bot.\n▫️User numeric ID: <code>%s</code>\n▫️Username: @%s\n▫️Config username: %s\n▫️User name: %s\n▫️Service location: %s\n▫️Product name: %s\n▫️Product data: %s\n▫️Product duration: %s\n▫️Renewal amount: $%s\n▫️User balance: $%s\n▫️Purchase time: %s"
             },
             "MessageBulk": {
                 "userresponse": "📥 A reply was received from a user. Tap the button below to reply and send your message.\n\nNumeric ID: %s\nUsername: %s\n📝 Message: %s",

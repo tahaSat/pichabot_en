@@ -5166,7 +5166,7 @@ Error reason : {$extendMsg}";
     update('invoice', 'Status', 'active', 'id_invoice', $invoice['id_invoice']);
     $priceFormat = number_format($price);
     $success = sprintf(
-        $textbotlang['users']['extend']['autorenew_success'] ?? "✅ Service %s was renewed automatically.\n\n🛍 Plan: %s\n💸 Amount deducted: %s USD",
+        $textbotlang['users']['extend']['autorenew_success'] ?? "✅ Service %s was renewed automatically.\n\n🛍 Plan: %s\n💸 Amount deducted: $%s",
         $invoice['username'],
         $product['name_product'],
         $priceFormat
@@ -6943,12 +6943,12 @@ function purchase_description_or_fallback($description, string $fallback_key, st
 
 function textbot_custom_volume_ask($price, $min, $max): string
 {
-    $tpl = textbot_get(
+    $tpl = money_strip_currency_words(textbot_get(
         'text_custom_volume_ask',
-        "📌 Send the data amount you want.\n🔔 Price per GB is {price} USD.\n🔔 Minimum {min} GB, maximum {max} GB."
-    );
+        "📌 Send the data amount you want.\n🔔 Price per GB is {price}.\n🔔 Minimum {min} GB, maximum {max} GB."
+    ));
     return strtr($tpl, [
-        '{price}' => (string) $price,
+        '{price}' => format_money_display($price),
         '{min}' => (string) $min,
         '{max}' => (string) $max,
     ]);
@@ -10474,6 +10474,17 @@ function format_money_amount($value): string
     return number_format($n, $decimals);
 }
 
+function format_money_display($value): string
+{
+    return '$' . format_money_amount($value);
+}
+
+function money_strip_currency_words(string $text): string
+{
+    $updated = preg_replace('/[ \t]*\b(?:Toman|Tomans|تومان|تومن|USD)\b/iu', '', $text);
+    return is_string($updated) ? $updated : $text;
+}
+
 function product_discount_sale_price($original, string $type, $amount): float
 {
     $original = money_amount($original);
@@ -10709,9 +10720,9 @@ function product_discount_format_html($original, $sale, bool $applied): string
     $sale = money_amount($sale);
     if ($applied && $original !== $sale) {
         // Telegram HTML: <s> draws one continuous line across the whole original price.
-        return '<s>' . format_money_amount($original) . '</s> ' . format_money_amount($sale);
+        return '<s>' . format_money_display($original) . '</s> ' . format_money_display($sale);
     }
-    return format_money_amount($sale);
+    return format_money_display($sale);
 }
 
 function product_discount_format_button($original, $sale, bool $applied): string
@@ -10719,9 +10730,9 @@ function product_discount_format_button($original, $sale, bool $applied): string
     $original = money_amount($original);
     $sale = money_amount($sale);
     if ($applied && $original !== $sale) {
-        return product_discount_strikethrough_text(format_money_amount($original)) . ' ' . format_money_amount($sale);
+        return product_discount_strikethrough_text(format_money_display($original)) . ' ' . format_money_display($sale);
     }
-    return format_money_amount($sale);
+    return format_money_display($sale);
 }
 
 function product_discount_to_latin_digits(string $text): string

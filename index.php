@@ -1550,7 +1550,7 @@ $textconnect
     savedata("clear", "id_invoice", $nameloc['id_invoice']);
     if ($product == 0) {
         $textcustom = "📌 Send the data amount you want.
-🔔 Price per GB is $custompricevalue USD.
+🔔 Price per GB is " . format_money_display($custompricevalue) . ".
 🔔 Minimum $mainvolume GB and maximum $maxvolume GB.";
         sendmessage($from_id, $textcustom, $backuser, 'html');
         deletemessage($from_id, $message_id);
@@ -1559,7 +1559,7 @@ $textconnect
     }
     if ($nameloc['name_product'] == "🛍 Custom data" || $nameloc['name_product'] == "⚙️ Custom service") {
         $textcustom = "📌 Send the data amount you want.
-🔔 Price per GB is $custompricevalue USD.
+🔔 Price per GB is " . format_money_display($custompricevalue) . ".
 🔔 Minimum $mainvolume GB and maximum $maxvolume GB.";
         sendmessage($from_id, $textcustom, $backuser, 'html');
         deletemessage($from_id, $message_id);
@@ -1658,11 +1658,11 @@ $textconnect
     $textextend = "📜 Your renewal invoice for username {$nameloc['username']} created.
         
 🛍 Product :{$product['name_product']}
-💸 Renewal price :{$product['price_product']}
+💸 Renewal price :" . format_money_display($product['price_product']) . "
 ⏱ Renewal duration :{$product['Service_time']} days
 🔋 Renewal data :{$product['Volume_constraint']} GB
 ✍️ Notes : {$product['note']}
-💸 Wallet balance : {$user['Balance']}
+💸 Wallet balance : " . format_money_display($user['Balance']) . "
 
 ✅ Tap the button below to confirm and renew";
     deletemessage($from_id, $message_id);
@@ -1826,11 +1826,11 @@ $textconnect
     $textextend = "📜 Your renewal invoice for username {$nameloc['username']} created.
         
 🛍 Product :{$product['name_product']}
-💸 Renewal price : $pricelastextend USD
+💸 Renewal price : " . format_money_display($pricelastextend) . "
 ⏱ Renewal duration :{$product['Service_time']} days
 🔋 Renewal data :{$product['Volume_constraint']} GB
 ✍️ Notes : {$product['note']}
-💸 Wallet balance : {$user['Balance']}
+💸 Wallet balance : " . format_money_display($user['Balance']) . "
 ✅ Tap the button below to confirm and renew";
     if ($user['step'] == "getvolumecustomuserforextend") {
         sendmessage($from_id, $textextend, $keyboardextend, 'HTML');
@@ -1931,11 +1931,11 @@ $textconnect
     $textextend = "📜 Your renewal invoice for username {$nameloc['username']} created.
         
 🛍 Product :{$info_product['name_product']}
-💸 Renewal price :{$info_product['price_product']}
+💸 Renewal price :" . format_money_display($info_product['price_product']) . "
 ⏱ Renewal duration :{$info_product['Service_time']} days
 🔋 Renewal data :{$info_product['Volume_constraint']} GB
 ✍️ Notes : {$info_product['note']}
-💸 Wallet balance : {$user['Balance']}
+💸 Wallet balance : " . format_money_display($user['Balance']) . "
 
 ✅ Tap the button below to confirm and renew";
     $keyboardextend = json_encode([
@@ -2114,7 +2114,7 @@ Service username: {$nameloc['username']}
         $result = ($prodcut['price_product'] * $valurcashbackextend) / 100;
         $pricelastextend = $pricelastextend - $result;
         sendmessage($from_id, "Congratulations 🎉
-📌 $result USD was added to your account as a renewal bonus", null, 'HTML');
+📌 \$result was added to your account as a renewal bonus", null, 'HTML');
     }
     $Balance_Low_user = $user['Balance'] - $pricelastextend;
     update("user", "Balance", $Balance_Low_user, "id", $from_id);
@@ -2157,7 +2157,7 @@ Service username: {$nameloc['username']}
  
 ▫️Service : {$nameloc['username']}
 ▫️Product : {$prodcut['name_product']}
-▫️Renewal price $priceproductformat USD
+▫️Renewal price \$priceproductformat
 ";
     sendmessage($from_id, $textextend, $keyboardextendfnished, 'HTML');
     $timejalali = jdate('Y/m/d H:i:s');
@@ -2178,9 +2178,9 @@ Service username: {$nameloc['username']}
 ▫️Product: {$prodcut['name_product']}
 ▫️Volume: {$prodcut['Volume_constraint']}
 ▫️Duration: {$prodcut['Service_time']}
-▫️Renewal amount: {$prodcut['price_product']} USD
-▫️Balance before purchase: $balanceformatsellbefore USD
-▫️Balance after purchase: $balanceformatsell USD
+▫️Renewal amount: \${$prodcut['price_product']}
+▫️Balance before purchase: \$balanceformatsellbefore
+▫️Balance after purchase: \$balanceformatsell
 ▫️Purchase time: $timejalali";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
@@ -2277,7 +2277,7 @@ Service username: {$nameloc['username']}
     update("user", "Processing_value", $nameloc['id_invoice'], "id", $from_id);
     $textextra = " ⭕️ Send the data amount you want to buy.
 ❌ Send the number in English.
-        ⚠️ Each extra GB costs $extrapricevalue USD.";
+        ⚠️ Each extra GB costs " . format_money_display($extrapricevalue) . ".";
     $bakinfos = json_encode([
         'inline_keyboard' => [
             [
@@ -2308,13 +2308,11 @@ Service username: {$nameloc['username']}
             ]
         ]
     ]);
-    $priceextra = number_format($priceextra, 0);
-    $extrapricevalues = number_format($extrapricevalue, 0);
     $textextra = "📜 Extra data invoice was created for you.
         
-📌 Price per GB Extra data : $extrapricevalues USD
+📌 Price per GB Extra data : " . format_money_display($extrapricevalue) . "
 🔋 Extra data requested : $text GB
-💰 Your invoice amount : $priceextra USD
+💰 Your invoice amount : " . format_money_display($priceextra) . "
         
 ✅ Tap below to pay and add the data";
     sendmessage($from_id, $textextra, $keyboardsetting, 'HTML');
@@ -2447,14 +2445,14 @@ Service username: {$nameloc['username']}
 ▫️Service: {$nameloc['username']}
 ▫️Extra data : $volumes GB
 
-▫️مبلغ افزایش حجم : $volumesformat USD";
+▫️مبلغ افزایش حجم : \$volumesformat";
     sendmessage($from_id, $textvolume, $keyboardextrafnished, 'HTML');
     $text_report = "⭕️ A user bought extra data
         
 User details : 
 🪪 User ID : $from_id
 🛍 Data purchased: $volumes GB
-💰 Amount paid : $volumesformat USD
+💰 Amount paid : \$volumesformat
 👤 Config username : {$nameloc['username']}
 Balance before purchase : {$user['Balance']}
 ";
@@ -2495,7 +2493,7 @@ Balance before purchase : {$user['Balance']}
         $userlimitlastfree = 0;
     $Pricechange = select("marzban_panel", "*", "code_panel", $dataget[1], "select")['priceChangeloc'];
     $textchange = "📍 Confirming will remove the service from this location and move it to the new one.
-💰 Transfer fee $Pricechange USD 
+💰 Transfer fee \$Pricechange 
 📌 Remaining limit : $userlimitlast  (Free transfers remaining :‌$userlimitlastfree )
 
 ✅ Tap below to confirm the transfer";
@@ -2714,7 +2712,7 @@ Balance before purchase : {$user['Balance']}
 🔻Name پنل جدید : {$marzban_list_get_new['name_panel']}
 🔻 Username مشتری در پنل:{$nameloc['username']}
 🔻حجم نهایی سرویس : $format_byte
-🔻Balance کاربر : $balanceformatsell USD";
+🔻Balance کاربر : \$balanceformatsell";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
             'chat_id' => $setting['Channel_Report'],
@@ -2919,13 +2917,11 @@ User subscription link :
             ]
         ]
     ]);
-    $priceextratime = number_format($priceextratime, 0);
-    $extrapricevalues = number_format($extrapricevalue, 0);
     $textextra = "📜 Extra time invoice was created for you.
         
-📌 Price per days Extra time : $extratimepricevalue USD
+📌 Price per days Extra time : " . format_money_display($extratimepricevalue) . "
 📆 Extra days requested : $text days
-💰 Your invoice amount : $priceextratime USD
+💰 Your invoice amount : " . format_money_display($priceextratime) . "
         
 ✅ Tap below to pay and add the time";
     sendmessage($from_id, $textextra, $keyboardsetting, 'HTML');
@@ -3049,7 +3045,7 @@ Service username: {$nameloc['username']}
 ▫️Service : {$nameloc['username']}
 ▫️Extra time : $extratimeday days
 
-▫️مبلغ افزایش زمان : $volumesformat USD";
+▫️مبلغ افزایش زمان : \$volumesformat";
     sendmessage($from_id, $textextratime, $keyboardextrafnished, 'HTML');
     $volumes = $tmieextra / $extratimepricevalue;
     $text_report = "⭕️ A user bought extra time
@@ -3057,7 +3053,7 @@ Service username: {$nameloc['username']}
 User details : 
 🪪 User ID : $from_id
 🛍 Time purchased: $volumes days
-💰 Amount paid : $volumesformat USD
+💰 Amount paid : \$volumesformat
 👤 Config username : {$nameloc['username']}";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
@@ -3923,7 +3919,7 @@ https://t.me/$usernamebot?start={$user['codeInvitation']}";
 👨‍👩‍👦 Your referral code : <code>{$user['codeInvitation']}</code>
 📱 Phone :$numberphone
 ⌚️Joined : $userjoin
-💰 Balance: $Balanceuser USD
+💰 Balance: \$Balanceuser
 🛒 Purchased services : $countorder 
 📑 Paid invoices :: $countpayment 
 🤝 Your referrals : {$user['affiliatescount']} 
@@ -4061,7 +4057,7 @@ $textinvite
         } else {
             $amount = withdraw_parse_int($text);
             if ($amount === null) {
-                sendmessage($from_id, "❌ Invalid amount. Enter a number in USD.", $wdAmountKb, 'HTML');
+                sendmessage($from_id, "❌ Invalid amount. Enter a number in $.", $wdAmountKb, 'HTML');
                 return;
             }
         }
@@ -4513,8 +4509,8 @@ $textinvite
         $info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
     if (intval($info_product['Service_time']) == 0)
         $info_product['Service_time'] = $textbotlang['users']['stateus']['Unlimited'];
-    $info_product_price_product = format_money_amount($info_product['price_product']);
-    $userBalance = number_format($user['Balance']);
+    $info_product_price_product = format_money_display($info_product['price_product']);
+    $userBalance = format_money_display($user['Balance']);
     $replacements = [
         '{username}' => $username_ac,
         '{name_product}' => $info_product['name_product'],
@@ -4524,7 +4520,7 @@ $textinvite
         '{Volume}' => $info_product['Volume_constraint'],
         '{userBalance}' => $userBalance
     ];
-    $textin = strtr($datatextbot['text_pishinvoice'], $replacements);
+    $textin = strtr(money_strip_currency_words($datatextbot['text_pishinvoice']), $replacements);
     if (intval($info_product['Volume_constraint']) == 0) {
         $textin = str_replace('GB', "", $textin);
     }
@@ -4663,7 +4659,7 @@ $textinvite
         $info_product['Service_time'] = $textbotlang['users']['stateus']['Unlimited'];
     $info_product_price_product = (is_array($priceInfo) && !empty($priceInfo['applied']))
         ? product_discount_format_html($priceInfo['original'], $priceInfo['payable'], true)
-        : format_money_amount($info_product['price_product']);
+        : format_money_display($info_product['price_product']);
     $displayName = (string) ($info_product['name_product'] ?? '');
     if (is_array($priceInfo) && !empty($priceInfo['applied'])) {
         $displayName = product_discount_rewrite_name(
@@ -4673,7 +4669,7 @@ $textinvite
             true
         );
     }
-    $userBalance = number_format($user['Balance']);
+    $userBalance = format_money_display($user['Balance']);
     $replacements = [
         '{username}' => $username_ac,
         '{name_product}' => $displayName,
@@ -4683,7 +4679,7 @@ $textinvite
         '{Volume}' => $info_product['Volume_constraint'],
         '{userBalance}' => $userBalance
     ];
-    $textin = strtr($datatextbot['text_pishinvoice'] ?? '', $replacements);
+    $textin = strtr(money_strip_currency_words($datatextbot['text_pishinvoice'] ?? ''), $replacements);
     if (intval($info_product['Volume_constraint']) == 0) {
         $textin = str_replace('GB', "", $textin);
     }
@@ -5021,7 +5017,7 @@ $textinvite
                 $dateacc = date('Y/m/d H:i:s');
                 $textadd = "🎁 Referral commission
 
-        $result USD was added to your wallet from your referral";
+        \$result was added to your wallet from your referral";
                 $textreportport = "
 مبلغ $result به کاربر {$user['affiliates']} برای پورسانت از کاربر $from_id واریز گردید 
 تایم : $dateacc";
@@ -5050,7 +5046,7 @@ $textinvite
             $dateacc = date('Y/m/d H:i:s');
             $textadd = "🎁 Referral commission
 
-        $result USD was added to your wallet from your referral";
+        \$result was added to your wallet from your referral";
             $textreportport = "
 مبلغ $result به کاربر {$user['affiliates']} برای پورسانت از کاربر $from_id واریز گردید 
 تایم : $dateacc";
@@ -5095,14 +5091,14 @@ $textonebuy
 ▫️Product:{$info_product['name_product']}
 ▫️Duration purchased:{$info_product['Service_time']} days
 ▫️Volume purchased: {$info_product['Volume_constraint']} GB
-▫️Balance before purchase: $balanceformatsellbefore USD
-▫️Balance after purchase: $balanceformatsell USD
+▫️Balance before purchase: \$balanceformatsellbefore
+▫️Balance after purchase: \$balanceformatsell
 ▫️Tracking code: $randomString
 ▫️User type: {$user['agent']}
 ▫️Phone number: {$user['number']}
 ▫️Product category: {$info_product['category']}
-▫️Product price: {$info_product['price_product']} USD
-▫️Final price: $priceproduct USD
+▫️Product price: \${$info_product['price_product']}
+▫️Final price: \$priceproduct
 ▫️Purchase time: $timejalali";
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage', [
@@ -5219,10 +5215,10 @@ $textonebuy
 👤 Username: <code>{$user['Processing_value_tow']}</code>
 🔐 Service: {$info_product['name_product']}
 📆 Duration: {$info_product['Service_time']} days
-💶 Original price : <del>$info_productmain USD</del>
-💶 Discounted price: {$info_product['price_product']}  USD
+💶 Original price : <del>" . format_money_display($info_productmain) . "</del>
+💶 Discounted price: " . format_money_display($info_product['price_product']) . "
 👥 Account data: {$info_product['Volume_constraint']} GB
-💵 Wallet balance : {$user['Balance']}
+💵 Wallet balance : " . format_money_display($user['Balance']) . "
                   
         💰 Your order is ready to pay.  ";
     $paymentDiscount = KeyboardPayment(
@@ -5240,7 +5236,7 @@ $textonebuy
     }
     $PaySetting = select("PaySetting", "*", "NamePay", "minbalancebuybulk", "select")['ValuePay'];
     if ($user['Balance'] < $PaySetting) {
-        sendmessage($from_id, "❌ Bulk buy requires at least $PaySetting USD in your wallet.", null, 'HTML');
+        sendmessage($from_id, "❌ Bulk buy requires at least \$PaySetting in your wallet.", null, 'HTML');
         return;
     }
     $locationproduct = mysqli_query($connect, "SELECT * FROM marzban_panel");
@@ -5355,16 +5351,16 @@ $textonebuy
     if ($info_product['Service_time'] == 0)
         $info_product['Service_time'] = $textbotlang['users']['stateus']['Unlimited'];
     $info_product['price_product'] = money_amount($info_product['price_product']) * intval($user['Processing_value_four']);
-    $price_product_format = format_money_amount($info_product['price_product']);
-    $userbalancepish = number_format($user['Balance']);
+    $price_product_format = format_money_display($info_product['price_product']);
+    $userbalancepish = format_money_display($user['Balance']);
     $textin = "
 📇 Your invoice:
 👤 Username: <code>$username_ac</code>
 🔐 Service: {$info_product['name_product']}
 ⏱ Duration: {$info_product['Service_time']} days
 🔋 Service data : {$info_product['Volume_constraint']} GB
-💸 Amount due : $price_product_format USD
-💰 Wallet balance : $userbalancepish USD
+💸 Amount due : $price_product_format
+💰 Wallet balance : $userbalancepish
     
 ✅ Tap the button below to confirm and pay";
     sendmessage($from_id, $textin, $payment, 'HTML');
@@ -5430,14 +5426,14 @@ $textonebuy
         $unitPrice = product_discount_apply($unitPrice, $info_product['code_product'] ?? '')['sale'];
     }
     $info_product['price_product'] = money_amount($unitPrice * intval($user['Processing_value_four']));
-    $price_product_format = format_money_amount($info_product['price_product']);
-    $userbalancepish = number_format($user['Balance']);
+    $price_product_format = format_money_display($info_product['price_product']);
+    $userbalancepish = format_money_display($user['Balance']);
     $textin = "
 📇 Your invoice:
 👤 Username: <code>$username_ac</code>
 🔐 Service: {$info_product['name_product']}
 📆 Duration: {$info_product['Service_time']} days
-💶 Price: $price_product_format  USD
+💶 Price: $price_product_format
 👥 Account data: {$info_product['Volume_constraint']} GB
 💵 Wallet balance : $userbalancepish
 ⭕️Number of configs : {$user['Processing_value_four']}
@@ -5696,13 +5692,13 @@ Name پنل : {$marzban_list_get['name_panel']}";
 ▫️Product:{$info_product['name_product']}
 ▫️Duration purchased:{$info_product['Service_time']} days
 ▫️Volume purchased: {$info_product['Volume_constraint']} GB
-▫️Balance before purchase: $balanceformatsellbefore USD
-▫️Balance after purchase: $balanceformatsell USD
+▫️Balance before purchase: \$balanceformatsellbefore
+▫️Balance after purchase: \$balanceformatsell
 ▫️Tracking code: $randomString
 ▫️User type: {$user['agent']}
 ▫️Phone number: {$user['number']}
-▫️Product price: {$info_product['price_product']} USD
-▫️Final price: {$info_product['price_product']} USD
+▫️Product price: \${$info_product['price_product']}
+▫️Final price: \${$info_product['price_product']}
 ▫️Config count: {$user['Processing_value_four']} pcs
 ▫️Purchase time: $timejalali";
     if (strlen($setting['Channel_Report']) > 0) {
@@ -5735,8 +5731,8 @@ Name پنل : {$marzban_list_get['name_panel']}";
             ]
         ]
     ]);
-    $sent = reply_or_edit($from_id, $message_id, "💸 Enter the amount in USD:
-✅ Minimum $minbalance, maximum $maxbalance USD", $bakinfos, 'HTML');
+    $sent = reply_or_edit($from_id, $message_id, "💸 Enter the amount in $:
+✅ Minimum \$minbalance, maximum \$maxbalance", $bakinfos, 'HTML');
     step('getprice', $from_id);
     $prompt_message_id = $sent['result']['message_id'] ?? $message_id;
     update("user", 'Processing_value', $prompt_message_id, "id", $from_id);
@@ -5751,13 +5747,13 @@ Name پنل : {$marzban_list_get['name_panel']}";
         $minbalance = number_format($minbalance);
         $maxbalance = number_format($maxbalance);
         sendmessage($from_id, "❌ Error
-💬 Amount must be at least $minbalance USD and at most $maxbalance USD", null, 'HTML');
+💬 Amount must be at least \$minbalance and at most \$maxbalance", null, 'HTML');
         return;
     }
     if ($user['Balance'] < 0 and intval($setting['Debtsettlement']) == 1) {
         $balancruser = abs($user['Balance']);
         if ($text < $balancruser) {
-            sendmessage($from_id, "❌ You have a debt. Please pay at least $balancruser USD.
+            sendmessage($from_id, "❌ You have a debt. Please pay at least \$balancruser.
          Send the amount again", null, 'HTML');
             return;
         }
@@ -5793,7 +5789,7 @@ Name پنل : {$marzban_list_get['name_panel']}";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance = number_format($mainbalance);
             $maxbalance = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalance and maximum is \$maxbalance", null, 'HTML');
             return;
         }
         $cardQuery = mysqli_query($connect, "SELECT * FROM card_number  ORDER BY RAND() LIMIT 1");
@@ -5823,22 +5819,21 @@ Name پنل : {$marzban_list_get['name_panel']}";
             }
             $valueshow = "{$user['Processing_value']}0";
             $replacements = [
-                '{price}' => $valueshow,
+                '{price}' => format_money_display($valueshow),
                 '{card_number}' => $card_number,
                 '{name_card}' => $PaySettingname,
             ];
             $price_copy = $valueshow;
-            $textcart = strtr($datatextbot['text_cart_auto'], $replacements);
+            $textcart = strtr(money_strip_currency_words($datatextbot['text_cart_auto']), $replacements);
             update("user", "Processing_value", $user['Processing_value'], "id", $from_id);
         } else {
-            $valueprice = number_format($user['Processing_value']);
             $replacements = [
-                '{price}' => $valueprice,
+                '{price}' => format_money_display($user['Processing_value']),
                 '{card_number}' => $card_number,
                 '{name_card}' => $PaySettingname,
             ];
             $price_copy = intval($user['Processing_value'] . "0");
-            $textcart = strtr($datatextbot['text_cart'], $replacements);
+            $textcart = strtr(money_strip_currency_words($datatextbot['text_cart']), $replacements);
         }
         $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
         $dateacc = date('Y/m/d H:i:s');
@@ -5888,7 +5883,7 @@ Name پنل : {$marzban_list_get['name_panel']}";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance = number_format($mainbalance);
             $maxbalance = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalance and maximum is \$maxbalance", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -5930,7 +5925,7 @@ Name پنل : {$marzban_list_get['name_panel']}";
         ]);
         $price_format = number_format($user['Processing_value'], 0);
         $textnowpayments = "✅ Payment invoice created.\n\n🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format USD
+💰 Invoice amount : \$price_format
 
 ❌ This transaction is valid for one hour After that it cannot be paid.        
 
@@ -5960,7 +5955,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance = number_format($mainbalance);
             $maxbalance = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalance and maximum is \$maxbalance", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6005,7 +6000,7 @@ Use the button below to pay👇🏻";
 ✅ Payment invoice created.
             
 🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format USD
+💰 Invoice amount : \$price_format
 
 ❌ This transaction is valid for one day After that it cannot be paid.        
 
@@ -6033,7 +6028,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance_fmt = number_format($mainbalance);
             $maxbalance_fmt = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance_fmt and maximum is $maxbalance_fmt USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalance_fmt and maximum is \$maxbalance_fmt", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6079,7 +6074,7 @@ Use the button below to pay👇🏻";
 ✅ Payment invoice created.
             
 🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format USD
+💰 Invoice amount : \$price_format
 
 ❌ This transaction is valid for one day After that it cannot be paid.        
 
@@ -6109,7 +6104,7 @@ Use the button below to pay👇🏻";
         if ((float) $amountUsd < (float) $minCryptomus || (float) $amountUsd > (float) $maxCryptomus) {
             $minCryptomusDisplay = number_format((float) $minCryptomus, 2);
             $maxCryptomusDisplay = number_format((float) $maxCryptomus, 2);
-            sendmessage($from_id, "❌ Minimum for this method is $minCryptomusDisplay and maximum is $maxCryptomusDisplay USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$minCryptomusDisplay and maximum is \$maxCryptomusDisplay", null, 'HTML');
             return;
         }
 
@@ -6274,7 +6269,7 @@ Use the button below to pay👇🏻";
         $textCryptomus = "<b>💲 Cryptomus payment invoice created</b>
 
 🔢 Invoice number: <code>$randomString</code>
-💰 Invoice amount: <code>$priceFormat USD</code>
+💰 Invoice amount: <code>\$priceFormat</code>
 
 ⚠️ This hosted payment link is valid for one hour. Do not pay it after it expires.
 
@@ -6303,7 +6298,7 @@ Use the button below to pay 👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalanceplisio and maximum is \$maxbalanceplisio", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6362,7 +6357,7 @@ Username کاربر : @$username";
 🔹 cafearz.com
 🔸 pay98.app
 🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format USD
+💰 Invoice amount : \$price_format
 📊 Current USD rate: $USD
 
 Use the button below to pay👇🏻";
@@ -6395,7 +6390,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalanceplisio and maximum is \$maxbalanceplisio", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6454,7 +6449,7 @@ Username کاربر : @$username";
 🔹 cafearz.com
 🔸 pay98.app
 🔢 Invoice number : $randomString
-💰 Invoice amount : $price_format USD
+💰 Invoice amount : \$price_format
 📊 Current USD rate: $USD
 
 
@@ -6491,7 +6486,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalanceplisio and maximum is \$maxbalanceplisio", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6538,7 +6533,7 @@ Use the button below to pay👇🏻";
         $textnowpayments = "✅ Your transaction was created
         
 🛒 Tracking code:  <code>$randomString</code> 
-💲 Amount: <code>$pricetoman</code> USD
+💲 Amount: <code>\$pricetoman</code>
 
 
 💢 Please read these notes before paying 👇
@@ -6576,7 +6571,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalanceplisio and maximum is \$maxbalanceplisio", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6622,7 +6617,7 @@ Use the button below to pay👇🏻";
         $textnowpayments = "✅ Your transaction was created
         
 🛒 Tracking code:  <code>$randomString</code> 
-💲 Amount: <code>$pricetoman</code> USD
+💲 Amount: <code>\$pricetoman</code>
 
 💢 Please read these notes before paying 👇
         
@@ -6670,7 +6665,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalanceplisio || $user['Processing_value'] > $maxbalanceplisio) {
             $mainbalanceplisio = number_format($mainbalanceplisio);
             $maxbalanceplisio = number_format($maxbalanceplisio);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalanceplisio and maximum is \$maxbalanceplisio", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6717,7 +6712,7 @@ Use the button below to pay👇🏻";
         $textnowpayments = "✅ Your transaction was created
         
 🛒 Tracking code:  <code>$randomString</code> 
-💲 Amount: <code>$pricetoman</code> USD
+💲 Amount: <code>\$pricetoman</code>
 
 
 💢 Please read these notes before paying 👇
@@ -6759,7 +6754,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalancedigitaltron || $user['Processing_value'] > $maxbalancedigitaltron) {
             $mainbalanceplisio = number_format($mainbalancedigitaltron);
             $maxbalanceplisio = number_format($maxbalancedigitaltron);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalanceplisio and maximum is $maxbalanceplisio USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalanceplisio and maximum is \$maxbalanceplisio", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6788,7 +6783,7 @@ Use the button below to pay👇🏻";
 💳 Wallet address: <code>$affilnecurrency</code>
 💲 Transaction amount: $trxprice TRX
 
-📌 Send $formatprice USD, then tap the button below and send the receipt
+📌 Send \$formatprice, then tap the button below and send the receipt
 
 💢 Please read these notes before paying 👇
 
@@ -6828,7 +6823,7 @@ Use the button below to pay👇🏻";
         if ($user['Processing_value'] < $mainbalance || $user['Processing_value'] > $maxbalance) {
             $mainbalance = number_format($mainbalance);
             $maxbalance = number_format($maxbalance);
-            sendmessage($from_id, "❌ Minimum for this method is $mainbalance and maximum is $maxbalance USD", null, 'HTML');
+            sendmessage($from_id, "❌ Minimum for this method is \$mainbalance and maximum is \$maxbalance", null, 'HTML');
             return;
         }
         deletemessage($from_id, $message_id);
@@ -6886,9 +6881,9 @@ Use the button below to pay👇🏻";
         $textstar = "✅ Your transaction was created
 
 🛒 Tracking code: <code>$randomString</code>
-💲 Transaction amount: $starAmount ⭐ (equal to $formatprice USD)
+💲 Transaction amount: $starAmount ⭐ (equal to \$formatprice)
 
-📌 Please send $formatprice USD as Telegram Stars.
+📌 Please send \$formatprice as Telegram Stars.
 
 💢 Important notes before paying: 👇
 🔹 Each transaction is valid for 1 day; do not pay after it expires.
@@ -7090,11 +7085,11 @@ Volume: {$get_invoice['Volume']} GB
 Duration: {$get_invoice['Service_time']} days
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
 💵 Total user payments: $Paymentusercount pcs
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
 
                 
 Notes: $caption $text
@@ -7155,11 +7150,11 @@ Service username: $usernamepanel
 Product: {$prodcut['name_product']}
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
 💵 Total user payments: $Paymentusercount pcs
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
                 
 Notes: $caption $text
 ✍️ If the receipt is valid, confirm the payment.";
@@ -7176,11 +7171,11 @@ Service username: $usernamepanel
 حجم خریداری شده  : $volumes
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
 💵 Total user payments: $Paymentusercount pcs
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
                 
 Notes: $caption $text
 ✍️ If the receipt is valid, confirm the payment.";
@@ -7197,11 +7192,11 @@ Service username: $usernamepanel
 تعداد days خریداری شده  : $time
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
 💵 Total user payments: $Paymentusercount pcs
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
                 
 Notes: $caption $text
 ✍️ If the receipt is valid, confirm the payment.";
@@ -7212,11 +7207,11 @@ Notes: $caption $text
 افزایش موجودی            
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
 💵 Total user payments: $Paymentusercount pcs
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
                 
 Notes: $caption $text
 ✍️ If the receipt is valid, confirm the payment.";
@@ -7295,10 +7290,10 @@ Volume: {$get_invoice['Volume']} گیگ
 Duration: {$get_invoice['Service_time']} days
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
                 
 ✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = $textbotlang['users']['Balance']['Send-receiptadnsendconfig'];
@@ -7357,10 +7352,10 @@ Service username: $usernamepanel
 Product: {$prodcut['name_product']}
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
                 
 ✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = "🚀 Your receipt was sent. After review, the service will be renewed";
@@ -7377,10 +7372,10 @@ Service username: $usernamepanel
 حجم خریداری شده  : $volumes
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
                 
 ✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = "🚀 Your receipt was sent. After review, extra data will be added.";
@@ -7397,10 +7392,10 @@ Service username: $usernamepanel
 تعداد days خریداری شده  : $time
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
                 
 ✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = "🚀 Your receipt was sent. After review, extra time will be added";
@@ -7411,10 +7406,10 @@ Service username: $usernamepanel
 افزایش موجودی            
 👤 Account name: $first_name
 👤 User ID:  <a href = \"tg://user?id=$from_id\">$from_id</a>
-💸 Current balance: $format_balance USD
+💸 Current balance: \$format_balance
 🛒 Payment tracking code: {$PaymentReport['id_order']}
 ⚜️ Username: @$username
-💸 Amount paid: $format_price_cart USD
+💸 Amount paid: \$format_price_cart
                 
 ✍️ If the receipt is valid, confirm the payment.";
         $userReceiptPendingAck = $textbotlang['users']['Balance']['Send-receipt'];
@@ -8510,7 +8505,7 @@ if (isset($update['message']['successful_payment'])) {
  
 ▫️Service : $usernamePanelExtends
 ▫️Product : {$prodcut['name_product']}
-▫️Renewal price {$prodcut['price_product']} USD
+▫️Renewal price " . format_money_display($prodcut['price_product']) . "
 ";
     sendmessage($from_id, $textextend, $keyboard, 'HTML');
     $timejalali = jdate('Y/m/d H:i:s');
