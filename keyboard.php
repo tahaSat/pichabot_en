@@ -1546,6 +1546,25 @@ function keyboard_departman_user()
     return json_encode($list_departman);
 }
 
+function keyboard_faq_list()
+{
+    global $pdo;
+    $list = ['inline_keyboard' => []];
+    foreach (faq_list_active($pdo) as $item) {
+        $id = (int) ($item['id'] ?? 0);
+        if ($id < 1) {
+            continue;
+        }
+        $list['inline_keyboard'][] = [
+            ['text' => faq_button_label((string) ($item['question'] ?? '')), 'callback_data' => 'faq_' . $id]
+        ];
+    }
+    $list['inline_keyboard'][] = [
+        ['text' => '🔙 Back', 'callback_data' => 'supportbtns'],
+    ];
+    return json_encode($list);
+}
+
 function KeyboardProduct($location, $query, $pricediscount, $datakeyboard, $statuscustom = false, $backuser = "backuser", $valuetow = null, $customvolume = "customsellvolume")
 {
     global $pdo, $textbotlang, $from_id, $user;

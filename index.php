@@ -3635,7 +3635,11 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
         sendmessage($from_id, "❌ This button is disabled", null, 'HTML');
         return;
     }
-    reply_or_edit($from_id, $message_id, $textbotlang['users']['support']['btnsupport'], $supportoption, 'HTML');
+    $supportIntro = trim((string) ($datatextbot['text_support_msg'] ?? ''));
+    if ($supportIntro === '') {
+        $supportIntro = $textbotlang['users']['support']['btnsupport'];
+    }
+    reply_or_edit($from_id, $message_id, $supportIntro, $supportoption, 'HTML');
 } elseif ($datain == "support") {
     Editmessagetext($from_id, $message_id, "📌 Choose the support department you want to message.", keyboard_departman_user(), 'HTML');
 } elseif (preg_match('/^departman_(.*)/', $datain, $dataget)) {
@@ -3864,7 +3868,28 @@ Message: $supportText";
         step("home", $from_id);
     }
 } elseif ($datain == "fqQuestions") {
-    sendmessage($from_id, $datatextbot['text_dec_fq'], null, 'HTML');
+    faq_ensure_schema($pdo);
+    $faqs = faq_list_active($pdo);
+    if ($faqs) {
+        reply_or_edit($from_id, $message_id, "❓ Frequently asked questions\nTap a question to see the answer.", keyboard_faq_list(), 'HTML');
+    } else {
+        sendmessage($from_id, $datatextbot['text_dec_fq'], null, 'HTML');
+    }
+} elseif (preg_match('/^faq_(\d+)$/', (string) $datain, $faqMatch)) {
+    faq_ensure_schema($pdo);
+    $faqItem = faq_get($pdo, (int) $faqMatch[1]);
+    if (!$faqItem || empty($faqItem['is_active'])) {
+        reply_or_edit($from_id, $message_id, "❌ This question is not available.", keyboard_faq_list(), 'HTML');
+    } else {
+        $faqQuestion = htmlspecialchars((string) ($faqItem['question'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $faqAnswer = (string) ($faqItem['answer'] ?? '');
+        $faqBack = json_encode([
+            'inline_keyboard' => [
+                [['text' => '🔙 Back', 'callback_data' => 'fqQuestions']],
+            ]
+        ]);
+        reply_or_edit($from_id, $message_id, "❓ <b>{$faqQuestion}</b>\n\n{$faqAnswer}", $faqBack, 'HTML');
+    }
 } elseif (user_text_matches_main_button($text, 'accountwallet', $datatextbot) || $datain == "account" || $text == "/wallet") {
     if (!check_active_btn($setting['keyboardmain'], "accountwallet")) {
         sendmessage($from_id, "❌ This button is disabled", null, 'HTML');

@@ -1624,6 +1624,29 @@ try {
     file_put_contents('error_log support_media', $e->getMessage());
 }
 try {
+    $tableName = 'support_faq';
+    $stmt = $pdo->prepare("SELECT 1 FROM information_schema.tables WHERE table_name = :tableName");
+    $stmt->execute([':tableName' => $tableName]);
+    if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+        $pdo->exec("CREATE TABLE support_faq (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            question VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            answer TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            sort_order INT NOT NULL DEFAULT 0,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
+            INDEX idx_support_faq_active_sort (is_active, sort_order, id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+} catch (PDOException $e) {
+    file_put_contents('error_log support_faq', $e->getMessage());
+}
+try {
+    $default_support_msg = $connect->real_escape_string('☎️ Frequently asked questions are under the FAQ button. Tap it first; if you still need help, tap Support.');
+    $connect->query("INSERT IGNORE INTO textbot (id_text, text) VALUES ('text_support_msg', '$default_support_msg')");
+} catch (Exception $e) {
+    file_put_contents('error_log text_support_msg', $e->getMessage());
+}
+try {
     $result = $connect->query("SHOW TABLES LIKE 'wheel_list'");
     $table_exists = ($result->num_rows > 0);
     if (!$table_exists) {

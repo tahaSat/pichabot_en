@@ -2,6 +2,7 @@
 require_once __DIR__ . '/inc/config.php';
 require_once __DIR__ . '/inc/icons.php';
 require_once __DIR__ . '/inc/payments_lib.php';
+require_once __DIR__ . '/inc/support_lib.php';
 require_auth();
 $pdo = panel_ensure_pdo();
 
@@ -257,6 +258,54 @@ if (isset($_GET['delete_income'])) {
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_support_texts') {
+    csrf_check_post();
+    faq_ensure_schema($pdo);
+    $intro = trim((string) ($_POST['support_intro'] ?? ''));
+    $fqLabel = trim((string) ($_POST['faq_button_label'] ?? ''));
+    if ($intro === '') {
+        flash('error', 'Support intro message cannot be empty.');
+    } elseif ($fqLabel === '') {
+        flash('error', 'FAQ button label cannot be empty.');
+    } elseif (mb_strlen($fqLabel, 'UTF-8') > 64) {
+        flash('error', 'FAQ button label must be at most 64 characters.');
+    } else {
+        panel_upsert_textbot($pdo, 'text_support_msg', $intro);
+        panel_upsert_textbot($pdo, 'text_fq', $fqLabel);
+        flash('success', 'Support texts saved.');
+    }
+    header('Location: settings.php?tab=support');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array(($_POST['action'] ?? ''), ['faq_add', 'faq_edit', 'faq_delete'], true)) {
+    csrf_check_post();
+    $action = (string) ($_POST['action'] ?? '');
+    if ($action === 'faq_add') {
+        $r = panel_faq_add(
+            $pdo,
+            (string) ($_POST['question'] ?? ''),
+            (string) ($_POST['answer'] ?? ''),
+            (int) ($_POST['sort_order'] ?? 0),
+            !empty($_POST['is_active'])
+        );
+    } elseif ($action === 'faq_edit') {
+        $r = panel_faq_update(
+            $pdo,
+            (int) ($_POST['edit_id'] ?? 0),
+            (string) ($_POST['question'] ?? ''),
+            (string) ($_POST['answer'] ?? ''),
+            (int) ($_POST['sort_order'] ?? 0),
+            !empty($_POST['is_active'])
+        );
+    } else {
+        $r = panel_faq_delete($pdo, (int) ($_POST['delete_id'] ?? 0));
+    }
+    flash(!empty($r['ok']) ? 'success' : 'error', $r['msg'] ?? '');
+    header('Location: settings.php?tab=support');
+    exit;
+}
+
 $tab = $_GET['tab'] ?? 'appearance';
 
 ensure_channel_post_setting_column();
@@ -381,6 +430,7 @@ $themes = [
 $tabs = [
     'appearance' => ['icon' => 'settings', 'label' => 'Appearance'],
     'bot' => ['icon' => 'menu', 'label' => 'Bot menu'],
+    'support' => ['icon' => 'message', 'label' => 'Support'],
     'finance' => ['icon' => 'wallet', 'label' => 'Finance'],
     'security' => ['icon' => 'block', 'label' => 'Security'],
     'system' => ['icon' => 'dashboard', 'label' => 'System'],
@@ -396,6 +446,24 @@ if ($tab === 'finance') {
     $expenseUsage = panel_expense_usage_counts($pdo);
     $incomeCategories = panel_income_categories($pdo);
     $incomeUsage = panel_income_usage_counts($pdo);
+}
+
+$support_intro = faq_default_support_message();
+$support_fq_label = '❓ FAQ';
+$faq_items = [];
+if ($tab === 'support') {
+    faq_ensure_schema($pdo);
+    $support_text_rows = db_fetchAll($pdo, "SELECT id_text, text FROM textbot WHERE id_text IN ('text_support_msg','text_fq')");
+    foreach ($support_text_rows as $row) {
+        $idText = (string) ($row['id_text'] ?? '');
+        $value = (string) ($row['text'] ?? '');
+        if ($idText === 'text_support_msg' && $value !== '') {
+            $support_intro = $value;
+        } elseif ($idText === 'text_fq' && $value !== '') {
+            $support_fq_label = $value;
+        }
+    }
+    $faq_items = panel_faq_list($pdo);
 }
 
 $pageTitle = $tab === 'bot' ? 'Bot menu' : 'Settings';
@@ -667,6 +735,194 @@ include __DIR__ . '/inc/layout_head.php';
             Titles are limited to 32 characters. Current users see the changes after they receive the menu again.
         </div>
     </div>
+
+<?php elseif ($tab === 'support'): ?>
+
+    <div class="card fade-up" style="margin-bottom:16px">
+        <div class="card-head">
+            <div>
+                <div class="card-title">Support screen</div>
+                <div class="card-subtitle">Shown when a user taps Support in the bot</div>
+            </div>
+        </div>
+        <form method="POST" class="card-body">
+            <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+            <input type="hidden" name="action" value="save_support_texts">
+            <div style="display:flex;flex-direction:column;gap:14px">
+                <div class="field">
+                    <label>Intro message</label>
+                    <textarea name="support_intro" class="input" rows="5" required maxlength="3500"><?= htmlspecialchars($support_intro) ?></textarea>
+                    <span class="field-hint">This is the text above the FAQ and Message support buttons. HTML is allowed.</span>
+                </div>
+                <div class="field">
+                    <label>FAQ button label</label>
+                    <input type="text" name="faq_button_label" class="input" required maxlength="64"
+                        value="<?= htmlspecialchars($support_fq_label) ?>">
+                    <span class="field-hint">Inline button next to Message support. Max 64 characters.</span>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary"><?= icon('check', 14) ?> Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card fade-up">
+        <div class="card-head">
+            <div>
+                <div class="card-title">Q&amp;A</div>
+                <div class="card-subtitle">If any questions are active, tapping FAQ lists them. Otherwise the old FAQ text is sent.</div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="openModal('faqAddModal')"><?= icon('plus', 14) ?> Add question</button>
+        </div>
+        <?php if (empty($faq_items)): ?>
+            <div class="empty" style="padding:48px 20px">
+                <p>No questions yet</p>
+                <button type="button" class="btn btn-primary" style="margin-top:14px" onclick="openModal('faqAddModal')"><?= icon('plus', 14) ?> Add the first question</button>
+            </div>
+        <?php else: ?>
+            <div class="tbl-wrap">
+                <table class="tbl-lg">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Question</th>
+                            <th>Answer</th>
+                            <th>Order</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php $i = 1; foreach ($faq_items as $item):
+                            $answerPreview = trim(preg_replace('/\s+/', ' ', strip_tags((string) ($item['answer'] ?? ''))));
+                            if (mb_strlen($answerPreview, 'UTF-8') > 80) {
+                                $answerPreview = rtrim(mb_substr($answerPreview, 0, 77, 'UTF-8')) . '...';
+                            }
+                            $isActive = !empty($item['is_active']);
+                            $editPayload = [
+                                'id' => (int) ($item['id'] ?? 0),
+                                'question' => (string) ($item['question'] ?? ''),
+                                'answer' => (string) ($item['answer'] ?? ''),
+                                'sort_order' => (int) ($item['sort_order'] ?? 0),
+                                'is_active' => $isActive ? 1 : 0,
+                            ];
+                        ?>
+                        <tr>
+                            <td class="cf"><?= $i++ ?></td>
+                            <td><?= htmlspecialchars((string) ($item['question'] ?? '')) ?></td>
+                            <td style="max-width:280px;color:var(--mute);font-size:.82rem"><?= htmlspecialchars($answerPreview) ?></td>
+                            <td class="cf"><?= (int) ($item['sort_order'] ?? 0) ?></td>
+                            <td>
+                                <?php if ($isActive): ?>
+                                    <span class="tag tag-ok">Active</span>
+                                <?php else: ?>
+                                    <span class="tag tag-plain">Hidden</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:5px;flex-wrap:wrap">
+                                    <button type="button" class="btn btn-ghost btn-sm btn-icon" title="Edit"
+                                        onclick="openFaqEditModal(<?= htmlspecialchars(json_encode($editPayload, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>)">
+                                        <?= icon('edit', 13) ?>
+                                    </button>
+                                    <form method="POST" onsubmit="return confirm('Delete this question?')">
+                                        <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+                                        <input type="hidden" name="action" value="faq_delete">
+                                        <input type="hidden" name="delete_id" value="<?= (int) ($item['id'] ?? 0) ?>">
+                                        <button type="submit" class="btn btn-no btn-sm btn-icon" title="Delete"><?= icon('trash', 13) ?></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <div class="modal-veil" id="faqAddModal">
+        <div class="modal" style="max-width:560px">
+            <div class="modal-head">
+                <h3>Add question</h3>
+                <button type="button" class="modal-x" onclick="closeModal('faqAddModal')"><?= icon('close', 14) ?></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+                    <input type="hidden" name="action" value="faq_add">
+                    <div class="field">
+                        <label>Question *</label>
+                        <input type="text" name="question" class="input" required maxlength="255" placeholder="e.g. Can I get a refund?">
+                    </div>
+                    <div class="field">
+                        <label>Answer *</label>
+                        <textarea name="answer" class="input" rows="6" required maxlength="3500" placeholder="The answer shown after the user taps this question"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Display order</label>
+                        <input type="number" name="sort_order" class="input" value="0" step="1">
+                    </div>
+                    <label style="display:flex;align-items:center;gap:8px;font-size:.85rem">
+                        <input type="checkbox" name="is_active" value="1" checked>
+                        Show in the bot
+                    </label>
+                </div>
+                <div class="modal-foot">
+                    <button type="submit" class="btn btn-primary"><?= icon('plus', 13) ?> Save</button>
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('faqAddModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-veil" id="faqEditModal">
+        <div class="modal" style="max-width:560px">
+            <div class="modal-head">
+                <h3>Edit question</h3>
+                <button type="button" class="modal-x" onclick="closeModal('faqEditModal')"><?= icon('close', 14) ?></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
+                    <input type="hidden" name="action" value="faq_edit">
+                    <input type="hidden" name="edit_id" id="faq_edit_id">
+                    <div class="field">
+                        <label>Question *</label>
+                        <input type="text" name="question" id="faq_edit_question" class="input" required maxlength="255">
+                    </div>
+                    <div class="field">
+                        <label>Answer *</label>
+                        <textarea name="answer" id="faq_edit_answer" class="input" rows="6" required maxlength="3500"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Display order</label>
+                        <input type="number" name="sort_order" id="faq_edit_sort" class="input" step="1">
+                    </div>
+                    <label style="display:flex;align-items:center;gap:8px;font-size:.85rem">
+                        <input type="checkbox" name="is_active" id="faq_edit_active" value="1">
+                        Show in the bot
+                    </label>
+                </div>
+                <div class="modal-foot">
+                    <button type="submit" class="btn btn-primary"><?= icon('check', 13) ?> Save changes</button>
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('faqEditModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    window.openFaqEditModal = function (c) {
+        document.getElementById('faq_edit_id').value = c.id || '';
+        document.getElementById('faq_edit_question').value = c.question || '';
+        document.getElementById('faq_edit_answer').value = c.answer || '';
+        document.getElementById('faq_edit_sort').value = c.sort_order != null ? c.sort_order : 0;
+        document.getElementById('faq_edit_active').checked = !!c.is_active;
+        openModal('faqEditModal');
+    };
+    </script>
 
 <?php elseif ($tab === 'finance'): ?>
 

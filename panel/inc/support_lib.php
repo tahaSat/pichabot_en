@@ -197,3 +197,98 @@ function panel_support_prepare_upload(array $file): array
         'type' => $type,
     ]];
 }
+
+function panel_faq_list(PDO $pdo): array
+{
+    return faq_list($pdo, false);
+}
+
+/**
+ * @return array{ok:bool,msg:string}
+ */
+function panel_faq_add(PDO $pdo, string $question, string $answer, int $sortOrder = 0, bool $active = true): array
+{
+    faq_ensure_schema($pdo);
+    $question = trim($question);
+    $answer = trim($answer);
+    if ($question === '') {
+        return ['ok' => false, 'msg' => 'Question is required.'];
+    }
+    if ($answer === '') {
+        return ['ok' => false, 'msg' => 'Answer is required.'];
+    }
+    if (mb_strlen($question, 'UTF-8') > 255) {
+        return ['ok' => false, 'msg' => 'Question must be at most 255 characters.'];
+    }
+    if (mb_strlen($answer, 'UTF-8') > 3500) {
+        return ['ok' => false, 'msg' => 'Answer must be at most 3500 characters.'];
+    }
+    db_query(
+        $pdo,
+        'INSERT INTO support_faq (question, answer, sort_order, is_active) VALUES (?,?,?,?)',
+        [$question, $answer, $sortOrder, $active ? 1 : 0]
+    );
+    return ['ok' => true, 'msg' => 'Question added.'];
+}
+
+/**
+ * @return array{ok:bool,msg:string}
+ */
+function panel_faq_update(PDO $pdo, int $id, string $question, string $answer, int $sortOrder, bool $active): array
+{
+    faq_ensure_schema($pdo);
+    $question = trim($question);
+    $answer = trim($answer);
+    if ($id < 1) {
+        return ['ok' => false, 'msg' => 'Question not found.'];
+    }
+    if ($question === '') {
+        return ['ok' => false, 'msg' => 'Question is required.'];
+    }
+    if ($answer === '') {
+        return ['ok' => false, 'msg' => 'Answer is required.'];
+    }
+    if (mb_strlen($question, 'UTF-8') > 255) {
+        return ['ok' => false, 'msg' => 'Question must be at most 255 characters.'];
+    }
+    if (mb_strlen($answer, 'UTF-8') > 3500) {
+        return ['ok' => false, 'msg' => 'Answer must be at most 3500 characters.'];
+    }
+    $row = faq_get($pdo, $id);
+    if (!$row) {
+        return ['ok' => false, 'msg' => 'Question not found.'];
+    }
+    db_query(
+        $pdo,
+        'UPDATE support_faq SET question = ?, answer = ?, sort_order = ?, is_active = ? WHERE id = ?',
+        [$question, $answer, $sortOrder, $active ? 1 : 0, $id]
+    );
+    return ['ok' => true, 'msg' => 'Question updated.'];
+}
+
+/**
+ * @return array{ok:bool,msg:string}
+ */
+function panel_faq_delete(PDO $pdo, int $id): array
+{
+    faq_ensure_schema($pdo);
+    $row = faq_get($pdo, $id);
+    if (!$row) {
+        return ['ok' => false, 'msg' => 'Question not found.'];
+    }
+    db_query($pdo, 'DELETE FROM support_faq WHERE id = ?', [$id]);
+    return ['ok' => true, 'msg' => 'Question deleted.'];
+}
+
+function panel_upsert_textbot(PDO $pdo, string $idText, string $text): void
+{
+    $exists = db_fetch($pdo, 'SELECT id_text FROM textbot WHERE id_text = ?', [$idText]);
+    if ($exists) {
+        db_query($pdo, 'UPDATE textbot SET text = ? WHERE id_text = ?', [$text, $idText]);
+    } else {
+        db_query($pdo, 'INSERT INTO textbot (id_text, text) VALUES (?, ?)', [$idText, $text]);
+    }
+    if (function_exists('clearSelectCache')) {
+        clearSelectCache('textbot');
+    }
+}

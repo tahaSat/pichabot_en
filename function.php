@@ -8802,6 +8802,95 @@ function support_ensure_schema(PDO $pdo): bool
     }
 }
 
+function faq_default_support_message(): string
+{
+    return '☎️ Frequently asked questions are under the FAQ button. Tap it first; if you still need help, tap Support.';
+}
+
+function faq_ensure_schema(PDO $pdo): bool
+{
+    static $ready = null;
+    if ($ready !== null) {
+        return $ready;
+    }
+
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS support_faq (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            question VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            answer TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            sort_order INT NOT NULL DEFAULT 0,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
+            INDEX idx_support_faq_active_sort (is_active, sort_order, id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        try {
+            $stmt = $pdo->prepare("INSERT IGNORE INTO textbot (id_text, text) VALUES ('text_support_msg', ?)");
+            $stmt->execute([faq_default_support_message()]);
+        } catch (Throwable $e) {
+            error_log('Unable to seed text_support_msg: ' . $e->getMessage());
+        }
+        return $ready = true;
+    } catch (Throwable $e) {
+        error_log('Unable to ensure support_faq schema: ' . $e->getMessage());
+        return $ready = false;
+    }
+}
+
+/**
+ * @return list<array{id:int|string,question:string,answer:string,sort_order:int|string,is_active:int|string}>
+ */
+function faq_list(PDO $pdo, bool $activeOnly = false): array
+{
+    if (!faq_ensure_schema($pdo)) {
+        return [];
+    }
+    $sql = 'SELECT id, question, answer, sort_order, is_active FROM support_faq';
+    if ($activeOnly) {
+        $sql .= ' WHERE is_active = 1';
+    }
+    $sql .= ' ORDER BY sort_order ASC, id ASC';
+    try {
+        $rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        return is_array($rows) ? $rows : [];
+    } catch (Throwable $e) {
+        error_log('faq_list: ' . $e->getMessage());
+        return [];
+    }
+}
+
+function faq_list_active(PDO $pdo): array
+{
+    return faq_list($pdo, true);
+}
+
+function faq_get(PDO $pdo, int $id): ?array
+{
+    if ($id < 1 || !faq_ensure_schema($pdo)) {
+        return null;
+    }
+    try {
+        $stmt = $pdo->prepare('SELECT id, question, answer, sort_order, is_active FROM support_faq WHERE id = ?');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    } catch (Throwable $e) {
+        error_log('faq_get: ' . $e->getMessage());
+        return null;
+    }
+}
+
+function faq_button_label(string $question): string
+{
+    $question = trim($question);
+    if ($question === '') {
+        return 'FAQ';
+    }
+    if (mb_strlen($question, 'UTF-8') <= 64) {
+        return $question;
+    }
+    return rtrim(mb_substr($question, 0, 61, 'UTF-8')) . '...';
+}
+
 function support_conversation_statuses(): array
 {
     return ['Unseen', 'Answered', 'close', 'flagged', 'کمپین'];
