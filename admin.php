@@ -10570,9 +10570,13 @@ f,n.n2", $backadmin, 'HTML');
     sendmessage($from_id, "📌 Send the department type to delete.", keyboard_departman_admin(), 'HTML');
     step("getremovedep", $from_id);
 } elseif ($user['step'] == "getremovedep") {
-    $stmt = $pdo->prepare("DELETE FROM departman WHERE name_departman = ?");
-    $stmt->bindParam(1, $text);
-    $stmt->execute();
+    $candidates = department_name_match_values($text);
+    if ($candidates === []) {
+        $candidates = [trim((string) $text)];
+    }
+    $placeholders = implode(',', array_fill(0, count($candidates), '?'));
+    $stmt = $pdo->prepare("DELETE FROM departman WHERE name_departman IN ($placeholders)");
+    $stmt->execute($candidates);
     sendmessage($from_id, "📌 The selected section was deleted.", $supportcenter, 'HTML');
     step("home", $from_id);
 } elseif ($text == "⚙️ Service settings" && $adminrulecheck['rule'] == "administrator") {

@@ -111,8 +111,8 @@ $keyboard = build_user_main_keyboard_markup($setting, $datatextbot, $textbotlang
 $keyboardPanel = json_encode([
     'inline_keyboard' => [
         [
-            ['text' => $datatextbot['text_Discount'], 'callback_data' => "Discount"],
-            ['text' => $datatextbot['text_Add_Balance'], 'callback_data' => "Add_Balance"]
+            ['text' => textbot_button_label('text_Discount', $datatextbot), 'callback_data' => "Discount"],
+            ['text' => textbot_button_label('text_Add_Balance', $datatextbot), 'callback_data' => "Add_Balance"]
         ],
         [
             ['text' => '💸 Withdraw request', 'callback_data' => 'Wallet_Withdraw'],
@@ -277,11 +277,11 @@ $step_payment = [
 if ($PaySettingcard == "oncard" && intval($users['cardpayment']) == 1) {
     if ($PaySettingpv == "oncardpv") {
         $step_payment['inline_keyboard'][] = [
-            ['text' => $datatextbot['carttocart'], 'url' => "https://t.me/$usernamecart"],
+            ['text' => textbot_button_label('carttocart', $datatextbot), 'url' => "https://t.me/$usernamecart"],
         ];
     } else {
         $step_payment['inline_keyboard'][] = [
-            ['text' => $datatextbot['carttocart'], 'callback_data' => "cart_to_offline"],
+            ['text' => textbot_button_label('carttocart', $datatextbot), 'callback_data' => "cart_to_offline"],
         ];
     }
 }
@@ -289,16 +289,16 @@ if (($paymentexits == 0 && $paymentverify == "onpayverify"))
     unset($step_payment['inline_keyboard']);
 if ($PaySettingnow == "onnowpayment") {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['textnowpayment'], 'callback_data' => "plisio"]
+        ['text' => textbot_button_label('textnowpayment', $datatextbot), 'callback_data' => "plisio"]
     ];
 }
 if ($payment_status_nowpayment == "1") {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['textsnowpayment'], 'callback_data' => "nowpayment"]
+        ['text' => textbot_button_label('textsnowpayment', $datatextbot), 'callback_data' => "nowpayment"]
     ];
 }
 if ($payment_status_cryptomus === "oncryptomus") {
-    $cryptomus_button_text = trim((string) ($datatextbot['textcryptomus'] ?? ''));
+    $cryptomus_button_text = textbot_button_label('textcryptomus', $datatextbot);
     if ($cryptomus_button_text !== '') {
         $step_payment['inline_keyboard'][] = [
             ['text' => $cryptomus_button_text, 'callback_data' => "cryptomus"]
@@ -307,47 +307,47 @@ if ($payment_status_cryptomus === "oncryptomus") {
 }
 if ($affilnecurrency == "ondigi") {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['textnowpaymenttron'], 'callback_data' => "digitaltron"]
+        ['text' => textbot_button_label('textnowpaymenttron', $datatextbot), 'callback_data' => "digitaltron"]
     ];
 }
 if ($Swapino == "onSwapinoBot") {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['iranpay2'], 'callback_data' => "iranpay1"]
+        ['text' => textbot_button_label('iranpay2', $datatextbot), 'callback_data' => "iranpay1"]
     ];
 }
 if ($trnadoo == "onternado") {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['iranpay3'], 'callback_data' => "iranpay2"]
+        ['text' => textbot_button_label('iranpay3', $datatextbot), 'callback_data' => "iranpay2"]
     ];
 }
 if ($arzireyali3 == "oniranpay3" && $paymentexits >= 2) {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['iranpay1'], 'callback_data' => "iranpay3"]
+        ['text' => textbot_button_label('iranpay1', $datatextbot), 'callback_data' => "iranpay3"]
     ];
 }
 if ($PaySettingaqayepardakht == "onaqayepardakht") {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['aqayepardakht'], 'callback_data' => "aqayepardakht"]
+        ['text' => textbot_button_label('aqayepardakht', $datatextbot), 'callback_data' => "aqayepardakht"]
     ];
 }
 if ($zarinpal == "onzarinpal") {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['zarinpal'], 'callback_data' => "zarinpal"]
+        ['text' => textbot_button_label('zarinpal', $datatextbot), 'callback_data' => "zarinpal"]
     ];
 }
 if ($tetraminator == "ontetraminator") {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['tetraminator'], 'callback_data' => "tetraminator"]
+        ['text' => textbot_button_label('tetraminator', $datatextbot), 'callback_data' => "tetraminator"]
     ];
 }
 if ($paymentstatussnotverify == "onverifypay") {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['textpaymentnotverify'], 'callback_data' => "paymentnotverify"]
+        ['text' => textbot_button_label('textpaymentnotverify', $datatextbot), 'callback_data' => "paymentnotverify"]
     ];
 }
 if (intval($paymentsstartelegram) == 1) {
     $step_payment['inline_keyboard'][] = [
-        ['text' => $datatextbot['text_star_telegram'], 'callback_data' => "startelegrams"]
+        ['text' => textbot_button_label('text_star_telegram', $datatextbot), 'callback_data' => "startelegrams"]
     ];
 }
 $step_payment['inline_keyboard'][] = [
@@ -1016,7 +1016,7 @@ if ($setting['statussupportpv'] == "onpvsupport") {
     $supportoption = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $datatextbot['text_fq'], 'callback_data' => "fqQuestions"],
+                ['text' => textbot_button_label('text_fq', $datatextbot), 'callback_data' => "fqQuestions"],
                 ['text' => "🎟 Message support", 'url' => "https://t.me/{$setting['id_support']}"],
             ],
             [
@@ -1029,7 +1029,7 @@ if ($setting['statussupportpv'] == "onpvsupport") {
     $supportoption = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $datatextbot['text_fq'], 'callback_data' => "fqQuestions"],
+                ['text' => textbot_button_label('text_fq', $datatextbot), 'callback_data' => "fqQuestions"],
                 ['text' => "🎟 Message support", 'callback_data' => "support"],
             ],
             [
@@ -1512,7 +1512,7 @@ function keyboard_departman_admin()
         if ($stmt) {
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $departemans['keyboard'][] = [
-                    ['text' => $row['name_departman']]
+                    ['text' => department_button_label($row['name_departman'])]
                 ];
             }
         }
@@ -1534,7 +1534,7 @@ function keyboard_departman_user()
         if ($stmt) {
             while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $list_departman['inline_keyboard'][] = [
-                    ['text' => $result['name_departman'], 'callback_data' => "departman_{$result['id']}"]
+                    ['text' => department_button_label($result['name_departman']), 'callback_data' => "departman_{$result['id']}"]
                 ];
             }
         }

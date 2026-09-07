@@ -3690,13 +3690,13 @@ if ($user['step'] == "createusertest" || preg_match('/locationtest_(.*)/', $data
             $time
         );
         $textsuppoer = "
-    📣 پشتیبان عزیز یک پیام از سمت کاربر برای شما ارسال گردید.
+📣 A user sent a support message.
 
-آیدی pcsی کاربر : <a href = \"tg://user?id=$from_id\">$from_id</a>
-زمان ارسال : $timejalali
-وضعیت پیام : پاسخ داده نشده
-نام کاربری کاربر : @$username    
-نام دپارتمان : {$departeman['name_departman']}
+User ID: <a href = \"tg://user?id=$from_id\">$from_id</a>
+Sent at: $time
+Status: Unanswered
+Username: @$username
+Department: {$departeman['name_departman']}
 
 Message: $supportText";
         $Response = json_encode([
@@ -3840,13 +3840,13 @@ $text";
             $time
         );
         $textsuppoer = "
-    📣 پشتیبان عزیز یک پیام از سمت کاربر برای شما ارسال گردید.
+📣 A user sent a support message.
 
-آیدی pcsی کاربر : <a href = \"tg://user?id=$from_id\">$from_id</a>
-زمان ارسال : $timejalali
-وضعیت پیام : پاسخ مشتری
-نام کاربری کاربر : @$username    
-نام دپارتمان : {$trakingdetail['name_departman']}
+User ID: <a href = \"tg://user?id=$from_id\">$from_id</a>
+Sent at: $time
+Status: Customer reply
+Username: @$username
+Department: {$trakingdetail['name_departman']}
 
 Message: $supportText";
         $Response = json_encode([
@@ -7802,7 +7802,7 @@ Service username: {$user['Processing_value']}
         }
     }
     step('home', $from_id);
-} elseif (($text == $datatextbot['textpanelagent'] || $datain == "agentpanel") && $user['agent'] != "f") {
+} elseif ((user_text_matches_textbot_button($text, 'textpanelagent', $datatextbot) || $datain == "agentpanel") && $user['agent'] != "f") {
     if ($setting['inlinebtnmain'] == "oninline") {
         Editmessagetext($from_id, $message_id, $textbotlang['Admin']['agent']['agenttext'], $keyboardagent, 'HTML');
     } else {
@@ -7819,7 +7819,7 @@ Service username: {$user['Processing_value']}
     sendmessage($from_id, $textbotlang['Admin']['agent']['submitusername'], $keyboardagent, 'html');
     update("user", "namecustom", $text, "id", $from_id);
     step("home", $from_id);
-} elseif ($text == $datatextbot['textrequestagent'] || $datain == "requestagent") {
+} elseif (user_text_matches_textbot_button($text, 'textrequestagent', $datatextbot) || $datain == "requestagent") {
     if ($user['Balance'] < $setting['agentreqprice']) {
         $priceagent = number_format($setting['agentreqprice']);
         sendmessage($from_id, sprintf($textbotlang['users']['agenttext']['insufficientbalanceagent'], $priceagent), $backuser, 'HTML');

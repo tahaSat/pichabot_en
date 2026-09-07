@@ -962,6 +962,29 @@ We hope you enjoyed the speed and quality. If you liked the test, you can buy yo
 }
 
 try {
+    $result = $connect->query("SHOW TABLES LIKE 'textbot'");
+    if ($result && $result->num_rows > 0 && function_exists('get_textbot_button_fallback_labels')) {
+        $english = get_textbot_button_fallback_labels();
+        $legacy = function_exists('get_textbot_button_legacy_labels') ? get_textbot_button_legacy_labels() : [];
+        foreach ($english as $id => $en) {
+            $id_esc = $connect->real_escape_string($id);
+            $en_esc = $connect->real_escape_string($en);
+            foreach ($legacy[$id] ?? [] as $fa) {
+                $fa_esc = $connect->real_escape_string($fa);
+                $connect->query("UPDATE textbot SET text = '$en_esc' WHERE id_text = '$id_esc' AND text = '$fa_esc'");
+            }
+            $current = $connect->query("SELECT text FROM textbot WHERE id_text = '$id_esc'");
+            $row = $current ? $current->fetch_assoc() : null;
+            if ($row && function_exists('button_text_contains_persian') && button_text_contains_persian($row['text'] ?? '')) {
+                $connect->query("UPDATE textbot SET text = '$en_esc' WHERE id_text = '$id_esc'");
+            }
+        }
+    }
+} catch (Exception $e) {
+    file_put_contents('error_log textbot_buttons', $e->getMessage());
+}
+
+try {
     $result = $connect->query("SHOW TABLES LIKE 'PaySetting'");
     $table_exists = ($result->num_rows > 0);
     $main = 20000;
@@ -1515,6 +1538,7 @@ try {
         $connect->query("INSERT INTO departman (idsupport,name_departman) VALUES ('$adminnumber','☎️ General')");
     } else {
         $connect->query("UPDATE departman SET name_departman = '☎️ General' WHERE name_departman = '☎️ بخش عمومی'");
+        $connect->query("UPDATE departman SET name_departman = '☎️ General' WHERE name_departman = 'بخش عمومی'");
     }
 } catch (PDOException $e) {
     file_put_contents('error_log departman', $e->getMessage());

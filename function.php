@@ -4323,15 +4323,15 @@ function KeyboardCustomMonths($panel, string $prefix = 'custommonth_', string $b
     }
     foreach ($monthsList as $opt) {
         $m = (int) $opt['months'];
-        $label = $m . ' ماهه';
+        $label = $m . ' month' . ($m === 1 ? '' : 's');
         if ($gb > 0 && $baseCost !== null) {
             $cost = panel_custom_service_price_for_user($panel, $user, $gb, panel_custom_months_to_days($m));
             if ($cost !== null) {
                 $extra = (int) $cost - (int) $baseCost;
                 if ($extra <= 0) {
-                    $label .= ' - هزینه ی مدت : بدون هزینه';
+                    $label .= ' — duration cost: free';
                 } else {
-                    $label .= ' - هزینه ی مدت : + ' . number_format($extra);
+                    $label .= ' — duration cost: + ' . number_format($extra);
                 }
             }
         }
@@ -4604,8 +4604,8 @@ function invoice_auto_renew_is_on($invoice): bool
 function invoice_auto_renew_button_label($invoice, $textbotlang = null): string
 {
     $on = invoice_auto_renew_is_on($invoice);
-    $onLabel = '✅ تمدید خودکار';
-    $offLabel = '❌ تمدید خودکار';
+    $onLabel = '✅ Auto-renew';
+    $offLabel = '❌ Auto-renew';
     if (is_array($textbotlang)) {
         $onLabel = $textbotlang['users']['extend']['autorenew_on'] ?? $onLabel;
         $offLabel = $textbotlang['users']['extend']['autorenew_off'] ?? $offLabel;
@@ -4615,9 +4615,9 @@ function invoice_auto_renew_button_label($invoice, $textbotlang = null): string
 
 function invoice_volume_cron_auto_renew_notice($invoice, $textbotlang = null): array
 {
-    $offText = '💡 با روشن کردن تمدید خودکار برای این سرویس و شارژ کیف پول، این اشتراک خود را همیشه متصل نگه دارید';
-    $onText = '✅ تمدید خودکار برای این سرویس روشن است.';
-    $enableLabel = '✅ روشن کردن تمدید خودکار';
+    $offText = '💡 Enable auto-renew and keep your wallet funded to stay connected';
+    $onText = '✅ Auto-renew is on for this service.';
+    $enableLabel = '✅ Enable auto-renew';
     if (is_array($textbotlang)) {
         $offText = $textbotlang['users']['extend']['autorenew_cron_off'] ?? $offText;
         $onText = $textbotlang['users']['extend']['autorenew_cron_on'] ?? $onText;
@@ -4644,7 +4644,7 @@ function invoice_volume_cron_keyboard($invoice, $textbotlang = null): string
     $invoiceId = (string) ($invoice['id_invoice'] ?? '');
     $rows = [
         [
-            ['text' => '💊 تمدید سرویس', 'callback_data' => 'extend_' . $invoiceId],
+            ['text' => '💊 Renew service', 'callback_data' => 'extend_' . $invoiceId],
         ],
     ];
     $notice = invoice_volume_cron_auto_renew_notice($invoice, $textbotlang);
@@ -5841,10 +5841,18 @@ function keyboardmain_label_to_id_map($datatextbot = null)
         }
     }
     $map = [];
+    $fallbacks = get_main_keyboard_button_fallback_labels();
+    $legacy = get_textbot_button_legacy_labels();
     foreach (get_main_keyboard_button_ids() as $id) {
         $map[$id] = $id;
         if (!empty($datatextbot[$id])) {
             $map[$datatextbot[$id]] = $id;
+        }
+        if (!empty($fallbacks[$id])) {
+            $map[$fallbacks[$id]] = $id;
+        }
+        foreach ($legacy[$id] ?? [] as $legacy_label) {
+            $map[$legacy_label] = $id;
         }
     }
     return $map;
@@ -6118,6 +6126,128 @@ function get_main_keyboard_button_fallback_labels()
     ];
 }
 
+function button_text_contains_persian($text): bool
+{
+    return is_string($text) && $text !== '' && preg_match('/\p{Arabic}/u', $text) === 1;
+}
+
+function button_label_if_english($stored, $fallback): string
+{
+    $label = trim((string) $stored);
+    if ($label === '' || button_text_contains_persian($label)) {
+        return (string) $fallback;
+    }
+    return $label;
+}
+
+function get_textbot_button_fallback_labels()
+{
+    return get_main_keyboard_button_fallback_labels() + [
+        'text_fq' => '❓ FAQ',
+        'text_Discount' => '🎁 Gift code',
+        'text_Add_Balance' => '💰 Top up wallet',
+        'carttocart' => '💳 Card transfer',
+        'textcryptomus' => '💸 Pay with Cryptomus',
+        'textnowpayment' => '💵 Crypto payment 1',
+        'textnowpaymenttron' => '💵 TRON deposit',
+        'textsnowpayment' => '💸 Pay with crypto',
+        'iranpay1' => '💸 Rial payment gateway',
+        'iranpay2' => '💸 Rial payment gateway 2',
+        'iranpay3' => '💸 Rial payment gateway 3',
+        'aqayepardakht' => '🔵 Aghaye Pardakht',
+        'zarinpal' => '🟡 ZarinPal',
+        'tetraminator' => '💸 Tetraminator',
+        'textpaymentnotverify' => 'Rial gateway',
+        'text_star_telegram' => '💫 Star Telegram',
+        'textrequestagent' => '👨‍💻 Request agency',
+        'textpanelagent' => '👨‍💻 Agency panel',
+    ];
+}
+
+function get_textbot_button_legacy_labels()
+{
+    return [
+        'text_support' => ['☎️ پشتیبانی'],
+        'text_fq' => ['❓ سوالات متداول', 'سوالات متداول'],
+        'text_help' => ['📚 آموزش'],
+        'text_sell' => ['🔐 خرید اشتراک'],
+        'text_extend' => ['♻️ تمدید سرویس'],
+        'text_usertest' => ['🔑 اکانت تست'],
+        'text_Purchased_services' => ['🛍 سرویس های من', '🛍 سرویس‌های من'],
+        'accountwallet' => ['🏦 کیف پول', '💰 کیف پول'],
+        'text_affiliates' => ['👥 زیرمجموعه گیری', '👥 زیرمجموعه‌گیری'],
+        'text_referral' => ['🎁 دعوت دوستان'],
+        'text_Tariff_list' => ['💵 تعرفه اشتراک ها', '💰 تعرفه اشتراک ها'],
+        'text_Discount' => ['🎁 کد هدیه'],
+        'text_Add_Balance' => ['💰 افزایش موجودی'],
+        'text_wheel_luck' => ['🎲 گردونه شانس'],
+        'carttocart' => ['💳 کارت به کارت'],
+        'textcryptomus' => ['💸 پرداخت Cryptomus'],
+        'textnowpayment' => ['💵 پرداخت ارزی 1'],
+        'textnowpaymenttron' => ['💵 واریز ترون'],
+        'textsnowpayment' => ['💸 پرداخت ارزی'],
+        'iranpay1' => ['💸 درگاه پرداخت ریالی'],
+        'iranpay2' => ['💸 درگاه پرداخت ریالی 2'],
+        'iranpay3' => ['💸 درگاه پرداخت ریالی 3'],
+        'aqayepardakht' => ['🔵 آقای پرداخت'],
+        'zarinpal' => ['🟡 زرین پال'],
+        'tetraminator' => ['💸 تترامیناتور'],
+        'textpaymentnotverify' => ['درگاه ریالی'],
+        'text_star_telegram' => ['💫 استار تلگرام'],
+        'textrequestagent' => ['👨‍💻 درخواست نمایندگی'],
+        'textpanelagent' => ['👨‍💻 پنل نمایندگی'],
+    ];
+}
+
+function textbot_button_label($button_id, $texts = null): string
+{
+    if (!is_array($texts)) {
+        $texts = $GLOBALS['datatextbot'] ?? [];
+    }
+    $fallbacks = get_textbot_button_fallback_labels();
+    $fallback = $fallbacks[$button_id] ?? (string) $button_id;
+    $stored = is_array($texts) ? ($texts[$button_id] ?? '') : '';
+    return button_label_if_english($stored, $fallback);
+}
+
+function department_known_label_map()
+{
+    return [
+        '☎️ بخش عمومی' => '☎️ General',
+        'بخش عمومی' => '☎️ General',
+    ];
+}
+
+function department_button_label($name): string
+{
+    $name = trim((string) $name);
+    $map = department_known_label_map();
+    if (isset($map[$name])) {
+        return $map[$name];
+    }
+    foreach ($map as $english) {
+        if ($name === $english) {
+            return $english;
+        }
+    }
+    return $name;
+}
+
+function department_name_match_values($display_or_stored): array
+{
+    $text = trim((string) $display_or_stored);
+    $values = [$text];
+    foreach (department_known_label_map() as $farsi => $english) {
+        if ($text === $farsi || $text === $english) {
+            $values[] = $farsi;
+            $values[] = $english;
+        }
+    }
+    return array_values(array_unique(array_filter($values, static function ($value) {
+        return $value !== '';
+    })));
+}
+
 function is_main_keyboard_internal_id($text)
 {
     return in_array($text, get_main_keyboard_button_ids(), true);
@@ -6142,7 +6272,7 @@ function get_main_keyboard_button_label($button_id, $datatextbot)
         return $fallback;
     }
 
-    return $label;
+    return button_label_if_english($label, $fallback);
 }
 
 function user_text_matches_main_button($text, $button_id, $datatextbot)
@@ -6166,6 +6296,40 @@ function user_text_matches_main_button($text, $button_id, $datatextbot)
                 $candidates[] = $first_line;
             }
         }
+    }
+
+    foreach (get_textbot_button_legacy_labels()[$button_id] ?? [] as $legacy) {
+        $candidates[] = $legacy;
+    }
+
+    $candidates = array_values(array_unique(array_filter($candidates, static function ($value) {
+        return $value !== '';
+    })));
+
+    return in_array($text, $candidates, true);
+}
+
+function user_text_matches_textbot_button($text, $button_id, $datatextbot): bool
+{
+    if ($text === '' || $text === null) {
+        return false;
+    }
+
+    $candidates = [
+        $button_id,
+        textbot_button_label($button_id, $datatextbot),
+        get_textbot_button_fallback_labels()[$button_id] ?? '',
+    ];
+
+    if (is_array($datatextbot) && !empty($datatextbot[$button_id])) {
+        $raw = trim((string) $datatextbot[$button_id]);
+        if ($raw !== '') {
+            $candidates[] = $raw;
+        }
+    }
+
+    foreach (get_textbot_button_legacy_labels()[$button_id] ?? [] as $legacy) {
+        $candidates[] = $legacy;
     }
 
     $candidates = array_values(array_unique(array_filter($candidates, static function ($value) {
@@ -6480,14 +6644,14 @@ function build_user_main_keyboard_markup($setting, $datatextbot, $textbotlang, $
         $extra_row[] = $extra_button;
     }
     if (($users['agent'] ?? '') !== 'f') {
-        $extra_button = ['text' => $datatextbot['textpanelagent'] ?? 'Agency'];
+        $extra_button = ['text' => textbot_button_label('textpanelagent', $datatextbot)];
         if ($inline) {
             $extra_button['callback_data'] = 'agentpanel';
         }
         $extra_row[] = $extra_button;
     }
     if (($users['agent'] ?? '') === 'f' && ($setting['statusagentrequest'] ?? '') === 'onrequestagent') {
-        $extra_button = ['text' => $datatextbot['textrequestagent'] ?? 'Request agency'];
+        $extra_button = ['text' => textbot_button_label('textrequestagent', $datatextbot)];
         if ($inline) {
             $extra_button['callback_data'] = 'requestagent';
         }
@@ -6615,7 +6779,7 @@ function build_main_keyboard_admin_markup($datatextbot, $keyboardmain_json)
         }
     }
     $rows[] = [
-        ['text' => "♻️ بازنشانی پیش‌فرض", 'callback_data' => 'resetmainbtn'],
+        ['text' => "♻️ Reset to default", 'callback_data' => 'resetmainbtn'],
     ];
     return json_encode(['inline_keyboard' => $rows], JSON_UNESCAPED_UNICODE);
 }
@@ -6629,12 +6793,12 @@ function build_main_keyboard_button_edit_text($button_id, $datatextbot, $keyboar
     $icons = get_main_keyboard_button_icons();
     $icon = $icons[$button_id] ?? '';
     if ($icon !== '') {
-        $emoji_line = "✨ ایموجی پرمیوم: <tg-emoji emoji-id=\"{$icon}\">⭐</tg-emoji>\n🆔 <code>{$icon}</code>";
+        $emoji_line = "✨ Premium emoji: <tg-emoji emoji-id=\"{$icon}\">⭐</tg-emoji>\n🆔 <code>{$icon}</code>";
     } else {
-        $emoji_line = '✨ ایموجی پرمیوم: تنظیم نشده';
+        $emoji_line = '✨ Premium emoji: not set';
     }
     $title_esc = htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-    return "⌨️ تنظیم دکمه منو\n\n📌 عنوان: <b>{$title_esc}</b>\n👁 وضعیت: {$active}\n{$emoji_line}\n\nاز دکمه‌های زیر برای مدیریت استفاده کنید.";
+    return "⌨️ Menu button settings\n\n📌 Title: <b>{$title_esc}</b>\n👁 Status: {$active}\n{$emoji_line}\n\nUse the buttons below to manage this item.";
 }
 
 function build_main_keyboard_button_edit_markup($button_id, $datatextbot, $keyboardmain_json)
@@ -6645,13 +6809,13 @@ function build_main_keyboard_button_edit_markup($button_id, $datatextbot, $keybo
     $rows = [
         [
             [
-                'text' => $active ? '🔴 مخفی کردن دکمه' : '🟢 نمایش دادن دکمه',
+                'text' => $active ? '🔴 Hide button' : '🟢 Show button',
                 'callback_data' => "togglemainbtn-$button_id",
             ],
         ],
         [
             [
-                'text' => '✨ تنظیم ایموجی پرمیوم',
+                'text' => '✨ Set premium emoji',
                 'callback_data' => "setmainbtnemoji-$button_id",
             ],
         ],
@@ -6659,13 +6823,13 @@ function build_main_keyboard_button_edit_markup($button_id, $datatextbot, $keybo
     if ($has_icon) {
         $rows[] = [
             [
-                'text' => '🗑 حذف ایموجی پرمیوم',
+                'text' => '🗑 Remove premium emoji',
                 'callback_data' => "clearmainbtnemoji-$button_id",
             ],
         ];
     }
     $rows[] = [
-        ['text' => '🔙 بازگشت به لیست', 'callback_data' => 'listmainbtn'],
+        ['text' => '🔙 Back to list', 'callback_data' => 'listmainbtn'],
     ];
     return json_encode(['inline_keyboard' => $rows], JSON_UNESCAPED_UNICODE);
 }
@@ -7207,7 +7371,7 @@ function keyboard_panels_purchase_text_edit(string $callback_prefix): string
         }
     }
     if ($rows === []) {
-        $rows[] = [['text' => '❌ پنلی یافت نشد', 'callback_data' => 'purchase_texts_back']];
+        $rows[] = [['text' => '❌ No panel found', 'callback_data' => 'purchase_texts_back']];
     }
     $rows[] = [['text' => '🔙 Back', 'callback_data' => 'purchase_texts_back']];
     return json_encode(['inline_keyboard' => $rows], JSON_UNESCAPED_UNICODE);
@@ -7235,7 +7399,7 @@ function keyboard_categories_purchase_text_edit(string $callback_prefix): string
         }
     }
     if ($rows === []) {
-        $rows[] = [['text' => '❌ دسته‌بندی یافت نشد', 'callback_data' => 'purchase_texts_back']];
+        $rows[] = [['text' => '❌ No category found', 'callback_data' => 'purchase_texts_back']];
     }
     $rows[] = [['text' => '🔙 Back', 'callback_data' => 'purchase_texts_back']];
     return json_encode(['inline_keyboard' => $rows], JSON_UNESCAPED_UNICODE);
@@ -8369,7 +8533,7 @@ function provision_free_service($user_id, $product, $panel, $note = 'referral_re
 
     $Shoppinginfo = json_encode([
         'inline_keyboard' => [
-            [['text' => $textbotlang['users']['help']['btninlinebuy'] ?? 'راهنما', 'callback_data' => "helpbtn"]],
+            [['text' => $textbotlang['users']['help']['btninlinebuy'] ?? 'Guide', 'callback_data' => "helpbtn"]],
         ],
     ]);
 
@@ -8536,7 +8700,7 @@ function referral_render_user_message($campaign, $user_id)
     }
 
     $keyboard_rows = [
-        [['text' => "🔗 اشتراک‌گذاری لینک", 'url' => "https://t.me/share/url?url=" . urlencode($link)]],
+        [['text' => "🔗 Share link", 'url' => "https://t.me/share/url?url=" . urlencode($link)]],
     ];
 
     return [
@@ -10902,7 +11066,7 @@ function broadcast_attachable_buttons()
 {
     return [
         'start' => [
-            'admin_label' => 'دکمه استارت',
+            'admin_label' => 'Start button',
             'text_key' => null,
             'fallback' => 'Start',
             'callback' => 'start',
@@ -10911,7 +11075,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'start',
         ],
         'buy' => [
-            'admin_label' => 'دکمه خرید',
+            'admin_label' => 'Buy button',
             'text_key' => 'text_sell',
             'fallback' => '🔐 Buy subscription',
             'callback' => 'buy',
@@ -10920,7 +11084,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'buy',
         ],
         'usertestbtn' => [
-            'admin_label' => 'دکمه اکانت تست',
+            'admin_label' => 'Test account button',
             'text_key' => 'text_usertest',
             'fallback' => '🔑 Test account',
             'callback' => 'usertestbtn',
@@ -10929,7 +11093,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'usertestbtn',
         ],
         'services' => [
-            'admin_label' => 'دکمه سرویس های من',
+            'admin_label' => 'My services button',
             'text_key' => 'text_Purchased_services',
             'fallback' => '🛍 My services',
             'callback' => 'backorder',
@@ -10938,7 +11102,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'backorder',
         ],
         'extendbtn' => [
-            'admin_label' => 'دکمه تمدید سرویس',
+            'admin_label' => 'Renew service button',
             'text_key' => 'text_extend',
             'fallback' => '♻️ Renew service',
             'callback' => 'extendbtn',
@@ -10947,7 +11111,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'extendbtn',
         ],
         'wallet' => [
-            'admin_label' => 'دکمه کیف پول',
+            'admin_label' => 'Wallet button',
             'text_key' => 'accountwallet',
             'fallback' => '🏦 Wallet + top up',
             'callback' => 'account',
@@ -10956,7 +11120,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'account',
         ],
         'addbalance' => [
-            'admin_label' => 'شارژ حساب کاربری',
+            'admin_label' => 'Top up account',
             'text_key' => 'text_Add_Balance',
             'fallback' => '💰 Top up',
             'callback' => 'Add_Balance',
@@ -10965,7 +11129,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'Add_Balance',
         ],
         'tariff' => [
-            'admin_label' => 'دکمه تعرفه اشتراک ها',
+            'admin_label' => 'Pricing button',
             'text_key' => 'text_Tariff_list',
             'fallback' => '💵 Pricing',
             'callback' => 'Tariff_list',
@@ -10974,7 +11138,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'Tariff_list',
         ],
         'helpbtn' => [
-            'admin_label' => 'دکمه آموزش',
+            'admin_label' => 'Guide button',
             'text_key' => 'text_help',
             'fallback' => '📚 Guide',
             'callback' => 'helpbtn',
@@ -10983,7 +11147,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'helpbtn',
         ],
         'support' => [
-            'admin_label' => 'دکمه پشتیبانی',
+            'admin_label' => 'Support button',
             'text_key' => 'text_support',
             'fallback' => '☎️ Support',
             'callback' => 'supportbtns',
@@ -10992,7 +11156,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'supportbtns',
         ],
         'affiliatesbtn' => [
-            'admin_label' => 'دکمه زیرمجموعه گیری',
+            'admin_label' => 'Referrals button',
             'text_key' => 'text_affiliates',
             'fallback' => '👥 Referrals',
             'callback' => 'affiliatesbtn',
@@ -11001,7 +11165,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'affiliatesbtn',
         ],
         'referral' => [
-            'admin_label' => 'دکمه دعوت دوستان',
+            'admin_label' => 'Invite friends button',
             'text_key' => 'text_referral',
             'fallback' => '🎁 Invite friends',
             'callback' => 'referralbtn',
@@ -11010,7 +11174,7 @@ function broadcast_attachable_buttons()
             'route_datain' => 'referralbtn',
         ],
         'wheel' => [
-            'admin_label' => 'دکمه گردونه شانس',
+            'admin_label' => 'Lucky wheel button',
             'text_key' => 'text_wheel_luck',
             'fallback' => '🎲 Lucky wheel',
             'callback' => 'wheel_luck',
@@ -11069,7 +11233,7 @@ function broadcast_btn_picker_keyboard($prefix, $extra_rows = [], $texts = null)
         $rows[] = $row;
     }
     $rows[] = [
-        ['text' => 'ارسال بدون دکمه', 'callback_data' => $prefix . '-none'],
+        ['text' => 'Send without a button', 'callback_data' => $prefix . '-none'],
     ];
     foreach ($extra_rows as $extra) {
         if (is_array($extra) && $extra !== []) {
@@ -11217,7 +11381,7 @@ function broadcast_ask_btn_title_step($from_id, $btn_type)
     $keyboard = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => "استفاده از عنوان پیش‌فرض", 'callback_data' => 'btntextdefault'],
+                ['text' => "Use default title", 'callback_data' => 'btntextdefault'],
             ],
         ]
     ]);
@@ -11475,7 +11639,7 @@ function broadcast_report_resend_keyboard($broadcast_id)
     return json_encode([
         'inline_keyboard' => [
             [
-                ['text' => '🔄 ارسال مجدد', 'callback_data' => 'bresend_' . intval($broadcast_id)],
+                ['text' => '🔄 Resend', 'callback_data' => 'bresend_' . intval($broadcast_id)],
             ],
         ],
     ], JSON_UNESCAPED_UNICODE);
@@ -11487,10 +11651,10 @@ function broadcast_report_confirm_keyboard($broadcast_id)
     return json_encode([
         'inline_keyboard' => [
             [
-                ['text' => '✅ تایید ارسال مجدد', 'callback_data' => 'bresendok_' . $id],
+                ['text' => '✅ Confirm resend', 'callback_data' => 'bresendok_' . $id],
             ],
             [
-                ['text' => '❌ انصراف', 'callback_data' => 'bresendno_' . $id],
+                ['text' => '❌ Cancel', 'callback_data' => 'bresendno_' . $id],
             ],
         ],
     ], JSON_UNESCAPED_UNICODE);
